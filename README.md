@@ -1,5 +1,8 @@
 # ReVanced Documentation
+
 Documentation and build instructions for ReVanced
 
 # Wiki
-https://github.com/ReVancedTeam/revanced-documentation/wiki
+
+- [Pages](https://github.com/ReVancedTeam/revanced-documentation)
+- [ReVanced build instructions](https://github.com/ReVancedTeam/revanced-documentation/wiki/ReVanced-build-instructions)
