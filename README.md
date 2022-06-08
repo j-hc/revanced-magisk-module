@@ -4,7 +4,7 @@ Instructions to build and install ReVanced.
 
 # Wiki
 
-- [Instructions for installing ReVanced](https://github.com/revanced/revanced-documentation/wiki/Instructions-for-installing-ReVanced)
+- [Prerequisites](https://github.com/revanced/revanced-documentation/wiki/Prerequisites)
   - [Downloading prebuilt packages](https://github.com/revanced/revanced-documentation/wiki/Downloading-prebuilt-packages)
   - [Building from source](https://github.com/revanced/revanced-documentation/wiki/Building-from-source)
     - [1. Building the ReVanced patcher](https://github.com/revanced/revanced-documentation/wiki/Building-the-ReVanced-patcher)
