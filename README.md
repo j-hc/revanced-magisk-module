@@ -1,14 +1,10 @@
-# ReVanced Documentation
+# Building the Magisk Module
 
-Instructions to build and install ReVanced.
+This repo includes the base.apk of the stock YouTube app (v17.24.34) and a simple script that
+download all necessary prebuilt revanced tools and creates a magisk module
 
-# Wiki
+# Usage
 
-- [Prerequisites](https://github.com/revanced/revanced-documentation/wiki/Prerequisites)
-  - [Downloading prebuilt packages](https://github.com/revanced/revanced-documentation/wiki/Downloading-prebuilt-packages)
-  - [Building from source](https://github.com/revanced/revanced-documentation/wiki/Building-from-source)
-    - [1. Building the ReVanced patcher](https://github.com/revanced/revanced-documentation/wiki/Building-the-ReVanced-patcher)
-    - [2. Building the ReVanced patches](https://github.com/revanced/revanced-documentation/wiki/Building-the-ReVanced-patches)
-    - [3. Building the ReVanced integrations](https://github.com/revanced/revanced-documentation/wiki/Building-the-ReVanced-integrations)
-    - [4. Building the ReVanced CLI](https://github.com/revanced/revanced-documentation/wiki/Building-the-ReVanced-CLI)
-- [Using the ReVanced CLI and installing ReVanced](https://github.com/revanced/revanced-documentation/wiki/Using-the-ReVanced-CLI-and-installing-ReVanced)
+```bash
+$ ./build-module.sh
+```
