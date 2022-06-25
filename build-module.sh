@@ -1,11 +1,6 @@
 #!/bin/bash
 
 echo "All necessary files (revanced cli, patches and integrations) will be downloaded, Youtube apk will be patched and zipped into a Magisk module"
-read -p "Continue? (y/n): " confirm
-
-if [[ ! $confirm == [yY] ]]; then
-	exit 0
-fi
 
 # CURRENT VERSION
 YTBASE="base-v17.24.34.apk"

@@ -1,0 +1,24 @@
+on: workflow_dispatch
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: "17"
+      - run: |
+          git clone "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" .
+          ./build-module.sh
+      - id: get_output_name
+        run: echo ::set-output name=OUTPUT::$(cat build-module.sh | sed -n 's/.*OUTPUT="\(.*\)".*/\1/p')
+        shell: bash
+      - name: Upload release
+        uses: svenstaro/upload-release-action@2.3.0
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ steps.get_output_name.outputs.OUTPUT }}
+          asset_name: ${{ steps.get_output_name.outputs.OUTPUT }}
+          release_name: ${{ steps.get_output_name.outputs.OUTPUT }}
+          overwrite: true
