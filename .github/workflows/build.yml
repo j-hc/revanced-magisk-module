@@ -12,13 +12,16 @@ jobs:
           git clone "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" .
           ./build-module.sh
       - id: get_output_name
-        run: echo ::set-output name=OUTPUT::$(find . -maxdepth 1 -name "revanced-magisk-*.zip" -printf '%P')
+        run: |
+          echo ::set-output name=OUTPUT::$(find . -maxdepth 1 -name "revanced-magisk-*.zip" -printf '%P')
+          echo ::set-output name=VERSION::$(find . -maxdepth 1 -name "revanced-magisk-*.zip" -printf '%P' | sed -n 's/.*revanced-magisk-\(.*\)\.zip.*/\1/p')
         shell: bash
       - name: Upload release
-        uses: svenstaro/upload-release-action@2.3.0
+        uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ steps.get_output_name.outputs.OUTPUT }}
           asset_name: ${{ steps.get_output_name.outputs.OUTPUT }}
           release_name: ${{ steps.get_output_name.outputs.OUTPUT }}
+          tag: ${{ steps.get_output_name.outputs.VERSION }}
           overwrite: true
