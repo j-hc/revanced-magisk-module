@@ -9,7 +9,7 @@ You will need to install the stock YouTube app matching with the module version 
 You can go grab the split APKs from APKMirror (the bundle, not the apk or it will crash)  
 
 
-You can get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases/tag/main) if you do not want to build yourself.
+You can get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases) if you do not want to build yourself.
 
 
 # Building the Magisk Module
