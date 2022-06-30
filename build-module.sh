@@ -50,13 +50,13 @@ if [ ! -f $BASE_APK ]; then
 fi
 
 java -jar $RV_CLI_JAR -a $BASE_APK -c -o revanced-base.apk -b $RV_PATCHES_JAR -e microg-support -m $RV_INTEGRATIONS_APK
-mv -f revanced-base.apk ./MMT-Extended/revanced-base.apk
+mv -f revanced-base.apk ./revanced-magisk/revanced-base.apk
 
 echo "Creating the magisk module..."
 OUTPUT="revanced-magisk-v$LAST_VER.zip"
-sed -i "s/version=v.*$/version=v$LAST_VER/g" ./MMT-Extended/module.prop
+sed -i "s/version=v.*$/version=v$LAST_VER/g" ./revanced-magisk/module.prop
 
-cd MMT-Extended
+cd revanced-magisk
 zip -r ../$OUTPUT .
 
 echo "Created the magisk module '$OUTPUT'"
