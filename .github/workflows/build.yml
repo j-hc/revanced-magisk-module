@@ -16,12 +16,16 @@ jobs:
           echo ::set-output name=OUTPUT::$(find . -maxdepth 1 -name "revanced-magisk-*.zip" -printf '%P')
           echo ::set-output name=VERSION::$(find . -maxdepth 1 -name "revanced-magisk-*.zip" -printf '%P' | sed -n 's/.*revanced-magisk-\(.*\)\.zip.*/\1/p')
         shell: bash
+      - name: Current Date
+        id: date
+        run: echo "::set-output name=DATE::$(date +'%m-%d')"
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
         with:
+          body: ${{ steps.date.outputs.DATE }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ steps.get_output_name.outputs.OUTPUT }}
           asset_name: ${{ steps.get_output_name.outputs.OUTPUT }}
           release_name: ${{ steps.get_output_name.outputs.OUTPUT }}
-          tag: ${{ steps.get_output_name.outputs.VERSION }}
+          tag: 2022-${{ steps.get_output_name.outputs.VERSION }}-${{ steps.date.outputs.DATE }}
           overwrite: true
