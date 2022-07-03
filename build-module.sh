@@ -1,13 +1,13 @@
 #!/bin/bash
 
-set -e
+set -xe
 
 echo "All necessary files (revanced cli, patches and integrations, stock YouTube apk) will be downloaded, Youtube apk will be patched and zipped into a Magisk module"
 
 WGET_HEADER='User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0'
 
 function req() {
-	wget -nv --show-progress -O $2 --header="$WGET_HEADER" $1
+	wget -nv -O $2 --header="$WGET_HEADER" $1
 }
 
 # yes this is how i download the stock yt apk from apkmirror
