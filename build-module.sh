@@ -7,7 +7,7 @@ echo "All necessary files (revanced cli, patches and integrations, stock YouTube
 WGET_HEADER='User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0'
 
 function req() {
-	wget -nv -O $2 --header="$WGET_HEADER" $1
+	wget -nv --show-progress -O $2 --header="$WGET_HEADER" $1
 }
 
 # yes this is how i download the stock yt apk from apkmirror
@@ -41,7 +41,7 @@ SUPPORTED_VERSIONS=$(unzip -p $RV_PATCHES_JAR | strings -n 8 -s , | sed -rn 's/.
 echo "Supported versions of the patch: $SUPPORTED_VERSIONS"
 LAST_VER=$(echo $SUPPORTED_VERSIONS | awk -F, '{ print $NF }')
 echo "Choosing $LAST_VER"
-BASE_APK="base-v$LAST_VER.apk"
+BASE_APK="base-v${LAST_VER}.apk"
 
 if [ ! -f $BASE_APK ]; then
 	echo "$BASE_APK could not be found, will be downloaded from apkmirror.."
@@ -49,14 +49,14 @@ if [ ! -f $BASE_APK ]; then
 	unzip -p yt-stock-v$LAST_VER.zip base.apk >$BASE_APK
 fi
 
-java -jar $RV_CLI_JAR -a $BASE_APK -c -o revanced-base.apk -b $RV_PATCHES_JAR -e microg-support -m $RV_INTEGRATIONS_APK
+java -jar $RV_CLI_JAR -a $BASE_APK -c -o revanced-base.apk -b $RV_PATCHES_JAR -e microg-support -e premium-heading -m $RV_INTEGRATIONS_APK
 mv -f revanced-base.apk ./revanced-magisk/revanced-base.apk
 
 echo "Creating the magisk module..."
-OUTPUT="revanced-magisk-v$LAST_VER.zip"
-sed -i "s/version=v.*$/version=v$LAST_VER/g" ./revanced-magisk/module.prop
+OUTPUT="revanced-magisk-v${LAST_VER}.zip"
+sed -i "s/version=v.*$/version=v${LAST_VER}/g" ./revanced-magisk/module.prop
 
 cd revanced-magisk
 zip -r ../$OUTPUT .
 
-echo "Created the magisk module '$OUTPUT'"
+echo "Created the magisk module '${OUTPUT}'"

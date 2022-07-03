@@ -2,5 +2,6 @@
 *.apk
 *.zip
 *.keystore
+revanced-cache
 
 .v*
