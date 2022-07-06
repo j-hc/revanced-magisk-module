@@ -10,25 +10,27 @@ jobs:
           java-version: "17"
       - name: Checkout
         uses: actions/checkout@v3
-      - run: |
-          ./build-module.sh
-      - id: get_output_name
+      - run: ./build-module.sh
+      - id: get_output
         run: |
-          echo ::set-output name=OUTPUT::$(find . -maxdepth 1 -name "revanced-magisk-*.zip" -printf '%P')
-          echo ::set-output name=VERSION::$(find . -maxdepth 1 -name "revanced-magisk-*.zip" -printf '%P' | sed -n 's/.*revanced-magisk-\(.*\)\.zip.*/\1/p')
-        shell: bash
-      - name: Current Date
-        id: date
-        run: |
+          FILE=$(find . -maxdepth 1 -name "revanced-magisk-*.zip" -printf '%P')
+          echo ::set-output name=OUTPUT::$FILE
+          echo ::set-output name=VERSION::$(echo $FILE | sed -n 's/.*revanced-magisk-\(.*\)\.zip.*/\1/p')
+          BUILD_LOG=$(cat build.log)
+          BUILD_LOG="${BUILD_LOG//'%'/'%25'}"
+          BUILD_LOG="${BUILD_LOG//$'\n'/'%0A'}"
+          BUILD_LOG="${BUILD_LOG//$'\r'/'%0D'}"
+
+          echo ::set-output name=BUILD_LOG::$BUILD_LOG
           echo "::set-output name=DATE::$(date +'%m-%d')"
-          echo "::set-output name=YYYY::$(date +'%4Y')"
+        shell: bash
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
         with:
-          body: ${{ steps.date.outputs.DATE }}
+          body: ${{ steps.get_output.outputs.BUILD_LOG }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ steps.get_output_name.outputs.OUTPUT }}
-          asset_name: ${{ steps.get_output_name.outputs.OUTPUT }}
-          release_name: ${{ steps.get_output_name.outputs.OUTPUT }}
-          tag: ${{ steps.date.outputs.YYYY }}-${{ steps.get_output_name.outputs.VERSION }}-${{ steps.date.outputs.DATE }}
-          overwrite: true
+          file: ${{ steps.get_output.outputs.OUTPUT }}
+          asset_name: ${{ steps.get_output.outputs.OUTPUT }}
+          release_name: ${{ steps.get_output.outputs.OUTPUT }}
+          tag: ${{ steps.get_output.outputs.VERSION }}-${{ steps.get_output.outputs.DATE }}
+          overwrite: false

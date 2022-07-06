@@ -3,5 +3,6 @@
 *.zip
 *.keystore
 revanced-cache
+build.log
 
 .v*
