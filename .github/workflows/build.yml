@@ -8,8 +8,9 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
+      - name: Checkout
+        uses: actions/checkout@v3
       - run: |
-          git clone "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" .
           ./build-module.sh
       - id: get_output_name
         run: |
