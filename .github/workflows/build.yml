@@ -18,7 +18,9 @@ jobs:
         shell: bash
       - name: Current Date
         id: date
-        run: echo "::set-output name=DATE::$(date +'%m-%d')"
+        run: |
+          echo "::set-output name=DATE::$(date +'%m-%d')"
+          echo "::set-output name=YYYY::$(date +'%4Y')"
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -27,5 +29,5 @@ jobs:
           file: ${{ steps.get_output_name.outputs.OUTPUT }}
           asset_name: ${{ steps.get_output_name.outputs.OUTPUT }}
           release_name: ${{ steps.get_output_name.outputs.OUTPUT }}
-          tag: 2022-${{ steps.get_output_name.outputs.VERSION }}-${{ steps.date.outputs.DATE }}
+          tag: ${{ steps.date.outputs.YYYY }}-${{ steps.get_output_name.outputs.VERSION }}-${{ steps.date.outputs.DATE }}
           overwrite: true
