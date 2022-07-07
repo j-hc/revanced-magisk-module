@@ -10,27 +10,25 @@ jobs:
           java-version: "17"
       - name: Checkout
         uses: actions/checkout@v3
-      - run: ./build-module.sh
+      - run: ./build.sh all
       - id: get_output
         run: |
-          FILE=$(find . -maxdepth 1 -name "revanced-magisk-*.zip" -printf '%P')
-          echo ::set-output name=OUTPUT::$FILE
-          echo ::set-output name=VERSION::$(echo $FILE | sed -n 's/.*revanced-magisk-\(.*\)\.zip.*/\1/p')
+          YT_FILE=$(find . -maxdepth 1 -name "yt-revanced-magisk-*.zip" -printf '%P')
+          echo ::set-output name=YT_OUTPUT::$YT_FILE
           BUILD_LOG=$(cat build.log)
           BUILD_LOG="${BUILD_LOG//'%'/'%25'}"
           BUILD_LOG="${BUILD_LOG//$'\n'/'%0A'}"
           BUILD_LOG="${BUILD_LOG//$'\r'/'%0D'}"
 
           echo ::set-output name=BUILD_LOG::$BUILD_LOG
-          echo "::set-output name=DATE::$(date +'%m-%d')"
+          echo ::set-output name=DATE::$(date +'%Y-%m-%d')
         shell: bash
-      - name: Upload release
+      - name: Upload modules to release
         uses: svenstaro/upload-release-action@v2
         with:
           body: ${{ steps.get_output.outputs.BUILD_LOG }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ steps.get_output.outputs.OUTPUT }}
-          asset_name: ${{ steps.get_output.outputs.OUTPUT }}
-          release_name: ${{ steps.get_output.outputs.OUTPUT }}
-          tag: ${{ steps.get_output.outputs.VERSION }}-${{ steps.get_output.outputs.DATE }}
-          overwrite: false
+          file: ./*.zip
+          release_name: ${{ steps.get_output.outputs.YT_OUTPUT }}
+          tag: ${{ steps.get_output.outputs.DATE }}
+          file_glob: true
