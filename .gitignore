@@ -2,7 +2,9 @@
 *.apk
 *.zip
 *.keystore
-revanced-cache
+*.so
+/revanced-cache
+/temp
 build.log
 
 .v*
