@@ -1,7 +1,5 @@
 #!/bin/bash
 
-YT_PATCHER_ARGS="-e microg-support -e premium-heading"
-MUSIC_PATCHER_ARGS="-e microg-support"
 MODULE_TEMPLATE_DIR="revanced-magisk"
 TEMP_DIR="temp"
 
@@ -88,7 +86,7 @@ build_yt() {
 	fi
 
 	yt_patched_apk="${TEMP_DIR}/yt-revanced-base.apk"
-	java -jar $RV_CLI_JAR -a $yt_base_apk -c -o $yt_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK $YT_PATCHER_ARGS
+	java -jar $RV_CLI_JAR -a $yt_base_apk -c -o $yt_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK $1
 	mv -f "$yt_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
 	echo "Creating the magisk module for YouTube..."
@@ -122,7 +120,7 @@ build_music() {
 	unzip -p "$music_apk" "lib/arm64-v8a/libjsc.so" >"${MODULE_TEMPLATE_DIR}/libjsc.so"
 
 	music_patched_apk="${TEMP_DIR}/music-revanced-base.apk"
-	java -jar $RV_CLI_JAR -a $music_apk -c -o $music_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK $MUSIC_PATCHER_ARGS
+	java -jar $RV_CLI_JAR -a $music_apk -c -o $music_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK $1
 	mv -f "$music_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
 	echo "Creating the magisk module for YouTube Music"
