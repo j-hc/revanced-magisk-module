@@ -86,7 +86,7 @@ build_yt() {
 	fi
 
 	yt_patched_apk="${TEMP_DIR}/yt-revanced-base.apk"
-	java -jar $RV_CLI_JAR -a $yt_base_apk -c -o $yt_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK $1
+	java -jar $RV_CLI_JAR -a $yt_base_apk -c -o $yt_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK -e premium-heading $1
 	mv -f "$yt_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
 	echo "Creating the magisk module for YouTube..."
@@ -155,7 +155,9 @@ name=YouTube ReVanced
 version=v${1}
 versionCode=1
 author=j-hc
-description=mounts base.apk for YouTube ReVanced" >"${MODULE_TEMPLATE_DIR}/module.prop"
+description=mounts base.apk for YouTube ReVanced
+updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json
+" >"${MODULE_TEMPLATE_DIR}/module.prop"
 }
 
 music_module_prop() {
@@ -164,5 +166,7 @@ name=YouTube Music ReVanced
 version=v${1}
 versionCode=1
 author=j-hc
-description=mounts base.apk for YouTube Music ReVanced" >"${MODULE_TEMPLATE_DIR}/module.prop"
+description=mounts base.apk for YouTube Music ReVanced
+updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update.json
+" >"${MODULE_TEMPLATE_DIR}/module.prop"
 }
