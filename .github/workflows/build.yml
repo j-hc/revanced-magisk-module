@@ -11,18 +11,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - run: ./build.sh all
+        env:
+          GITHUB_REPOSITORY: $GITHUB_REPOSITORY
       - id: get_output
         run: |
-          YT_FILE=$(find . -maxdepth 1 -name "yt-revanced-magisk-*.zip" -printf '%P')
-          echo ::set-output name=YT_OUTPUT::$YT_FILE
+          echo ::set-output name=YT_OUTPUT::$(find . -maxdepth 1 -name "yt-revanced-magisk-*.zip" -printf '%P')
+          echo ::set-output name=MUSIC_OUTPUT::$(find . -maxdepth 1 -name "music-revanced-magisk-*.zip" -printf '%P')
+
           BUILD_LOG=$(cat build.log)
           BUILD_LOG="${BUILD_LOG//'%'/'%25'}"
           BUILD_LOG="${BUILD_LOG//$'\n'/'%0A'}"
           BUILD_LOG="${BUILD_LOG//$'\r'/'%0D'}"
 
           echo ::set-output name=BUILD_LOG::$BUILD_LOG
-          echo ::set-output name=DATE::$(date +'%Y-%m-%d')
+          echo ::set-output name=DATE::$(date +'%Y%m%d')
         shell: bash
+
       - name: Upload modules to release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -32,3 +36,33 @@ jobs:
           release_name: ${{ steps.get_output.outputs.YT_OUTPUT }}
           tag: ${{ steps.get_output.outputs.DATE }}
           file_glob: true
+          overwrite: true
+
+      - id: update_config
+        run: |
+          echo "${{ steps.get_output.outputs.BUILD_LOG }}" >latest_build.log
+          CHANGELOG_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/latest_build.log"
+          get_update_json() {
+            echo "{
+            \"version\": \"v$1\",
+            \"versionCode\": $2,
+            \"zipUrl\": \"$3\",
+            \"changelog\": \"$4\"
+          }"
+          }
+          YT_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube version: \(.*\)/\1/p')
+          YT_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.get_output.outputs.DATE }}/${{ steps.get_output.outputs.YT_OUTPUT }}"
+          UPDATE_YT_JSON=$(get_update_json $YT_VER ${{ steps.get_output.outputs.DATE }} $YT_DLURL $CHANGELOG_URL)
+          echo "$UPDATE_YT_JSON" >yt-update.json
+
+          MUSIC_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music version: \(.*\)/\1/p')
+          MUSIC_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.get_output.outputs.DATE }}/${{ steps.get_output.outputs.MUSIC_OUTPUT }}"
+          UPDATE_MUSIC_JSON=$(get_update_json $MUSIC_VER ${{ steps.get_output.outputs.DATE }} $MUSIC_DLURL $CHANGELOG_URL)
+          echo "$UPDATE_MUSIC_JSON" >music-update.json
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: update
+          create_branch: true
+          file_pattern: latest_build.log music-update.json yt-update.json
+          push_options: "--force"
