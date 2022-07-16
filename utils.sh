@@ -10,15 +10,15 @@ get_prebuilts() {
 	mkdir -p "$TEMP_DIR"
 	RV_CLI_URL=$(req https://api.github.com/repos/revanced/revanced-cli/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_CLI_JAR="${TEMP_DIR}/$(echo "$RV_CLI_URL" | awk -F/ '{ print $NF }')"
-	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
+	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}  "
 
 	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*apk\)".*/\1/p')
 	RV_INTEGRATIONS_APK="${TEMP_DIR}/$(echo "$RV_INTEGRATIONS_URL" | awk '{n=split($0, arr, "/"); printf "%s-%s.apk", substr(arr[n], 0, length(arr[n]) - 4), arr[n-1]}')"
-	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
+	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}  "
 
 	RV_PATCHES_URL=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_PATCHES_JAR="${TEMP_DIR}/$(echo "$RV_PATCHES_URL" | awk -F/ '{ print $NF }')"
-	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
+	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}  "
 
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
