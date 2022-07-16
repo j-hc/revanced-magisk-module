@@ -4,7 +4,7 @@ set -e
 
 source utils.sh
 
-YT_PATCHER_ARGS="-e microg-support"
+YT_PATCHER_ARGS="-e microg-support -e swipe-controls"
 MUSIC_PATCHER_ARGS="-e microg-support"
 
 BUILD_YT=false
