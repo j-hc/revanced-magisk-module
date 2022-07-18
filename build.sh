@@ -9,13 +9,12 @@ MUSIC_PATCHER_ARGS="-e microg-support"
 
 BUILD_YT=false
 BUILD_MUSIC=false
-UPDATE_PREBUILTS=true
 
 print_usage() {
-	echo -e "Usage:\n${0} youtube|music|all|clean|reset-template"
+	echo -e "Usage:\n${0} all|youtube|music|clean|reset-template"
 }
 
-if [ -z "$1" ]; then
+if [ -z ${1+x} ]; then
 	print_usage
 	exit 0
 elif [ "$1" == "clean" ]; then
@@ -32,8 +31,6 @@ elif [ "$1" == "youtube" ]; then
 	BUILD_YT=true
 elif [ "$1" == "music" ]; then
 	BUILD_MUSIC=true
-elif [ "$2" == "--no-update" ]; then
-	UPDATE_PREBUILTS=false
 else
 	print_usage
 	exit 1
@@ -42,9 +39,7 @@ fi
 >build.log
 log "$(date +'%Y-%m-%d')\n"
 
-if $UPDATE_PREBUILTS; then
-	get_prebuilts
-fi
+get_prebuilts
 
 if $BUILD_YT; then
 	build_yt "$YT_PATCHER_ARGS"

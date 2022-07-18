@@ -2,10 +2,9 @@
 
 MODULE_TEMPLATE_DIR="revanced-magisk"
 TEMP_DIR="temp"
+GITHUB_REPO_FALLBACK="j-hc/revanced-magisk-module"
 
-if [ -z ${GITHUB_REPOSITORY+x} ]; then
-	GITHUB_REPOSITORY="j-hc/revanced-magisk-module"
-fi
+: "${GITHUB_REPOSITORY:=$GITHUB_REPO_FALLBACK}"
 
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
 
@@ -75,8 +74,8 @@ dl_music() {
 build_yt() {
 	echo "Patching YouTube"
 	reset_template
-	# This only finds the supported versions of some random patch wrt the first occurance of the string but that's fine
 	local supported_versions last_ver yt_base_apk dl_output yt_patched_apk output
+	# This only finds the supported versions of some random patch wrt the first occurance of the string but that's fine
 	supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -n 8 -s , | sed -rn 's/.*youtube,versions,(([0-9.]*,*)*),Lk.*/\1/p')
 	echo "Supported versions of the YouTube patch: $supported_versions"
 	last_ver=$(echo "$supported_versions" | awk -F, '{ print $NF }')
@@ -92,7 +91,7 @@ build_yt() {
 	mv -f "$yt_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
 	echo "Creating the magisk module for YouTube..."
-	output="yt-revanced-magisk-v${last_ver}-noarch.zip"
+	output="yt-revanced-magisk-v${last_ver}-all.zip"
 
 	service_sh "com.google.android.youtube"
 	yt_module_prop "$last_ver"
@@ -131,7 +130,9 @@ build_music() {
 	service_sh "com.google.android.apps.youtube.music"
 	music_module_prop "$last_ver"
 	echo 'YTPATH=$(pm path com.google.android.apps.youtube.music | grep base | sed "s/package://g; s/\/base.apk//g")
-cp_ch -n $MODPATH/libjsc.so $YTPATH/lib/arm64 0755' >"${MODULE_TEMPLATE_DIR}/common/install.sh"
+if [ -n "$YTPATH" ]; then
+	cp_ch -n $MODPATH/libjsc.so $YTPATH/lib/arm64 0755
+fi' >"${MODULE_TEMPLATE_DIR}/common/install.sh"
 
 	cd "$MODULE_TEMPLATE_DIR" || return
 	zip -r "../$output" .
@@ -158,8 +159,7 @@ version=v${1}
 versionCode=$(date +'%Y%m%d')
 author=j-hc
 description=mounts base.apk for YouTube ReVanced
-updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json
-" >"${MODULE_TEMPLATE_DIR}/module.prop"
+updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json" >"${MODULE_TEMPLATE_DIR}/module.prop"
 }
 
 music_module_prop() {
@@ -169,6 +169,5 @@ version=v${1}
 versionCode=$(date +'%Y%m%d')
 author=j-hc
 description=mounts base.apk for YouTube Music ReVanced
-updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update.json
-" >"${MODULE_TEMPLATE_DIR}/module.prop"
+updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update.json" >"${MODULE_TEMPLATE_DIR}/module.prop"
 }
