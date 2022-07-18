@@ -8,11 +8,26 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "17"
+
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get previous tag
+        id: previous_tag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with:
+          fallback: 1
+
+      - id: next_ver_code
+        run: export TAG=${{ steps.previous_tag.outputs.tag }}; echo ::set-output name=NEXT_VER_CODE::$((TAG + 1))
+
       - run: ./build.sh all
         env:
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
+          NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+
       - id: get_output
         run: |
           echo ::set-output name=YT_OUTPUT::$(find . -maxdepth 1 -name "yt-revanced-magisk-*.zip" -printf '%P')
@@ -24,7 +39,6 @@ jobs:
           BUILD_LOG="${BUILD_LOG//$'\r'/'%0D'}"
 
           echo ::set-output name=BUILD_LOG::$BUILD_LOG
-          echo ::set-output name=DATE::$(date +'%Y%m%d')
         shell: bash
 
       - name: Upload modules to release
@@ -34,11 +48,12 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./*.zip
           release_name: ${{ steps.get_output.outputs.YT_OUTPUT }}
-          tag: ${{ steps.get_output.outputs.DATE }}
+          tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           file_glob: true
           overwrite: true
 
-      - id: update_config
+      - name: Update changelog and magisk udate configs
+        id: update_config
         run: |
           echo "${{ steps.get_output.outputs.BUILD_LOG }}" >latest_build.log
           CHANGELOG_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/latest_build.log"
@@ -51,18 +66,20 @@ jobs:
           }"
           }
           YT_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube version: \(.*\)/\1/p')
-          YT_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.get_output.outputs.DATE }}/${{ steps.get_output.outputs.YT_OUTPUT }}"
-          UPDATE_YT_JSON=$(get_update_json $YT_VER ${{ steps.get_output.outputs.DATE }} $YT_DLURL $CHANGELOG_URL)
+          YT_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YT_OUTPUT }}"
+          UPDATE_YT_JSON=$(get_update_json $YT_VER ${{ steps.next_ver_code.outputs.NEXT_VER_CODE}} $YT_DLURL $CHANGELOG_URL)
           echo "$UPDATE_YT_JSON" >yt-update.json
 
           MUSIC_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music version: \(.*\)/\1/p')
-          MUSIC_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.get_output.outputs.DATE }}/${{ steps.get_output.outputs.MUSIC_OUTPUT }}"
-          UPDATE_MUSIC_JSON=$(get_update_json $MUSIC_VER ${{ steps.get_output.outputs.DATE }} $MUSIC_DLURL $CHANGELOG_URL)
+          MUSIC_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MUSIC_OUTPUT }}"
+          UPDATE_MUSIC_JSON=$(get_update_json $MUSIC_VER ${{ steps.next_ver_code.outputs.NEXT_VER_CODE}} $MUSIC_DLURL $CHANGELOG_URL)
           echo "$UPDATE_MUSIC_JSON" >music-update.json
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: update
           create_branch: true
+          skip_checkout: true
           file_pattern: latest_build.log music-update.json yt-update.json
-          push_options: "--force"
+          commit_message: Bump ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+          push_options: "--force" # this seemed easy, will checkout properly later

@@ -5,6 +5,7 @@ TEMP_DIR="temp"
 GITHUB_REPO_FALLBACK="j-hc/revanced-magisk-module"
 
 : "${GITHUB_REPOSITORY:=$GITHUB_REPO_FALLBACK}"
+: "${NEXT_VER_CODE:=$(date +'%Y%m%d')}"
 
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
 
@@ -156,7 +157,7 @@ yt_module_prop() {
 	echo "id=ytrv-magisk
 name=YouTube ReVanced
 version=v${1}
-versionCode=$(date +'%Y%m%d')
+versionCode=${NEXT_VER_CODE}
 author=j-hc
 description=mounts base.apk for YouTube ReVanced
 updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json" >"${MODULE_TEMPLATE_DIR}/module.prop"
@@ -166,7 +167,7 @@ music_module_prop() {
 	echo "id=ytmusicrv-magisk
 name=YouTube Music ReVanced
 version=v${1}
-versionCode=$(date +'%Y%m%d')
+versionCode=${NEXT_VER_CODE}
 author=j-hc
 description=mounts base.apk for YouTube Music ReVanced
 updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update.json" >"${MODULE_TEMPLATE_DIR}/module.prop"
