@@ -51,7 +51,7 @@ log() {
 dl_yt() {
 	echo "Downloading YouTube"
 	local url="https://www.apkmirror.com/apk/google-inc/youtube/youtube-${1//./-}-release/"
-	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*BUNDLE</span>[^@]*@\([^#]*\).*;\1;p')"
+	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*APK</span>[^@]*@\([^#]*\).*;\1;p')"
 	log "\nYouTube version: $1\ndownloaded from: [APKMirror]($url)"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
@@ -80,9 +80,7 @@ build_yt() {
 	yt_base_apk="${TEMP_DIR}/base-v${last_ver}.apk"
 
 	if [ ! -f "$yt_base_apk" ]; then
-		dl_output="${TEMP_DIR}/yt-stock-v${last_ver}.zip"
-		dl_yt "$last_ver" "$dl_output"
-		unzip -p "$dl_output" "base.apk" >"$yt_base_apk"
+		dl_yt "$last_ver" "$yt_base_apk"
 	fi
 
 	yt_patched_apk="${TEMP_DIR}/yt-revanced-base.apk"
