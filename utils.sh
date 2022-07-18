@@ -88,7 +88,7 @@ build_yt() {
 	fi
 
 	yt_patched_apk="${TEMP_DIR}/yt-revanced-base.apk"
-	java -jar $RV_CLI_JAR -a $yt_base_apk -c -o $yt_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK -e premium-heading $1
+	java -jar $RV_CLI_JAR -a $yt_base_apk -c -o $yt_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK $1
 	mv -f "$yt_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
 	echo "Creating the magisk module for YouTube..."
