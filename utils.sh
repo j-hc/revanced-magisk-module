@@ -3,6 +3,10 @@
 MODULE_TEMPLATE_DIR="revanced-magisk"
 TEMP_DIR="temp"
 
+if [ -z ${GITHUB_REPOSITORY+x} ]; then
+	GITHUB_REPOSITORY="j-hc/revanced-magisk-module"
+fi
+
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
 
 get_prebuilts() {
