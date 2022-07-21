@@ -14,14 +14,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get previous tag
-        id: previous_tag
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
-        with:
-          fallback: 1
-
       - id: next_ver_code
-        run: export TAG=${{ steps.previous_tag.outputs.tag }}; echo ::set-output name=NEXT_VER_CODE::$((TAG + 1))
+        run: echo ::set-output name=NEXT_VER_CODE::$(date +'%Y%m%d')
+
+      # - id: next_ver_code
+      #   run: export TAG=${{ steps.previous_tag.outputs.tag }}; echo ::set-output name=NEXT_VER_CODE::$((TAG + 1))
 
       - run: ./build.sh all
         env:
@@ -52,7 +49,7 @@ jobs:
           file_glob: true
           overwrite: true
 
-      - name: Update changelog and magisk udate configs
+      - name: Update changelog and magisk update jsons
         id: update_config
         run: |
           echo "${{ steps.get_output.outputs.BUILD_LOG }}" >latest_build.log
