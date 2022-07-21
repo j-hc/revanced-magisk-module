@@ -14,14 +14,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get previous tag
-        id: previous_tag
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
-        with:
-          fallback: 1
+      - id: prev_tag
+        run: |
+          TAG=$(git tag --sort=creatordate | tail -1)
+          if [ -z "$TAG" ]; then TAG=1; fi
+          echo ::set-output name=tag::$TAG
 
       - id: next_ver_code
-        run: export TAG=${{ steps.previous_tag.outputs.tag }}; echo ::set-output name=NEXT_VER_CODE::$((TAG + 1))
+        run: export TAG=${{ steps.prev_tag.outputs.tag }}; echo ::set-output name=NEXT_VER_CODE::$((TAG + 1))
 
       - run: ./build.sh all
         env:
@@ -50,9 +50,9 @@ jobs:
           release_name: ${{ steps.get_output.outputs.YT_OUTPUT }}
           tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           file_glob: true
-          overwrite: true
+          overwrite: false
 
-      - name: Update changelog and magisk udate configs
+      - name: Update changelog and magisk update jsons
         id: update_config
         run: |
           echo "${{ steps.get_output.outputs.BUILD_LOG }}" >latest_build.log
@@ -79,7 +79,6 @@ jobs:
         with:
           branch: update
           create_branch: true
-          skip_checkout: true
           file_pattern: latest_build.log music-update.json yt-update.json
           commit_message: Bump ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           push_options: "--force" # this seemed easy, will checkout properly later
