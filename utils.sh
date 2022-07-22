@@ -19,15 +19,15 @@ get_prebuilts() {
 	mkdir -p "$TEMP_DIR"
 	RV_CLI_URL=$(req https://api.github.com/repos/revanced/revanced-cli/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_CLI_JAR="${TEMP_DIR}/$(echo "$RV_CLI_URL" | awk -F/ '{ print $NF }')"
-	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}  "
+	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
 
 	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*apk\)".*/\1/p')
 	RV_INTEGRATIONS_APK="${TEMP_DIR}/$(echo "$RV_INTEGRATIONS_URL" | awk '{n=split($0, arr, "/"); printf "%s-%s.apk", substr(arr[n], 0, length(arr[n]) - 4), arr[n-1]}')"
-	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}  "
+	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
 
 	RV_PATCHES_URL=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_PATCHES_JAR="${TEMP_DIR}/$(echo "$RV_PATCHES_URL" | awk -F/ '{ print $NF }')"
-	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}  "
+	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
 
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
@@ -53,7 +53,7 @@ dl_if_dne() {
 }
 
 log() {
-	echo -e "$1" >>build.log
+	echo -e "$1  " >>build.log
 }
 
 # yes this is how i download the stock yt apk from apkmirror
@@ -61,16 +61,17 @@ dl_yt() {
 	echo "Downloading YouTube"
 	local url="https://www.apkmirror.com/apk/google-inc/youtube/youtube-${1//./-}-release/"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*APK</span>[^@]*@\([^#]*\).*;\1;p')"
-	log "\nYouTube version: $1\ndownloaded from: [APKMirror]($url)"
+	log "\nYouTube version: $1"
+	log "downloaded from: [APKMirror - YouTube v${1}]($url)"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$2"
 }
 
 dl_music() {
-	echo "Downloading YouTube Music"
-	local url="https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-${1//./-}-release/"
 	local arch="$3"
+	echo "Downloading YouTube Music (${arch})"
+	local url="https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-${1//./-}-release/"
 	if [ "$arch" = "$ARM64_V8A" ]; then
 		url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*arm64-v8a</div>[^@]*@\([^"]*\).*;\1;p')"
 	elif [ "$arch" = "$ARM_V7A" ]; then
@@ -79,7 +80,8 @@ dl_music() {
 		echo "Wrong arch: '$arch'"
 		return
 	fi
-	log "\nYouTube Music ($arch) version: $1\ndownloaded from: [APKMirror]($url)"
+	log "\nYouTube Music ($arch) version: $1"
+	log "downloaded from: [APKMirror - YouTube Music v${1} (${arch})]($url)"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$2"

@@ -53,11 +53,14 @@ jobs:
           file_glob: true
           overwrite: false
 
-      - name: Update changelog and magisk update jsons
+      - name: Switch to update branch and create if it DNE
+        run: git checkout -f update || git switch --discard-changes --orphan update
+
+      - name: Update changelog and Magisk update jsons
         id: update_config
         run: |
-          echo "${{ steps.get_output.outputs.BUILD_LOG }}" >latest_build.log
-          CHANGELOG_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/latest_build.log"
+          cp build.log latest_build.md
+          CHANGELOG_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/latest_build.md"
           get_update_json() {
             echo "{
             \"version\": \"v$1\",
@@ -68,22 +71,21 @@ jobs:
           }
           YT_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube version: \(.*\)/\1/p')
           YT_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YT_OUTPUT }}"
-          UPDATE_YT_JSON=$(get_update_json $YT_VER ${{ steps.next_ver_code.outputs.NEXT_VER_CODE}} $YT_DLURL $CHANGELOG_URL)
+          UPDATE_YT_JSON=$(get_update_json "$YT_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$YT_DLURL" "$CHANGELOG_URL")
           echo "$UPDATE_YT_JSON" >yt-update.json
 
-          MUSIC_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music version: \(.*\)/\1/p')
+          MUSIC_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music (arm64-v8a) version: \(.*\)/\1/p')
           MUSIC_ARM64_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM64 }}"
           MUSIC_ARM_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM }}"
 
-          UPDATE_MUSIC_ARM64_JSON=$(get_update_json $MUSIC_VER ${{ steps.next_ver_code.outputs.NEXT_VER_CODE}} $MUSIC_ARM64_DLURL $CHANGELOG_URL)
+          UPDATE_MUSIC_ARM64_JSON=$(get_update_json "$MUSIC_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" "$MUSIC_ARM64_DLURL" "$CHANGELOG_URL")
           echo "$UPDATE_MUSIC_ARM64_JSON" >music-update-arm64-v8a.json
-          UPDATE_MUSIC_ARM_JSON=$(get_update_json $MUSIC_VER ${{ steps.next_ver_code.outputs.NEXT_VER_CODE}} $MUSIC_ARM_DLURL $CHANGELOG_URL)
+          UPDATE_MUSIC_ARM_JSON=$(get_update_json "$MUSIC_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" $MUSIC_ARM_DLURL "$CHANGELOG_URL")
           echo "$UPDATE_MUSIC_ARM_JSON" >music-update-arm-v7a.json
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: update
-          create_branch: true
-          file_pattern: latest_build.log music-update.json yt-update.json
+          skip_checkout: true
+          file_pattern: latest_build.md *.json
           commit_message: Bump ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
-          push_options: "--force" # this seemed easy, will checkout properly later
