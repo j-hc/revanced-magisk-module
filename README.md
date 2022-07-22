@@ -11,15 +11,16 @@ You can get the [latest CI release](https://github.com/j-hc/revanced-magisk-modu
 ## Updating
 The modules support Magisk update which means you will receive updates from your Magisk app, downloading from github releases and reflashing is not necessary.
 
-### Note
+## Note
 If you wish to include/exclude some patches to your liking:
  * Star the repo :eyes:
  * Fork the repo
  * Edit the patcher args in [`build.sh`](./build.sh)
- * Start the workflow to build
+ * Run the [workflow](../../actions/workflows/build.yml)
+ * Grab your module from [releases](../../releases)
 
 # Building the Magisk Modules
 
-```bash
+```console
 $ ./build.sh all
 ```
