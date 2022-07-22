@@ -96,14 +96,14 @@ build_yt() {
 	echo "Supported versions of the YouTube patch: $supported_versions"
 	last_ver=$(echo "$supported_versions" | awk -F, '{ print $NF }')
 	echo "Choosing '${last_ver}'"
-	local yt_base_apk="${TEMP_DIR}/base-v${last_ver}.apk"
+	local yt_base_apk="${TEMP_DIR}/yt-stock-v${last_ver}.apk"
 
 	if [ ! -f "$yt_base_apk" ]; then
 		dl_yt "$last_ver" "$yt_base_apk"
 	fi
 
 	local yt_patched_apk="${TEMP_DIR}/yt-revanced-base.apk"
-	java -jar $RV_CLI_JAR -a $yt_base_apk -c -o $yt_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK $1
+	java -jar "$RV_CLI_JAR" -a "$yt_base_apk" -c -o "$yt_patched_apk" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" "$1"
 	mv -f "$yt_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
 	echo "Creating the magisk module for YouTube..."
@@ -136,7 +136,7 @@ build_music() {
 	fi
 
 	local music_patched_apk="${TEMP_DIR}/music-revanced-base.apk"
-	java -jar $RV_CLI_JAR -a $music_apk -c -o $music_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK $1
+	java -jar "$RV_CLI_JAR" -a "$music_apk" -c -o "$music_patched_apk" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" "$1"
 	mv -f "$music_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
 	echo "Creating the magisk module for YouTube Music ($arch)"

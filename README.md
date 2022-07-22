@@ -20,6 +20,7 @@ If you wish to include/exclude some patches to your liking:
  * Grab your module from [releases](../../releases)
 
 # Building the Magisk Modules
+If you are going to build locally, make sure you have [Azul Zulu distribution of OpenJDK 17](https://www.azul.com/downloads/?version=java-17-lts&os=linux&architecture=x86-64-bit&package=jdk)
 
 ```console
 $ ./build.sh all

@@ -2,10 +2,11 @@
 
 set -euo pipefail
 
-source utils.sh
-
 YT_PATCHER_ARGS="-e microg-support -e swipe-controls"
 MUSIC_PATCHER_ARGS="-e microg-support"
+
+# dont change anything after this point ↓
+source utils.sh
 
 BUILD_YT=false
 BUILD_MUSIC=false
