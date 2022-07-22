@@ -1,8 +1,13 @@
 #!/bin/bash
 
+# this is the repo to fallback for magisk update json if you are not building on github actions ↓
+GITHUB_REPO_FALLBACK="j-hc/revanced-magisk-module"
+
+# dont change anything after this point ↓
 MODULE_TEMPLATE_DIR="revanced-magisk"
 TEMP_DIR="temp"
-GITHUB_REPO_FALLBACK="j-hc/revanced-magisk-module"
+ARM64_V8A="arm64-v8a"
+ARM_V7A="arm-v7a"
 
 : "${GITHUB_REPOSITORY:=$GITHUB_REPO_FALLBACK}"
 : "${NEXT_VER_CODE:=$(date +'%Y%m%d')}"
@@ -33,7 +38,7 @@ reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/service.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
-	rm -f "${MODULE_TEMPLATE_DIR}/base.apk" "${MODULE_TEMPLATE_DIR}/libjsc.so"
+	rm -f "${MODULE_TEMPLATE_DIR}/base.apk"
 }
 
 req() {
@@ -65,8 +70,16 @@ dl_yt() {
 dl_music() {
 	echo "Downloading YouTube Music"
 	local url="https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-${1//./-}-release/"
-	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*arm64-v8a</div>[^@]*@\([^"]*\).*;\1;p')"
-	log "\nYouTube Music version: $1\ndownloaded from: [APKMirror]($url)"
+	local arch="$3"
+	if [ "$arch" = "$ARM64_V8A" ]; then
+		url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*arm64-v8a</div>[^@]*@\([^"]*\).*;\1;p')"
+	elif [ "$arch" = "$ARM_V7A" ]; then
+		url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*armeabi-v7a</div>[^@]*@\([^"]*\).*;\1;p')"
+	else
+		echo "Wrong arch: '$arch'"
+		return
+	fi
+	log "\nYouTube Music ($arch) version: $1\ndownloaded from: [APKMirror]($url)"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$2"
@@ -75,24 +88,24 @@ dl_music() {
 build_yt() {
 	echo "Patching YouTube"
 	reset_template
-	local supported_versions last_ver yt_base_apk dl_output yt_patched_apk output
+	local supported_versions last_ver
 	# This only finds the supported versions of some random patch wrt the first occurance of the string but that's fine
 	supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -n 8 -s , | sed -rn 's/.*youtube,versions,(([0-9.]*,*)*),Lk.*/\1/p')
 	echo "Supported versions of the YouTube patch: $supported_versions"
 	last_ver=$(echo "$supported_versions" | awk -F, '{ print $NF }')
 	echo "Choosing '${last_ver}'"
-	yt_base_apk="${TEMP_DIR}/base-v${last_ver}.apk"
+	local yt_base_apk="${TEMP_DIR}/base-v${last_ver}.apk"
 
 	if [ ! -f "$yt_base_apk" ]; then
 		dl_yt "$last_ver" "$yt_base_apk"
 	fi
 
-	yt_patched_apk="${TEMP_DIR}/yt-revanced-base.apk"
+	local yt_patched_apk="${TEMP_DIR}/yt-revanced-base.apk"
 	java -jar $RV_CLI_JAR -a $yt_base_apk -c -o $yt_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK $1
 	mv -f "$yt_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
 	echo "Creating the magisk module for YouTube..."
-	output="yt-revanced-magisk-v${last_ver}-all.zip"
+	local output="yt-revanced-magisk-v${last_ver}-all.zip"
 
 	service_sh "com.google.android.youtube"
 	yt_module_prop "$last_ver"
@@ -105,35 +118,30 @@ build_yt() {
 }
 
 build_music() {
-	echo "Patching YouTube Music"
+	local arch="$2"
+	echo "Patching YouTube Music ($arch)"
 	reset_template
-	local supported_versions last_ver music_apk music_patched_apk output
+	local supported_versions last_ver
 	# This only finds the supported versions of some random patch wrt the first occurance of the string but that's fine
 	supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -n 7 -s , | sed -rn 's/.*music,versions,(([0-9.]*,*)*),Lk.*/\1/p')
 	echo "Supported versions of the Music patch: $supported_versions"
 	last_ver=$(echo "$supported_versions" | awk -F, '{ print $NF }')
 	echo "Choosing '${last_ver}'"
-	music_apk="${TEMP_DIR}/music-stock-v${last_ver}.apk"
+	local music_apk="${TEMP_DIR}/music-stock-v${last_ver}-${arch}.apk"
 
 	if [ ! -f "$music_apk" ]; then
-		dl_music "$last_ver" "$music_apk"
+		dl_music "$last_ver" "$music_apk" "$arch"
 	fi
 
-	unzip -p "$music_apk" "lib/arm64-v8a/libjsc.so" >"${MODULE_TEMPLATE_DIR}/libjsc.so"
-
-	music_patched_apk="${TEMP_DIR}/music-revanced-base.apk"
+	local music_patched_apk="${TEMP_DIR}/music-revanced-base.apk"
 	java -jar $RV_CLI_JAR -a $music_apk -c -o $music_patched_apk -b $RV_PATCHES_JAR -m $RV_INTEGRATIONS_APK $1
 	mv -f "$music_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
-	echo "Creating the magisk module for YouTube Music"
-	output="music-revanced-magisk-v${last_ver}-arm64-v8a.zip"
+	echo "Creating the magisk module for YouTube Music ($arch)"
+	local output="music-revanced-magisk-v${last_ver}-${arch}.zip"
 
 	service_sh "com.google.android.apps.youtube.music"
-	music_module_prop "$last_ver"
-	echo 'YTPATH=$(pm path com.google.android.apps.youtube.music | grep base | sed "s/package://g; s/\/base.apk//g")
-if [ -n "$YTPATH" ]; then
-	cp_ch -n $MODPATH/libjsc.so $YTPATH/lib/arm64 0755
-fi' >"${MODULE_TEMPLATE_DIR}/common/install.sh"
+	music_module_prop "$last_ver" "$arch"
 
 	cd "$MODULE_TEMPLATE_DIR" || return
 	zip -r "../$output" .
@@ -164,11 +172,22 @@ updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-upda
 }
 
 music_module_prop() {
-	echo "id=ytmusicrv-magisk
+	local arch="$2"
+	local update_json="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update-${arch}.json"
+	if [ "$arch" = "$ARM64_V8A" ]; then
+		local id="ytmusicrv-magisk"
+	elif [ "$arch" = "$ARM_V7A" ]; then
+		local id="ytmusicrv-arm-magisk"
+	else
+		echo "Wrong arch for prop: '$arch'"
+		return
+	fi
+
+	echo "id=${id}
 name=YouTube Music ReVanced
 version=v${1}
 versionCode=${NEXT_VER_CODE}
 author=j-hc
 description=mounts base.apk for YouTube Music ReVanced
-updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update.json" >"${MODULE_TEMPLATE_DIR}/module.prop"
+updateJson=${update_json}" >"${MODULE_TEMPLATE_DIR}/module.prop"
 }

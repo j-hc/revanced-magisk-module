@@ -31,7 +31,8 @@ jobs:
       - id: get_output
         run: |
           echo ::set-output name=YT_OUTPUT::$(find . -maxdepth 1 -name "yt-revanced-magisk-*.zip" -printf '%P')
-          echo ::set-output name=MUSIC_OUTPUT::$(find . -maxdepth 1 -name "music-revanced-magisk-*.zip" -printf '%P')
+          echo ::set-output name=MUSIC_OUTPUT_ARM64::$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm64-v8a.zip" -printf '%P')
+          echo ::set-output name=MUSIC_OUTPUT_ARM::$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm-v7a.zip" -printf '%P')
 
           BUILD_LOG=$(cat build.log)
           BUILD_LOG="${BUILD_LOG//'%'/'%25'}"
@@ -71,9 +72,13 @@ jobs:
           echo "$UPDATE_YT_JSON" >yt-update.json
 
           MUSIC_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music version: \(.*\)/\1/p')
-          MUSIC_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MUSIC_OUTPUT }}"
-          UPDATE_MUSIC_JSON=$(get_update_json $MUSIC_VER ${{ steps.next_ver_code.outputs.NEXT_VER_CODE}} $MUSIC_DLURL $CHANGELOG_URL)
-          echo "$UPDATE_MUSIC_JSON" >music-update.json
+          MUSIC_ARM64_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM64 }}"
+          MUSIC_ARM_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM }}"
+
+          UPDATE_MUSIC_ARM64_JSON=$(get_update_json $MUSIC_VER ${{ steps.next_ver_code.outputs.NEXT_VER_CODE}} $MUSIC_ARM64_DLURL $CHANGELOG_URL)
+          echo "$UPDATE_MUSIC_ARM64_JSON" >music-update-arm64-v8a.json
+          UPDATE_MUSIC_ARM_JSON=$(get_update_json $MUSIC_VER ${{ steps.next_ver_code.outputs.NEXT_VER_CODE}} $MUSIC_ARM_DLURL $CHANGELOG_URL)
+          echo "$UPDATE_MUSIC_ARM_JSON" >music-update-arm-v7a.json
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:

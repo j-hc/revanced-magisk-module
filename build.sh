@@ -17,36 +17,37 @@ print_usage() {
 if [ -z ${1+x} ]; then
 	print_usage
 	exit 0
-elif [ "$1" == "clean" ]; then
+elif [ "$1" = "clean" ]; then
 	rm -rf ./temp ./revanced-cache ./*.jar ./*.apk ./*.zip ./*.keystore build.log
 	reset_template
 	exit 0
-elif [ "$1" == "reset-template" ]; then
+elif [ "$1" = "reset-template" ]; then
 	reset_template
 	exit 0
-elif [ "$1" == "all" ]; then
+elif [ "$1" = "all" ]; then
 	BUILD_YT=true
 	BUILD_MUSIC=true
-elif [ "$1" == "youtube" ]; then
+elif [ "$1" = "youtube" ]; then
 	BUILD_YT=true
-elif [ "$1" == "music" ]; then
+elif [ "$1" = "music" ]; then
 	BUILD_MUSIC=true
 else
 	print_usage
 	exit 1
 fi
 
->build.log
+true >build.log
 log "$(date +'%Y-%m-%d')\n"
 
 get_prebuilts
 
-if $BUILD_YT; then
+if [ "$BUILD_YT" = true ]; then
 	build_yt "$YT_PATCHER_ARGS"
 fi
 
-if $BUILD_MUSIC; then
-	build_music "$MUSIC_PATCHER_ARGS"
+if [ "$BUILD_MUSIC" = true ]; then
+	build_music "$MUSIC_PATCHER_ARGS" "$ARM64_V8A"
+	build_music "$MUSIC_PATCHER_ARGS" "$ARM_V7A"
 fi
 
 echo "Done"
