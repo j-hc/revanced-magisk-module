@@ -109,7 +109,7 @@ dl_twitter() {
 }
 
 apk_last_ver() {
-	req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\)</span>.*;\1;p' | head -n 1 | xargs
+	req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\)</span>.*;\1;p' | grep release | head -n 1 | xargs
 }
 
 build_twitter() {
