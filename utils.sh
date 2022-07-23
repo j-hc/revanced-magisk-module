@@ -1,11 +1,8 @@
 #!/bin/bash
 
-# this is the repo to fallback for magisk update json if you are not building on github actions ↓
-GITHUB_REPO_FALLBACK="j-hc/revanced-magisk-module"
-
-# dont change anything after this point ↓
 MODULE_TEMPLATE_DIR="revanced-magisk"
 TEMP_DIR="temp"
+BUILD_DIR="build"
 ARM64_V8A="arm64-v8a"
 ARM_V7A="arm-v7a"
 
@@ -32,6 +29,19 @@ get_prebuilts() {
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
 	dl_if_dne "$RV_PATCHES_JAR" "$RV_PATCHES_URL"
+}
+
+set_prebuilts() {
+	[ ! -d "$TEMP_DIR" ] && {
+		echo "${TEMP_DIR} directory could not be found"
+		exit 1
+	}
+	RV_CLI_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-cli-*")
+	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
+	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "app-release-unsigned-*")
+	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
+	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*")
+	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
 }
 
 reset_template() {
@@ -87,8 +97,47 @@ dl_music() {
 	req "$url" "$2"
 }
 
+dl_twitter() {
+	echo "Downloading Twitter"
+	local url="https://www.apkmirror.com/apk/twitter-inc/twitter/twitter-${1//./-}-release/"
+	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*APK</span>[^@]*@\([^#]*\).*;\1;p')"
+	log "\nTwitter version: $1"
+	log "downloaded from: [APKMirror - Twitter v${1}]($url)"
+	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
+	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
+	req "$url" "$2"
+}
+
+apk_last_ver() {
+	req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\)</span>.*;\1;p' | head -n 1 | xargs
+}
+
+build_twitter() {
+	echo "Building Twitter"
+	local supported_versions last_ver
+	supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -n 8 -s , | sed -rn 's/.*twitter,versions,(([0-9.]*,*)*),Lk.*/\1/p')
+	if [ -z "$supported_versions" ]; then
+		last_ver=$(apk_last_ver "https://www.apkmirror.com/apk/twitter-inc/")
+		echo "Choosing latest version '${last_ver}'"
+	else
+		echo "Supported versions of the Twitter patch: $supported_versions"
+		last_ver=$(echo "$supported_versions" | awk -F, '{ print $NF }')
+		echo "Choosing '${last_ver}'"
+	fi
+	local twitter_base_apk="${TEMP_DIR}/twitter-stock-v${last_ver}.apk"
+	if [ ! -f "$twitter_base_apk" ]; then
+		dl_twitter "$last_ver" "$twitter_base_apk"
+	fi
+
+	local twitter_patched_apk="twitter-revanced-v${last_ver}.apk"
+	java -jar "$RV_CLI_JAR" -a "$twitter_base_apk" -c -o "$twitter_patched_apk" -b "$RV_PATCHES_JAR"
+
+	mv -f "$twitter_patched_apk" "$BUILD_DIR"
+	echo "Built Twitter: '${BUILD_DIR}/${twitter_patched_apk}'"
+}
+
 build_yt() {
-	echo "Patching YouTube"
+	echo "Building YouTube"
 	reset_template
 	local supported_versions last_ver
 	# This only finds the supported versions of some random patch wrt the first occurance of the string but that's fine
@@ -116,12 +165,13 @@ build_yt() {
 	zip -r "../$output" .
 	cd ..
 
-	echo "Built YouTube: '${output}'"
+	mv -f "$output" "$BUILD_DIR"
+	echo "Built YouTube: '${BUILD_DIR}/${output}'"
 }
 
 build_music() {
 	local arch="$2"
-	echo "Patching YouTube Music ($arch)"
+	echo "Building YouTube Music ($arch)"
 	reset_template
 	local supported_versions last_ver
 	# This only finds the supported versions of some random patch wrt the first occurance of the string but that's fine
@@ -149,7 +199,8 @@ build_music() {
 	zip -r "../$output" .
 	cd ..
 
-	echo "Built Music '${output}'"
+	mv -f "$output" "$BUILD_DIR"
+	echo "Built Music '${BUILD_DIR}/${output}'"
 }
 
 service_sh() {
