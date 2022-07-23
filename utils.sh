@@ -72,7 +72,7 @@ dl_yt() {
 	local url="https://www.apkmirror.com/apk/google-inc/youtube/youtube-${1//./-}-release/"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*APK</span>[^@]*@\([^#]*\).*;\1;p')"
 	log "\nYouTube version: $1"
-	log "downloaded from: [APKMirror - YouTube v${1}]($url)"
+	log "downloaded from: [APKMirror - YouTube]($url)"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$2"
@@ -91,7 +91,7 @@ dl_music() {
 		return
 	fi
 	log "\nYouTube Music ($arch) version: $1"
-	log "downloaded from: [APKMirror - YouTube Music v${1} (${arch})]($url)"
+	log "downloaded from: [APKMirror - YouTube Music (${arch})]($url)"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$2"
@@ -102,7 +102,7 @@ dl_twitter() {
 	local url="https://www.apkmirror.com/apk/twitter-inc/twitter/twitter-${1//./-}-release/"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*APK</span>[^@]*@\([^#]*\).*;\1;p')"
 	log "\nTwitter version: $1"
-	log "downloaded from: [APKMirror - Twitter v${1}]($url)"
+	log "downloaded from: [APKMirror - Twitter]($url)"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$2"
@@ -130,7 +130,7 @@ build_twitter() {
 	fi
 
 	local twitter_patched_apk="twitter-revanced-v${last_ver}.apk"
-	java -jar "$RV_CLI_JAR" -a "$twitter_base_apk" -c -o "$twitter_patched_apk" -b "$RV_PATCHES_JAR"
+	java -jar "$RV_CLI_JAR" -a "$twitter_base_apk" -c -o "$twitter_patched_apk" -b "$RV_PATCHES_JAR" --keystore=ks.keystore
 
 	mv -f "$twitter_patched_apk" "$BUILD_DIR"
 	echo "Built Twitter: '${BUILD_DIR}/${twitter_patched_apk}'"
@@ -152,7 +152,7 @@ build_yt() {
 	fi
 
 	local yt_patched_apk="${TEMP_DIR}/yt-revanced-base.apk"
-	java -jar "$RV_CLI_JAR" -a "$yt_base_apk" -c -o "$yt_patched_apk" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" $1
+	java -jar "$RV_CLI_JAR" -a "$yt_base_apk" -c -o "$yt_patched_apk" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" --keystore=ks.keystore $1
 	mv -f "$yt_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
 	echo "Creating the magisk module for YouTube..."
@@ -186,7 +186,7 @@ build_music() {
 	fi
 
 	local music_patched_apk="${TEMP_DIR}/music-revanced-base.apk"
-	java -jar "$RV_CLI_JAR" -a "$music_apk" -c -o "$music_patched_apk" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" $1
+	java -jar "$RV_CLI_JAR" -a "$music_apk" -c -o "$music_patched_apk" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" --keystore=ks.keystore $1
 	mv -f "$music_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 
 	echo "Creating the magisk module for YouTube Music ($arch)"

@@ -13,7 +13,7 @@ if [ -z ${1+x} ]; then
 	print_usage
 	exit 0
 elif [ "$1" = "clean" ]; then
-	rm -rf ./temp ./revanced-cache ./*.jar ./*.apk ./*.zip ./*.keystore build.log
+	rm -rf ./temp ./revanced-cache ./*.jar ./*.apk ./*.zip build.log
 	reset_template
 	exit 0
 elif [ "$1" = "reset-template" ]; then
