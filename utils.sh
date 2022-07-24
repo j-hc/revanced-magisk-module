@@ -45,7 +45,6 @@ set_prebuilts() {
 }
 
 reset_template() {
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/service.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
 	rm -f "${MODULE_TEMPLATE_DIR}/base.apk"
