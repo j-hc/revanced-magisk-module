@@ -9,7 +9,14 @@ You will need to **install the stock YouTube (or YT Music) app matching with the
 You can get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases) from here.
 
 ## Updating
-The modules support Magisk update which means you will receive updates from your Magisk app, downloading from github releases and reflashing is not necessary.
+The modules support Magisk update which means you will receive updates from your Magisk app, downloading from github releases and reflashing is not necessary.  
+To be able to update YouTube when the patches support a higher version, you will need to:
+ * Disable the module
+ * Reboot
+ * Install the APK of the new version
+ * Update the module and reboot again
+
+Or you can manually unmount the app.
 
 ## Note
 If you wish to include/exclude some patches to your liking:
