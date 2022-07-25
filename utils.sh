@@ -6,8 +6,8 @@ BUILD_DIR="build"
 ARM64_V8A="arm64-v8a"
 ARM_V7A="arm-v7a"
 
-: "${GITHUB_REPOSITORY:=$GITHUB_REPO_FALLBACK}"
-: "${NEXT_VER_CODE:=$(date +'%Y%m%d')}"
+GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$GITHUB_REPO_FALLBACK}
+NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
 
@@ -32,7 +32,7 @@ get_prebuilts() {
 }
 
 set_prebuilts() {
-	[ ! -d "$TEMP_DIR" ] && {
+	[ -d "$TEMP_DIR" ] || {
 		echo "${TEMP_DIR} directory could not be found"
 		exit 1
 	}
@@ -65,169 +65,106 @@ log() {
 	echo -e "$1  " >>build.log
 }
 
-# yes this is how i download the stock yt apk from apkmirror
-dl_yt() {
-	echo "Downloading YouTube"
-	local url="https://www.apkmirror.com/apk/google-inc/youtube/youtube-${1//./-}-release/"
-	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*APK</span>[^@]*@\([^#]*\).*;\1;p')"
-	log "\nYouTube version: $1"
-	log "downloaded from: [APKMirror - YouTube]($url)"
+dl_apk() {
+	local url=$1 regexp=$2 output=$3
+	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
+	echo "$url"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
-	req "$url" "$2"
-}
-
-dl_music() {
-	local arch="$3"
-	echo "Downloading YouTube Music (${arch})"
-	local url="https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-${1//./-}-release/"
-	if [ "$arch" = "$ARM64_V8A" ]; then
-		url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*arm64-v8a</div>[^@]*@\([^"]*\).*;\1;p')"
-	elif [ "$arch" = "$ARM_V7A" ]; then
-		url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*armeabi-v7a</div>[^@]*@\([^"]*\).*;\1;p')"
-	else
-		echo "Wrong arch: '$arch'"
-		return
-	fi
-	log "\nYouTube Music ($arch) version: $1"
-	log "downloaded from: [APKMirror - YouTube Music (${arch})]($url)"
-	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
-	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
-	req "$url" "$2"
-}
-
-dl_twitter() {
-	echo "Downloading Twitter"
-	local url="https://www.apkmirror.com/apk/twitter-inc/twitter/twitter-${1//./-}-release/"
-	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's/href="/@/g; s;.*APK</span>[^@]*@\([^#]*\).*;\1;p')"
-	log "\nTwitter version: $1"
-	log "downloaded from: [APKMirror - Twitter]($url)"
-	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
-	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
-	req "$url" "$2"
+	req "$url" "$output"
 }
 
 apk_last_ver() {
 	req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\)</span>.*;\1;p' | grep release | head -n 1 | xargs
 }
 
+get_patch_last_supported_ver() {
+	declare -r supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -s , | sed -rn "s/.*${1},versions,(([0-9.]*,*)*),Lk.*/\1/p")
+	echo "${supported_versions##*,}"
+}
+
+patch_apk() {
+	local stock_input=$1 patched_output=$2 patcher_args=$3
+	java -jar "$RV_CLI_JAR" -a "$stock_input" -c -o "$patched_output" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" --keystore=ks.keystore $patcher_args
+}
+
+zip_module() {
+	local patched_apk=$1 module_name=$2
+	mv -f "$patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
+	cd "$MODULE_TEMPLATE_DIR" || return
+	zip -r "../${BUILD_DIR}/${module_name}" .
+	cd ..
+}
+
 build_twitter() {
 	echo "Building Twitter"
-	local supported_versions last_ver
-	supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -n 8 -s , | sed -rn 's/.*twitter,versions,(([0-9.]*,*)*),Lk.*/\1/p')
-	if [ -z "$supported_versions" ]; then
-		last_ver=$(apk_last_ver "https://www.apkmirror.com/apk/twitter-inc/")
-		echo "Choosing latest version '${last_ver}'"
-	else
-		echo "Supported versions of the Twitter patch: $supported_versions"
-		last_ver=$(echo "$supported_versions" | awk -F, '{ print $NF }')
-		echo "Choosing '${last_ver}'"
-	fi
-	local twitter_base_apk="${TEMP_DIR}/twitter-stock-v${last_ver}.apk"
-	if [ ! -f "$twitter_base_apk" ]; then
-		dl_twitter "$last_ver" "$twitter_base_apk"
-	fi
+	local last_ver
+	last_ver=$(get_patch_last_supported_ver "twitter")
+	last_ver="${last_ver:-$(apk_last_ver "https://www.apkmirror.com/apk/twitter-inc/")}"
 
-	local twitter_patched_apk="twitter-revanced-v${last_ver}.apk"
-	java -jar "$RV_CLI_JAR" -a "$twitter_base_apk" -c -o "$twitter_patched_apk" -b "$RV_PATCHES_JAR" --keystore=ks.keystore
-
-	mv -f "$twitter_patched_apk" "$BUILD_DIR"
-	echo "Built Twitter: '${BUILD_DIR}/${twitter_patched_apk}'"
+	echo "Choosing version '${last_ver}'"
+	local stock_apk="${TEMP_DIR}/twitter-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/twitter-revanced-v${last_ver}.apk"
+	if [ ! -f "$stock_apk" ]; then
+		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/twitter-inc/twitter/twitter-${last_ver//./-}-release/" \
+			"APK</span>[^@]*@\([^#]*\)" \
+			"$stock_apk")
+		log "\nTwitter version: ${last_ver}"
+		log "downloaded from: [APKMirror - Twitter]($dl_url)"
+	fi
+	patch_apk "$stock_apk" "$patched_apk" ""
 }
 
 build_yt() {
 	echo "Building YouTube"
 	reset_template
-	local supported_versions last_ver
-	# This only finds the supported versions of some random patch wrt the first occurance of the string but that's fine
-	supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -n 8 -s , | sed -rn 's/.*youtube,versions,(([0-9.]*,*)*),Lk.*/\1/p')
-	echo "Supported versions of the YouTube patch: $supported_versions"
-	last_ver=$(echo "$supported_versions" | awk -F, '{ print $NF }')
-	echo "Choosing '${last_ver}'"
-	local yt_base_apk="${TEMP_DIR}/yt-stock-v${last_ver}.apk"
+	local last_ver
+	last_ver=$(get_patch_last_supported_ver "youtube")
+	echo "Choosing version '${last_ver}'"
 
-	if [ ! -f "$yt_base_apk" ]; then
-		dl_yt "$last_ver" "$yt_base_apk"
+	local stock_apk="${TEMP_DIR}/youtube-stock-v${last_ver}.apk" patched_apk="${TEMP_DIR}/youtube-revanced.apk"
+	if [ ! -f "$stock_apk" ]; then
+		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/google-inc/youtube/youtube-${last_ver//./-}-release/" \
+			"APK</span>[^@]*@\([^#]*\)" \
+			"$stock_apk")
+		log "\nYouTube version: ${last_ver}"
+		log "downloaded from: [APKMirror - YouTube]($dl_url)"
 	fi
-
-	local yt_patched_apk="${TEMP_DIR}/yt-revanced-base.apk"
-	java -jar "$RV_CLI_JAR" -a "$yt_base_apk" -c -o "$yt_patched_apk" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" --keystore=ks.keystore $1
-	mv -f "$yt_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
-
-	echo "Creating the magisk module for YouTube..."
-	local output="yt-revanced-magisk-v${last_ver}-all.zip"
-
+	patch_apk "$stock_apk" "$patched_apk" "$YT_PATCHER_ARGS"
 	service_sh "com.google.android.youtube"
-	yt_module_prop "$last_ver"
+	module_prop "ytrv-magisk" \
+		"YouTube ReVanced" \
+		"$last_ver" \
+		"mounts base.apk for YouTube ReVanced" \
+		"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json"
 
-	cd "$MODULE_TEMPLATE_DIR" || return
-	zip -r "../$output" .
-	cd ..
-
-	mv -f "$output" "$BUILD_DIR"
+	local output="youtube-revanced-magisk-v${last_ver}-all.zip"
+	zip_module $patched_apk "$output"
 	echo "Built YouTube: '${BUILD_DIR}/${output}'"
 }
 
 build_music() {
-	local arch="$2"
-	echo "Building YouTube Music ($arch)"
+	echo "Building YouTube Music"
 	reset_template
-	local supported_versions last_ver
-	# This only finds the supported versions of some random patch wrt the first occurance of the string but that's fine
-	supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -n 7 -s , | sed -rn 's/.*music,versions,(([0-9.]*,*)*),Lk.*/\1/p')
-	echo "Supported versions of the Music patch: $supported_versions"
-	last_ver=$(echo "$supported_versions" | awk -F, '{ print $NF }')
-	echo "Choosing '${last_ver}'"
-	local music_apk="${TEMP_DIR}/music-stock-v${last_ver}-${arch}.apk"
+	local arch=$1 last_ver
+	last_ver=$(get_patch_last_supported_ver "music")
+	echo "Choosing version '${last_ver}'"
 
-	if [ ! -f "$music_apk" ]; then
-		dl_music "$last_ver" "$music_apk" "$arch"
+	local stock_apk="${TEMP_DIR}/music-stock-v${last_ver}-${arch}.apk" patched_apk="${TEMP_DIR}/music-revanced-${arch}.apk"
+	if [ ! -f "$stock_apk" ]; then
+		if [ "$arch" = "$ARM64_V8A" ]; then
+			local regexp_arch='arm64-v8a</div>[^@]*@\([^"]*\)'
+		elif [ "$arch" = "$ARM_V7A" ]; then
+			local regexp_arch='armeabi-v7a</div>[^@]*@\([^"]*\)'
+		fi
+		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-${last_ver//./-}-release/" \
+			"$regexp_arch" \
+			"$stock_apk")
+		log "\nYouTube Music (${arch}) version: ${last_ver}"
+		log "downloaded from: [APKMirror - YouTube Music ${arch}]($dl_url)"
 	fi
-
-	local music_patched_apk="${TEMP_DIR}/music-revanced-base.apk"
-	java -jar "$RV_CLI_JAR" -a "$music_apk" -c -o "$music_patched_apk" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" --keystore=ks.keystore $1
-	mv -f "$music_patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
-
-	echo "Creating the magisk module for YouTube Music ($arch)"
-	local output="music-revanced-magisk-v${last_ver}-${arch}.zip"
-
+	patch_apk "$stock_apk" "$patched_apk" "$MUSIC_PATCHER_ARGS"
 	service_sh "com.google.android.apps.youtube.music"
-	music_module_prop "$last_ver" "$arch"
 
-	cd "$MODULE_TEMPLATE_DIR" || return
-	zip -r "../$output" .
-	cd ..
-
-	mv -f "$output" "$BUILD_DIR"
-	echo "Built Music '${BUILD_DIR}/${output}'"
-}
-
-service_sh() {
-	echo 'while [ "$(getprop sys.boot_completed)" != 1 ]; do
-	sleep 1
-done
-
-YTPATH=$(pm path PACKAGE | grep base | sed "s/package://g; s/\/base.apk//g")
-if [ -n "$YTPATH" ]; then
-	su -c mount $MODDIR/base.apk $YTPATH/base.apk
-fi' | sed "s/PACKAGE/$1/g" >"${MODULE_TEMPLATE_DIR}/service.sh"
-}
-
-yt_module_prop() {
-	echo "id=ytrv-magisk
-name=YouTube ReVanced
-version=v${1}
-versionCode=${NEXT_VER_CODE}
-author=j-hc
-description=mounts base.apk for YouTube ReVanced" >"${MODULE_TEMPLATE_DIR}/module.prop"
-
-	if [ "$ENABLE_MAGISK_UPDATE" = true ]; then
-		echo "updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json" >>"${MODULE_TEMPLATE_DIR}/module.prop"
-	fi
-}
-
-music_module_prop() {
-	local arch="$2"
 	local update_json="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update-${arch}.json"
 	if [ "$arch" = "$ARM64_V8A" ]; then
 		local id="ytmusicrv-magisk"
@@ -237,15 +174,38 @@ music_module_prop() {
 		echo "Wrong arch for prop: '$arch'"
 		return
 	fi
+	module_prop "$id" \
+		"YouTube Music ReVanced" \
+		"$last_ver" \
+		"mounts base.apk for YouTube Music ReVanced" \
+		"$update_json"
 
-	echo "id=${id}
-name=YouTube Music ReVanced
-version=v${1}
+	local output="music-revanced-magisk-v${last_ver}-${arch}.zip"
+	zip_module "$patched_apk" "$output"
+	echo "Built Music '${BUILD_DIR}/${output}'"
+}
+
+service_sh() {
+	local s='while [ "$(getprop sys.boot_completed)" != 1 ]; do
+	sleep 1
+done
+
+YTPATH=$(pm path PACKAGE | grep base | sed "s/package://g; s/\/base.apk//g")
+if [ "$YTPATH" ]; then
+	su -c mount $MODDIR/base.apk $YTPATH/base.apk
+fi'
+	echo "${s//PACKAGE/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
+}
+
+module_prop() {
+	echo "id=${1}
+name=${2}
+version=v${3}
 versionCode=${NEXT_VER_CODE}
 author=j-hc
-description=mounts base.apk for YouTube Music ReVanced" >"${MODULE_TEMPLATE_DIR}/module.prop"
+description=${4}" >"${MODULE_TEMPLATE_DIR}/module.prop"
 
 	if [ "$ENABLE_MAGISK_UPDATE" = true ]; then
-		echo "updateJson=${update_json}" >>"${MODULE_TEMPLATE_DIR}/module.prop"
+		echo "updateJson=${5}" >>"${MODULE_TEMPLATE_DIR}/module.prop"
 	fi
 }

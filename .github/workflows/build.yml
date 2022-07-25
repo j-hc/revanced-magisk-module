@@ -38,7 +38,7 @@ jobs:
           echo ::set-output name=BUILD_LOG::$BUILD_LOG
 
           cd build
-          yt_op=$(find . -maxdepth 1 -name "yt-revanced-magisk-*.zip" -printf '%P')
+          yt_op=$(find . -maxdepth 1 -name "youtube-revanced-magisk-*.zip" -printf '%P')
           echo ::set-output name=YT_OUTPUT::$yt_op
           if [ -z "$yt_op" ]; then
             echo ::set-output name=RELEASE_NAME::"revanced"

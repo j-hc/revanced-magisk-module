@@ -3,6 +3,6 @@
 *.zip
 /revanced-cache
 /temp
+/build
 build.log
-
-.v*
+test.sh

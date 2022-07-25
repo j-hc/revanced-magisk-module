@@ -13,7 +13,7 @@ if [ -z ${1+x} ]; then
 	print_usage
 	exit 0
 elif [ "$1" = "clean" ]; then
-	rm -rf ./temp ./revanced-cache ./*.jar ./*.apk ./*.zip build.log
+	rm -rf temp revanced-cache ./*.jar ./*.apk ./*.zip build.log build
 	reset_template
 	exit 0
 elif [ "$1" = "reset-template" ]; then
@@ -37,15 +37,15 @@ else
 fi
 
 if [ "$BUILD_YT" = true ]; then
-	build_yt "$YT_PATCHER_ARGS"
+	build_yt
 fi
 
 if [ "$BUILD_MUSIC_ARM64_V8A" = true ]; then
-	build_music "$MUSIC_PATCHER_ARGS" "$ARM64_V8A"
+	build_music "$ARM64_V8A"
 fi
 
 if [ "$BUILD_MUSIC_ARM_V7A" = true ]; then
-	build_music "$MUSIC_PATCHER_ARGS" "$ARM_V7A"
+	build_music "$ARM_V7A"
 fi
 
 if [ "$BUILD_TWITTER" = true ]; then
