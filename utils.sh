@@ -45,7 +45,6 @@ set_prebuilts() {
 }
 
 reset_template() {
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/service.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
 	rm -f "${MODULE_TEMPLATE_DIR}/base.apk"
@@ -220,8 +219,11 @@ name=YouTube ReVanced
 version=v${1}
 versionCode=${NEXT_VER_CODE}
 author=j-hc
-description=mounts base.apk for YouTube ReVanced
-updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json" >"${MODULE_TEMPLATE_DIR}/module.prop"
+description=mounts base.apk for YouTube ReVanced" >"${MODULE_TEMPLATE_DIR}/module.prop"
+
+	if [ "$ENABLE_MAGISK_UPDATE" = true ]; then
+		echo "updateJson=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json" >>"${MODULE_TEMPLATE_DIR}/module.prop"
+	fi
 }
 
 music_module_prop() {
@@ -241,6 +243,9 @@ name=YouTube Music ReVanced
 version=v${1}
 versionCode=${NEXT_VER_CODE}
 author=j-hc
-description=mounts base.apk for YouTube Music ReVanced
-updateJson=${update_json}" >"${MODULE_TEMPLATE_DIR}/module.prop"
+description=mounts base.apk for YouTube Music ReVanced" >"${MODULE_TEMPLATE_DIR}/module.prop"
+
+	if [ "$ENABLE_MAGISK_UPDATE" = true ]; then
+		echo "updateJson=${update_json}" >>"${MODULE_TEMPLATE_DIR}/module.prop"
+	fi
 }
