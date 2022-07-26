@@ -85,6 +85,7 @@ get_patch_last_supported_ver() {
 
 patch_apk() {
 	local stock_input=$1 patched_output=$2 patcher_args=$3
+	#shellcheck disable=SC2086
 	java -jar "$RV_CLI_JAR" -a "$stock_input" -c -o "$patched_output" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" --keystore=ks.keystore $patcher_args
 }
 
@@ -95,7 +96,6 @@ zip_module() {
 	zip -r "../${BUILD_DIR}/${module_name}" .
 	cd ..
 }
-
 
 build_twitter() {
 	echo "Building Twitter"
@@ -187,6 +187,7 @@ build_music() {
 }
 
 service_sh() {
+	#shellcheck disable=SC2016
 	local s='while [ "$(getprop sys.boot_completed)" != 1 ]; do
 	sleep 1
 done
