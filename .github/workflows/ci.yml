@@ -1,0 +1,42 @@
+name: CI
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 16 * * *"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Should build?
+        id: should_build
+        run: |
+          git checkout update || {
+            echo ::set-output name=SHOULD_BUILD::true
+            exit 0
+          }
+          git checkout update || exit 0
+          RV_PATCHES_URL=$(wget -nv -O- --header="$WGET_HEADER" https://api.github.com/repos/revanced/revanced-patches/releases/latest | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+          RV_PATCHES="$(echo "$RV_PATCHES_URL" | awk -F/ '{ print $NF }')"
+          CUR_PATCHES=$(sed -n 's/.*Patches: \(.*\)/\1/p' latest_build.md | xargs)
+          echo "current patches version: $CUR_PATCHES"
+          echo "latest patches version: $RV_PATCHES"
+          if [ "$CUR_PATCHES" = "$RV_PATCHES" ]; then
+            echo "dont build!"
+            echo ::set-output name=SHOULD_BUILD::false
+          else
+            echo ::set-output name=SHOULD_BUILD::true
+          fi
+
+    outputs:
+      SHOULD_BUILD: ${{ steps.should_build.outputs.SHOULD_BUILD }}
+
+  build:
+    needs: check
+    uses: ./.github/workflows/build.yml
+    if: ${{ needs.check.outputs.SHOULD_BUILD == true }}
