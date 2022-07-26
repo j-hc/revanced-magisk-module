@@ -74,8 +74,8 @@ dl_apk() {
 	req "$url" "$output"
 }
 
-apk_last_ver() {
-	req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\)</span>.*;\1;p' | grep release | head -n 1 | xargs
+get_apk_vers() {
+	req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'
 }
 
 get_patch_last_supported_ver() {
@@ -96,11 +96,12 @@ zip_module() {
 	cd ..
 }
 
+
 build_twitter() {
 	echo "Building Twitter"
 	local last_ver
 	last_ver=$(get_patch_last_supported_ver "twitter")
-	last_ver="${last_ver:-$(apk_last_ver "https://www.apkmirror.com/apk/twitter-inc/")}"
+	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/apk/twitter-inc/" | grep release | head -n 1)}"
 
 	echo "Choosing version '${last_ver}'"
 	local stock_apk="${TEMP_DIR}/twitter-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/twitter-revanced-v${last_ver}.apk"
