@@ -19,7 +19,7 @@ jobs:
           if ! git checkout update; then
             echo ::set-output name=SHOULD_BUILD::1
           else
-            RV_PATCHES_URL=$(wget -nv -O- --header="$WGET_HEADER" https://api.github.com/repos/revanced/revanced-patches/releases/latest | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+            RV_PATCHES_URL=$(wget -nv -O- https://api.github.com/repos/revanced/revanced-patches/releases/latest | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
             RV_PATCHES="$(echo "$RV_PATCHES_URL" | awk -F/ '{ print $NF }')"
             CUR_PATCHES=$(sed -n 's/.*Patches: \(.*\)/\1/p' latest_build.md | xargs)
             echo "current patches version: $CUR_PATCHES"
