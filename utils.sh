@@ -84,17 +84,38 @@ get_patch_last_supported_ver() {
 }
 
 patch_apk() {
-	local stock_input=$1 patched_output=$2 patcher_args=$3
-	#shellcheck disable=SC2086
-	java -jar "$RV_CLI_JAR" -a "$stock_input" -c -o "$patched_output" -b "$RV_PATCHES_JAR" -m "$RV_INTEGRATIONS_APK" --keystore=ks.keystore $patcher_args
+	local stock_input=$1 patched_output=$2 patcher_args=$3 include_integrations=$4 decode_resources=$5
+	pa=""
+	if [ "$include_integrations" = true ]; then pa="-m ${RV_INTEGRATIONS_APK}"; fi
+	if [ "$decode_resources" = false ]; then pa="${pa} -r"; fi
+	# shellcheck disable=SC2086
+	java -jar "$RV_CLI_JAR" -a "$stock_input" -c -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args $pa
 }
 
 zip_module() {
 	local patched_apk=$1 module_name=$2
-	mv -f "$patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
+	cp -f "$patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 	cd "$MODULE_TEMPLATE_DIR" || return
 	zip -r "../${BUILD_DIR}/${module_name}" .
 	cd ..
+}
+
+build_reddit() {
+	echo "Building Reddit"
+	local last_ver
+	last_ver=$(get_patch_last_supported_ver "frontpage")
+	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/apk/redditinc/reddit/" | head -n 1)}"
+
+	echo "Choosing version '${last_ver}'"
+	local stock_apk="${TEMP_DIR}/reddit-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/reddit-revanced-v${last_ver}.apk"
+	if [ ! -f "$stock_apk" ]; then
+		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/redditinc/reddit/reddit-${last_ver//./-}-release/" \
+			"APK</span>[^@]*@\([^#]*\)" \
+			"$stock_apk")
+		log "\nReddit version: ${last_ver}"
+		log "downloaded from: [APKMirror - Reddit]($dl_url)"
+	fi
+	patch_apk "$stock_apk" "$patched_apk" "" false false
 }
 
 build_twitter() {
@@ -112,7 +133,7 @@ build_twitter() {
 		log "\nTwitter version: ${last_ver}"
 		log "downloaded from: [APKMirror - Twitter]($dl_url)"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" ""
+	patch_apk "$stock_apk" "$patched_apk" "" false false
 }
 
 build_yt() {
@@ -122,7 +143,7 @@ build_yt() {
 	last_ver=$(get_patch_last_supported_ver "youtube")
 	echo "Choosing version '${last_ver}'"
 
-	local stock_apk="${TEMP_DIR}/youtube-stock-v${last_ver}.apk" patched_apk="${TEMP_DIR}/youtube-revanced.apk"
+	local stock_apk="${TEMP_DIR}/youtube-stock-v${last_ver}.apk" patched_apk="${TEMP_DIR}/youtube-revanced-v${last_ver}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/google-inc/youtube/youtube-${last_ver//./-}-release/" \
 			"APK</span>[^@]*@\([^#]*\)" \
@@ -130,7 +151,7 @@ build_yt() {
 		log "\nYouTube version: ${last_ver}"
 		log "downloaded from: [APKMirror - YouTube]($dl_url)"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "$YT_PATCHER_ARGS"
+	patch_apk "$stock_apk" "$patched_apk" "$YT_PATCHER_ARGS" true true
 	service_sh "com.google.android.youtube"
 	module_prop "ytrv-magisk" \
 		"YouTube ReVanced" \
@@ -150,7 +171,7 @@ build_music() {
 	last_ver=$(get_patch_last_supported_ver "music")
 	echo "Choosing version '${last_ver}'"
 
-	local stock_apk="${TEMP_DIR}/music-stock-v${last_ver}-${arch}.apk" patched_apk="${TEMP_DIR}/music-revanced-${arch}.apk"
+	local stock_apk="${TEMP_DIR}/music-stock-v${last_ver}-${arch}.apk" patched_apk="${TEMP_DIR}/music-revanced-v${last_ver}-${arch}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		if [ "$arch" = "$ARM64_V8A" ]; then
 			local regexp_arch='arm64-v8a</div>[^@]*@\([^"]*\)'
@@ -163,7 +184,7 @@ build_music() {
 		log "\nYouTube Music (${arch}) version: ${last_ver}"
 		log "downloaded from: [APKMirror - YouTube Music ${arch}]($dl_url)"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "$MUSIC_PATCHER_ARGS"
+	patch_apk "$stock_apk" "$patched_apk" "$MUSIC_PATCHER_ARGS" true true
 	service_sh "com.google.android.apps.youtube.music"
 
 	local update_json="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update-${arch}.json"

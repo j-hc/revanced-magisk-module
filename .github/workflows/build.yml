@@ -66,7 +66,7 @@ jobs:
       - name: Update changelog and Magisk update jsons
         id: update_config
         run: |
-          cp build.log latest_build.md
+          cp -f build.log latest_build.md
           CHANGELOG_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/latest_build.md"
           get_update_json() {
             echo "{
