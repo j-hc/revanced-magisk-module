@@ -212,10 +212,9 @@ service_sh() {
 	local s='while [ "$(getprop sys.boot_completed)" != 1 ]; do
 	sleep 1
 done
-
-YTPATH=$(pm path PACKAGE | grep base | sed "s/package://g; s/\/base.apk//g")
-if [ "$YTPATH" ]; then
-	su -c mount $MODDIR/base.apk $YTPATH/base.apk
+BASEPATH=$(pm path PACKAGE | grep base | sed "s/package://g")
+if [ "$BASEPATH" ]; then
+	su -c mount $MODDIR/base.apk $BASEPATH
 fi'
 	echo "${s//PACKAGE/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
 }
