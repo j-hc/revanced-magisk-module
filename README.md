@@ -19,6 +19,8 @@ There is also an extra module in releases that detaches YouTube and YouTube Musi
  * Run the [workflow](../../actions/workflows/build.yml)
  * Grab your modules from [releases](../../releases)
 
+**If you include microg patches in [build.conf](./build.conf), you get noroot APKs instead of Magisk modules. Twitter and Reddit will always be built as APKs regardless.**
+
 ## Updating
 The modules support Magisk update which means you will receive updates from your Magisk app, downloading from github releases and reflashing is not necessary.  
 To be able to update YouTube version, you will need to:
