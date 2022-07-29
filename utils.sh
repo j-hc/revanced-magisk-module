@@ -84,12 +84,9 @@ get_patch_last_supported_ver() {
 }
 
 patch_apk() {
-	local stock_input=$1 patched_output=$2 patcher_args=$3 include_integrations=$4 decode_resources=$5
-	pa=""
-	if [ "$include_integrations" = true ]; then pa="-m ${RV_INTEGRATIONS_APK}"; fi
-	if [ "$decode_resources" = false ]; then pa="${pa} -r"; fi
+	local stock_input=$1 patched_output=$2 patcher_args=$3
 	# shellcheck disable=SC2086
-	java -jar "$RV_CLI_JAR" -a "$stock_input" -c -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args $pa
+	java -jar "$RV_CLI_JAR" -a "$stock_input" -c -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
 }
 
 zip_module() {
@@ -115,7 +112,7 @@ build_reddit() {
 		log "\nReddit version: ${last_ver}"
 		log "downloaded from: [APKMirror - Reddit]($dl_url)"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "" false false
+	patch_apk "$stock_apk" "$patched_apk" "-r"
 }
 
 build_twitter() {
@@ -133,7 +130,7 @@ build_twitter() {
 		log "\nTwitter version: ${last_ver}"
 		log "downloaded from: [APKMirror - Twitter]($dl_url)"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "" false false
+	patch_apk "$stock_apk" "$patched_apk" "-r"
 }
 
 build_yt() {
@@ -151,7 +148,7 @@ build_yt() {
 		log "\nYouTube version: ${last_ver}"
 		log "downloaded from: [APKMirror - YouTube]($dl_url)"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "$YT_PATCHER_ARGS" true true
+	patch_apk "$stock_apk" "$patched_apk" "${YT_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 	service_sh "com.google.android.youtube"
 	module_prop "ytrv-magisk" \
 		"YouTube ReVanced" \
@@ -160,7 +157,7 @@ build_yt() {
 		"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json"
 
 	local output="youtube-revanced-magisk-v${last_ver}-all.zip"
-	zip_module $patched_apk "$output"
+	zip_module "$patched_apk" "$output"
 	echo "Built YouTube: '${BUILD_DIR}/${output}'"
 }
 
@@ -184,7 +181,7 @@ build_music() {
 		log "\nYouTube Music (${arch}) version: ${last_ver}"
 		log "downloaded from: [APKMirror - YouTube Music ${arch}]($dl_url)"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "$MUSIC_PATCHER_ARGS" true true
+	patch_apk "$stock_apk" "$patched_apk" "${MUSIC_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 	service_sh "com.google.android.apps.youtube.music"
 
 	local update_json="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update-${arch}.json"

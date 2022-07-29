@@ -1,3 +1,4 @@
 [submodule "mindetach-magisk"]
-	path = mindetach-magisk
-	url = https://github.com/j-hc/mindetach-magisk
+path = mindetach-magisk
+url = https://github.com/j-hc/mindetach-magisk
+ignore = dirty
