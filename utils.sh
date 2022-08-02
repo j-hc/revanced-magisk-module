@@ -150,7 +150,7 @@ build_yt() {
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "${YT_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 
-	if [[ "$YT_PATCHER_ARGS" != *"-e microg-support"* ]]; then
+	if [[ "$YT_PATCHER_ARGS" != *"-e microg-support"* ]] && [[ "$YT_PATCHER_ARGS" != *"--exclusive"* ]] || [[ "$YT_PATCHER_ARGS" == *"-i microg-support"* ]]; then
 		mv -f "$patched_apk" build
 		echo "Built YouTube (no root) '${BUILD_DIR}/${patched_apk}'"
 		return
@@ -190,7 +190,7 @@ build_music() {
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "${MUSIC_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 
-	if [[ "$MUSIC_PATCHER_ARGS" != *"-e music-microg-support"* ]]; then
+	if [[ "$MUSIC_PATCHER_ARGS" != *"-e music-microg-support"* ]] && [[ "$MUSIC_PATCHER_ARGS" != *"--exclusive"* ]] || [[ "$MUSIC_PATCHER_ARGS" == *"-i music-microg-support"* ]]; then
 		mv -f "$patched_apk" build
 		echo "Built Music (no root) '${BUILD_DIR}/${patched_apk}'"
 		return
