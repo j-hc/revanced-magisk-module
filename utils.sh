@@ -46,6 +46,7 @@ set_prebuilts() {
 
 reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/service.sh"
+	echo "# utils" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
 	rm -f "${MODULE_TEMPLATE_DIR}/base.apk"
 }
@@ -157,6 +158,7 @@ build_yt() {
 	fi
 
 	service_sh "com.google.android.youtube"
+	postfsdata_sh "com.google.android.youtube"
 	module_prop "ytrv-magisk" \
 		"YouTube ReVanced" \
 		"$last_ver" \
@@ -197,6 +199,7 @@ build_music() {
 	fi
 
 	service_sh "com.google.android.apps.youtube.music"
+	postfsdata_sh "com.google.android.apps.youtube.music"
 
 	local update_json="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update-${arch}.json"
 	if [ "$arch" = "$ARM64_V8A" ]; then
@@ -229,6 +232,11 @@ if [ "$BASEPATH" ]; then
 	mount -o bind $MODDIR/base.apk $BASEPATH
 fi'
 	echo "${s//PACKAGE/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
+}
+
+postfsdata_sh() {
+	local s="cat /proc/mounts | PACKAGE | cut -d' ' -f2 | xargs -r umount -l"
+	echo "${s//PACKAGE/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
 }
 
 module_prop() {
