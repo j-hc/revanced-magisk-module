@@ -220,12 +220,13 @@ build_music() {
 
 service_sh() {
 	#shellcheck disable=SC2016
-	local s='while [ "$(getprop sys.boot_completed)" != 1 ]; do
+	local s='until [ "$(getprop sys.boot_completed)" = 1 ]; do
 	sleep 1
 done
 BASEPATH=$(pm path PACKAGE | grep base | sed "s/package://g")
 if [ "$BASEPATH" ]; then
-	su -c mount $MODDIR/base.apk $BASEPATH
+	chcon u:object_r:apk_data_file:s0 $MODDIR/base.apk
+	mount -o bind $MODDIR/base.apk $BASEPATH
 fi'
 	echo "${s//PACKAGE/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
 }
