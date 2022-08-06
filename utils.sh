@@ -293,7 +293,7 @@ else
 		else
 			abort "ERROR: unsupported arch: ${ARCH}"
 		fi
-		chmod +x $xdelta
+		chmod +x $MODPATH/xdelta
 
 		am force-stop __PKGNAME
 		cat /proc/mounts | grep __PKGNAME | cut -d" " -f2 | xargs -r umount -l
