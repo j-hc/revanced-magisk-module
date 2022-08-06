@@ -1,4 +1,4 @@
-2022-08-05
+2022-08-06
   
 CLI: revanced-cli-2.9.1-all.jar  
 Integrations: app-release-unsigned-v0.31.1.apk  
