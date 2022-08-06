@@ -36,17 +36,18 @@ set_prebuilts() {
 		echo "${TEMP_DIR} directory could not be found"
 		exit 1
 	}
-	RV_CLI_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-cli-*")
+	RV_CLI_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-cli-*" | tail -n1)
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
-	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "app-release-unsigned-*")
+	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "app-release-unsigned-*" | tail -n1)
 	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
-	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*")
+	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*" | tail -n1)
 	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
 }
 
 reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/service.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
+	echo "# utils" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
 	rm -f "${MODULE_TEMPLATE_DIR}/base.apk"
 }
@@ -87,14 +88,14 @@ get_patch_last_supported_ver() {
 patch_apk() {
 	local stock_input=$1 patched_output=$2 patcher_args=$3
 	# shellcheck disable=SC2086
-	java -jar "$RV_CLI_JAR" -a "$stock_input" -c -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
+	java -jar "$RV_CLI_JAR" -c -a "$stock_input" -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
 }
 
 zip_module() {
 	local patched_apk=$1 module_name=$2
 	cp -f "$patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
-	cd "$MODULE_TEMPLATE_DIR" || return
-	zip -r "../${BUILD_DIR}/${module_name}" .
+	cd "$MODULE_TEMPLATE_DIR" || exit 1
+	zip -FSr "../${BUILD_DIR}/${module_name}" .
 	cd ..
 }
 
@@ -159,6 +160,7 @@ build_yt() {
 
 	service_sh "com.google.android.youtube"
 	postfsdata_sh "com.google.android.youtube"
+	install_sh "com.google.android.youtube"
 	module_prop "ytrv-magisk" \
 		"YouTube ReVanced" \
 		"$last_ver" \
@@ -200,6 +202,7 @@ build_music() {
 
 	service_sh "com.google.android.apps.youtube.music"
 	postfsdata_sh "com.google.android.apps.youtube.music"
+	install_sh "com.google.android.apps.youtube.music"
 
 	local update_json="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update-${arch}.json"
 	if [ "$arch" = "$ARM64_V8A" ]; then
@@ -226,7 +229,7 @@ service_sh() {
 	local s='until [ "$(getprop sys.boot_completed)" = 1 ]; do
 	sleep 1
 done
-BASEPATH=$(pm path PACKAGE | grep base | sed "s/package://g")
+BASEPATH=$(pm path PACKAGE | grep base | cut -d: -f2)
 if [ "$BASEPATH" ]; then
 	chcon u:object_r:apk_data_file:s0 $MODDIR/base.apk
 	mount -o bind $MODDIR/base.apk $BASEPATH
@@ -235,8 +238,32 @@ fi'
 }
 
 postfsdata_sh() {
-	local s="cat /proc/mounts | PACKAGE | cut -d' ' -f2 | xargs -r umount -l"
+	local s="cat /proc/mounts | grep PACKAGE | cut -d' ' -f2 | xargs -r umount -l"
 	echo "${s//PACKAGE/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
+}
+
+install_sh() {
+	#shellcheck disable=SC2016
+	local s='DUMP=$(dumpsys package PKGNAME)
+MODULE_VER=$(sed -n "s/.*version=v\(.*\)/\1/p" <"$MODPATH/module.prop")
+CUR_VER=$(echo "$DUMP" | grep versionName | head -n1 | cut -d= -f2)
+if [ -z "$CUR_VER" ]; then
+	ui_print "WARNING: PKGNAME is not installed"
+else
+	if [ "$MODULE_VER" != "$CUR_VER" ]; then
+		ui_print ""
+		ui_print "WARNING: PKGNAME version mismatch!"
+		ui_print "  installed: ${CUR_VER}"
+		ui_print "  module:    ${MODULE_VER}"
+		ui_print ""
+	else
+		cat /proc/mounts | grep PKGNAME | cut -d" " -f2 | xargs -r umount -l
+		BASEPATH=$(echo "$DUMP" | grep path | cut -d: -f2 | xargs)
+		chcon u:object_r:apk_data_file:s0 $MODPATH/base.apk
+		mount -o bind $MODPATH/base.apk $BASEPATH
+	fi
+fi'
+	echo "${s//PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
 }
 
 module_prop() {
