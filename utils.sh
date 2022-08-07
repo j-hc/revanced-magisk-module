@@ -31,21 +31,26 @@ get_prebuilts() {
 	dl_if_dne "$RV_PATCHES_JAR" "$RV_PATCHES_URL"
 }
 
-dl_xdelta() {
-	XDELTA_aarch64="${TEMP_DIR}/xdelta_aarch64"
-	XDELTA_arm="${TEMP_DIR}/xdelta_arm"
+extract_deb() {
+	local output=$1 url=$2 path=$3
+	local deb_path="${TEMP_DIR}/${url##*/}"
+	dl_if_dne "$deb_path" "$url"
+	ar x "$deb_path" data.tar.xz
+	if [ "${output: -1}" = "/" ]; then
+		tar -C "$output" -vxf data.tar.xz --wildcards "$path" --strip-components 7
+	else
+		tar -C "$TEMP_DIR" -vxf data.tar.xz "$path" --strip-components 7
+		mv -f "${TEMP_DIR}/${path##*/}" "$output"
+	fi
+	rm -rf data.tar.xz
+}
 
-	dl_if_dne "${XDELTA_aarch64}.deb" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_aarch64.deb"
-	ar x "${XDELTA_aarch64}.deb" data.tar.xz
-	tar -vxf data.tar.xz ./data/data/com.termux/files/usr/bin/xdelta3 --strip-components 7
-	mv -f xdelta3 $XDELTA_aarch64
-	rm data.tar.xz
+get_xdelta() {
+	extract_deb "${MODULE_TEMPLATE_DIR}/xdelta_aarch64" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_aarch64.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
+	extract_deb "${MODULE_TEMPLATE_DIR}/xdelta_arm" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_arm.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
 
-	dl_if_dne "${XDELTA_arm}.deb" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_arm.deb"
-	ar x "${XDELTA_arm}.deb" data.tar.xz
-	tar -vxf data.tar.xz ./data/data/com.termux/files/usr/bin/xdelta3 --strip-components 7
-	mv -f xdelta3 $XDELTA_arm
-	rm data.tar.xz
+	extract_deb "${MODULE_TEMPLATE_DIR}/lib/arm/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_arm.deb" "./data/data/com.termux/files/usr/lib/*so*"
+	extract_deb "${MODULE_TEMPLATE_DIR}/lib/aarch64/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_aarch64.deb" "./data/data/com.termux/files/usr/lib/*so*"
 }
 
 set_prebuilts() {
@@ -66,12 +71,11 @@ reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
-	rm -rf ${MODULE_TEMPLATE_DIR}/*xdelta*
+	rm -rf "${MODULE_TEMPLATE_DIR}/rv.xdelta"
+	mkdir -p "${MODULE_TEMPLATE_DIR}/lib/arm" "${MODULE_TEMPLATE_DIR}/lib/aarch64"
 }
 
-req() {
-	wget -nv -O "$2" --header="$WGET_HEADER" "$1"
-}
+req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
 
 dl_if_dne() {
 	if [ ! -f "$1" ]; then
@@ -80,9 +84,7 @@ dl_if_dne() {
 	fi
 }
 
-log() {
-	echo -e "$1  " >>build.log
-}
+log() { echo -e "$1  " >>build.log; }
 
 dl_apk() {
 	local url=$1 regexp=$2 output=$3
@@ -93,18 +95,16 @@ dl_apk() {
 	req "$url" "$output"
 }
 
-get_apk_vers() {
-	req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'
-}
+get_apk_vers() { req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'; }
 
 get_patch_last_supported_ver() {
 	declare -r supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -s , | sed -rn "s/.*${1},versions,(([0-9.]*,*)*),Lk.*/\1/p")
 	echo "${supported_versions##*,}"
 }
 
-get_xdelta() {
+xdelta_patch() {
 	echo "Binary diffing ${2} against ${1}"
-	xdelta3 -fs "$1" "$2" "$3"
+	xdelta3 -f -e -s "$1" "$2" "$3"
 }
 
 patch_apk() {
@@ -116,9 +116,6 @@ patch_apk() {
 zip_module() {
 	local xdelta_patch=$1 module_name=$2
 	cp -f "$xdelta_patch" "${MODULE_TEMPLATE_DIR}/rv.xdelta"
-	cp -f "$XDELTA_aarch64" "${MODULE_TEMPLATE_DIR}"
-	cp -f "$XDELTA_arm" "${MODULE_TEMPLATE_DIR}"
-
 	cd "$MODULE_TEMPLATE_DIR" || exit 1
 	zip -FSr "../${BUILD_DIR}/${module_name}" .
 	cd ..
@@ -194,7 +191,7 @@ build_yt() {
 
 	local output="youtube-revanced-magisk-v${last_ver}-all.zip"
 	local xdelta="${TEMP_DIR}/youtube-revanced-v${last_ver}.xdelta"
-	get_xdelta "$stock_apk" "$patched_apk" "$xdelta"
+	xdelta_patch "$stock_apk" "$patched_apk" "$xdelta"
 	zip_module "$xdelta" "$output"
 	echo "Built YouTube: '${BUILD_DIR}/${output}'"
 }
@@ -248,7 +245,7 @@ build_music() {
 
 	local output="music-revanced-magisk-v${last_ver}-${arch}.zip"
 	local xdelta="${TEMP_DIR}/music-revanced-v${last_ver}.xdelta"
-	get_xdelta "$stock_apk" "$patched_apk" "$xdelta"
+	xdelta_patch "$stock_apk" "$patched_apk" "$xdelta"
 	zip_module "$xdelta" "$output"
 	echo "Built Music '${BUILD_DIR}/${output}'"
 }
@@ -258,17 +255,20 @@ service_sh() {
 	local s='until [ "$(getprop sys.boot_completed)" = 1 ]; do
 	sleep 1
 done
-BASEPATH=$(pm path PACKAGE | grep base | cut -d: -f2)
+BASEPATH=$(pm path __PKGNAME | grep base | cut -d: -f2)
 if [ "$BASEPATH" ]; then
 	chcon u:object_r:apk_data_file:s0 $MODDIR/base.apk
 	mount -o bind $MODDIR/base.apk $BASEPATH
 fi'
-	echo "${s//PACKAGE/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
+	echo "${s//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
 }
 
 postfsdata_sh() {
-	local s="cat /proc/mounts | grep PACKAGE | cut -d' ' -f2 | xargs -r umount -l"
-	echo "${s//PACKAGE/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
+	#shellcheck disable=SC2016
+	local s='while read -r line; do
+	echo "$line" | cut -d" " -f2 | xargs -r umount -l
+done < <(cat /proc/mounts | grep __PKGNAME)'
+	echo "${s//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
 }
 
 install_sh() {
@@ -277,38 +277,50 @@ install_sh() {
 DUMP=$(dumpsys package __PKGNAME)
 MODULE_VER=__MDVRSN
 CUR_VER=$(echo "$DUMP" | grep versionName | head -n1 | cut -d= -f2)
-if [ -z "$CUR_VER" ]; then
-	abort "ERROR: __PKGNAME is not installed!"
-else	
-	if [ "$MODULE_VER" != "$CUR_VER" ]; then
-		ui_print "ERROR: __PKGNAME version mismatch!"
-		ui_print "  installed: ${CUR_VER}"
-		ui_print "  module:    ${MODULE_VER}"
-		abort
-	else
-		if [ "$ARCH" = "arm" ]; then
-			ln -s $MODPATH/xdelta_arm $MODPATH/xdelta
-		elif [ "$ARCH" = "arm64" ]; then
-			ln -s $MODPATH/xdelta_aarch64 $MODPATH/xdelta
-		else
-			abort "ERROR: unsupported arch: ${ARCH}"
-		fi
-		chmod +x $MODPATH/xdelta
 
-		am force-stop __PKGNAME
-		cat /proc/mounts | grep __PKGNAME | cut -d" " -f2 | xargs -r umount -l
+if [ -z "$CUR_VER" ]; then abort "ERROR: __PKGNAME is not installed!"; fi
+if [ "$MODULE_VER" != "$CUR_VER" ]; then
+	ui_print "ERROR: __PKGNAME version mismatch!"
+	ui_print "  installed : ${CUR_VER}"
+	ui_print "  module    : ${MODULE_VER}"
+	abort ""
+fi
 
-		ui_print "* Patching __PKGNAME"
-		BASEPATH=$(echo "$DUMP" | grep path | cut -d: -f2 | xargs)
-		$MODPATH/xdelta -d -s $BASEPATH $MODPATH/rv.xdelta $MODPATH/base.apk || abort "Patching failed"
-		ui_print "* Patching done"
-		rm $MODPATH/*xdelta*
+if [ "$ARCH" = "arm" ]; then
+	export LD_LIBRARY_PATH=$MODPATH/lib/arm
+	ln -s $MODPATH/xdelta_arm $MODPATH/xdelta
+elif [ "$ARCH" = "arm64" ]; then
+	export LD_LIBRARY_PATH=$MODPATH/lib/aarch64
+	ln -s $MODPATH/xdelta_aarch64 $MODPATH/xdelta
+else
+	abort "ERROR: unsupported arch: ${ARCH}"
+fi
+chmod +x $MODPATH/xdelta
 
-		chcon u:object_r:apk_data_file:s0 $MODPATH/base.apk
-		mount -o bind $MODPATH/base.apk $BASEPATH || abort "Mounting failed"
-		ui_print "* Mounted __PKGNAME"
-	fi
-fi'
+am force-stop __PKGNAME
+while read -r line; do
+	ui_print "* Un-mounting"
+	echo "$line" | cut -d" " -f2 | xargs -r umount -l
+done < <(cat /proc/mounts | grep __PKGNAME)
+
+ui_print "* Patching __PKGNAME"
+BASEPATH=$(echo "$DUMP" | grep path | cut -d: -f2 | xargs)
+[ -z "$BASEPATH" ] && abort "ERROR: Base path not found"
+if ! op=$($MODPATH/xdelta -d -f -s $BASEPATH $MODPATH/rv.xdelta $MODPATH/base.apk 2>&1); then
+	ui_print "ERROR: Patching failed!"
+	ui_print "Make sure you installed __PKGNAME from the link given in releases section."
+	abort "$op"
+fi
+ui_print "* Patching done"
+rm -r $MODPATH/lib $MODPATH/*xdelta*
+
+chcon u:object_r:apk_data_file:s0 $MODPATH/base.apk
+if ! op=$(mount -o bind $MODPATH/base.apk $BASEPATH 2>&1); then 
+	ui_print "ERROR: Mount failed!"
+	abort "$op"
+fi
+ui_print "* Mounted __PKGNAME"'
+
 	s="${s//__PKGNAME/$1}"
 	echo "${s//__MDVRSN/$2}" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
 }

@@ -13,7 +13,7 @@ if [ -z ${1+x} ]; then
 	print_usage
 	exit 0
 elif [ "$1" = "clean" ]; then
-	rm -r revanced-cache ./*.jar ./*.apk ./*.zip build.log build || true
+	rm -rf revanced-cache build.log build
 	reset_template
 	exit 0
 elif [ "$1" = "reset-template" ]; then
@@ -31,7 +31,8 @@ log "$(date +'%Y-%m-%d')\n"
 mkdir -p "$BUILD_DIR"
 
 if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
-dl_xdelta
+reset_template
+get_xdelta
 
 if [ "$BUILD_YT" = true ]; then build_yt; fi
 if [ "$BUILD_MUSIC_ARM64_V8A" = true ]; then build_music "$ARM64_V8A"; fi
