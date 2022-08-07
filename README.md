@@ -4,11 +4,11 @@
 
 This repo includes a simple script that downloads all the latest version of necessary prebuilt revanced tools and build patched apps according to your config file (so do not create issues related to revanced in this repo).
 
-You will need to **install the stock YouTube (or YT Music) app matching with the module's version on your phone**. The link is provided in release notes.
+You will need to **install the stock YouTube (or YT Music) app matching with the module's version on your phone** from the link is provided in releases section. Patching **may fail** if you install from some different source.
 
 You can get the [latest CI release from here](https://github.com/j-hc/revanced-magisk-module/releases).
 
-The [mindetach module](https://github.com/j-hc/mindetach-magisk) in the releases detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
+The [mindetach module](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
 
 ## To include/exclude patches or build non-root variant
  * Star the repo :eyes:
@@ -21,15 +21,6 @@ The [mindetach module](https://github.com/j-hc/mindetach-magisk) in the releases
 
 ## Updating
 The modules support Magisk update which means you will receive updates from your Magisk app, downloading from github releases and reflashing is not necessary.  
-<details> 
-<summary>Additional steps to update YouTube if you have it installed as a system app</summary>
-<ul> 
-	<li>Disable the module</li>
-	<li>Reboot</li>
-	<li>Install the APK of the new YouTube</li>
-	<li>Update the module and reboot again</li>
-</ul>
-</details>
   
 ### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday if there is a change. You may want to disable it.**
 

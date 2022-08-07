@@ -103,12 +103,14 @@ get_patch_last_supported_ver() {
 }
 
 xdelta_patch() {
+	if [ -f "$3" ]; then return; fi
 	echo "Binary diffing ${2} against ${1}"
 	xdelta3 -f -e -s "$1" "$2" "$3"
 }
 
 patch_apk() {
 	local stock_input=$1 patched_output=$2 patcher_args=$3
+	if [ -f "$patched_output" ]; then return; fi
 	# shellcheck disable=SC2086
 	java -jar "$RV_CLI_JAR" -c -a "$stock_input" -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
 }
@@ -265,9 +267,9 @@ fi'
 
 postfsdata_sh() {
 	#shellcheck disable=SC2016
-	local s='while read -r line; do
+	local s='grep __PKGNAME /proc/mounts | while read -r line; do
 	echo "$line" | cut -d" " -f2 | xargs -r umount -l
-done < <(cat /proc/mounts | grep __PKGNAME)'
+done'
 	echo "${s//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
 }
 
@@ -279,6 +281,12 @@ MODULE_VER=__MDVRSN
 CUR_VER=$(echo "$DUMP" | grep versionName | head -n1 | cut -d= -f2)
 
 if [ -z "$CUR_VER" ]; then abort "ERROR: __PKGNAME is not installed!"; fi
+
+am force-stop __PKGNAME
+grep __PKGNAME /proc/mounts | while read -r line; do
+	ui_print "* Un-mount"
+	echo "$line" | cut -d" " -f2 | xargs -r umount -l
+done
 if [ "$MODULE_VER" != "$CUR_VER" ]; then
 	ui_print "ERROR: __PKGNAME version mismatch!"
 	ui_print "  installed : ${CUR_VER}"
@@ -296,12 +304,6 @@ else
 	abort "ERROR: unsupported arch: ${ARCH}"
 fi
 chmod +x $MODPATH/xdelta
-
-am force-stop __PKGNAME
-while read -r line; do
-	ui_print "* Un-mounting"
-	echo "$line" | cut -d" " -f2 | xargs -r umount -l
-done < <(cat /proc/mounts | grep __PKGNAME)
 
 ui_print "* Patching __PKGNAME"
 BASEPATH=$(echo "$DUMP" | grep path | cut -d: -f2 | xargs)
