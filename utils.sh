@@ -31,6 +31,23 @@ get_prebuilts() {
 	dl_if_dne "$RV_PATCHES_JAR" "$RV_PATCHES_URL"
 }
 
+dl_xdelta() {
+	XDELTA_aarch64="${TEMP_DIR}/xdelta_aarch64"
+	XDELTA_arm="${TEMP_DIR}/xdelta_arm"
+
+	dl_if_dne "${XDELTA_aarch64}.deb" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_aarch64.deb"
+	ar x "${XDELTA_aarch64}.deb" data.tar.xz
+	tar -vxf data.tar.xz ./data/data/com.termux/files/usr/bin/xdelta3 --strip-components 7
+	mv -f xdelta3 $XDELTA_aarch64
+	rm data.tar.xz
+
+	dl_if_dne "${XDELTA_arm}.deb" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_arm.deb"
+	ar x "${XDELTA_arm}.deb" data.tar.xz
+	tar -vxf data.tar.xz ./data/data/com.termux/files/usr/bin/xdelta3 --strip-components 7
+	mv -f xdelta3 $XDELTA_arm
+	rm data.tar.xz
+}
+
 set_prebuilts() {
 	[ -d "$TEMP_DIR" ] || {
 		echo "${TEMP_DIR} directory could not be found"
@@ -49,7 +66,7 @@ reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
-	rm -f "${MODULE_TEMPLATE_DIR}/base.apk"
+	rm -rf ${MODULE_TEMPLATE_DIR}/*xdelta*
 }
 
 req() {
@@ -85,6 +102,11 @@ get_patch_last_supported_ver() {
 	echo "${supported_versions##*,}"
 }
 
+get_xdelta() {
+	echo "Binary diffing ${2} against ${1}"
+	xdelta3 -fs "$1" "$2" "$3"
+}
+
 patch_apk() {
 	local stock_input=$1 patched_output=$2 patcher_args=$3
 	# shellcheck disable=SC2086
@@ -92,8 +114,11 @@ patch_apk() {
 }
 
 zip_module() {
-	local patched_apk=$1 module_name=$2
-	cp -f "$patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
+	local xdelta_patch=$1 module_name=$2
+	cp -f "$xdelta_patch" "${MODULE_TEMPLATE_DIR}/rv.xdelta"
+	cp -f "$XDELTA_aarch64" "${MODULE_TEMPLATE_DIR}"
+	cp -f "$XDELTA_arm" "${MODULE_TEMPLATE_DIR}"
+
 	cd "$MODULE_TEMPLATE_DIR" || exit 1
 	zip -FSr "../${BUILD_DIR}/${module_name}" .
 	cd ..
@@ -160,7 +185,7 @@ build_yt() {
 
 	service_sh "com.google.android.youtube"
 	postfsdata_sh "com.google.android.youtube"
-	install_sh "com.google.android.youtube"
+	install_sh "com.google.android.youtube" "$last_ver"
 	module_prop "ytrv-magisk" \
 		"YouTube ReVanced" \
 		"$last_ver" \
@@ -168,7 +193,9 @@ build_yt() {
 		"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json"
 
 	local output="youtube-revanced-magisk-v${last_ver}-all.zip"
-	zip_module "$patched_apk" "$output"
+	local xdelta="${TEMP_DIR}/youtube-revanced-v${last_ver}.xdelta"
+	get_xdelta "$stock_apk" "$patched_apk" "$xdelta"
+	zip_module "$xdelta" "$output"
 	echo "Built YouTube: '${BUILD_DIR}/${output}'"
 }
 
@@ -202,7 +229,7 @@ build_music() {
 
 	service_sh "com.google.android.apps.youtube.music"
 	postfsdata_sh "com.google.android.apps.youtube.music"
-	install_sh "com.google.android.apps.youtube.music"
+	install_sh "com.google.android.apps.youtube.music" "$last_ver"
 
 	local update_json="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update-${arch}.json"
 	if [ "$arch" = "$ARM64_V8A" ]; then
@@ -220,7 +247,9 @@ build_music() {
 		"$update_json"
 
 	local output="music-revanced-magisk-v${last_ver}-${arch}.zip"
-	zip_module "$patched_apk" "$output"
+	local xdelta="${TEMP_DIR}/music-revanced-v${last_ver}.xdelta"
+	get_xdelta "$stock_apk" "$patched_apk" "$xdelta"
+	zip_module "$xdelta" "$output"
 	echo "Built Music '${BUILD_DIR}/${output}'"
 }
 
@@ -244,26 +273,44 @@ postfsdata_sh() {
 
 install_sh() {
 	#shellcheck disable=SC2016
-	local s='DUMP=$(dumpsys package PKGNAME)
-MODULE_VER=$(sed -n "s/.*version=v\(.*\)/\1/p" <"$MODPATH/module.prop")
+	local s='ui_print ""
+DUMP=$(dumpsys package __PKGNAME)
+MODULE_VER=__MDVRSN
 CUR_VER=$(echo "$DUMP" | grep versionName | head -n1 | cut -d= -f2)
 if [ -z "$CUR_VER" ]; then
-	ui_print "WARNING: PKGNAME is not installed"
-else
+	abort "ERROR: __PKGNAME is not installed!"
+else	
 	if [ "$MODULE_VER" != "$CUR_VER" ]; then
-		ui_print ""
-		ui_print "WARNING: PKGNAME version mismatch!"
+		ui_print "ERROR: __PKGNAME version mismatch!"
 		ui_print "  installed: ${CUR_VER}"
 		ui_print "  module:    ${MODULE_VER}"
-		ui_print ""
+		abort
 	else
-		cat /proc/mounts | grep PKGNAME | cut -d" " -f2 | xargs -r umount -l
+		if [ "$ARCH" = "arm" ]; then
+			ln -s $MODPATH/xdelta_arm $MODPATH/xdelta
+		elif [ "$ARCH" = "arm64" ]; then
+			ln -s $MODPATH/xdelta_aarch64 $MODPATH/xdelta
+		else
+			abort "ERROR: unsupported arch: ${ARCH}"
+		fi
+		chmod +x $xdelta
+
+		am force-stop __PKGNAME
+		cat /proc/mounts | grep __PKGNAME | cut -d" " -f2 | xargs -r umount -l
+
+		ui_print "* Patching __PKGNAME"
 		BASEPATH=$(echo "$DUMP" | grep path | cut -d: -f2 | xargs)
+		$MODPATH/xdelta -d -s $BASEPATH $MODPATH/rv.xdelta $MODPATH/base.apk || abort "Patching failed"
+		ui_print "* Patching done"
+		rm $MODPATH/*xdelta*
+
 		chcon u:object_r:apk_data_file:s0 $MODPATH/base.apk
-		mount -o bind $MODPATH/base.apk $BASEPATH
+		mount -o bind $MODPATH/base.apk $BASEPATH || abort "Mounting failed"
+		ui_print "* Mounted __PKGNAME"
 	fi
 fi'
-	echo "${s//PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
+	s="${s//__PKGNAME/$1}"
+	echo "${s//__MDVRSN/$2}" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
 }
 
 module_prop() {

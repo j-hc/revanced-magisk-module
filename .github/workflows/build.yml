@@ -16,6 +16,9 @@ jobs:
           fetch-depth: 0
           submodules: true
 
+      - name: Install xdelta3
+        run: sudo apt-get install -y xdelta3
+
       - id: prev_tag
         run: |
           TAG=$(git tag --sort=creatordate | tail -1)

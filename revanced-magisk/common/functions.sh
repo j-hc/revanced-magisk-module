@@ -107,7 +107,7 @@ install_script() {
   esac
   [ "$(grep "#!/system/bin/sh" $1)" ] || sed -i "1i #!/system/bin/sh" $1
   local i
-  for i in "MODPATH" "LIBDIR" "MODID" "INFO" "MODDIR"; do
+  for i in "MODPATH" "MODID" "INFO" "MODDIR"; do
     case $i in
     "MODPATH") sed -i "1a $i=$NVBASE/modules/$MODID" $1 ;;
     "MODDIR") sed -i "1a $i=\${0%/*}" $1 ;;
@@ -139,14 +139,7 @@ prop_process() {
 [ -z $DYNLIB ] && DYNLIB=false
 [ -z $DEBUG ] && DEBUG=false
 INFO=$NVBASE/modules/.$MODID-files
-ORIGDIR="$MAGISKTMP/mirror"
-if $DYNLIB; then
-  LIBPATCH="\/vendor"
-  LIBDIR=/system/vendor
-else
-  LIBPATCH="\/system"
-  LIBDIR=/system
-fi
+
 if ! $BOOTMODE; then
   ui_print "- Only uninstall is supported in recovery"
   ui_print "  Uninstalling!"
@@ -240,6 +233,7 @@ if $DYNLIB; then
   # Delete empty lib folders (busybox find doesn't have this capability)
   toybox find $MODPATH/system/lib* -type d -empty -delete >/dev/null 2>&1
 fi
+ui_print "   by j-hc (github.com/j-hc)"
 
 # Set permissions
 ui_print " "
