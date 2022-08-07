@@ -37,9 +37,9 @@ extract_deb() {
 	dl_if_dne "$deb_path" "$url"
 	ar x "$deb_path" data.tar.xz
 	if [ "${output: -1}" = "/" ]; then
-		tar -C "$output" -vxf data.tar.xz --wildcards "$path" --strip-components 7
+		tar -C "$output" -xf data.tar.xz --wildcards "$path" --strip-components 7
 	else
-		tar -C "$TEMP_DIR" -vxf data.tar.xz "$path" --strip-components 7
+		tar -C "$TEMP_DIR" -xf data.tar.xz "$path" --strip-components 7
 		mv -f "${TEMP_DIR}/${path##*/}" "$output"
 	fi
 	rm -rf data.tar.xz
@@ -162,8 +162,7 @@ build_twitter() {
 build_yt() {
 	echo "Building YouTube"
 	reset_template
-	local last_ver
-	last_ver=$(get_patch_last_supported_ver "youtube")
+	declare -r last_ver=$(get_patch_last_supported_ver "youtube")
 	echo "Choosing version '${last_ver}'"
 
 	local stock_apk="${TEMP_DIR}/youtube-stock-v${last_ver}.apk" patched_apk="${TEMP_DIR}/youtube-revanced-v${last_ver}.apk"
@@ -199,10 +198,10 @@ build_yt() {
 }
 
 build_music() {
-	echo "Building YouTube Music"
+	local arch=$1
+	echo "Building YouTube Music (${arch})"
 	reset_template
-	local arch=$1 last_ver
-	last_ver=$(get_patch_last_supported_ver "music")
+	declare -r last_ver=$(get_patch_last_supported_ver "music")
 	echo "Choosing version '${last_ver}'"
 
 	local stock_apk="${TEMP_DIR}/music-stock-v${last_ver}-${arch}.apk" patched_apk="${TEMP_DIR}/music-revanced-v${last_ver}-${arch}.apk"
@@ -279,8 +278,7 @@ install_sh() {
 DUMP=$(dumpsys package __PKGNAME)
 MODULE_VER=__MDVRSN
 CUR_VER=$(echo "$DUMP" | grep versionName | head -n1 | cut -d= -f2)
-
-if [ -z "$CUR_VER" ]; then abort "ERROR: __PKGNAME is not installed!"; fi
+[ -z "$CUR_VER" ] && "ERROR: __PKGNAME is not installed!"
 
 am force-stop __PKGNAME
 grep __PKGNAME /proc/mounts | while read -r line; do
@@ -293,7 +291,7 @@ if [ "$MODULE_VER" != "$CUR_VER" ]; then
 	ui_print "  module    : ${MODULE_VER}"
 	abort ""
 fi
-
+ui_print "* Patching __PKGNAME"
 if [ "$ARCH" = "arm" ]; then
 	export LD_LIBRARY_PATH=$MODPATH/lib/arm
 	ln -s $MODPATH/xdelta_arm $MODPATH/xdelta
@@ -304,24 +302,22 @@ else
 	abort "ERROR: unsupported arch: ${ARCH}"
 fi
 chmod +x $MODPATH/xdelta
-
-ui_print "* Patching __PKGNAME"
 BASEPATH=$(echo "$DUMP" | grep path | cut -d: -f2 | xargs)
-[ -z "$BASEPATH" ] && abort "ERROR: Base path not found"
+[ -z "$BASEPATH" ] && abort "ERROR: Base path not found!"
 if ! op=$($MODPATH/xdelta -d -f -s $BASEPATH $MODPATH/rv.xdelta $MODPATH/base.apk 2>&1); then
 	ui_print "ERROR: Patching failed!"
 	ui_print "Make sure you installed __PKGNAME from the link given in releases section."
 	abort "$op"
 fi
 ui_print "* Patching done"
-rm -r $MODPATH/lib $MODPATH/*xdelta*
-
 chcon u:object_r:apk_data_file:s0 $MODPATH/base.apk
 if ! op=$(mount -o bind $MODPATH/base.apk $BASEPATH 2>&1); then 
 	ui_print "ERROR: Mount failed!"
 	abort "$op"
 fi
-ui_print "* Mounted __PKGNAME"'
+ui_print "* Mounted __PKGNAME"
+rm -r $MODPATH/lib $MODPATH/*xdelta*
+am force-stop __PKGNAME'
 
 	s="${s//__PKGNAME/$1}"
 	echo "${s//__MDVRSN/$2}" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
