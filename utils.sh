@@ -165,6 +165,24 @@ build_twitter() {
 	patch_apk "$stock_apk" "$patched_apk" "-r"
 }
 
+build_warn_wetter() {
+	echo "Building WarnWetter"
+	local last_ver
+	last_ver=$(get_patch_last_supported_ver "warnapp")
+	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/apk/deutscher-wetterdienst/" | head -n 1)}"
+
+	echo "Choosing version '${last_ver}'"
+	local stock_apk="${TEMP_DIR}/warn_wetter-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/warn_wetter-revanced-v${last_ver}.apk"
+	if [ ! -f "$stock_apk" ]; then
+		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/deutscher-wetterdienst/warnwetter/warnwetter-${last_ver//./-}-release/" \
+			"APK</span>[^@]*@\([^#]*\)" \
+			"$stock_apk")
+		log "\nWarnWetter version: ${last_ver}"
+		log "downloaded from: [APKMirror - WarnWetter]($dl_url)"
+	fi
+	patch_apk "$stock_apk" "$patched_apk" "-r"
+}
+
 build_yt() {
 	echo "Building YouTube"
 	reset_template
