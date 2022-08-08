@@ -24,11 +24,9 @@ if [ -n "$BASEPATH" ] && $MODPATH/bin/cmp -s $BASEPATH $MODPATH/stock.apk; then
 	ui_print "* Installed __PKGNAME and module stock.apk are identical"
 	ui_print "* Skipping stock APK installation"
 else
-	ui_print "* Uninstalling current __PKGNAME"
-	pm uninstall __PKGNAME >/dev/null
-	ui_print "* Installing stock __PKGNAME APK"
+	ui_print "* Installing/Updating stock __PKGNAME"
 	set_perm $MODPATH/stock.apk 1000 1000 644 u:object_r:apk_data_file:s0
-	if ! op=$(pm install -r -g $MODPATH/stock.apk 2>&1); then
+	if ! op=$(pm install -r -d $MODPATH/stock.apk 2>&1); then
 		ui_print "ERROR: APK installation failed!"
 		abort "${op}"
 	fi
