@@ -51,11 +51,17 @@ extract_deb() {
 
 get_xdelta() {
 	echo "Getting xdelta binaries"
-	extract_deb "${MODULE_TEMPLATE_DIR}/xdelta_aarch64" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_aarch64.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
-	extract_deb "${MODULE_TEMPLATE_DIR}/xdelta_arm" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_arm.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
+	extract_deb "${MODULE_TEMPLATE_DIR}/bin/xdelta-aarch64" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_aarch64.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
+	extract_deb "${MODULE_TEMPLATE_DIR}/bin/xdelta-arm" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_arm.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
 	echo "Getting liblzma libs"
 	extract_deb "${MODULE_TEMPLATE_DIR}/lib/arm/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_arm.deb" "./data/data/com.termux/files/usr/lib/*so*"
 	extract_deb "${MODULE_TEMPLATE_DIR}/lib/aarch64/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_aarch64.deb" "./data/data/com.termux/files/usr/lib/*so*"
+}
+
+get_cmp() {
+	echo "Getting cmp binaries"
+	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/cmp-arm64" "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/diffutils/cmp-arm64?raw=true"
+	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/cmp-arm" "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/diffutils/cmp-arm?raw=true"
 }
 
 abort() { echo "$1" && exit 1; }
@@ -79,7 +85,7 @@ reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/customize.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
 	rm -rf ${MODULE_TEMPLATE_DIR}/rvc.xdelta ${MODULE_TEMPLATE_DIR}/*.apk
-	mkdir -p ${MODULE_TEMPLATE_DIR}/lib/arm ${MODULE_TEMPLATE_DIR}/lib/aarch64
+	mkdir -p ${MODULE_TEMPLATE_DIR}/lib/arm ${MODULE_TEMPLATE_DIR}/lib/aarch64 ${MODULE_TEMPLATE_DIR}/bin
 }
 
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }

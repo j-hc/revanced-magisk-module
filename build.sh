@@ -33,6 +33,7 @@ mkdir -p "$BUILD_DIR"
 if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
 reset_template
 get_xdelta
+get_cmp
 
 if [ "$BUILD_YT" = true ]; then build_yt; fi
 if [ "$BUILD_MUSIC_ARM64_V8A" = true ]; then build_music $ARM64_V8A; fi
