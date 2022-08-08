@@ -1,15 +1,19 @@
 #!/bin/bash
 
 MODULE_TEMPLATE_DIR="revanced-magisk"
+MODULE_SCRIPTS_DIR="scripts"
 TEMP_DIR="temp"
 BUILD_DIR="build"
+
 ARM64_V8A="arm64-v8a"
 ARM_V7A="arm-v7a"
-
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$GITHUB_REPO_FALLBACK}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
-
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
+
+SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
+POSTFSDATA_SH=$(cat $MODULE_SCRIPTS_DIR/post-fs-data.sh)
+CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
 
 get_prebuilts() {
 	echo "Getting prebuilts"
@@ -17,7 +21,6 @@ get_prebuilts() {
 	RV_CLI_URL=$(req https://api.github.com/repos/revanced/revanced-cli/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_CLI_JAR="${TEMP_DIR}/$(echo "$RV_CLI_URL" | awk -F/ '{ print $NF }')"
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
-
 	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*apk\)".*/\1/p')
 	RV_INTEGRATIONS_APK="${TEMP_DIR}/$(echo "$RV_INTEGRATIONS_URL" | awk '{n=split($0, arr, "/"); printf "%s-%s.apk", substr(arr[n], 0, length(arr[n]) - 4), arr[n-1]}')"
 	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
@@ -33,6 +36,7 @@ get_prebuilts() {
 
 extract_deb() {
 	local output=$1 url=$2 path=$3
+	if [ -f "$output" ] || [ -n "$(ls -A "$output")" ]; then return; fi
 	local deb_path="${TEMP_DIR}/${url##*/}"
 	dl_if_dne "$deb_path" "$url"
 	ar x "$deb_path" data.tar.xz
@@ -46,36 +50,46 @@ extract_deb() {
 }
 
 get_xdelta() {
+	echo "Getting xdelta binaries"
 	extract_deb "${MODULE_TEMPLATE_DIR}/xdelta_aarch64" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_aarch64.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
 	extract_deb "${MODULE_TEMPLATE_DIR}/xdelta_arm" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_arm.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
-
+	echo "Getting liblzma libs"
 	extract_deb "${MODULE_TEMPLATE_DIR}/lib/arm/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_arm.deb" "./data/data/com.termux/files/usr/lib/*so*"
 	extract_deb "${MODULE_TEMPLATE_DIR}/lib/aarch64/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_aarch64.deb" "./data/data/com.termux/files/usr/lib/*so*"
 }
 
+abort() { echo "$1" && exit 1; }
+
 set_prebuilts() {
-	[ -d "$TEMP_DIR" ] || {
-		echo "${TEMP_DIR} directory could not be found"
-		exit 1
-	}
+	[ -d "$TEMP_DIR" ] || abort "${TEMP_DIR} directory could not be found"
 	RV_CLI_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-cli-*" | tail -n1)
+	[ -z "$RV_CLI_JAR" ] && abort "revanced cli not found"
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
 	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "app-release-unsigned-*" | tail -n1)
+	[ -z "$RV_CLI_JAR" ] && abort "revanced integrations not found"
 	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
 	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*" | tail -n1)
+	[ -z "$RV_CLI_JAR" ] && abort "revanced patches not found"
 	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
 }
 
 reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/service.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
+	echo "# utils" >"${MODULE_TEMPLATE_DIR}/customize.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
-	rm -rf "${MODULE_TEMPLATE_DIR}/rv.xdelta"
-	mkdir -p "${MODULE_TEMPLATE_DIR}/lib/arm" "${MODULE_TEMPLATE_DIR}/lib/aarch64"
+	rm -rf ${MODULE_TEMPLATE_DIR}/rvc.xdelta ${MODULE_TEMPLATE_DIR}/*.apk
+	mkdir -p ${MODULE_TEMPLATE_DIR}/lib/arm ${MODULE_TEMPLATE_DIR}/lib/aarch64
 }
 
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
+log() { echo -e "$1  " >>build.log; }
+get_apk_vers() { req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'; }
+
+get_patch_last_supported_ver() {
+	declare -r supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -s , | sed -rn "s/.*${1},versions,(([0-9.]*,*)*),Lk.*/\1/p")
+	echo "${supported_versions##*,}"
+}
 
 dl_if_dne() {
 	if [ ! -f "$1" ]; then
@@ -84,8 +98,6 @@ dl_if_dne() {
 	fi
 }
 
-log() { echo -e "$1  " >>build.log; }
-
 dl_apk() {
 	local url=$1 regexp=$2 output=$3
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
@@ -93,13 +105,6 @@ dl_apk() {
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$output"
-}
-
-get_apk_vers() { req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'; }
-
-get_patch_last_supported_ver() {
-	declare -r supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -s , | sed -rn "s/.*${1},versions,(([0-9.]*,*)*),Lk.*/\1/p")
-	echo "${supported_versions##*,}"
 }
 
 xdelta_patch() {
@@ -116,8 +121,9 @@ patch_apk() {
 }
 
 zip_module() {
-	local xdelta_patch=$1 module_name=$2
-	cp -f "$xdelta_patch" "${MODULE_TEMPLATE_DIR}/rv.xdelta"
+	local xdelta_patch=$1 module_name=$2 stock_apk=$3
+	cp -f "$xdelta_patch" "${MODULE_TEMPLATE_DIR}/rvc.xdelta"
+	cp -f "$stock_apk" "${MODULE_TEMPLATE_DIR}/stock.apk"
 	cd "$MODULE_TEMPLATE_DIR" || exit 1
 	zip -FSr "../${BUILD_DIR}/${module_name}" .
 	cd ..
@@ -183,7 +189,7 @@ build_yt() {
 
 	service_sh "com.google.android.youtube"
 	postfsdata_sh "com.google.android.youtube"
-	install_sh "com.google.android.youtube" "$last_ver"
+	customize_sh "com.google.android.youtube" "$last_ver"
 	module_prop "ytrv-magisk" \
 		"YouTube ReVanced" \
 		"$last_ver" \
@@ -193,7 +199,7 @@ build_yt() {
 	local output="youtube-revanced-magisk-v${last_ver}-all.zip"
 	local xdelta="${TEMP_DIR}/youtube-revanced-v${last_ver}.xdelta"
 	xdelta_patch "$stock_apk" "$patched_apk" "$xdelta"
-	zip_module "$xdelta" "$output"
+	zip_module "$xdelta" "$output" "$stock_apk"
 	echo "Built YouTube: '${BUILD_DIR}/${output}'"
 }
 
@@ -227,7 +233,7 @@ build_music() {
 
 	service_sh "com.google.android.apps.youtube.music"
 	postfsdata_sh "com.google.android.apps.youtube.music"
-	install_sh "com.google.android.apps.youtube.music" "$last_ver"
+	customize_sh "com.google.android.apps.youtube.music" "$last_ver"
 
 	local update_json="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update-${arch}.json"
 	if [ "$arch" = "$ARM64_V8A" ]; then
@@ -247,80 +253,15 @@ build_music() {
 	local output="music-revanced-magisk-v${last_ver}-${arch}.zip"
 	local xdelta="${TEMP_DIR}/music-revanced-v${last_ver}.xdelta"
 	xdelta_patch "$stock_apk" "$patched_apk" "$xdelta"
-	zip_module "$xdelta" "$output"
-	echo "Built Music '${BUILD_DIR}/${output}'"
+	zip_module "$xdelta" "$output" "$stock_apk"
+	echo "Built Music (${arch}) '${BUILD_DIR}/${output}'"
 }
 
-service_sh() {
-	#shellcheck disable=SC2016
-	local s='until [ "$(getprop sys.boot_completed)" = 1 ]; do
-	sleep 1
-done
-BASEPATH=$(pm path __PKGNAME | grep base | cut -d: -f2)
-if [ "$BASEPATH" ]; then
-	chcon u:object_r:apk_data_file:s0 $MODDIR/base.apk
-	mount -o bind $MODDIR/base.apk $BASEPATH
-fi'
-	echo "${s//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
-}
-
-postfsdata_sh() {
-	#shellcheck disable=SC2016
-	local s='grep __PKGNAME /proc/mounts | while read -r line; do
-	echo "$line" | cut -d" " -f2 | xargs -r umount -l
-done'
-	echo "${s//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
-}
-
-install_sh() {
-	#shellcheck disable=SC2016
-	local s='ui_print ""
-DUMP=$(dumpsys package __PKGNAME)
-MODULE_VER=__MDVRSN
-CUR_VER=$(echo "$DUMP" | grep versionName | head -n1 | cut -d= -f2)
-[ -z "$CUR_VER" ] && "ERROR: __PKGNAME is not installed!"
-
-am force-stop __PKGNAME
-grep __PKGNAME /proc/mounts | while read -r line; do
-	ui_print "* Un-mount"
-	echo "$line" | cut -d" " -f2 | xargs -r umount -l
-done
-if [ "$MODULE_VER" != "$CUR_VER" ]; then
-	ui_print "ERROR: __PKGNAME version mismatch!"
-	ui_print "  installed : ${CUR_VER}"
-	ui_print "  module    : ${MODULE_VER}"
-	abort ""
-fi
-ui_print "* Patching __PKGNAME"
-if [ "$ARCH" = "arm" ]; then
-	export LD_LIBRARY_PATH=$MODPATH/lib/arm
-	ln -s $MODPATH/xdelta_arm $MODPATH/xdelta
-elif [ "$ARCH" = "arm64" ]; then
-	export LD_LIBRARY_PATH=$MODPATH/lib/aarch64
-	ln -s $MODPATH/xdelta_aarch64 $MODPATH/xdelta
-else
-	abort "ERROR: unsupported arch: ${ARCH}"
-fi
-chmod +x $MODPATH/xdelta
-BASEPATH=$(echo "$DUMP" | grep path | cut -d: -f2 | xargs)
-[ -z "$BASEPATH" ] && abort "ERROR: Base path not found!"
-if ! op=$($MODPATH/xdelta -d -f -s $BASEPATH $MODPATH/rv.xdelta $MODPATH/base.apk 2>&1); then
-	ui_print "ERROR: Patching failed!"
-	ui_print "Make sure you installed __PKGNAME from the link given in releases section."
-	abort "$op"
-fi
-ui_print "* Patching done"
-chcon u:object_r:apk_data_file:s0 $MODPATH/base.apk
-if ! op=$(mount -o bind $MODPATH/base.apk $BASEPATH 2>&1); then 
-	ui_print "ERROR: Mount failed!"
-	abort "$op"
-fi
-ui_print "* Mounted __PKGNAME"
-rm -r $MODPATH/lib $MODPATH/*xdelta*
-am force-stop __PKGNAME'
-
-	s="${s//__PKGNAME/$1}"
-	echo "${s//__MDVRSN/$2}" >"${MODULE_TEMPLATE_DIR}/common/install.sh"
+service_sh() { echo "${SERVICE_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"; }
+postfsdata_sh() { echo "${POSTFSDATA_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"; }
+customize_sh() {
+	s="${CUSTOMIZE_SH//__PKGNAME/$1}"
+	echo "${s//__MDVRSN/$2}" >"${MODULE_TEMPLATE_DIR}/customize.sh"
 }
 
 module_prop() {

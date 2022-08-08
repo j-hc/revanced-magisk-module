@@ -49,4 +49,5 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	cd ../../
 fi
 
+reset_template
 echo "Done"

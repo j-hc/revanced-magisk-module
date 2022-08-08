@@ -1,1 +1,7 @@
-# utils
+id=ytmusicrv-arm-magisk
+name=YouTube Music ReVanced
+version=v5.17.51
+versionCode=20220808
+author=j-hc
+description=mounts base.apk for YouTube Music ReVanced
+updateJson=https://raw.githubusercontent.com/j-hc/revanced-magisk-module/update/music-update-arm-v7a.json
