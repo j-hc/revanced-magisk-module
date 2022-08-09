@@ -6,21 +6,21 @@ grep __PKGNAME /proc/mounts | while read -r line; do
 	echo "$line" | cut -d" " -f2 | xargs -r umount -l
 done
 
+set_perm_recursive $MODPATH/bin 0 0 0755 0777
 if [ $ARCH = "arm" ]; then
 	export LD_LIBRARY_PATH=$MODPATH/lib/arm
-	ln -s $MODPATH/bin/xdelta-arm $MODPATH/bin/xdelta
-	ln -s $MODPATH/bin/cmp-arm $MODPATH/bin/cmp
+	alias xdelta='$MODPATH/bin/arm/xdelta'
+	alias cmp='$MODPATH/bin/arm/cmp'
 elif [ $ARCH = "arm64" ]; then
-	export LD_LIBRARY_PATH=$MODPATH/lib/aarch64
-	ln -s $MODPATH/bin/xdelta-aarch64 $MODPATH/bin/xdelta
-	ln -s $MODPATH/bin/cmp-arm64 $MODPATH/bin/cmp
+	export LD_LIBRARY_PATH=$MODPATH/lib/arm64
+	alias xdelta='$MODPATH/bin/arm64/xdelta'
+	alias cmp='$MODPATH/bin/arm64/cmp'
 else
 	abort "ERROR: unsupported arch: ${ARCH}!"
 fi
-chmod +x $MODPATH/bin/xdelta $MODPATH/bin/cmp
 
 BASEPATH=$(pm path __PKGNAME | grep base | cut -d: -f2)
-if [ -n "$BASEPATH" ] && $MODPATH/bin/cmp -s $BASEPATH $MODPATH/stock.apk; then
+if [ -n "$BASEPATH" ] && cmp -s $BASEPATH $MODPATH/stock.apk; then
 	ui_print "* Installed __PKGNAME and module stock.apk are identical"
 	ui_print "* Skipping stock APK installation"
 else
@@ -34,7 +34,7 @@ else
 fi
 
 ui_print "* Patching __PKGNAME (v__MDVRSN) on the fly"
-if ! op=$($MODPATH/bin/xdelta -d -f -s $BASEPATH $MODPATH/rvc.xdelta $MODPATH/base.apk 2>&1); then
+if ! op=$(xdelta -d -f -s $BASEPATH $MODPATH/rvc.xdelta $MODPATH/base.apk 2>&1); then
 	ui_print "ERROR: Patching failed!"
 	abort "$op"
 fi

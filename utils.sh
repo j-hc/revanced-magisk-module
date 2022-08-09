@@ -36,7 +36,7 @@ get_prebuilts() {
 
 extract_deb() {
 	local output=$1 url=$2 path=$3
-	if [ -f "$output" ] || [ -n "$(ls -A "$output")" ]; then return; fi
+	if [ -f "$output" ] || [ -n "$(ls -A "$output" >/dev/null 2>&1)" ]; then return; fi
 	local deb_path="${TEMP_DIR}/${url##*/}"
 	dl_if_dne "$deb_path" "$url"
 	ar x "$deb_path" data.tar.xz
@@ -51,17 +51,17 @@ extract_deb() {
 
 get_xdelta() {
 	echo "Getting xdelta binaries"
-	extract_deb "${MODULE_TEMPLATE_DIR}/bin/xdelta-aarch64" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_aarch64.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
-	extract_deb "${MODULE_TEMPLATE_DIR}/bin/xdelta-arm" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_arm.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
+	extract_deb "${MODULE_TEMPLATE_DIR}/bin/arm64/xdelta" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_aarch64.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
+	extract_deb "${MODULE_TEMPLATE_DIR}/bin/arm/xdelta" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_arm.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
 	echo "Getting liblzma libs"
+	extract_deb "${MODULE_TEMPLATE_DIR}/lib/arm64/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_aarch64.deb" "./data/data/com.termux/files/usr/lib/*so*"
 	extract_deb "${MODULE_TEMPLATE_DIR}/lib/arm/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_arm.deb" "./data/data/com.termux/files/usr/lib/*so*"
-	extract_deb "${MODULE_TEMPLATE_DIR}/lib/aarch64/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_aarch64.deb" "./data/data/com.termux/files/usr/lib/*so*"
 }
 
 get_cmp() {
 	echo "Getting cmp binaries"
-	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/cmp-arm64" "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/diffutils/cmp-arm64?raw=true"
-	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/cmp-arm" "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/diffutils/cmp-arm?raw=true"
+	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmp" "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/diffutils/cmp-arm64?raw=true"
+	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmp" "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/diffutils/cmp-arm?raw=true"
 }
 
 abort() { echo "$1" && exit 1; }
@@ -85,7 +85,7 @@ reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/customize.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
 	rm -rf ${MODULE_TEMPLATE_DIR}/rvc.xdelta ${MODULE_TEMPLATE_DIR}/*.apk
-	mkdir -p ${MODULE_TEMPLATE_DIR}/lib/arm ${MODULE_TEMPLATE_DIR}/lib/aarch64 ${MODULE_TEMPLATE_DIR}/bin
+	mkdir -p ${MODULE_TEMPLATE_DIR}/lib/arm ${MODULE_TEMPLATE_DIR}/lib/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/arm64
 }
 
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
