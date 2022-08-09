@@ -9,6 +9,8 @@ You can get the [latest CI release from here](https://github.com/j-hc/revanced-m
 The [**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
 
 ## To include/exclude patches or build non-root variant
+[**See the list of patches**](https://github.com/revanced/revanced-patches#-list-of-available-patches)
+
  * Star the repo :eyes:
  * Use the repo as template or fork it (if you choose the repo to be private, you won't receive updates from Magisk app)
  * Edit the patcher args in [`build.conf`](./build.conf)
@@ -23,7 +25,7 @@ The modules support Magisk update which means you will receive updates from your
 ### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday if there is a change. You may want to disable it.**
 
 # Building Locally
-Make sure you have [Azul Zulu distribution of OpenJDK 17](https://www.azul.com/downloads/?version=java-17-lts&os=linux&architecture=x86-64-bit&package=jdk) and run:
+Make sure you have [Azul Zulu distribution of OpenJDK 17](https://www.azul.com/downloads/?version=java-17-lts&os=linux&architecture=x86-64-bit&package=jdk) and xdelta3 installed. Then run:
 
 ```console
 $ git clone --recurse-submodules https://github.com/j-hc/revanced-magisk-module
