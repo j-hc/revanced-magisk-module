@@ -17,7 +17,6 @@ CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
 
 get_prebuilts() {
 	echo "Getting prebuilts"
-	mkdir -p "$TEMP_DIR"
 	RV_CLI_URL=$(req https://api.github.com/repos/revanced/revanced-cli/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_CLI_JAR="${TEMP_DIR}/$(echo "$RV_CLI_URL" | awk -F/ '{ print $NF }')"
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
@@ -50,16 +49,13 @@ extract_deb() {
 }
 
 get_xdelta() {
-	echo "Getting xdelta binaries"
 	extract_deb "${MODULE_TEMPLATE_DIR}/bin/arm64/xdelta" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_aarch64.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
 	extract_deb "${MODULE_TEMPLATE_DIR}/bin/arm/xdelta" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_arm.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
-	echo "Getting liblzma libs"
 	extract_deb "${MODULE_TEMPLATE_DIR}/lib/arm64/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_aarch64.deb" "./data/data/com.termux/files/usr/lib/*so*"
 	extract_deb "${MODULE_TEMPLATE_DIR}/lib/arm/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_arm.deb" "./data/data/com.termux/files/usr/lib/*so*"
 }
 
 get_cmp() {
-	echo "Getting cmp binaries"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmp" "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/diffutils/cmp-arm64?raw=true"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmp" "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/diffutils/cmp-arm?raw=true"
 }
@@ -91,10 +87,15 @@ reset_template() {
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
 log() { echo -e "$1  " >>build.log; }
 get_apk_vers() { req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'; }
-
+get_largest_ver() {
+	local max=0
+	while read -r v || [ -n "$v" ]; do
+		if [[ ${v//[!0-9]/} -gt ${max//[!0-9]/} ]]; then max=$v; fi
+	done
+	if [[ $max = 0 ]]; then echo ""; else echo "$max"; fi
+}
 get_patch_last_supported_ver() {
-	declare -r supported_versions=$(unzip -p "$RV_PATCHES_JAR" | strings -s , | sed -rn "s/.*${1},versions,(([0-9.]*,*)*),Lk.*/\1/p")
-	echo "${supported_versions##*,}"
+	unzip -p "$RV_PATCHES_JAR" | strings -s , | sed -rn "s/.*${1},versions,(([0-9.]*,*)*),Lk.*/\1/p" | tr ',' '\n' | get_largest_ver
 }
 
 dl_if_dne() {
@@ -139,7 +140,7 @@ build_reddit() {
 	echo "Building Reddit"
 	local last_ver
 	last_ver=$(get_patch_last_supported_ver "frontpage")
-	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/apk/redditinc/reddit/" | head -n 1)}"
+	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=reddit" | get_largest_ver)}"
 
 	echo "Choosing version '${last_ver}'"
 	local stock_apk="${TEMP_DIR}/reddit-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/reddit-revanced-v${last_ver}.apk"
@@ -157,7 +158,7 @@ build_twitter() {
 	echo "Building Twitter"
 	local last_ver
 	last_ver=$(get_patch_last_supported_ver "twitter")
-	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/apk/twitter-inc/" | grep release | head -n 1)}"
+	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=twitter" | grep release | get_largest_ver)}"
 
 	echo "Choosing version '${last_ver}'"
 	local stock_apk="${TEMP_DIR}/twitter-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/twitter-revanced-v${last_ver}.apk"
@@ -175,7 +176,7 @@ build_warn_wetter() {
 	echo "Building WarnWetter"
 	local last_ver
 	last_ver=$(get_patch_last_supported_ver "warnapp")
-	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/apk/deutscher-wetterdienst/" | head -n 1)}"
+	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=warnwetter" | get_largest_ver)}"
 
 	echo "Choosing version '${last_ver}'"
 	local stock_apk="${TEMP_DIR}/warn_wetter-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/warn_wetter-revanced-v${last_ver}.apk"
@@ -192,9 +193,12 @@ build_warn_wetter() {
 build_yt() {
 	echo "Building YouTube"
 	reset_template
-	declare -r last_ver=$(get_patch_last_supported_ver "youtube")
+	if [[ $YT_PATCHER_ARGS == *"--experimental"* ]]; then
+		declare -r last_ver=$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=youtube" | get_largest_ver) # this fetches beta
+	else
+		declare -r last_ver=$(get_patch_last_supported_ver "youtube")
+	fi
 	echo "Choosing version '${last_ver}'"
-
 	local stock_apk="${TEMP_DIR}/youtube-stock-v${last_ver}.apk" patched_apk="${TEMP_DIR}/youtube-revanced-v${last_ver}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/google-inc/youtube/youtube-${last_ver//./-}-release/" \
@@ -205,9 +209,9 @@ build_yt() {
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "${YT_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 
-	if [[ "$YT_PATCHER_ARGS" != *"-e microg-support"* ]] && [[ "$YT_PATCHER_ARGS" != *"--exclusive"* ]] || [[ "$YT_PATCHER_ARGS" == *"-i microg-support"* ]]; then
-		mv -f "$patched_apk" build
-		echo "Built YouTube (no root) '${BUILD_DIR}/${patched_apk}'"
+	if [[ $YT_PATCHER_ARGS != *"-e microg-support"* ]] && [[ $YT_PATCHER_ARGS != *"--exclusive"* ]] || [[ $YT_PATCHER_ARGS == *"-i microg-support"* ]]; then
+		mv -f "$patched_apk" "${BUILD_DIR}/"
+		echo "Built YouTube (no root)"
 		return
 	fi
 
@@ -231,9 +235,12 @@ build_music() {
 	local arch=$1
 	echo "Building YouTube Music (${arch})"
 	reset_template
-	declare -r last_ver=$(get_patch_last_supported_ver "music")
+	if [[ $MUSIC_PATCHER_ARGS == *"--experimental"* ]]; then
+		declare -r last_ver=$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=youtube-music" | get_largest_ver)
+	else
+		declare -r last_ver=$(get_patch_last_supported_ver "music")
+	fi
 	echo "Choosing version '${last_ver}'"
-
 	local stock_apk="${TEMP_DIR}/music-stock-v${last_ver}-${arch}.apk" patched_apk="${TEMP_DIR}/music-revanced-v${last_ver}-${arch}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		if [ "$arch" = "$ARM64_V8A" ]; then
@@ -249,9 +256,9 @@ build_music() {
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "${MUSIC_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 
-	if [[ "$MUSIC_PATCHER_ARGS" != *"-e music-microg-support"* ]] && [[ "$MUSIC_PATCHER_ARGS" != *"--exclusive"* ]] || [[ "$MUSIC_PATCHER_ARGS" == *"-i music-microg-support"* ]]; then
-		mv -f "$patched_apk" build
-		echo "Built Music (no root) '${BUILD_DIR}/${patched_apk}'"
+	if [[ $MUSIC_PATCHER_ARGS != *"-e music-microg-support"* ]] && [[ $MUSIC_PATCHER_ARGS != *"--exclusive"* ]] || [[ $MUSIC_PATCHER_ARGS == *"-i music-microg-support"* ]]; then
+		mv -f "$patched_apk" "${BUILD_DIR}/"
+		echo "Built Music (no root)"
 		return
 	fi
 

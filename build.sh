@@ -28,7 +28,7 @@ fi
 
 : >build.log
 log "$(date +'%Y-%m-%d')\n"
-mkdir -p "$BUILD_DIR"
+mkdir -p "$BUILD_DIR" "$TEMP_DIR"
 
 if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
 reset_template

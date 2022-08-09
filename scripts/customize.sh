@@ -6,7 +6,6 @@ grep __PKGNAME /proc/mounts | while read -r line; do
 	echo "$line" | cut -d" " -f2 | xargs -r umount -l
 done
 
-set_perm_recursive $MODPATH/bin 0 0 0755 0777
 if [ $ARCH = "arm" ]; then
 	export LD_LIBRARY_PATH=$MODPATH/lib/arm
 	alias xdelta='$MODPATH/bin/arm/xdelta'
@@ -18,6 +17,7 @@ elif [ $ARCH = "arm64" ]; then
 else
 	abort "ERROR: unsupported arch: ${ARCH}!"
 fi
+set_perm_recursive $MODPATH/bin 0 0 0755 0777
 
 BASEPATH=$(pm path __PKGNAME | grep base | cut -d: -f2)
 if [ -n "$BASEPATH" ] && cmp -s $BASEPATH $MODPATH/stock.apk; then
