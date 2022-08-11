@@ -55,9 +55,9 @@ get_xdelta() {
 	extract_deb "${MODULE_TEMPLATE_DIR}/lib/arm/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_arm.deb" "./data/data/com.termux/files/usr/lib/*so*"
 }
 
-get_cmp() {
-	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmp" "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/diffutils/cmp-arm64?raw=true"
-	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmp" "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/blob/master/diffutils/cmp-arm?raw=true"
+get_cmpr() {
+	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/download/20220811/cmpr-arm64-v8a"
+	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/download/20220811/cmpr-armeabi-v7a"
 }
 
 abort() { echo "$1" && exit 1; }

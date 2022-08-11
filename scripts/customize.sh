@@ -9,18 +9,18 @@ done
 if [ $ARCH = "arm" ]; then
 	export LD_LIBRARY_PATH=$MODPATH/lib/arm
 	alias xdelta='$MODPATH/bin/arm/xdelta'
-	alias cmp='$MODPATH/bin/arm/cmp'
+	alias cmpr='$MODPATH/bin/arm/cmpr'
 elif [ $ARCH = "arm64" ]; then
 	export LD_LIBRARY_PATH=$MODPATH/lib/arm64
 	alias xdelta='$MODPATH/bin/arm64/xdelta'
-	alias cmp='$MODPATH/bin/arm64/cmp'
+	alias cmpr='$MODPATH/bin/arm64/cmpr'
 else
 	abort "ERROR: unsupported arch: ${ARCH}!"
 fi
 set_perm_recursive $MODPATH/bin 0 0 0755 0777
 
 BASEPATH=$(pm path __PKGNAME | grep base | cut -d: -f2)
-if [ -n "$BASEPATH" ] && cmp -s $BASEPATH $MODPATH/stock.apk; then
+if [ -n "$BASEPATH" ] && cmpr $BASEPATH $MODPATH/stock.apk; then
 	ui_print "* Installed __PKGNAME and module stock.apk are identical"
 	ui_print "* Skipping stock APK installation"
 else
