@@ -15,21 +15,44 @@ jobs:
 
       - name: Should build?
         id: should_build
+        shell: bash
         run: |
+          source build.conf
+          source utils.sh
+
+          is_youtube_latest() {
+            if [[ $YT_PATCHER_ARGS == *"--experimental"* ]]; then
+              declare -r cur_yt=$(sed -n 's/.*YouTube version: \(.*\)/\1/p' latest_build.md | xargs)
+              [ -z "$cur_yt" ] && return 1 # empty, fail=>dont build
+              declare -r last_ver=$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=youtube" | get_largest_ver)
+
+              echo "current yt version: $cur_yt"
+              echo "latest yt version: $last_ver"
+              [ "$cur_yt" != "$last_ver" ] # test success=>build, fail=>dont build
+            else
+              return 1 # not experimental, dont build
+            fi
+          }
+
+          is_patches_latest() {
+            declare -r last_patches_url=$(wget -nv -O- https://api.github.com/repos/revanced/revanced-patches/releases/latest | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+            declare -r last_patches=${last_patches_url##*/}
+            cur_patches=$(sed -n 's/.*Patches: \(.*\)/\1/p' latest_build.md | xargs)
+
+            echo "current patches version: $cur_patches"
+            echo "latest patches version: $last_patches"
+            [ "$cur_patches" != "$last_patches" ] # test success=>build, fail=>dont build
+          }
+
           if ! git checkout update; then
+            echo "first time building!"
+            echo ::set-output name=SHOULD_BUILD::1
+          elif is_patches_latest || is_youtube_latest; then
+            echo "build!"
             echo ::set-output name=SHOULD_BUILD::1
           else
-            RV_PATCHES_URL=$(wget -nv -O- https://api.github.com/repos/revanced/revanced-patches/releases/latest | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
-            RV_PATCHES="$(echo "$RV_PATCHES_URL" | awk -F/ '{ print $NF }')"
-            CUR_PATCHES=$(sed -n 's/.*Patches: \(.*\)/\1/p' latest_build.md | xargs)
-            echo "current patches version: $CUR_PATCHES"
-            echo "latest patches version: $RV_PATCHES"
-            if [ "$CUR_PATCHES" = "$RV_PATCHES" ]; then
-              echo "dont build!"
-              echo ::set-output name=SHOULD_BUILD::0
-            else
-              echo ::set-output name=SHOULD_BUILD::1
-            fi
+            echo "dont build!"
+            echo ::set-output name=SHOULD_BUILD::0
           fi
 
     outputs:
