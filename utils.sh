@@ -17,7 +17,7 @@ CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
 
 get_prebuilts() {
 	echo "Getting prebuilts"
-	RV_CLI_URL=$(req https://api.github.com/repos/revanced/revanced-cli/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+	RV_CLI_URL=$(req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_CLI_JAR="${TEMP_DIR}/$(echo "$RV_CLI_URL" | awk -F/ '{ print $NF }')"
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
 	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*apk\)".*/\1/p')
@@ -124,7 +124,8 @@ patch_apk() {
 	local stock_input=$1 patched_output=$2 patcher_args=$3
 	if [ -f "$patched_output" ]; then return; fi
 	# shellcheck disable=SC2086
-	java -jar "$RV_CLI_JAR" -c -a "$stock_input" -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
+	# --rip-lib is only available in my own revanced-cli builds
+	java -jar "$RV_CLI_JAR" --rip-lib x86 --rip-lib x86_64 -c -a "$stock_input" -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
 }
 
 zip_module() {
