@@ -7,11 +7,11 @@ grep __PKGNAME /proc/mounts | while read -r line; do
 done
 
 if [ $ARCH = "arm" ]; then
-	export LD_LIBRARY_PATH=$MODPATH/lib/arm
+	XDELTA_PRELOAD=$MODPATH/lib/arm
 	alias xdelta='$MODPATH/bin/arm/xdelta'
 	alias cmpr='$MODPATH/bin/arm/cmpr'
 elif [ $ARCH = "arm64" ]; then
-	export LD_LIBRARY_PATH=$MODPATH/lib/arm64
+	XDELTA_PRELOAD=$MODPATH/lib/arm64
 	alias xdelta='$MODPATH/bin/arm64/xdelta'
 	alias cmpr='$MODPATH/bin/arm64/cmpr'
 else
@@ -34,7 +34,7 @@ else
 fi
 
 ui_print "* Patching __PKGNAME (v__MDVRSN) on the fly"
-if ! op=$(xdelta -d -f -s $BASEPATH $MODPATH/rvc.xdelta $MODPATH/base.apk 2>&1); then
+if ! op=$(LD_LIBRARY_PATH=$XDELTA_PRELOAD xdelta -d -f -s $BASEPATH $MODPATH/rvc.xdelta $MODPATH/base.apk 2>&1); then
 	ui_print "ERROR: Patching failed!"
 	abort "$op"
 fi
