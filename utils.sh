@@ -291,8 +291,11 @@ build_music() {
 	echo "Built Music (${arch}) '${BUILD_DIR}/${output}'"
 }
 
-service_sh() { echo "${SERVICE_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"; }
 postfsdata_sh() { echo "${POSTFSDATA_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"; }
+service_sh() {
+	s="${SERVICE_SH//__MNTDLY/$MOUNT_DELAY}"
+	echo "${s//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
+}
 customize_sh() {
 	s="${CUSTOMIZE_SH//__PKGNAME/$1}"
 	echo "${s//__MDVRSN/$2}" >"${MODULE_TEMPLATE_DIR}/customize.sh"
