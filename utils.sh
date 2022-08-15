@@ -89,7 +89,7 @@ reset_template() {
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
 log() { echo -e "$1  " >>build.log; }
 get_apk_vers() { req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'; }
-get_largest_ver() {
+get_largest_ver() { # fix this later to properly support semver
 	local max=0
 	while read -r v || [ -n "$v" ]; do
 		if [[ ${v//[!0-9]/} -gt ${max//[!0-9]/} ]]; then max=$v; fi
@@ -189,6 +189,21 @@ build_warn_wetter() {
 			"$stock_apk")
 		log "\nWarnWetter version: ${last_ver}"
 		log "downloaded from: [APKMirror - WarnWetter]($dl_url)"
+	fi
+	patch_apk "$stock_apk" "$patched_apk" "-r"
+}
+
+build_tiktok() {
+	echo "Building TikTok"
+	declare -r last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=tik-tok" | head -1)}"
+	echo "Choosing version '${last_ver}'"
+	local stock_apk="${TEMP_DIR}/tiktok-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/tiktok-revanced-v${last_ver}.apk"
+	if [ ! -f "$stock_apk" ]; then
+		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok/tik-tok-${last_ver//./-}-release/" \
+			"APK</span>[^@]*@\([^#]*\)" \
+			"$stock_apk")
+		log "\nTikTok version: ${last_ver}"
+		log "downloaded from: [APKMirror - TikTok]($dl_url)"
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "-r"
 }
