@@ -54,6 +54,7 @@ if ! op=$(mount -o bind $MODPATH/base.apk $BASEPATH 2>&1); then
 	abort "$op"
 fi
 
+ui_print "   by j-hc (github.com/j-hc)"
 ui_print " "
 rm -r $MODPATH/bin $MODPATH/lib $MODPATH/rvc.xdelta $MODPATH/stock.apk
 am force-stop __PKGNAME
