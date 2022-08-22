@@ -80,7 +80,9 @@ jobs:
             \"changelog\": \"$4\"
           }"
           }
+          IS_MODULE_UPDATE=0
           if [ -n "${{ steps.get_output.outputs.YT_OUTPUT }}" ]; then
+            IS_MODULE_UPDATE=1
             YT_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube version: \(.*\)/\1/p')
             YT_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YT_OUTPUT }}"
             UPDATE_YT_JSON=$(get_update_json "$YT_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$YT_DLURL" "$CHANGELOG_URL")
@@ -88,6 +90,7 @@ jobs:
           fi
 
           if [ -n "${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM64 }}" ]; then
+            IS_MODULE_UPDATE=1
             MUSIC_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music (arm64-v8a) version: \(.*\)/\1/p')
             MUSIC_ARM64_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM64 }}"
             UPDATE_MUSIC_ARM64_JSON=$(get_update_json "$MUSIC_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" "$MUSIC_ARM64_DLURL" "$CHANGELOG_URL")
@@ -95,15 +98,18 @@ jobs:
           fi
 
           if [ -n "${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM }}" ]; then
+            IS_MODULE_UPDATE=1
             MUSIC_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music (arm-v7a) version: \(.*\)/\1/p')
             MUSIC_ARM_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM }}"
             UPDATE_MUSIC_ARM_JSON=$(get_update_json "$MUSIC_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" "$MUSIC_ARM_DLURL" "$CHANGELOG_URL")
             echo "$UPDATE_MUSIC_ARM_JSON" >music-update-arm-v7a.json
           fi
+          echo ::set-output name=IS_MODULE_UPDATE::$IS_MODULE_UPDATE
 
       - uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ steps.update_config.outputs.IS_MODULE_UPDATE == 1 }}
         with:
           branch: update
           skip_checkout: true
           file_pattern: latest_build.md *.json
-          commit_message: Bump ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+          commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
