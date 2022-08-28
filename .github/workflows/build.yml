@@ -65,8 +65,7 @@ jobs:
           overwrite: false
 
       - name: Switch to update branch
-        run: |
-          git checkout -f update || { git switch --discard-changes --orphan update; : >dummy.json; }
+        run: git checkout -f update || git switch --discard-changes --orphan update
 
       - name: Update changelog and Magisk update jsons
         id: update_config
@@ -101,6 +100,7 @@ jobs:
             UPDATE_MUSIC_ARM_JSON=$(get_update_json "$MUSIC_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" "$MUSIC_ARM_DLURL" "$CHANGELOG_URL")
             echo "$UPDATE_MUSIC_ARM_JSON" >music-update-arm-v7a.json
           fi
+          if [ ! -f *.json ]; then : >dummy.json; fi
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
