@@ -111,7 +111,6 @@ dl_if_dne() {
 dl_apk() {
 	local url=$1 regexp=$2 output=$3
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
-	echo "$url"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$output"
@@ -149,11 +148,10 @@ build_reddit() {
 	echo "Choosing version '${last_ver}'"
 	local stock_apk="${TEMP_DIR}/reddit-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/reddit-revanced-v${last_ver}.apk"
 	if [ ! -f "$stock_apk" ]; then
-		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/redditinc/reddit/reddit-${last_ver//./-}-release/" \
+		dl_apk "https://www.apkmirror.com/apk/redditinc/reddit/reddit-${last_ver//./-}-release/" \
 			"APK</span>[^@]*@\([^#]*\)" \
-			"$stock_apk")
+			"$stock_apk"
 		log "\nReddit version: ${last_ver}"
-		log "downloaded from: [APKMirror - Reddit]($dl_url)"
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "-r"
 }
@@ -167,11 +165,10 @@ build_twitter() {
 	echo "Choosing version '${last_ver}'"
 	local stock_apk="${TEMP_DIR}/twitter-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/twitter-revanced-v${last_ver}.apk"
 	if [ ! -f "$stock_apk" ]; then
-		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/twitter-inc/twitter/twitter-${last_ver//./-}-release/" \
+		dl_apk "https://www.apkmirror.com/apk/twitter-inc/twitter/twitter-${last_ver//./-}-release/" \
 			"APK</span>[^@]*@\([^#]*\)" \
-			"$stock_apk")
+			"$stock_apk"
 		log "\nTwitter version: ${last_ver}"
-		log "downloaded from: [APKMirror - Twitter]($dl_url)"
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "-r"
 }
@@ -185,11 +182,10 @@ build_warn_wetter() {
 	echo "Choosing version '${last_ver}'"
 	local stock_apk="${TEMP_DIR}/warn_wetter-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/warn_wetter-revanced-v${last_ver}.apk"
 	if [ ! -f "$stock_apk" ]; then
-		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/deutscher-wetterdienst/warnwetter/warnwetter-${last_ver//./-}-release/" \
+		dl_apk "https://www.apkmirror.com/apk/deutscher-wetterdienst/warnwetter/warnwetter-${last_ver//./-}-release/" \
 			"APK</span>[^@]*@\([^#]*\)" \
-			"$stock_apk")
+			"$stock_apk"
 		log "\nWarnWetter version: ${last_ver}"
-		log "downloaded from: [APKMirror - WarnWetter]($dl_url)"
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "-r"
 }
@@ -200,11 +196,10 @@ build_tiktok() {
 	echo "Choosing version '${last_ver}'"
 	local stock_apk="${TEMP_DIR}/tiktok-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/tiktok-revanced-v${last_ver}.apk"
 	if [ ! -f "$stock_apk" ]; then
-		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok/tik-tok-${last_ver//./-}-release/" \
+		dl_apk "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok/tik-tok-${last_ver//./-}-release/" \
 			"APK</span>[^@]*@\([^#]*\)" \
-			"$stock_apk")
+			"$stock_apk"
 		log "\nTikTok version: ${last_ver}"
-		log "downloaded from: [APKMirror - TikTok]($dl_url)"
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "-r"
 }
@@ -220,11 +215,10 @@ build_yt() {
 	echo "Choosing version '${last_ver}'"
 	local stock_apk="${TEMP_DIR}/youtube-stock-v${last_ver}.apk" patched_apk="${TEMP_DIR}/youtube-revanced-v${last_ver}.apk"
 	if [ ! -f "$stock_apk" ]; then
-		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/google-inc/youtube/youtube-${last_ver//./-}-release/" \
+		dl_apk "https://www.apkmirror.com/apk/google-inc/youtube/youtube-${last_ver//./-}-release/" \
 			"APK</span>[^@]*@\([^#]*\)" \
-			"$stock_apk")
+			"$stock_apk"
 		log "\nYouTube version: ${last_ver}"
-		log "downloaded from: [APKMirror - YouTube]($dl_url)"
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "${YT_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 
@@ -267,11 +261,10 @@ build_music() {
 		elif [ "$arch" = "$ARM_V7A" ]; then
 			local regexp_arch='armeabi-v7a</div>[^@]*@\([^"]*\)'
 		fi
-		declare -r dl_url=$(dl_apk "https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-${last_ver//./-}-release/" \
+		dl_apk "https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-${last_ver//./-}-release/" \
 			"$regexp_arch" \
-			"$stock_apk")
+			"$stock_apk"
 		log "\nYouTube Music (${arch}) version: ${last_ver}"
-		log "downloaded from: [APKMirror - YouTube Music ${arch}]($dl_url)"
 	fi
 	patch_apk "$stock_apk" "$patched_apk" "${MUSIC_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 
