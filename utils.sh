@@ -220,11 +220,20 @@ build_yt() {
 			"$stock_apk"
 		log "\nYouTube version: ${last_ver}"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "${YT_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 
 	if [[ $YT_PATCHER_ARGS != *"-e microg-support"* ]] && [[ $YT_PATCHER_ARGS != *"--exclusive"* ]] || [[ $YT_PATCHER_ARGS == *"-i microg-support"* ]]; then
+		local is_root=false
+	else
+		local is_root=true
+		# --unsigned is only available in my revanced-cli builds
+		YT_PATCHER_ARGS="${YT_PATCHER_ARGS} --unsigned"
+	fi
+
+	patch_apk "$stock_apk" "$patched_apk" "${YT_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
+
+	if [ $is_root = false ]; then
 		mv -f "$patched_apk" "${BUILD_DIR}/"
-		echo "Built YouTube (no root)"
+		echo "Built YouTube (non-root)"
 		return
 	fi
 
@@ -266,11 +275,20 @@ build_music() {
 			"$stock_apk"
 		log "\nYouTube Music (${arch}) version: ${last_ver}"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "${MUSIC_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 
 	if [[ $MUSIC_PATCHER_ARGS != *"-e music-microg-support"* ]] && [[ $MUSIC_PATCHER_ARGS != *"--exclusive"* ]] || [[ $MUSIC_PATCHER_ARGS == *"-i music-microg-support"* ]]; then
+		local is_root=false
+	else
+		local is_root=true
+		# --unsigned is only available in my revanced-cli builds
+		MUSIC_PATCHER_ARGS="${MUSIC_PATCHER_ARGS} --unsigned"
+	fi
+
+	patch_apk "$stock_apk" "$patched_apk" "${MUSIC_PATCHER_ARGS}"
+
+	if [ $is_root = false ]; then
 		mv -f "$patched_apk" "${BUILD_DIR}/"
-		echo "Built Music (no root)"
+		echo "Built Music (non-root)"
 		return
 	fi
 

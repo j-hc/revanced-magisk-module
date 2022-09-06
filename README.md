@@ -1,4 +1,4 @@
-# YouTube ReVanced Magisk Module
+# ReVanced Magisk Module
 [![Build Modules](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml/badge.svg)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml)
 [![CI](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml)
 
@@ -18,6 +18,10 @@ The [**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the rele
  * Grab your modules from [releases](../../releases)
 
 **If you include microg patches in [build.conf](./build.conf), you get non-root APKs instead of Magisk modules. Twitter and Reddit will always be built as APKs regardless. To be able to use non-root variant you will need to install [Vanced MicroG](https://www.apkmirror.com/apk/team-vanced/microg-youtube-vanced/microg-youtube-vanced-0-2-24-220220-release/).**
+
+## Installation
+ * Simply flash the module, you do not need to install YouTube or Music beforehand. Everything is handled by the module.
+ * No need for a reboot after the installation. YouTube or Music will be mounted immediately.
 
 ## Updating
 The modules support Magisk update which means you will receive updates from your Magisk app, downloading from github releases and reflashing is not necessary.  
