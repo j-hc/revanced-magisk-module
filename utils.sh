@@ -28,8 +28,10 @@ get_prebuilts() {
 
 	RV_PATCHES_URL=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_PATCHES_JAR="${TEMP_DIR}/${RV_PATCHES_URL##*/}"
-	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
-	log "[Patches Changelog](https://github.com/revanced/revanced-patches/releases/latest)"
+	local rv_patches_filename=${RV_PATCHES_JAR#"$TEMP_DIR/"}
+	local rv_patches_ver=${rv_patches_filename##*'-'}
+	log "Patches: $rv_patches_filename"
+	log "[Patches Changelog](https://github.com/revanced/revanced-patches/releases/tag/v${rv_patches_ver%%'.jar'*})"
 
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
