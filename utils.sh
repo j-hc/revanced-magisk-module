@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 MODULE_TEMPLATE_DIR="revanced-magisk"
 MODULE_SCRIPTS_DIR="scripts"
@@ -92,10 +92,12 @@ reset_template() {
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
 log() { echo -e "$1  " >>build.log; }
 get_apk_vers() { req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'; }
-get_largest_ver() { # fix this later to properly support semver
+get_largest_ver() {
 	local max=0
 	while read -r v || [ -n "$v" ]; do
-		if [[ ${v//[!0-9]/} -gt ${max//[!0-9]/} ]]; then max=$v; fi
+		if [ "$(./semver "$v" "$max")" = 1 ]; then
+			max=$v
+		fi
 	done
 	if [[ $max = 0 ]]; then echo ""; else echo "$max"; fi
 }
