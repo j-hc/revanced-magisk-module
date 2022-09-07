@@ -7,7 +7,7 @@ BUILD_DIR="build"
 
 ARM64_V8A="arm64-v8a"
 ARM_V7A="arm-v7a"
-GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$GITHUB_REPO_FALLBACK}
+GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"j-hc/revanced-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
 
@@ -91,13 +91,11 @@ reset_template() {
 
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
 log() { echo -e "$1  " >>build.log; }
-get_apk_vers() { req "$1" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'; }
+get_apk_vers() { req "https://www.apkmirror.com/uploads/?appcategory=${1}" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'; }
 get_largest_ver() {
 	local max=0
 	while read -r v || [ -n "$v" ]; do
-		if [ "$(./semver "$v" "$max")" = 1 ]; then
-			max=$v
-		fi
+		if [ "$(./semver "$v" "$max")" = 1 ]; then max=$v; fi
 	done
 	if [[ $max = 0 ]]; then echo ""; else echo "$max"; fi
 }
@@ -143,190 +141,190 @@ zip_module() {
 	cd ..
 }
 
-build_reddit() {
-	echo "Building Reddit"
-	local last_ver
-	last_ver=$(get_patch_last_supported_ver "frontpage")
-	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=reddit" | get_largest_ver)}"
-
-	echo "Choosing version '${last_ver}'"
-	local stock_apk="${TEMP_DIR}/reddit-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/reddit-revanced-v${last_ver}.apk"
-	if [ ! -f "$stock_apk" ]; then
-		dl_apk "https://www.apkmirror.com/apk/redditinc/reddit/reddit-${last_ver//./-}-release/" \
-			"APK</span>[^@]*@\([^#]*\)" \
-			"$stock_apk"
-		log "\nReddit version: ${last_ver}"
+select_ver() {
+	local last_ver pkg_name=$1 apkmirror_category=$2 select_ver_experimental=$3
+	last_ver=$(get_patch_last_supported_ver "$pkg_name")
+	if [ "$select_ver_experimental" = true ] || [ -z "$last_ver" ]; then
+		if [ "$pkg_name" = "com.twitter.android" ]; then
+			last_ver=$(get_apk_vers "$apkmirror_category" | grep "release" | get_largest_ver)
+		else
+			last_ver=$(get_apk_vers "$apkmirror_category" | get_largest_ver)
+		fi
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "-r"
+	echo "$last_ver"
 }
 
-build_twitter() {
-	echo "Building Twitter"
-	local last_ver
-	last_ver=$(get_patch_last_supported_ver "twitter")
-	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=twitter" | grep release | get_largest_ver)}"
+build_rv() {
+	local -n args=$1
+	local version
+	reset_template
+	local arch=${args[arch]:-}
+	if [ "$arch" ]; then arch="-$arch"; fi
 
-	echo "Choosing version '${last_ver}'"
-	local stock_apk="${TEMP_DIR}/twitter-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/twitter-revanced-v${last_ver}.apk"
-	if [ ! -f "$stock_apk" ]; then
-		dl_apk "https://www.apkmirror.com/apk/twitter-inc/twitter/twitter-${last_ver//./-}-release/" \
-			"APK</span>[^@]*@\([^#]*\)" \
-			"$stock_apk"
-		log "\nTwitter version: ${last_ver}"
+	echo "Building ${args[app_name]}${arch}"
+
+	if [ "${args[is_module]}" = true ]; then
+		if [[ ${args[patcher_args]} == *"--experimental"* ]]; then
+			local select_ver_experimental=true
+		else
+			local select_ver_experimental=false
+		fi
+		if [[ ${args[patcher_args]} != *-e\ ?(music-)microg-support* ]] &&
+			[[ ${args[patcher_args]} != *"--exclusive"* ]] ||
+			[[ ${args[patcher_args]} == *-i\ ?(music-)microg-support* ]]; then
+			local is_root=false
+		else
+			local is_root=true
+		fi
+	else
+		local select_ver_experimental=true
+		local is_root=false
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "-r"
-}
-
-build_warn_wetter() {
-	echo "Building WarnWetter"
-	local last_ver
-	last_ver=$(get_patch_last_supported_ver "warnapp")
-	last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=warnwetter" | get_largest_ver)}"
-
-	echo "Choosing version '${last_ver}'"
-	local stock_apk="${TEMP_DIR}/warn_wetter-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/warn_wetter-revanced-v${last_ver}.apk"
-	if [ ! -f "$stock_apk" ]; then
-		dl_apk "https://www.apkmirror.com/apk/deutscher-wetterdienst/warnwetter/warnwetter-${last_ver//./-}-release/" \
-			"APK</span>[^@]*@\([^#]*\)" \
-			"$stock_apk"
-		log "\nWarnWetter version: ${last_ver}"
+	if [ $is_root = true ]; then
+		local output_dir="$TEMP_DIR"
+		# --unsigned is only available in my revanced-cli builds
+		args[patcher_args]="${args[patcher_args]} --unsigned"
+	else
+		local output_dir="$BUILD_DIR"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "-r"
-}
 
-build_tiktok() {
-	echo "Building TikTok"
-	declare -r last_ver="${last_ver:-$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=tik-tok" | head -1)}"
-	echo "Choosing version '${last_ver}'"
-	local stock_apk="${TEMP_DIR}/tiktok-stock-v${last_ver}.apk" patched_apk="${BUILD_DIR}/tiktok-revanced-v${last_ver}.apk"
+	version=$(select_ver "${args[pkg_name]}" "${args[apkmirror_category]}" $select_ver_experimental)
+	echo "Choosing version '${version}'"
+
+	local stock_apk="${TEMP_DIR}/${args[app_name],,}-stock-v${version}${arch}.apk"
+	local patched_apk="${output_dir}/${args[app_name],,}-revanced-v${version}${arch}.apk"
 	if [ ! -f "$stock_apk" ]; then
-		dl_apk "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok/tik-tok-${last_ver//./-}-release/" \
-			"APK</span>[^@]*@\([^#]*\)" \
+		dl_apk "https://www.apkmirror.com/apk/${args[apkmirror_dlurl]}-${version//./-}-release/" \
+			"${args[regexp]}" \
 			"$stock_apk"
-		log "\nTikTok version: ${last_ver}"
+		log "\n${args[app_name]}${arch} version: ${version}"
 	fi
-	patch_apk "$stock_apk" "$patched_apk" "-r"
+
+	patch_apk "$stock_apk" "$patched_apk" "${args[patcher_args]}"
+
+	if [ $is_root = false ]; then
+		echo "Built ${args[app_name]}${arch} (non-root)"
+		return
+	fi
+
+	service_sh "${args[pkg_name]}"
+	postfsdata_sh "${args[pkg_name]}"
+	customize_sh "${args[pkg_name]}" "${version}"
+	module_prop "${args[module_prop_name]}" \
+		"${args[app_name]} ReVanced" \
+		"${version}" \
+		"mounts base.apk for ${args[app_name]} ReVanced" \
+		"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${args[module_update_json]}"
+
+	local module_output="${args[app_name],,}-revanced-magisk-v${version}${arch}.zip"
+	local xdelta="${TEMP_DIR}/${args[app_name],,}-revanced-v${version}${arch}.xdelta"
+	xdelta_patch "$stock_apk" "$patched_apk" "$xdelta"
+	zip_module "$xdelta" "$module_output" "$stock_apk"
+	echo "Built ${args[app_name]}: '${BUILD_DIR}/${module_output}'"
 }
 
 build_yt() {
-	echo "Building YouTube"
-	reset_template
-	if [[ $YT_PATCHER_ARGS == *"--experimental"* ]]; then
-		declare -r last_ver=$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=youtube" | get_largest_ver) # this fetches beta
-	else
-		declare -r last_ver=$(get_patch_last_supported_ver "youtube")
-	fi
-	echo "Choosing version '${last_ver}'"
-	local stock_apk="${TEMP_DIR}/youtube-stock-v${last_ver}.apk" patched_apk="${TEMP_DIR}/youtube-revanced-v${last_ver}.apk"
-	if [ ! -f "$stock_apk" ]; then
-		dl_apk "https://www.apkmirror.com/apk/google-inc/youtube/youtube-${last_ver//./-}-release/" \
-			"APK</span>[^@]*@\([^#]*\)" \
-			"$stock_apk"
-		log "\nYouTube version: ${last_ver}"
-	fi
+	declare -A yt_args
+	yt_args[app_name]="YouTube"
+	yt_args[is_module]=true
+	yt_args[patcher_args]="${YT_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
+	yt_args[apkmirror_category]="youtube"
+	yt_args[pkg_name]="com.google.android.youtube"
+	yt_args[apkmirror_dlurl]="google-inc/youtube/youtube"
+	yt_args[regexp]="APK</span>[^@]*@\([^#]*\)"
+	yt_args[module_prop_name]="ytrv-magisk"
+	#shellcheck disable=SC2034
+	yt_args[module_update_json]="yt-update.json"
 
-	if [[ $YT_PATCHER_ARGS != *"-e microg-support"* ]] && [[ $YT_PATCHER_ARGS != *"--exclusive"* ]] || [[ $YT_PATCHER_ARGS == *"-i microg-support"* ]]; then
-		local is_root=false
-	else
-		local is_root=true
-		# --unsigned is only available in my revanced-cli builds
-		local patcher_args="${YT_PATCHER_ARGS} --unsigned"
-	fi
-
-	patch_apk "$stock_apk" "$patched_apk" "${patcher_args} -m ${RV_INTEGRATIONS_APK}"
-
-	if [ $is_root = false ]; then
-		mv -f "$patched_apk" "${BUILD_DIR}/"
-		echo "Built YouTube (non-root)"
-		return
-	fi
-
-	service_sh "com.google.android.youtube"
-	postfsdata_sh "com.google.android.youtube"
-	customize_sh "com.google.android.youtube" "$last_ver"
-	module_prop "ytrv-magisk" \
-		"YouTube ReVanced" \
-		"$last_ver" \
-		"mounts base.apk for YouTube ReVanced" \
-		"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/yt-update.json"
-
-	local output="youtube-revanced-magisk-v${last_ver}-all.zip"
-	local xdelta="${TEMP_DIR}/youtube-revanced-v${last_ver}.xdelta"
-	xdelta_patch "$stock_apk" "$patched_apk" "$xdelta"
-	zip_module "$xdelta" "$output" "$stock_apk"
-	echo "Built YouTube: '${BUILD_DIR}/${output}'"
+	build_rv yt_args
 }
 
 build_music() {
+	declare -A ytmusic_args
 	local arch=$1
-	echo "Building YouTube Music (${arch})"
-	reset_template
-	if [[ $MUSIC_PATCHER_ARGS == *"--experimental"* ]]; then
-		declare -r last_ver=$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=youtube-music" | get_largest_ver)
-	else
-		declare -r last_ver=$(get_patch_last_supported_ver "music")
-	fi
-	echo "Choosing version '${last_ver}'"
-	local stock_apk="${TEMP_DIR}/music-stock-v${last_ver}-${arch}.apk" patched_apk="${TEMP_DIR}/music-revanced-v${last_ver}-${arch}.apk"
-	if [ ! -f "$stock_apk" ]; then
-		if [ "$arch" = "$ARM64_V8A" ]; then
-			local regexp_arch='arm64-v8a</div>[^@]*@\([^"]*\)'
-		elif [ "$arch" = "$ARM_V7A" ]; then
-			local regexp_arch='armeabi-v7a</div>[^@]*@\([^"]*\)'
-		fi
-		dl_apk "https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-${last_ver//./-}-release/" \
-			"$regexp_arch" \
-			"$stock_apk"
-		log "\nYouTube Music (${arch}) version: ${last_ver}"
-	fi
-
-	if [[ $MUSIC_PATCHER_ARGS != *"-e music-microg-support"* ]] && [[ $MUSIC_PATCHER_ARGS != *"--exclusive"* ]] || [[ $MUSIC_PATCHER_ARGS == *"-i music-microg-support"* ]]; then
-		local is_root=false
-	else
-		local is_root=true
-		# --unsigned is only available in my revanced-cli builds
-		local patcher_args="${MUSIC_PATCHER_ARGS} --unsigned"
-	fi
-
-	patch_apk "$stock_apk" "$patched_apk" "${patcher_args}"
-
-	if [ $is_root = false ]; then
-		mv -f "$patched_apk" "${BUILD_DIR}/"
-		echo "Built Music (non-root)"
-		return
-	fi
-
-	service_sh "com.google.android.apps.youtube.music"
-	postfsdata_sh "com.google.android.apps.youtube.music"
-	customize_sh "com.google.android.apps.youtube.music" "$last_ver"
-
-	local update_json="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/music-update-${arch}.json"
+	ytmusic_args[app_name]="Music"
+	ytmusic_args[is_module]=true
+	ytmusic_args[patcher_args]="${MUSIC_PATCHER_ARGS}"
+	ytmusic_args[apkmirror_category]="youtube-music"
+	ytmusic_args[arch]=$arch
+	ytmusic_args[pkg_name]="com.google.android.apps.youtube.music"
+	ytmusic_args[apkmirror_dlurl]="google-inc/youtube-music/youtube-music"
 	if [ "$arch" = "$ARM64_V8A" ]; then
-		local id="ytmusicrv-magisk"
+		ytmusic_args[regexp]='arm64-v8a</div>[^@]*@\([^"]*\)'
+		ytmusic_args[module_prop_name]="ytmusicrv-magisk"
 	elif [ "$arch" = "$ARM_V7A" ]; then
-		local id="ytmusicrv-arm-magisk"
-	else
-		echo "Wrong arch for prop: '$arch'"
-		return
+		ytmusic_args[regexp]='armeabi-v7a</div>[^@]*@\([^"]*\)'
+		ytmusic_args[module_prop_name]="ytmusicrv-arm-magisk"
 	fi
-	module_prop "$id" \
-		"YouTube Music ReVanced" \
-		"$last_ver" \
-		"mounts base.apk for YouTube Music ReVanced" \
-		"$update_json"
+	#shellcheck disable=SC2034
+	ytmusic_args[module_update_json]="music-update-${arch}"
 
-	local output="music-revanced-magisk-v${last_ver}-${arch}.zip"
-	local xdelta="${TEMP_DIR}/music-revanced-v${last_ver}-${arch}.xdelta"
-	xdelta_patch "$stock_apk" "$patched_apk" "$xdelta"
-	zip_module "$xdelta" "$output" "$stock_apk"
-	echo "Built Music (${arch}) '${BUILD_DIR}/${output}'"
+	build_rv ytmusic_args
+}
+
+build_twitter() {
+	declare -A tw_args
+	tw_args[app_name]="Twitter"
+	tw_args[is_module]=false
+	tw_args[patcher_args]="-r"
+	tw_args[apkmirror_category]="twitter"
+	tw_args[pkg_name]="com.twitter.android"
+	tw_args[apkmirror_dlurl]="twitter-inc/twitter/twitter"
+	#shellcheck disable=SC2034
+	tw_args[regexp]="APK</span>[^@]*@\([^#]*\)"
+
+	build_rv tw_args
+}
+
+build_reddit() {
+	declare -A reddit_args
+	reddit_args[app_name]="Reddit"
+	reddit_args[is_module]=false
+	reddit_args[patcher_args]="-r"
+	reddit_args[apkmirror_category]="reddit"
+	reddit_args[pkg_name]="com.reddit.frontpage"
+	reddit_args[apkmirror_dlurl]="redditinc/reddit/reddit"
+	#shellcheck disable=SC2034
+	reddit_args[regexp]="APK</span>[^@]*@\([^#]*\)"
+
+	build_rv reddit_args
+}
+
+build_warn_wetter() {
+	declare -A warn_wetter_args
+	warn_wetter_args[app_name]="WarnWetter"
+	warn_wetter_args[is_module]=false
+	warn_wetter_args[patcher_args]="-r"
+	warn_wetter_args[apkmirror_category]="warnwetter"
+	warn_wetter_args[pkg_name]="de.dwd.warnapp"
+	warn_wetter_args[apkmirror_dlurl]="deutscher-wetterdienst/warnwetter/warnwetter"
+	#shellcheck disable=SC2034
+	warn_wetter_args[regexp]="APK</span>[^@]*@\([^#]*\)"
+
+	build_rv warn_wetter_args
+}
+
+build_tiktok() {
+	declare -A tiktok_args
+	tiktok_args[app_name]="TikTok"
+	tiktok_args[is_module]=false
+	tiktok_args[patcher_args]="-r"
+	tiktok_args[apkmirror_category]="tik-tok"
+	tiktok_args[pkg_name]="com.ss.android.ugc.trill"
+	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok/tik-tok"
+	#shellcheck disable=SC2034
+	tiktok_args[regexp]="APK</span>[^@]*@\([^#]*\)"
+
+	build_rv tiktok_args
 }
 
 postfsdata_sh() { echo "${POSTFSDATA_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"; }
+
 service_sh() {
 	s="${SERVICE_SH//__MNTDLY/$MOUNT_DELAY}"
 	echo "${s//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
 }
+
 customize_sh() {
 	s="${CUSTOMIZE_SH//__PKGNAME/$1}"
 	echo "${s//__MDVRSN/$2}" >"${MODULE_TEMPLATE_DIR}/customize.sh"

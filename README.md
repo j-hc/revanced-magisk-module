@@ -22,6 +22,7 @@ The [**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the rele
 ## Installation
  * Simply flash the module, you do not need to install YouTube or Music beforehand. Everything is handled by the module.
  * No need for a reboot after the installation. YouTube or Music will be mounted immediately.
+ * x86 and x86_64 arches are not supported!
 
 ## Updating
 The modules support Magisk update which means you will receive updates from your Magisk app, downloading from github releases and reflashing is not necessary.  
