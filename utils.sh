@@ -226,10 +226,10 @@ build_yt() {
 	else
 		local is_root=true
 		# --unsigned is only available in my revanced-cli builds
-		YT_PATCHER_ARGS="${YT_PATCHER_ARGS} --unsigned"
+		local patcher_args="${YT_PATCHER_ARGS} --unsigned"
 	fi
 
-	patch_apk "$stock_apk" "$patched_apk" "${YT_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
+	patch_apk "$stock_apk" "$patched_apk" "${patcher_args} -m ${RV_INTEGRATIONS_APK}"
 
 	if [ $is_root = false ]; then
 		mv -f "$patched_apk" "${BUILD_DIR}/"
@@ -281,10 +281,10 @@ build_music() {
 	else
 		local is_root=true
 		# --unsigned is only available in my revanced-cli builds
-		MUSIC_PATCHER_ARGS="${MUSIC_PATCHER_ARGS} --unsigned"
+		local patcher_args="${MUSIC_PATCHER_ARGS} --unsigned"
 	fi
 
-	patch_apk "$stock_apk" "$patched_apk" "${MUSIC_PATCHER_ARGS}"
+	patch_apk "$stock_apk" "$patched_apk" "${patcher_args}"
 
 	if [ $is_root = false ]; then
 		mv -f "$patched_apk" "${BUILD_DIR}/"
