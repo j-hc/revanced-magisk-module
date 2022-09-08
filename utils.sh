@@ -257,7 +257,7 @@ build_music() {
 		ytmusic_args[module_prop_name]="ytmusicrv-arm-magisk"
 	fi
 	#shellcheck disable=SC2034
-	ytmusic_args[module_update_json]="music-update-${arch}"
+	ytmusic_args[module_update_json]="music-update-${arch}.json"
 
 	build_rv ytmusic_args
 }
