@@ -85,7 +85,7 @@ reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/customize.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
-	rm -rf ${MODULE_TEMPLATE_DIR}/rvc.xdelta ${MODULE_TEMPLATE_DIR}/*.apk
+	rm -rf ${MODULE_TEMPLATE_DIR}/rv.patch ${MODULE_TEMPLATE_DIR}/*.apk
 	mkdir -p ${MODULE_TEMPLATE_DIR}/lib/arm ${MODULE_TEMPLATE_DIR}/lib/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/arm64
 }
 
@@ -133,9 +133,9 @@ patch_apk() {
 }
 
 zip_module() {
-	local xdelta_patch=$1 module_name=$2 stock_apk=$3
-	cp -f "$xdelta_patch" "${MODULE_TEMPLATE_DIR}/rvc.xdelta"
-	cp -f "$stock_apk" "${MODULE_TEMPLATE_DIR}/stock.apk"
+	local xdelta_patch=$1 module_name=$2 stock_apk=$3 pkg_name=$4
+	cp -f "$xdelta_patch" "${MODULE_TEMPLATE_DIR}/rv.patch"
+	cp -f "$stock_apk" "${MODULE_TEMPLATE_DIR}/${pkg_name}.apk"
 	cd "$MODULE_TEMPLATE_DIR" || exit 1
 	zip -FSr "../${BUILD_DIR}/${module_name}" .
 	cd ..
@@ -221,7 +221,7 @@ build_rv() {
 	local module_output="${args[app_name],,}-revanced-magisk-v${version}-${args[arch]}.zip"
 	local xdelta="${TEMP_DIR}/${args[app_name],,}-revanced-v${version}-${args[arch]}.xdelta"
 	xdelta_patch "$stock_apk" "$patched_apk" "$xdelta"
-	zip_module "$xdelta" "$module_output" "$stock_apk"
+	zip_module "$xdelta" "$module_output" "$stock_apk" "${args[pkg_name]}"
 	echo "Built ${args[app_name]}: '${BUILD_DIR}/${module_output}'"
 }
 
