@@ -158,10 +158,8 @@ build_rv() {
 	local -n args=$1
 	local version
 	reset_template
-	local arch=${args[arch]:-}
-	if [ "$arch" ]; then arch="-$arch"; fi
 
-	echo "Building ${args[app_name]}${arch}"
+	echo "Building ${args[app_name]} ${args[arch]}"
 
 	if [ "${args[is_module]}" = true ]; then
 		if [[ ${args[patcher_args]} == *"--experimental"* ]]; then
@@ -191,19 +189,23 @@ build_rv() {
 	version=$(select_ver "${args[pkg_name]}" "${args[apkmirror_category]}" $select_ver_experimental)
 	echo "Choosing version '${version}'"
 
-	local stock_apk="${TEMP_DIR}/${args[app_name],,}-stock-v${version}${arch}.apk"
-	local patched_apk="${output_dir}/${args[app_name],,}-revanced-v${version}${arch}.apk"
+	local stock_apk="${TEMP_DIR}/${args[app_name],,}-stock-v${version}-${args[arch]}.apk"
+	local patched_apk="${output_dir}/${args[app_name],,}-revanced-v${version}-${args[arch]}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		dl_apk "https://www.apkmirror.com/apk/${args[apkmirror_dlurl]}-${version//./-}-release/" \
 			"${args[regexp]}" \
 			"$stock_apk"
-		log "\n${args[app_name]}${arch} version: ${version}"
+		if [ "${args[arch]}" = "all" ]; then
+			log "\n${args[app_name]} version: ${version}"
+		else
+			log "\n${args[app_name]} (${args[arch]}) version: ${version}"
+		fi
 	fi
 
 	patch_apk "$stock_apk" "$patched_apk" "${args[patcher_args]}"
 
 	if [ $is_root = false ]; then
-		echo "Built ${args[app_name]}${arch} (non-root)"
+		echo "Built ${args[app_name]} (${args[arch]}) (non-root)"
 		return
 	fi
 
@@ -216,8 +218,8 @@ build_rv() {
 		"mounts base.apk for ${args[app_name]} ReVanced" \
 		"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${args[module_update_json]}"
 
-	local module_output="${args[app_name],,}-revanced-magisk-v${version}${arch}.zip"
-	local xdelta="${TEMP_DIR}/${args[app_name],,}-revanced-v${version}${arch}.xdelta"
+	local module_output="${args[app_name],,}-revanced-magisk-v${version}-${args[arch]}.zip"
+	local xdelta="${TEMP_DIR}/${args[app_name],,}-revanced-v${version}-${args[arch]}.xdelta"
 	xdelta_patch "$stock_apk" "$patched_apk" "$xdelta"
 	zip_module "$xdelta" "$module_output" "$stock_apk"
 	echo "Built ${args[app_name]}: '${BUILD_DIR}/${module_output}'"
@@ -229,6 +231,7 @@ build_yt() {
 	yt_args[is_module]=true
 	yt_args[patcher_args]="${YT_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
 	yt_args[apkmirror_category]="youtube"
+	yt_args[arch]="all"
 	yt_args[pkg_name]="com.google.android.youtube"
 	yt_args[apkmirror_dlurl]="google-inc/youtube/youtube"
 	yt_args[regexp]="APK</span>[^@]*@\([^#]*\)"
@@ -257,7 +260,7 @@ build_music() {
 		ytmusic_args[module_prop_name]="ytmusicrv-arm-magisk"
 	fi
 	#shellcheck disable=SC2034
-	ytmusic_args[module_update_json]="music-update-${arch}"
+	ytmusic_args[module_update_json]="music-update-${arch}.json"
 
 	build_rv ytmusic_args
 }
@@ -268,6 +271,7 @@ build_twitter() {
 	tw_args[is_module]=false
 	tw_args[patcher_args]="-r"
 	tw_args[apkmirror_category]="twitter"
+	tw_args[arch]="all"
 	tw_args[pkg_name]="com.twitter.android"
 	tw_args[apkmirror_dlurl]="twitter-inc/twitter/twitter"
 	#shellcheck disable=SC2034
@@ -282,6 +286,7 @@ build_reddit() {
 	reddit_args[is_module]=false
 	reddit_args[patcher_args]="-r"
 	reddit_args[apkmirror_category]="reddit"
+	reddit_args[arch]="all"
 	reddit_args[pkg_name]="com.reddit.frontpage"
 	reddit_args[apkmirror_dlurl]="redditinc/reddit/reddit"
 	#shellcheck disable=SC2034
@@ -296,6 +301,7 @@ build_warn_wetter() {
 	warn_wetter_args[is_module]=false
 	warn_wetter_args[patcher_args]="-r"
 	warn_wetter_args[apkmirror_category]="warnwetter"
+	warn_wetter_args[arch]="all"
 	warn_wetter_args[pkg_name]="de.dwd.warnapp"
 	warn_wetter_args[apkmirror_dlurl]="deutscher-wetterdienst/warnwetter/warnwetter"
 	#shellcheck disable=SC2034
@@ -310,6 +316,7 @@ build_tiktok() {
 	tiktok_args[is_module]=false
 	tiktok_args[patcher_args]="-r"
 	tiktok_args[apkmirror_category]="tik-tok"
+	tiktok_args[arch]="all"
 	tiktok_args[pkg_name]="com.ss.android.ugc.trill"
 	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok/tik-tok"
 	#shellcheck disable=SC2034
