@@ -32,7 +32,7 @@ if [ -n "$BASEPATH" ] && cmpr $BASEPATH $MODPATH/__PKGNAME.apk; then
 else
 	ui_print "* Updating stock __PKGNAME"
 	set_perm $MODPATH/__PKGNAME.apk 1000 1000 644 u:object_r:apk_data_file:s0
-	if ! op=$(pm install -i com.android.vending -r -d $MODPATH/__PKGNAME.apk 2>&1); then
+	if ! op=$(pm install --user 0 -i com.android.vending -r -d $MODPATH/__PKGNAME.apk 2>&1); then
 		ui_print "ERROR: APK installation failed!"
 		abort "${op}"
 	fi
