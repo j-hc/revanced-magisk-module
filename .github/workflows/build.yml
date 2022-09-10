@@ -64,8 +64,8 @@ jobs:
 #           file_glob: true
 #           overwrite: false
 
-#       - name: Switch to update branch
-#         run: git checkout -f update || git switch --discard-changes --orphan update
+      - name: Switch to update branch
+        run: git checkout -f update || git switch --discard-changes --orphan update
 
 #       - name: Update changelog and Magisk update jsons
 #         id: update_config
