@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source semver
+
 MODULE_TEMPLATE_DIR="revanced-magisk"
 MODULE_SCRIPTS_DIR="scripts"
 TEMP_DIR="temp"
@@ -95,7 +97,7 @@ get_apk_vers() { req "https://www.apkmirror.com/uploads/?appcategory=${1}" - | s
 get_largest_ver() {
 	local max=0
 	while read -r v || [ -n "$v" ]; do
-		if [ "$(./semver "$v" "$max")" = 1 ]; then max=$v; fi
+		if [ "$(command_compare "$v" "$max")" = 1 ]; then max=$v; fi
 	done
 	if [[ $max = 0 ]]; then echo ""; else echo "$max"; fi
 }
@@ -315,10 +317,10 @@ build_tiktok() {
 	tiktok_args[app_name]="TikTok"
 	tiktok_args[is_module]=false
 	tiktok_args[patcher_args]="-r"
-	tiktok_args[apkmirror_category]="tik-tok"
+	tiktok_args[apkmirror_category]="tik-tok-including-musical-ly"
 	tiktok_args[arch]="all"
-	tiktok_args[pkg_name]="com.ss.android.ugc.trill"
-	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok/tik-tok"
+	tiktok_args[pkg_name]="com.zhiliaoapp.musically"
+	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok-including-musical-ly/tik-tok-including-musical-ly"
 	#shellcheck disable=SC2034
 	tiktok_args[regexp]="APK</span>[^@]*@\([^#]*\)"
 
