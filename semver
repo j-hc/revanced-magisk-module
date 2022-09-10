@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 #github.com/fsaintjacques/semver-tool
 
-set -o errexit -o nounset -o pipefail
-
 NAT='0|[1-9][0-9]*'
 ALPHANUM='[0-9]*[A-Za-z-][0-9A-Za-z-]*'
 IDENT="$NAT|$ALPHANUM"
@@ -68,16 +66,13 @@ function compare_fields {
   local rightfield=("${!r}")
   local left
   local right
-
   local i=$((-1))
   local order=$((0))
-
   while true; do
     [ $order -ne 0 ] && {
       echo $order
       return
     }
-
     : $((i++))
     left="${leftfield[$i]}"
     right="${rightfield[$i]}"
@@ -94,7 +89,6 @@ function compare_fields {
       echo 1
       return
     }
-
     is_nat "$left" && is_nat "$right" && {
       order=$(order_nat "$left" "$right")
       continue
@@ -153,7 +147,4 @@ function command_compare {
   v_=$(validate_version "$2")
   set +u
   compare_version "$v" "$v_"
-  exit 0
 }
-
-command_compare "$@"
