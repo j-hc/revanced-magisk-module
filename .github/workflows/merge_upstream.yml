@@ -2,6 +2,7 @@ name: Scheduled Merge Remote Action
 on: 
   schedule:
     - cron: '0 22 * * 6'
+  workflow_dispatch:
 
 jobs:
   merge-upstream:
