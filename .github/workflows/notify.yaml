@@ -23,13 +23,17 @@ jobs:
         run: |
           curl https://api.github.com/repos/${{ github.repository }}/releases/latest > release.json
           
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+          
       - name: Push release.json
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: update
           skip_checkout: true
           file_pattern: release.json
-          commit_message: Update release.json $(date)
+          commit_message: Update release.json on ${{ steps.date.outputs.date }}
           
       - name: Switch to update branch
         run: git checkout -f update
