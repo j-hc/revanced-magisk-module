@@ -35,8 +35,6 @@ jobs:
           file_pattern: release.json
           commit_message: Update release.json on ${{ steps.date.outputs.date }}
           
-      - name: Switch to update branch
-        run: git checkout -f update
       - name: Telegram Channel Update
         uses: appleboy/telegram-action@master
         with:
@@ -44,7 +42,7 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: |
-            cat latest_build.md
+            echo $(cat latest_build.md)
             
             [Download](https://revanced-apks.pages.dev/)
             
