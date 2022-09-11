@@ -35,7 +35,7 @@ jobs:
           file_pattern: release.json
           commit_message: Update release.json on ${{ steps.date.outputs.date }}
       
-      - name: Get lateest_build.md
+      - name: Get latest release description
         id: read_file
         uses: andstor/file-reader-action@v1
         with:
@@ -48,8 +48,11 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: |
-            ${{ steps.read_file.outputs.contents }}
+            *__Release__*
+          
+            _Date_: ${{ steps.read_file.outputs.contents }}
             
-            [Download](https://revanced-apks.pages.dev/)
+            *[Download Now](https://revanced-apks.pages.dev/)*
+            <br>
             
         
