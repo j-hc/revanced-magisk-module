@@ -15,9 +15,14 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
+          
+      - name: Switch to update branch
+        run: git checkout -f update || git switch --discard-changes --orphan update
+        
       - name: Update release JSON
         run: |
           curl https://api.github.com/repos/${{ github.repository }}/releases/latest > release.json
+          
       - name: Push release.json
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
@@ -25,6 +30,7 @@ jobs:
           skip_checkout: true
           file_pattern: release.json
           commit_message: Update release.json $(date)
+          
       - name: Switch to update branch
         run: git checkout -f update
       - name: Telegram Channel Update
