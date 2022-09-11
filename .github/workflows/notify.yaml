@@ -1,0 +1,41 @@
+name: Act on release created
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  Notify Release:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Update release JSON
+        run: |
+          curl https://api.github.com/repos/${{ github.repository }}/releases/latest > release.json
+      - name: Push release.json
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: update
+          skip_checkout: true
+          file_pattern: release.json
+          commit_message: Update release.json $(date)
+      - name: Switch to update branch
+        run: git checkout -f update
+      - name: Telegram Channel Update
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            cat latest_build.md
+            
+            [Download](https://revanced-apks.pages.dev/)
+            
+        
