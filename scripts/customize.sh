@@ -2,18 +2,13 @@
 ui_print ""
 
 grep __PKGNAME /proc/self/mountinfo | while read -r line; do
-	mount_path=$(echo "$line" | cut -d' ' -f5)
-	ui_print "* Un-mount $mount_path"
-	umount -l "$mount_path"
+	mountpoint=$(echo "$line" | cut -d' ' -f5)
+	umount -l "${mountpoint%%\\*}"
 done
 
 if [ $ARCH = "arm" ]; then
-	XDELTA_PRELOAD=$MODPATH/lib/arm
-	alias xdelta='$MODPATH/bin/arm/xdelta'
 	alias cmpr='$MODPATH/bin/arm/cmpr'
 elif [ $ARCH = "arm64" ]; then
-	XDELTA_PRELOAD=$MODPATH/lib/arm64
-	alias xdelta='$MODPATH/bin/arm64/xdelta'
 	alias cmpr='$MODPATH/bin/arm64/cmpr'
 else
 	abort "ERROR: unsupported arch: ${ARCH}!"
@@ -42,12 +37,6 @@ else
 	fi
 fi
 
-ui_print "* Patching __PKGNAME (v__MDVRSN)"
-if ! op=$(LD_LIBRARY_PATH=$XDELTA_PRELOAD xdelta -d -f -s $BASEPATH $MODPATH/rv.patch $MODPATH/base.apk 2>&1); then
-	ui_print "ERROR: Patching failed!"
-	abort "$op"
-fi
-ui_print "* Patching done"
 ui_print "* Setting Permissions"
 set_perm $MODPATH/base.apk 1000 1000 644 u:object_r:apk_data_file:s0
 
@@ -56,7 +45,7 @@ if ! op=$(mount -o bind $MODPATH/base.apk $BASEPATH 2>&1); then
 	ui_print "ERROR: Mount failed!"
 	abort "$op"
 fi
-rm -r $MODPATH/bin $MODPATH/lib $MODPATH/rv.patch $MODPATH/__PKGNAME.apk
+rm -r $MODPATH/bin $MODPATH/__PKGNAME.apk
 am force-stop __PKGNAME
 
 ui_print "* Done"

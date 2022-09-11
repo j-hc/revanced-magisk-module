@@ -1,7 +1,6 @@
 *.jar
 *.apk
 *.zip
-*.xdelta
 /revanced-cache
 /temp
 /build

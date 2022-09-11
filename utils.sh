@@ -40,28 +40,6 @@ get_prebuilts() {
 	dl_if_dne "$RV_PATCHES_JAR" "$RV_PATCHES_URL"
 }
 
-extract_deb() {
-	local output=$1 url=$2 path=$3
-	if [ -f "$output" ] || [ -n "$(ls -A "$output" >/dev/null 2>&1)" ]; then return; fi
-	local deb_path="${TEMP_DIR}/${url##*/}"
-	dl_if_dne "$deb_path" "$url"
-	ar x "$deb_path" data.tar.xz
-	if [ "${output: -1}" = "/" ]; then
-		tar -C "$output" -xf data.tar.xz --wildcards "$path" --strip-components 7
-	else
-		tar -C "$TEMP_DIR" -xf data.tar.xz "$path" --strip-components 7
-		mv -f "${TEMP_DIR}/${path##*/}" "$output"
-	fi
-	rm -rf data.tar.xz
-}
-
-get_xdelta() {
-	extract_deb "${MODULE_TEMPLATE_DIR}/bin/arm64/xdelta" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_aarch64.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
-	extract_deb "${MODULE_TEMPLATE_DIR}/bin/arm/xdelta" "https://grimler.se/termux/termux-main/pool/main/x/xdelta3/xdelta3_3.1.0-1_arm.deb" "./data/data/com.termux/files/usr/bin/xdelta3"
-	extract_deb "${MODULE_TEMPLATE_DIR}/lib/arm64/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_aarch64.deb" "./data/data/com.termux/files/usr/lib/*so*"
-	extract_deb "${MODULE_TEMPLATE_DIR}/lib/arm/" "https://grimler.se/termux/termux-main/pool/main/libl/liblzma/liblzma_5.2.5-1_arm.deb" "./data/data/com.termux/files/usr/lib/*so*"
-}
-
 get_cmpr() {
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/download/20220811/cmpr-arm64-v8a"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/download/20220811/cmpr-armeabi-v7a"
@@ -87,8 +65,8 @@ reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/customize.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
-	rm -rf ${MODULE_TEMPLATE_DIR}/rv.patch ${MODULE_TEMPLATE_DIR}/*.apk
-	mkdir -p ${MODULE_TEMPLATE_DIR}/lib/arm ${MODULE_TEMPLATE_DIR}/lib/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/arm64
+	rm -rf ${MODULE_TEMPLATE_DIR}/*.apk
+	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/arm64
 }
 
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
@@ -120,26 +98,20 @@ dl_apk() {
 	req "$url" "$output"
 }
 
-xdelta_patch() {
-	if [ -f "$3" ]; then return; fi
-	echo "Binary diffing ${2} against ${1}"
-	xdelta3 -f -e -s "$1" "$2" "$3"
-}
-
 patch_apk() {
 	local stock_input=$1 patched_output=$2 patcher_args=$3
 	if [ -f "$patched_output" ]; then return; fi
 	# shellcheck disable=SC2086
 	# --rip-lib is only available in my own revanced-cli builds
-	java -jar "$RV_CLI_JAR" --rip-lib x86 --rip-lib x86_64 -c -a "$stock_input" -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
+	java -jar "$RV_CLI_JAR" --rip-lib x86 --rip-lib x86_64 -a "$stock_input" -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
 }
 
 zip_module() {
-	local xdelta_patch=$1 module_name=$2 stock_apk=$3 pkg_name=$4
-	cp -f "$xdelta_patch" "${MODULE_TEMPLATE_DIR}/rv.patch"
+	local patched_apk=$1 module_name=$2 stock_apk=$3 pkg_name=$4
+	cp -f "$patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 	cp -f "$stock_apk" "${MODULE_TEMPLATE_DIR}/${pkg_name}.apk"
 	cd "$MODULE_TEMPLATE_DIR" || exit 1
-	zip -FSr "../${BUILD_DIR}/${module_name}" .
+	zip -9 -FSr "../${BUILD_DIR}/${module_name}" .
 	cd ..
 }
 
@@ -183,7 +155,7 @@ build_rv() {
 	if [ $is_root = true ]; then
 		local output_dir="$TEMP_DIR"
 		# --unsigned is only available in my revanced-cli builds
-		args[patcher_args]="${args[patcher_args]} --unsigned"
+		args[patcher_args]="${args[patcher_args]} --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
 	else
 		local output_dir="$BUILD_DIR"
 	fi
@@ -221,9 +193,8 @@ build_rv() {
 		"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${args[module_update_json]}"
 
 	local module_output="${args[app_name],,}-revanced-magisk-v${version}-${args[arch]}.zip"
-	local xdelta="${TEMP_DIR}/${args[app_name],,}-revanced-v${version}-${args[arch]}.xdelta"
-	xdelta_patch "$stock_apk" "$patched_apk" "$xdelta"
-	zip_module "$xdelta" "$module_output" "$stock_apk" "${args[pkg_name]}"
+	zip_module "$patched_apk" "$module_output" "$stock_apk" "${args[pkg_name]}"
+
 	echo "Built ${args[app_name]}: '${BUILD_DIR}/${module_output}'"
 }
 
