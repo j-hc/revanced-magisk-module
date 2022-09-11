@@ -101,10 +101,6 @@ jobs:
             echo "$UPDATE_MUSIC_ARM_JSON" >music-update-arm-v7a.json
           fi
           if [ ! -f *.json ]; then : >dummy.json; fi
-          
-      - name: Update release JSON
-        run: |
-          curl https://api.github.com/repos/${{ github.repository }}/releases/latest > release.json
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
