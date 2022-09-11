@@ -48,11 +48,11 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: |
-            *__Release__*
+            *Release*
           
             _Date_: ${{ steps.read_file.outputs.contents }}
             
-            *[Download Now](https://revanced-apks.pages.dev/)*
+            [*Download Now*](https://revanced-apks.pages.dev/)
             <br>
             
         
