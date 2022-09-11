@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Notify Release:
+  Notify_Release:
     name: Notify Release
     runs-on: ubuntu-latest
     steps:
