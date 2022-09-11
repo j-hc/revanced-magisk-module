@@ -1,8 +1,8 @@
-name: Act on release created
+name: Act on release
 
 on:
-  release:
-    types: [created]
+  push:
+    branches: [update]
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
           submodules: true
           
       - name: Switch to update branch
-        run: git checkout -f update || git switch --discard-changes --orphan update
+        run: git checkout -f release || git switch --discard-changes --orphan update
         
       - name: Update release JSON
         run: |
@@ -30,7 +30,7 @@ jobs:
       - name: Push release.json
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: update
+          branch: release
           skip_checkout: true
           file_pattern: release.json
           commit_message: Update release.json on ${{ steps.date.outputs.date }}
