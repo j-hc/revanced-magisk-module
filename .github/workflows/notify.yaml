@@ -2,7 +2,8 @@ name: Act on release
 
 on:
   push:
-    branches: [update]
+    branches:
+      - update
   workflow_dispatch:
 
 jobs:
