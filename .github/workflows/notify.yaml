@@ -34,6 +34,10 @@ jobs:
           skip_checkout: true
           file_pattern: release.json
           commit_message: Update release.json on ${{ steps.date.outputs.date }}
+      
+      - name: Get lateest_build.md
+        id: latest_build
+        run: echo "::set-output name=latest_build_message::$(cat latest_build.md)"
           
       - name: Telegram Channel Update
         uses: appleboy/telegram-action@master
@@ -42,7 +46,7 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: |
-            echo $(cat latest_build.md)
+            ${{ steps.latest_build.outputs.latest_build_message }}
             
             [Download](https://revanced-apks.pages.dev/)
             
