@@ -38,11 +38,9 @@ jobs:
       - name: Get lateest_build.md
         id: latest_build
         run: |
-          OUTPUT_MSG = $(cat latest_build.md)
-          OUTPUT_MSG="${OUTPUT_MSG//'%'/'%25'}"
-          OUTPUT_MSG="${OUTPUT_MSG//$'\n'/'%0A'}"
-          OUTPUT_MSG="${OUTPUT_MSG//$'\r'/'%0D'}"
-          echo "::set-output name=latest_build_message::$OUTPUT_MSG"
+          OUTPUT_MSG=$(cat latest_build.md)
+          echo "$OUTPUT_MSG"
+          echo "::set-env name=RELEASE_MSG::$OUTPUT_MSG"
           
       - name: Telegram Channel Update
         uses: appleboy/telegram-action@master
@@ -51,7 +49,9 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: |
-            ${{ steps.latest_build.outputs.latest_build_message }}
+            ```
+            ${{ env.RELEASE_MSG }}
+            ```
             
             [Download](https://revanced-apks.pages.dev/)
             
