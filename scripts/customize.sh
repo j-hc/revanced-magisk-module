@@ -41,7 +41,7 @@ ui_print "* Setting Permissions"
 set_perm $MODPATH/base.apk 1000 1000 644 u:object_r:apk_data_file:s0
 
 ui_print "* Mounting __PKGNAME"
-if ! op=$(mount -o bind $MODPATH/base.apk $BASEPATH 2>&1); then
+if ! op=$(su -Mc mount -o bind $MODPATH/base.apk $BASEPATH 2>&1); then
 	ui_print "ERROR: Mount failed!"
 	abort "$op"
 fi

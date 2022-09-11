@@ -9,5 +9,5 @@ BASEPATH=$(pm path __PKGNAME | grep base)
 BASEPATH=${BASEPATH#*:}
 if [ "$BASEPATH" ]; then
 	chcon u:object_r:apk_data_file:s0 $MODDIR/base.apk
-	mount -o bind $MODDIR/base.apk $BASEPATH
+	su -Mc mount -o bind $MODDIR/base.apk $BASEPATH
 fi
