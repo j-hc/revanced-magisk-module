@@ -24,11 +24,15 @@ jobs:
         # Get all recent branches and commits from the upstream
         git fetch upstream
         
+        git pull upstream main
+        
         #change branch
         git checkout -b upstream
         
         # Merge the branches and commits from the upstream
-        git rebase -i upstream/main
+        git merge upstream/main
+        
+        git add . --force
         
     - name: Get current date
       id: date
