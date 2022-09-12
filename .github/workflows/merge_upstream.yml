@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Sync Repo
-        run: gh repo sync j-hc/revanced-magisk-module -b main
+        run: gh repo sync revanced-apks/revanced-apks -b main
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
             
