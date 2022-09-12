@@ -16,7 +16,7 @@ jobs:
       run: |
         git remote add upstream ${UPSTREAM}
         git fetch upstream
-        gh pr create --title "Merge Upstream" --body "Upstream update" --fill --base main --head upstream/main
+        gh pr create --title "Merge Upstream" --body "Upstream update" --base origin/main --head upstream/main
         
 #     - name: Enable Pull Request Automerge
 #       uses: peter-evans/enable-pull-request-automerge@v2
