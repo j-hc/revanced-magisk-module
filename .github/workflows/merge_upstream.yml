@@ -14,20 +14,7 @@ jobs:
         UPSTREAM: https://github.com/j-hc/revanced-magisk-module
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        git config --global user.name "github-actions"
-        git config --global user.email "github-actions@users.noreply.github.com"
-        
-        git remote add upstream "${UPSTREAM}"
-        
-        # Verify upstream is correct, you should see the URL for the upstream fetch and push 
-        git remote -v
-        
-        # Get all recent branches and commits from the upstream
-        git fetch upstream
-        
-        git pull upstream main
-        
-        gh pr create --title "Merge Upstream" --body "Update from upstream repo" --base main --head upstream:main
+        gh pr create --title "Merge Upstream" --fill --base main --head j-hc:revanced-magisk-module:main
         
 #     - name: Enable Pull Request Automerge
 #       uses: peter-evans/enable-pull-request-automerge@v2
