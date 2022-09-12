@@ -3,8 +3,7 @@ on:
   schedule:
     - cron: '0 22 * * *'
   workflow_dispatch:
-permissions:
-      pull-requests: write
+permissions: write-all
 
 jobs:
   merge-upstream:
