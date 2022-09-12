@@ -3,11 +3,14 @@ on:
   schedule:
     - cron: '0 22 * * *'
   workflow_dispatch:
-permissions: write-all
 
 jobs:
   merge-upstream:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    
     steps:
     - uses: actions/checkout@master
     - name: Upstream Pull Request
