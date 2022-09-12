@@ -16,6 +16,7 @@ WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/2010010
 SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
 POSTFSDATA_SH=$(cat $MODULE_SCRIPTS_DIR/post-fs-data.sh)
 CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
+UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
 
 get_prebuilts() {
 	echo "Getting prebuilts"
@@ -45,7 +46,7 @@ get_cmpr() {
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/download/20220811/cmpr-armeabi-v7a"
 }
 
-abort() { echo "$1" && exit 1; }
+abort() { echo "abort: $1" && exit 1; }
 
 set_prebuilts() {
 	[ -d "$TEMP_DIR" ] || abort "${TEMP_DIR} directory could not be found"
@@ -64,6 +65,7 @@ reset_template() {
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/service.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/customize.sh"
+	echo "# utils" >"${MODULE_TEMPLATE_DIR}/uninstall.sh"
 	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
 	rm -rf ${MODULE_TEMPLATE_DIR}/*.apk
 	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/arm64
@@ -90,6 +92,7 @@ dl_if_dne() {
 	fi
 }
 
+# if you are here to copy paste this piece of code, acknowledge it:)
 dl_apk() {
 	local url=$1 regexp=$2 output=$3
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
@@ -110,7 +113,7 @@ zip_module() {
 	local patched_apk=$1 module_name=$2 stock_apk=$3 pkg_name=$4
 	cp -f "$patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
 	cp -f "$stock_apk" "${MODULE_TEMPLATE_DIR}/${pkg_name}.apk"
-	cd "$MODULE_TEMPLATE_DIR" || exit 1
+	cd "$MODULE_TEMPLATE_DIR" || abort "Module template dir not found"
 	zip -9 -FSr "../${BUILD_DIR}/${module_name}" .
 	cd ..
 }
@@ -155,12 +158,17 @@ build_rv() {
 	if [ $is_root = true ]; then
 		local output_dir="$TEMP_DIR"
 		# --unsigned is only available in my revanced-cli builds
-		args[patcher_args]="${args[patcher_args]} --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
+		if [ "${args[rip_all_libs]}" = true ]; then
+			# native libraries are already extracted. remove them all to keep apks smol
+			args[patcher_args]="${args[patcher_args]} --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
+		else
+			args[patcher_args]="${args[patcher_args]} --unsigned"
+		fi
 	else
 		local output_dir="$BUILD_DIR"
 	fi
 
-	version=$(select_ver "${args[pkg_name]}" "${args[apkmirror_category]}" $select_ver_experimental)
+	version=$(select_ver "${args[pkg_name]}" "${args[apkmirror_dlurl]##*/}" $select_ver_experimental)
 	echo "Choosing version '${version}'"
 
 	local stock_apk="${TEMP_DIR}/${args[app_name],,}-stock-v${version}-${args[arch]}.apk"
@@ -183,6 +191,7 @@ build_rv() {
 		return
 	fi
 
+	uninstall_sh "${args[pkg_name]}"
 	service_sh "${args[pkg_name]}"
 	postfsdata_sh "${args[pkg_name]}"
 	customize_sh "${args[pkg_name]}" "${version}"
@@ -203,8 +212,8 @@ build_yt() {
 	yt_args[app_name]="YouTube"
 	yt_args[is_module]=true
 	yt_args[patcher_args]="${YT_PATCHER_ARGS} -m ${RV_INTEGRATIONS_APK}"
-	yt_args[apkmirror_category]="youtube"
 	yt_args[arch]="all"
+	yt_args[rip_all_libs]=true
 	yt_args[pkg_name]="com.google.android.youtube"
 	yt_args[apkmirror_dlurl]="google-inc/youtube/youtube"
 	yt_args[regexp]="APK</span>[^@]*@\([^#]*\)"
@@ -221,8 +230,8 @@ build_music() {
 	ytmusic_args[app_name]="Music"
 	ytmusic_args[is_module]=true
 	ytmusic_args[patcher_args]="${MUSIC_PATCHER_ARGS}"
-	ytmusic_args[apkmirror_category]="youtube-music"
 	ytmusic_args[arch]=$arch
+	ytmusic_args[rip_all_libs]=false
 	ytmusic_args[pkg_name]="com.google.android.apps.youtube.music"
 	ytmusic_args[apkmirror_dlurl]="google-inc/youtube-music/youtube-music"
 	if [ "$arch" = "$ARM64_V8A" ]; then
@@ -243,7 +252,6 @@ build_twitter() {
 	tw_args[app_name]="Twitter"
 	tw_args[is_module]=false
 	tw_args[patcher_args]="-r"
-	tw_args[apkmirror_category]="twitter"
 	tw_args[arch]="all"
 	tw_args[pkg_name]="com.twitter.android"
 	tw_args[apkmirror_dlurl]="twitter-inc/twitter/twitter"
@@ -258,7 +266,6 @@ build_reddit() {
 	reddit_args[app_name]="Reddit"
 	reddit_args[is_module]=false
 	reddit_args[patcher_args]="-r"
-	reddit_args[apkmirror_category]="reddit"
 	reddit_args[arch]="all"
 	reddit_args[pkg_name]="com.reddit.frontpage"
 	reddit_args[apkmirror_dlurl]="redditinc/reddit/reddit"
@@ -273,7 +280,6 @@ build_warn_wetter() {
 	warn_wetter_args[app_name]="WarnWetter"
 	warn_wetter_args[is_module]=false
 	warn_wetter_args[patcher_args]="-r"
-	warn_wetter_args[apkmirror_category]="warnwetter"
 	warn_wetter_args[arch]="all"
 	warn_wetter_args[pkg_name]="de.dwd.warnapp"
 	warn_wetter_args[apkmirror_dlurl]="deutscher-wetterdienst/warnwetter/warnwetter"
@@ -288,7 +294,6 @@ build_tiktok() {
 	tiktok_args[app_name]="TikTok"
 	tiktok_args[is_module]=false
 	tiktok_args[patcher_args]="-r"
-	tiktok_args[apkmirror_category]="tik-tok-including-musical-ly"
 	tiktok_args[arch]="all"
 	tiktok_args[pkg_name]="com.zhiliaoapp.musically"
 	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok-including-musical-ly/tik-tok-including-musical-ly"
@@ -299,12 +304,11 @@ build_tiktok() {
 }
 
 postfsdata_sh() { echo "${POSTFSDATA_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"; }
-
+uninstall_sh() { echo "${UNINSTALL_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/uninstall.sh"; }
 service_sh() {
 	s="${SERVICE_SH//__MNTDLY/$MOUNT_DELAY}"
 	echo "${s//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
 }
-
 customize_sh() {
 	s="${CUSTOMIZE_SH//__PKGNAME/$1}"
 	echo "${s//__MDVRSN/$2}" >"${MODULE_TEMPLATE_DIR}/customize.sh"
