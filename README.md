@@ -30,7 +30,7 @@ The modules support Magisk update which means you will receive updates from your
 ### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday if there is a change. You may want to disable it.**
 
 # Building Locally
-Make sure you have OpenJDK 17 and xdelta3 installed. Then run:
+Make sure you have JDK 17 installed. Then run:
 
 ```console
 $ git clone --recurse-submodules https://github.com/j-hc/revanced-magisk-module
