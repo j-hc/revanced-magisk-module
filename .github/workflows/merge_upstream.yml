@@ -17,6 +17,7 @@ jobs:
           
       - name: Create PR on conflicts
         run: |
+          git remote add upstream https://github.com/j-hc/revanced-magisk-module
           git fetch upstream
           gh pr create -f -H  upstream/update -r revanced-apks
         env:
