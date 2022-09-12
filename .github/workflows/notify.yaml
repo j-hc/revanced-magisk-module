@@ -40,7 +40,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10' 
-      - uses: jannekem/run-python-script-action@master
+      - uses: jannekem/run-python-script-action@v1
         id: pyscript
         with:
           script: |
