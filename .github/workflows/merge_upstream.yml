@@ -30,7 +30,7 @@ jobs:
         git checkout -b upstream
         
         # Merge the branches and commits from the upstream
-        git merge upstream/main
+        git merge upstream/main --ff-only
         
         git add . --force
         
