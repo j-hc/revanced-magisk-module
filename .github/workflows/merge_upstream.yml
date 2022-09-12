@@ -14,13 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Create Pull Request
-        id: cpr
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{ secrets.PAT }}
-          push-to-fork: j-hc/revanced-magisk-module
-          base: main
+      - name: Sync Repo
+        run: gh repo sync j-hc/revanced-magisk-module -b main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             
 #     - name: Enable Pull Request Automerge
 #       uses: peter-evans/enable-pull-request-automerge@v2
