@@ -1,0 +1,59 @@
+name: Act on release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  Notify_Release:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+          
+      - name: Switch to release branch
+        run: git checkout -f release || git switch --discard-changes --orphan update
+        
+      - name: Update release JSON
+        run: |
+          curl https://api.github.com/repos/${{ github.repository }}/releases/latest > release.json
+          
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+          
+      - name: Push release.json
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: release
+          skip_checkout: true
+          file_pattern: release.json
+          commit_message: Update release.json on ${{ steps.date.outputs.date }}
+          
+      - name: Switch to update branch
+        run: git checkout -f update || git switch --discard-changes --orphan update
+      
+      - name: Get latest release description
+        id: read_file
+        uses: andstor/file-reader-action@v1
+        with:
+          path: "latest_build.md"
+          
+      - name: Telegram Channel Update
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          disable_web_page_preview: true
+          format: markdown
+          message: |
+            *Release*
+          
+            Date: ${{ steps.read_file.outputs.contents }}
+            
+            [Download Now](https://revanced-apks.pages.dev/)
