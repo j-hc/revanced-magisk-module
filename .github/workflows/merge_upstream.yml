@@ -28,7 +28,7 @@ jobs:
         git checkout -b upstream
         
         # Merge the branches and commits from the upstream
-        # git merge upstream/main --allow-unrelated-histories
+        git merge upstream/main --allow-unrelated-histories
         
     - name: Get current date
       id: date
