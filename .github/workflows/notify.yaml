@@ -52,7 +52,7 @@ jobs:
 
             print("Date: "+release['body'], end="\n\n")
 
-            print("* __Downloads__ *")
+            print("*Downloads*")
 
             # Collect browser_download_url from assets in release
             for asset in release['assets'][::-1]:
@@ -66,7 +66,7 @@ jobs:
           disable_web_page_preview: true
           format: markdown
           message: |
-            * __RELEASE__ *
+            *RELEASE*
             
             ${{ steps.pyscript.outputs.stdout }}
             
