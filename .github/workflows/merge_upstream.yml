@@ -10,8 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Sync Repo
-        run: gh repo sync ${{ github.repository }} -b main
+#       - name: Sync Repo
+#         run: gh repo sync ${{ github.repository }} -b main
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.PAT }}
+          
+      - name: Create PR on conflicts
+        run: gh pr create -f -H upstream:update -r revanced-apks
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
