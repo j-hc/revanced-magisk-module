@@ -45,7 +45,6 @@ jobs:
         with:
           script: |
             import json
-            print("*Release*\n")
 
             # Read release.json file
             with open('release.json', 'r') as f:
@@ -53,10 +52,10 @@ jobs:
 
             print("Date: "+release['body'], end="\n\n")
 
-            print("*Downloads*: \n")
+            print("* __Downloads__ *")
 
             # Collect browser_download_url from assets in release
-            for asset in release['assets']:
+            for asset in release['assets'][::-1]:
                 print(f"[{asset['name']}]({asset['browser_download_url']})")
           
       - name: Telegram Channel Update
@@ -67,7 +66,10 @@ jobs:
           disable_web_page_preview: true
           format: markdown
           message: |
+            * __RELEASE__ *
+            
             ${{ steps.pyscript.outputs.stdout }}
             
             Visit [ReVanced APKs](https://revanced-apks.pages.dev/)
-            [Source](https://github.com/${{ github.repository }})
+            
+            Follow @revanced_apks_web
