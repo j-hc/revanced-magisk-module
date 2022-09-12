@@ -19,7 +19,7 @@ jobs:
         run: |
           git remote add upstream https://github.com/j-hc/revanced-magisk-module
           git fetch upstream
-          gh pr create -f -B origin/update -H upstream/update -r revanced-apks
+          gh pr create --title "PR test" --body "PR Test" -B origin/update -H upstream/update -r revanced-apks
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
