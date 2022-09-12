@@ -17,7 +17,7 @@ jobs:
       - name: Sync Repo
         run: gh repo sync j-hc/revanced-magisk-module -b main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
             
 #     - name: Enable Pull Request Automerge
 #       uses: peter-evans/enable-pull-request-automerge@v2
