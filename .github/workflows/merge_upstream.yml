@@ -22,7 +22,7 @@ jobs:
         git remote -v
         
         # Get all recent branches and commits from the upstream
-        git fetch upstream
+        git fetch upstream --allow-unrelated-histories
         
         # Merge the branches and commits from the upstream
         git merge upstream/main
