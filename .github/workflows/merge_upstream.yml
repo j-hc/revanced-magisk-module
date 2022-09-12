@@ -14,6 +14,8 @@ jobs:
         UPSTREAM: https://github.com/j-hc/revanced-magisk-module
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        git remote add upstream ${UPSTREAM}
+        git fetch upstream
         gh pr create --title "Merge Upstream" --body "Upstream update" --fill --base main --head j-hc:revanced-magisk-module:main
         
 #     - name: Enable Pull Request Automerge
