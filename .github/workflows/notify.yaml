@@ -37,14 +37,27 @@ jobs:
           file_pattern: release.json
           commit_message: Update release.json on ${{ steps.date.outputs.date }}
           
-      - name: Switch to update branch
-        run: git checkout -f update || git switch --discard-changes --orphan update
-      
-      - name: Get latest release description
-        id: read_file
-        uses: andstor/file-reader-action@v1
+      - uses: actions/setup-python@v4
         with:
-          path: "latest_build.md"
+          python-version: '3.10' 
+      - uses: jannekem/run-python-script-action@master
+        id: pyscript
+        with:
+          script: |
+            import json
+            print("*Release*\n")
+
+            # Read release.json file
+            with open('release.json', 'r') as f:
+                release = json.load(f)
+
+            print("Date: "+release['body'], end="\n\n")
+
+            print("*Downloads*: \n")
+
+            # Collect browser_download_url from assets in release
+            for asset in release['assets']:
+                print(f"[{asset['name']}]({asset['browser_download_url']})")
           
       - name: Telegram Channel Update
         uses: appleboy/telegram-action@master
@@ -54,8 +67,7 @@ jobs:
           disable_web_page_preview: true
           format: markdown
           message: |
-            *Release*
-          
-            Date: ${{ steps.read_file.outputs.contents }}
+            ${{ steps.pyscript.outputs.stdout }}
             
-            [Download Now](https://revanced-apks.pages.dev/)
+            Visit [ReVanced APKs](https://revanced-apks.pages.dev/)
+            [Source](https://github.com/${{ github.repository }})
