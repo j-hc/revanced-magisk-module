@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: fetch and push
+    - name: Upstream Pull Request
       env:
         UPSTREAM: https://github.com/j-hc/revanced-magisk-module
       run: |
@@ -24,14 +24,36 @@ jobs:
         # Get all recent branches and commits from the upstream
         git fetch upstream --allow-unrelated-histories
         
+        #change branch
+        git checkout -b upstream
+        
         # Merge the branches and commits from the upstream
         git merge upstream/main
-                
-        # helpful for debugging
-        git show-ref
         
-    - name: Push changes
-      uses: ad-m/github-push-action@master
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v4
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: main
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Merge upstream ${{ steps.date.outputs.date }}
+        committer: GitHub <noreply@github.com>
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+        branch: upstream
+        delete-branch: true
+        title: 'Merge Upstream'
+        body: |
+          Update upstream
+          - Updated with *today's* date
+    - name: Enable Pull Request Automerge
+      if: steps.cpr.outputs.pull-request-operation == 'created'
+      uses: peter-evans/enable-pull-request-automerge@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+        merge-method: squash
+
+        
