@@ -14,7 +14,7 @@ jobs:
         UPSTREAM: https://github.com/j-hc/revanced-magisk-module
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh pr create --title "Merge Upstream" --fill --base revanced-apks:revanced-apks:main --head j-hc:revanced-magisk-module:main
+        gh pr create --title "Merge Upstream" --body "Upstream update" --fill --base main --head j-hc:revanced-magisk-module:main
         
 #     - name: Enable Pull Request Automerge
 #       uses: peter-evans/enable-pull-request-automerge@v2
