@@ -16,16 +16,17 @@ jobs:
           fetch-depth: 0
           submodules: true
 
-      - id: prev_tag
+      - name: Get next version code
+        id: next_ver_code
         run: |
-          TAG=$(git tag --sort=creatordate | tail -1)
-          if [ -z "$TAG" ]; then TAG=1; fi
-          echo ::set-output name=tag::$TAG
+          # TAG=$(git tag --sort=creatordate | tail -1)
+          # fetch it from github
+          TAG=$(wget https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest -O- | tr -d ' ' | sed -n 's/.*"tag_name":"\(.*\)".*/\1/p')
+          if [ -z "$TAG" ]; then TAG=0; fi
+          echo ::set-output name=NEXT_VER_CODE::$((TAG + 1))
 
-      - id: next_ver_code
-        run: export TAG=${{ steps.prev_tag.outputs.tag }}; echo ::set-output name=NEXT_VER_CODE::$((TAG + 1))
-
-      - run: ./build.sh build
+      - name: Build Modules/APKs
+        run: ./build.sh build
         env:
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
           NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
@@ -68,6 +69,7 @@ jobs:
         id: update_config
         run: |
           cp -f build.log latest_build.md
+          echo -e "\n[revanced-magisk-module repo]($GITHUB_SERVER_URL/j-hc/revanced-magisk-module)" >>latest_build.md
           CHANGELOG_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/latest_build.md"
           get_update_json() {
             echo "{
