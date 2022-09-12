@@ -16,7 +16,7 @@ jobs:
 #           GITHUB_TOKEN: ${{ secrets.PAT }}
           
       - name: Create PR on conflicts
-        run: gh pr create -f -H upstream:update -r revanced-apks
+        run: gh pr create -f -H  j-hc/revanced-magisk-module:update -r revanced-apks
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
