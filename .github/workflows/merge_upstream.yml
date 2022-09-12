@@ -7,23 +7,12 @@ on:
 jobs:
   merge-upstream:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
-    
     steps:
       - uses: actions/checkout@v3
 
       - name: Sync Repo
-        run: gh repo sync revanced-apks/revanced-apks -b main
+        run: gh repo sync ${{ github.repository }} -b main
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
-            
-#     - name: Enable Pull Request Automerge
-#       uses: peter-evans/enable-pull-request-automerge@v2
-#       with:
-#         token: ${{ secrets.GITHUB_TOKEN }}
-#         pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-#         merge-method: squash
 
         
