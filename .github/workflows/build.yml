@@ -33,6 +33,7 @@ jobs:
 
       - id: get_output
         run: |
+          echo -e "\n[revanced-magisk-module repo]($GITHUB_SERVER_URL/j-hc/revanced-magisk-module)" >>build.log
           BUILD_LOG=$(cat build.log)
           BUILD_LOG="${BUILD_LOG//'%'/'%25'}"
           BUILD_LOG="${BUILD_LOG//$'\n'/'%0A'}"
@@ -69,7 +70,6 @@ jobs:
         id: update_config
         run: |
           cp -f build.log latest_build.md
-          echo -e "\n[revanced-magisk-module repo]($GITHUB_SERVER_URL/j-hc/revanced-magisk-module)" >>latest_build.md
           CHANGELOG_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/latest_build.md"
           get_update_json() {
             echo "{

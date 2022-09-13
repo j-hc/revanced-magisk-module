@@ -198,7 +198,7 @@ build_rv() {
 	module_prop "${args[module_prop_name]}" \
 		"${args[app_name]} ReVanced" \
 		"${version}" \
-		"mounts base.apk for ${args[app_name]} ReVanced" \
+		"${args[app_name]} ReVanced Magisk module" \
 		"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${args[module_update_json]}"
 
 	local module_output="${args[app_name],,}-revanced-magisk-v${version}-${args[arch]}.zip"

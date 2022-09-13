@@ -7,18 +7,20 @@ You can get the [latest CI release from here](https://github.com/j-hc/revanced-m
 The [**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
 
 ## Features
- * Can build magisk modules or non-root APKs
+ * Can build Magisk modules or non-root APKs
  * Updated daily with the latest versions of apps and patches in accordance with your configuration
  * Cleans APKs from unneeded libs to make them smaller
  * Fully open-source, every binary or APK is compiled without human intervention
  * Modules
+     * recompiles invalidated odex for YouTube and Music apps for faster usage
      * receive updates from Magisk app
      * do not break safetynet or trigger root detections used by certain apps
      * handle installation of the correct version of the stock app and all that
      * mount the patched app immediately without needing to reboot
      * do not cause any permanent changes in /system or /data partitions
 
-<sub>* x86 and x86_64 arches are not supported atm but create an issue let me know if you need them </sub>
+
+The default config is for building Magisk modules for YouTube and YT Music, if you want a repo that builds **APKs for every app** you can check out this one: https://github.com/revanced-apks/revanced-apks
 
 ## To include/exclude patches or build non-root variant
 [**See the list of patches**](https://github.com/revanced/revanced-patches#-list-of-available-patches)
