@@ -31,7 +31,7 @@ The default config is for building Magisk modules for YouTube and YT Music, if y
  * Run the [workflow](../../actions/workflows/build.yml)
  * Grab your modules from [releases](../../releases)
 
-**If you include microg patches in [build.conf](./build.conf), you get non-root APKs instead of Magisk modules. Apps except Youtube and Music will always be built as APKs regardless. To be able to use non-root variants of YT and Music you will need to install [Vanced MicroG](https://www.apkmirror.com/apk/team-vanced/microg-youtube-vanced/microg-youtube-vanced-0-2-24-220220-release/).**
+**If you include microg patches in [build.conf](./build.conf), you get non-root APKs instead of Magisk modules. Apps except Youtube and Music will always be built as APKs regardless. To be able to use non-root variants of YT and Music you will need to install [Vanced MicroG](https://github.com/TeamVanced/VancedMicroG/releases).**
 
 ### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday if there is a change. You may want to disable it.**
 
