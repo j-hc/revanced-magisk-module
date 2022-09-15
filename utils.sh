@@ -295,8 +295,8 @@ build_tiktok() {
 	tiktok_args[is_module]=false
 	tiktok_args[patcher_args]="-r"
 	tiktok_args[arch]="all"
-	tiktok_args[pkg_name]="com.zhiliaoapp.musically"
-	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok-including-musical-ly/tik-tok-including-musical-ly"
+	tiktok_args[pkg_name]="com.ss.android.ugc.trill"
+	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok/tik-tok"
 	#shellcheck disable=SC2034
 	tiktok_args[regexp]="APK</span>[^@]*@\([^#]*\)"
 
