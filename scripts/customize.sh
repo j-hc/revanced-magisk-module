@@ -52,6 +52,9 @@ fi
 rm -r $MODPATH/bin $MODPATH/__PKGNAME.apk
 am force-stop __PKGNAME
 
+ui_print "* Optimizing __PKGNAME"
+cmd package compile -m speed-profile -f __PKGNAME &
+
 ui_print "* Done"
 ui_print "  by j-hc (github.com/j-hc)"
 ui_print " "
