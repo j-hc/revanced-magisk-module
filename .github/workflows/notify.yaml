@@ -1,11 +1,6 @@
 name: Act on release
 
-on:
-  workflow_run:
-    workflows: [Build Modules]
-    types:
-      - completed
-  workflow_dispatch:
+on: [workflow_call, workflow_dispatch]
 
 jobs:
   Notify_Release:
