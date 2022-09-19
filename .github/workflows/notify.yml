@@ -47,7 +47,7 @@ jobs:
 
             print("Date: "+release['body'], end="\n\n")
 
-            print("*Downloads*")
+            print("*__Downloads__*")
 
             # Collect browser_download_url from assets in release
             for asset in release['assets'][::-1]:
@@ -59,9 +59,9 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           disable_web_page_preview: true
-          format: markdown
+          format: markdownV2
           message: |
-            *RELEASE*
+            *__RELEASE__*
             
             ${{ steps.pyscript.outputs.stdout }}
             
