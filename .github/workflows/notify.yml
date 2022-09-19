@@ -51,7 +51,7 @@ jobs:
 
             # Collect browser_download_url from assets in release
             for asset in release['assets'][::-1]:
-                print(f"[{asset['name']}]({asset['browser_download_url']})")
+                print(f"[{asset['name'].replace("-","\-")}]({asset['browser_download_url']})")
           
       - name: Telegram Channel Update
         uses: appleboy/telegram-action@master
