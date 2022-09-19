@@ -1,6 +1,14 @@
 name: Act on release
 
-on: [workflow_call, workflow_dispatch]
+on: 
+  workflow_call:
+    secrets:
+      TELEGRAM_TO:
+        required: true
+      TELEGRAM_TOKEN:
+        required: true
+  workflow_dispatch:
+      
 
 jobs:
   Notify_Release:
