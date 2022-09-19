@@ -47,11 +47,11 @@ jobs:
 
             print("Date: "+release['body'], end="\n\n")
 
-            print("*__Downloads__*")
+            print("*Downloads*")
 
             # Collect browser_download_url from assets in release
             for asset in release['assets'][::-1]:
-                print(f"[{asset['name'].replace("-","\-")}]({asset['browser_download_url']})")
+                print(f"[{asset['name']}]({asset['browser_download_url']})")
           
       - name: Telegram Channel Update
         uses: appleboy/telegram-action@master
@@ -59,9 +59,9 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           disable_web_page_preview: true
-          format: markdownV2
+          format: markdown
           message: |
-            *__RELEASE__*
+            *RELEASE*
             
             ${{ steps.pyscript.outputs.stdout }}
             
