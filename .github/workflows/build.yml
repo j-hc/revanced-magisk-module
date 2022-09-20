@@ -1,5 +1,12 @@
 name: Build Modules
-on: [workflow_call, workflow_dispatch]
+on:
+  workflow_call:
+    secrets:
+      TELEGRAM_TO:
+        required: true
+      TELEGRAM_TOKEN:
+        required: true
+  workflow_dispatch:
 
 jobs:
   run:
@@ -111,3 +118,6 @@ jobs:
   notify:
     needs: run
     uses: ./.github/workflows/notify.yml
+    secrets:
+      TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
