@@ -116,7 +116,7 @@ jobs:
           commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
 
   notify:
-    if: github.repository == 'main'
+    if: github.ref == 'ref/head/main'
     needs: run
     uses: ./.github/workflows/notify.yml
     secrets:
