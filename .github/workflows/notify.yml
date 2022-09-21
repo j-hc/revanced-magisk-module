@@ -66,7 +66,6 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          disable_web_page_preview: true
           format: markdown
           message: |
             *RELEASE*
