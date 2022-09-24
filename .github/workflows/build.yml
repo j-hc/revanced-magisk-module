@@ -40,7 +40,6 @@ jobs:
 
       - id: get_output
         run: |
-          echo -e "\n[revanced-magisk-module repo]($GITHUB_SERVER_URL/j-hc/revanced-magisk-module)" >>build.log
           BUILD_LOG=$(cat build.log)
           BUILD_LOG="${BUILD_LOG//'%'/'%25'}"
           BUILD_LOG="${BUILD_LOG//$'\n'/'%0A'}"
