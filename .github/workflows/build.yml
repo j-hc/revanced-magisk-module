@@ -118,6 +118,7 @@ jobs:
   notify:
     needs: run
     uses: ./.github/workflows/notify.yml
+    if: github.ref == 'refs/heads/main'
     secrets:
       TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
