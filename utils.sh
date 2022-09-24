@@ -29,12 +29,14 @@ get_prebuilts() {
 	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK%.apk}-$(cut -d/ -f8 <<<"$RV_INTEGRATIONS_URL").apk"
 	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
 
-	RV_PATCHES_URL=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+	API_RESPONSE=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
+	RELEASE_BODY="${{fromJson(API_RESPONSE).body}}"
+	RV_PATCHES_URL=$(echo $API_RESPONSE | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_PATCHES_JAR="${TEMP_DIR}/${RV_PATCHES_URL##*/}"
 	local rv_patches_filename=${RV_PATCHES_JAR#"$TEMP_DIR/"}
 	local rv_patches_ver=${rv_patches_filename##*'-'}
 	log "Patches: $rv_patches_filename"
-	log "[Patches Changelog](https://github.com/revanced/revanced-patches/releases/tag/v${rv_patches_ver%%'.jar'*})"
+	log $RELEASE_BODY
 
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
