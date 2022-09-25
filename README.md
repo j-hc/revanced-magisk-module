@@ -20,7 +20,7 @@ The [**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the rele
      * do not cause any permanent changes in /system or /data partitions
 
 
-The default config is for building Magisk modules for YouTube and YT Music, if you want a repo that builds **APKs for every app** you can check out this one: https://github.com/revanced-apks/revanced-apks
+The default config is for building Magisk modules for YouTube and YT Music, if you want a repo that builds **APKs for every app** you can check out this one: https://github.com/revanced-apks/build-apps
 
 ## To include/exclude patches or build non-root variant
 [**See the list of patches**](https://github.com/revanced/revanced-patches#-list-of-available-patches)
