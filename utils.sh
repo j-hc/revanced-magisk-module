@@ -9,7 +9,7 @@ BUILD_DIR="build"
 
 ARM64_V8A="arm64-v8a"
 ARM_V7A="arm-v7a"
-GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"j-hc/revanced-magisk-module"}
+GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"revanced-apks/build-apps"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
 
@@ -34,7 +34,6 @@ get_prebuilts() {
 	local rv_patches_filename=${RV_PATCHES_JAR#"$TEMP_DIR/"}
 	local rv_patches_ver=${rv_patches_filename##*'-'}
 	log "Patches: $rv_patches_filename"
-	log "[Patches Changelog](https://github.com/revanced/revanced-patches/releases/tag/v${rv_patches_ver%%'.jar'*})"
 
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
