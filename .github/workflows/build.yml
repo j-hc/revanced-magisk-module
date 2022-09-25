@@ -41,7 +41,8 @@ jobs:
       - name: Set Build Log
         id: get_output
         run: |
-          echo "\nUse [microG APK](https://www.apkmirror.com/apk/team-vanced/microg-youtube-vanced/) for YouTube and Music" >> build.log
+          echo " " >> build.log
+          echo "Use [microG APK](https://www.apkmirror.com/apk/team-vanced/microg-youtube-vanced/) for YouTube and Music" >> build.log
           BUILD_LOG=$(cat build.log)
           BUILD_LOG="${BUILD_LOG//'%'/'%25'}"
           BUILD_LOG="${BUILD_LOG//$'\n'/'%0A'}"
