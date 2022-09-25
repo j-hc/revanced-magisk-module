@@ -36,6 +36,11 @@ get_prebuilts() {
 	local rv_patches_filename=${RV_PATCHES_JAR#"$TEMP_DIR/"}
 	local rv_patches_ver=${rv_patches_filename##*'-'}
 	log "Patches: $rv_patches_filename"
+	
+	RELEASE_BODY="${RELEASE_BODY//'%'/'%25'}"
+	RELEASE_BODY="${RELEASE_BODY//$'\n'/'%0A'}"
+	RELEASE_BODY="${RELEASE_BODY//$'\r'/'%0D'}"
+	echo $RELEASE_BODY
 	log $RELEASE_BODY
 
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
