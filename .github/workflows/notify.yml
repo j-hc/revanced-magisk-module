@@ -72,6 +72,4 @@ jobs:
             
             ${{ steps.pyscript.outputs.stdout }}
             
-            Visit [ReVanced APKs](https://revanced-apks.pages.dev/)
-            
-            Follow @revanced_apks_web
+            @revanced_apks_web | revanced-apks.pages.dev
