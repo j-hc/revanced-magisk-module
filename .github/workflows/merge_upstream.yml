@@ -8,6 +8,7 @@ jobs:
   merge-upstream:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Sync Repo
         run: gh repo sync ${{ github.repository }} -b main
         env:
