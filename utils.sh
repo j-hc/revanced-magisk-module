@@ -20,7 +20,7 @@ UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
 
 get_prebuilts() {
 	echo "Getting prebuilts"
-	RV_CLI_URL=$(req https://api.github.com/repos/inotia00/revanced-patches/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+	RV_CLI_URL=$(req https://api.github.com/repos/notia00/revanced-cli/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_CLI_JAR="${TEMP_DIR}/${RV_CLI_URL##*/}"
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
 
