@@ -19,9 +19,7 @@ jobs:
       - name: Get next version code
         id: next_ver_code
         run: |
-          # TAG=$(git tag --sort=creatordate | tail -1)
-          # fetch it from github
-          TAG=$(wget https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest -O- | tr -d ' ' | sed -n 's/.*"tag_name":"\(.*\)".*/\1/p')
+          TAG=$(git tag --sort=creatordate | tail -1)
           if [ -z "$TAG" ]; then TAG=0; fi
           echo ::set-output name=NEXT_VER_CODE::$((TAG + 1))
 
