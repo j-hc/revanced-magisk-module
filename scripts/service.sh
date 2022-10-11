@@ -1,7 +1,7 @@
 #!/system/bin/sh
 # shellcheck disable=SC2086
 MODDIR=${0%/*}
-RVPATH=/data/local/tmp/__PKGNAME_rv.apk
+RVPATH=/data/adb/__PKGNAME_rv.apk
 until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 1; done
 sleep __MNTDLY
 

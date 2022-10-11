@@ -42,7 +42,7 @@ ui_print "* Setting Permissions"
 set_perm $MODPATH/base.apk 1000 1000 644 u:object_r:apk_data_file:s0
 
 ui_print "* Mounting __PKGNAME"
-RVPATH=/data/local/tmp/__PKGNAME_rv.apk
+RVPATH=/data/adb/__PKGNAME_rv.apk
 ln -f $MODPATH/base.apk $RVPATH
 
 if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH 2>&1); then
@@ -50,6 +50,7 @@ if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH 2>&1); then
 	abort "$op"
 fi
 rm -r $MODPATH/bin $MODPATH/__PKGNAME.apk
+rm -f /data/local/tmp/__PKGNAME_rv.apk
 am force-stop __PKGNAME
 
 ui_print "* Optimizing __PKGNAME"
