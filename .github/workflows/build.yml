@@ -21,7 +21,7 @@ jobs:
         run: |
           TAG=$(git tag --sort=creatordate | tail -1)
           if [ -z "$TAG" ]; then TAG=0; fi
-          echo ::set-output name=NEXT_VER_CODE::$((TAG + 1))
+          echo "NEXT_VER_CODE=$((TAG + 1))" >> $GITHUB_OUTPUT
 
       - name: Build Modules/APKs
         run: ./build.sh build
@@ -37,18 +37,18 @@ jobs:
           BUILD_LOG="${BUILD_LOG//$'\n'/'%0A'}"
           BUILD_LOG="${BUILD_LOG//$'\r'/'%0D'}"
 
-          echo ::set-output name=BUILD_LOG::$BUILD_LOG
+          echo "BUILD_LOG=$BUILD_LOG" >> $GITHUB_OUTPUT
 
           cd build
           yt_op=$(find . -maxdepth 1 -name "youtube-revanced-magisk-*.zip" -printf '%P')
-          echo ::set-output name=YT_OUTPUT::$yt_op
+          echo "YT_OUTPUT=$yt_op" >> $GITHUB_OUTPUT
           if [ -z "$yt_op" ]; then
-            echo ::set-output name=RELEASE_NAME::"revanced"
+            echo "RELEASE_NAME="revanced"" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=RELEASE_NAME::$yt_op
+            echo "RELEASE_NAME=$yt_op" >> $GITHUB_OUTPUT
           fi
-          echo ::set-output name=MUSIC_OUTPUT_ARM64::$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm64-v8a.zip" -printf '%P')
-          echo ::set-output name=MUSIC_OUTPUT_ARM::$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm-v7a.zip" -printf '%P')
+          echo "MUSIC_OUTPUT_ARM64=$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm64-v8a.zip" -printf '%P')" >> $GITHUB_OUTPUT
+          echo "MUSIC_OUTPUT_ARM=$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm-v7a.zip" -printf '%P')" >> $GITHUB_OUTPUT
 
       - name: Upload modules to release
         uses: svenstaro/upload-release-action@v2
