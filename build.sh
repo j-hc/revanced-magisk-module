@@ -45,7 +45,8 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	echo "Building mindetach module"
 	cd mindetach-magisk/mindetach/
 	: >detach.txt
-	echo "com.google.android.youtube" >>detach.txt
+	if [ "$BUILD_YT" = true ]; then echo "com.google.android.youtube" >>detach.txt; fi
+	if [ "$BUILD_MUSIC_ARM64_V8A" = true ] || [ "$BUILD_MUSIC_ARM_V7A" = true ]; then echo "com.google.android.apps.youtube.music" >>detach.txt; fi
 	echo "com.google.android.apps.youtube.music" >>detach.txt
 	zip -r ../../build/mindetach.zip .
 	cd ../../
