@@ -54,7 +54,7 @@ rm -f /data/local/tmp/__PKGNAME_rv.apk
 am force-stop __PKGNAME
 
 ui_print "* Optimizing __PKGNAME"
-cmd package compile -m speed-profile -f __PKGNAME &
+cmd package compile --reset __PKGNAME &
 
 ui_print "* Done"
 ui_print "  by j-hc (github.com/j-hc)"
