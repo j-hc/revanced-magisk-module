@@ -31,8 +31,7 @@ jobs:
 
       - id: get_output
         run: |
-          echo -e "\n[revanced-magisk-module repo]($GITHUB_SERVER_URL/j-hc/revanced-magisk-module)" >>build.log
-          BUILD_LOG=$(cat build.log)
+          BUILD_LOG=$(cat build.md)
 
           echo "BUILD_LOG<<EOF" >> $GITHUB_ENV
           echo "$BUILD_LOG" >> $GITHUB_ENV
@@ -42,7 +41,7 @@ jobs:
           yt_op=$(find . -maxdepth 1 -name "youtube-revanced-magisk-*.zip" -printf '%P')
           echo "YT_OUTPUT=$yt_op" >> $GITHUB_OUTPUT
           if [ -z "$yt_op" ]; then
-            echo "RELEASE_NAME="revanced"" >> $GITHUB_OUTPUT
+            echo "RELEASE_NAME="ReVanced"" >> $GITHUB_OUTPUT
           else
             echo "RELEASE_NAME=$yt_op" >> $GITHUB_OUTPUT
           fi
@@ -66,8 +65,7 @@ jobs:
       - name: Update changelog and Magisk update jsons
         id: update_config
         run: |
-          cp -f build.log latest_build.md
-          CHANGELOG_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/latest_build.md"
+          CHANGELOG_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/build.md"
           get_update_json() {
             echo "{
             \"version\": \"v$1\",
@@ -77,21 +75,21 @@ jobs:
           }"
           }
           if [ -n "${{ steps.get_output.outputs.YT_OUTPUT }}" ]; then
-            YT_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*YouTube version: \(.*\)/\1/p')
+            YT_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*YouTube: \(.*\)/\1/p')
             YT_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YT_OUTPUT }}"
             UPDATE_YT_JSON=$(get_update_json "$YT_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$YT_DLURL" "$CHANGELOG_URL")
             echo "$UPDATE_YT_JSON" >yt-update.json
           fi
 
           if [ -n "${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM64 }}" ]; then
-            MUSIC_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*Music (arm64-v8a) version: \(.*\)/\1/p')
+            MUSIC_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*Music (arm64-v8a): \(.*\)/\1/p')
             MUSIC_ARM64_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM64 }}"
             UPDATE_MUSIC_ARM64_JSON=$(get_update_json "$MUSIC_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" "$MUSIC_ARM64_DLURL" "$CHANGELOG_URL")
             echo "$UPDATE_MUSIC_ARM64_JSON" >music-update-arm64-v8a.json
           fi
 
           if [ -n "${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM }}" ]; then
-            MUSIC_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*Music (arm-v7a) version: \(.*\)/\1/p')
+            MUSIC_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*Music (arm-v7a): \(.*\)/\1/p')
             MUSIC_ARM_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM }}"
             UPDATE_MUSIC_ARM_JSON=$(get_update_json "$MUSIC_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" "$MUSIC_ARM_DLURL" "$CHANGELOG_URL")
             echo "$UPDATE_MUSIC_ARM_JSON" >music-update-arm-v7a.json
@@ -102,5 +100,5 @@ jobs:
         with:
           branch: update
           skip_checkout: true
-          file_pattern: latest_build.md *.json
+          file_pattern: build.md *.json
           commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}

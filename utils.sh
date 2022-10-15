@@ -20,21 +20,22 @@ UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
 
 get_prebuilts() {
 	echo "Getting prebuilts"
-	RV_CLI_URL=$(req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+	RV_CLI_URL=$(req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | jq -r '.assets[0].browser_download_url')
 	RV_CLI_JAR="${TEMP_DIR}/${RV_CLI_URL##*/}"
-	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
+	log "CLI: ${RV_CLI_URL##*/}"
 
-	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*apk\)".*/\1/p')
+	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | jq -r '.assets[0].browser_download_url')
 	RV_INTEGRATIONS_APK=${RV_INTEGRATIONS_URL##*/}
-	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK%.apk}-$(cut -d/ -f8 <<<"$RV_INTEGRATIONS_URL").apk"
-	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
+	RV_INTEGRATIONS_APK="${RV_INTEGRATIONS_APK%.apk}-$(cut -d/ -f8 <<<"$RV_INTEGRATIONS_URL").apk"
+	log "Integrations: $RV_INTEGRATIONS_APK"
+	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK}"
 
-	RV_PATCHES_URL=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+	RV_PATCHES=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
+	RV_PATCHES_CHANGELOG=$(echo "$RV_PATCHES" | jq -r '.body' | sed '/^$/N;/^\n$/D')
+	RV_PATCHES_URL=$(echo "$RV_PATCHES" | jq -r '.assets[].browser_download_url | select(endswith("jar"))')
 	RV_PATCHES_JAR="${TEMP_DIR}/${RV_PATCHES_URL##*/}"
-	local rv_patches_filename=${RV_PATCHES_JAR#"$TEMP_DIR/"}
-	local rv_patches_ver=${rv_patches_filename##*'-'}
-	log "Patches: $rv_patches_filename"
-	log "[Patches Changelog](https://github.com/revanced/revanced-patches/releases/tag/v${rv_patches_ver%%'.jar'*})"
+	log "Patches: ${RV_PATCHES_URL##*/}"
+	log "${RV_PATCHES_CHANGELOG//# [/### [}\n"
 
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
@@ -72,7 +73,7 @@ reset_template() {
 }
 
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
-log() { echo -e "$1  " >>build.log; }
+log() { echo -e "$1  " >>build.md; }
 get_apk_vers() { req "https://www.apkmirror.com/uploads/?appcategory=${1}" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'; }
 get_largest_ver() {
 	local max=0
@@ -136,8 +137,7 @@ build_rv() {
 	local version
 	reset_template
 
-	echo "Building ${args[app_name]} ${args[arch]}"
-
+	echo "Building ${args[app_name]} (${args[arch]})"
 	if [ "${args[is_module]}" = true ]; then
 		if [[ ${args[patcher_args]} == *"--experimental"* ]]; then
 			local select_ver_experimental=true
@@ -178,9 +178,9 @@ build_rv() {
 			"${args[regexp]}" \
 			"$stock_apk"
 		if [ "${args[arch]}" = "all" ]; then
-			log "\n${args[app_name]} version: ${version}"
+			log "${args[app_name]}: ${version}"
 		else
-			log "\n${args[app_name]} (${args[arch]}) version: ${version}"
+			log "${args[app_name]} (${args[arch]}): ${version}"
 		fi
 	fi
 
