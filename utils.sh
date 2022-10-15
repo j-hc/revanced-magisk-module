@@ -293,7 +293,7 @@ build_tiktok() {
 	declare -A tiktok_args
 	tiktok_args[app_name]="TikTok"
 	tiktok_args[is_module]=false
-	tiktok_args[patcher_args]=""
+	tiktok_args[patcher_args]="-m ${RV_INTEGRATIONS_APK}"
 	tiktok_args[arch]="all"
 	tiktok_args[pkg_name]="com.ss.android.ugc.trill"
 	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok/tik-tok"
