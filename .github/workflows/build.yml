@@ -1,12 +1,14 @@
 name: Build Modules
-on: [workflow_call, workflow_dispatch]
-secrets:
-  TELEGRAM_TOKEN:
-    description: 'Telegram Bot Token'
-    required: true
-  TELEGRAM_TO:
-    description: 'Telegram Chat ID'
-    required: true
+on: 
+  workflow_call:
+    secrets:
+      TELEGRAM_TOKEN:
+        description: 'Telegram Bot Token'
+        required: true
+      TELEGRAM_TO:
+        description: 'Telegram Chat ID'
+        required: true
+  workflow_dispatch:
 
 jobs:
   run:
