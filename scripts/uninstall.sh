@@ -1,2 +1,2 @@
 #!/system/bin/sh
-rm /data/local/tmp/__PKGNAME_rv.apk
+rm /data/adb/__PKGNAME_rv.apk
