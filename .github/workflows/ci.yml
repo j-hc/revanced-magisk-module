@@ -22,7 +22,7 @@ jobs:
 
           is_youtube_latest() {
             if [[ $YT_PATCHER_ARGS == *"--experimental"* ]]; then
-              declare -r cur_yt=$(sed -n 's/.*YouTube version: \(.*\)/\1/p' latest_build.md | xargs)
+              declare -r cur_yt=$(sed -n 's/.*YouTube: \(.*\)/\1/p' build.md | xargs)
               [ -z "$cur_yt" ] && return 1 # empty, fail=>dont build
               declare -r last_ver=$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=youtube" | get_largest_ver)
 
@@ -35,9 +35,9 @@ jobs:
           }
 
           is_patches_latest() {
-            declare -r last_patches_url=$(wget -nv -O- https://api.github.com/repos/revanced/revanced-patches/releases/latest | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+            declare -r last_patches_url=$(wget -nv -O- https://api.github.com/repos/revanced/revanced-patches/releases/latest | jq -r '.assets[].browser_download_url | select(endswith("jar"))')
             declare -r last_patches=${last_patches_url##*/}
-            cur_patches=$(sed -n 's/.*Patches: \(.*\)/\1/p' latest_build.md | xargs)
+            cur_patches=$(sed -n 's/.*Patches: \(.*\)/\1/p' build.md | xargs)
 
             echo "current patches version: $cur_patches"
             echo "latest patches version: $last_patches"
@@ -46,13 +46,13 @@ jobs:
 
           if ! git checkout update; then
             echo "first time building!"
-            echo ::set-output name=SHOULD_BUILD::1
+            echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
           elif is_patches_latest || is_youtube_latest; then
             echo "build!"
-            echo ::set-output name=SHOULD_BUILD::1
+            echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
           else
             echo "dont build!"
-            echo ::set-output name=SHOULD_BUILD::0
+            echo "SHOULD_BUILD=0" >> $GITHUB_OUTPUT
           fi
 
     outputs:

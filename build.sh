@@ -13,7 +13,7 @@ if [ -z ${1+x} ]; then
 	print_usage
 	exit 0
 elif [ "$1" = "clean" ]; then
-	rm -rf revanced-cache build.log build
+	rm -rf revanced-cache build.md build
 	reset_template
 	exit 0
 elif [ "$1" = "reset-template" ]; then
@@ -26,8 +26,7 @@ else
 	exit 1
 fi
 
-: >build.log
-log "$(date +'%Y-%m-%d')\n"
+: >build.md
 mkdir -p "$BUILD_DIR" "$TEMP_DIR"
 
 if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
@@ -45,11 +44,12 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	echo "Building mindetach module"
 	cd mindetach-magisk/mindetach/
 	: >detach.txt
-	echo "com.google.android.youtube" >>detach.txt
-	echo "com.google.android.apps.youtube.music" >>detach.txt
+	if [ "$BUILD_YT" = true ]; then echo "com.google.android.youtube" >>detach.txt; fi
+	if [ "$BUILD_MUSIC_ARM64_V8A" = true ] || [ "$BUILD_MUSIC_ARM_V7A" = true ]; then echo "com.google.android.apps.youtube.music" >>detach.txt; fi
 	zip -r ../../build/mindetach.zip .
 	cd ../../
 fi
+log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 
 reset_template
 echo "Done"

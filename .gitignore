@@ -4,7 +4,7 @@
 /revanced-cache
 /temp
 /build
-build.log
+build.md
 /test
 *.keystore
 !base-v17.24.34.apk
