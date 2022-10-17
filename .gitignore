@@ -6,3 +6,6 @@
 /build
 build.log
 /test
+*.keystore
+!base-v17.24.34.apk
+.v*
