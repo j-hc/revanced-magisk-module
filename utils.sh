@@ -191,6 +191,11 @@ build_rv() {
 
 	patch_apk "$stock_apk" "$patched_apk" "${args[patcher_args]}"
 
+	if [ ! -f "$patched_apk" ]; then
+		echo "BUILD FAIL"
+		return
+	fi
+
 	if [ $is_root = false ]; then
 		echo "Built ${args[app_name]} (${args[arch]}) (non-root)"
 		return
