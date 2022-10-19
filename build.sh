@@ -49,7 +49,7 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	zip -r ../../build/mindetach.zip .
 	cd ../../
 fi
-log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
+log "\nUse microg for non root YT apks"
 
 reset_template
 echo "Done"
