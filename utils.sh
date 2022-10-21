@@ -18,23 +18,29 @@ POSTFSDATA_SH=$(cat $MODULE_SCRIPTS_DIR/post-fs-data.sh)
 CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
 UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
 
+json_get() {
+	local key=$1 grep_for=${2:-}
+	grep "$key" | if [ "$grep_for" ]; then grep "$grep_for"; else cat; fi | sed -E 's/^[^:]*:\s?"(.*)",?/\1/'
+}
+
 get_prebuilts() {
 	echo "Getting prebuilts"
-	RV_CLI_URL=$(req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+	RV_CLI_URL=$(req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | json_get 'browser_download_url')
 	RV_CLI_JAR="${TEMP_DIR}/${RV_CLI_URL##*/}"
-	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
+	log "CLI: ${RV_CLI_URL##*/}"
 
-	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*apk\)".*/\1/p')
+	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | json_get 'browser_download_url')
 	RV_INTEGRATIONS_APK=${RV_INTEGRATIONS_URL##*/}
-	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK%.apk}-$(cut -d/ -f8 <<<"$RV_INTEGRATIONS_URL").apk"
-	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
+	RV_INTEGRATIONS_APK="${RV_INTEGRATIONS_APK%.apk}-$(cut -d/ -f8 <<<"$RV_INTEGRATIONS_URL").apk"
+	log "Integrations: $RV_INTEGRATIONS_APK"
+	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK}"
 
-	RV_PATCHES_URL=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+	RV_PATCHES=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
+	RV_PATCHES_CHANGELOG=$(echo "$RV_PATCHES" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
+	RV_PATCHES_URL=$(echo "$RV_PATCHES" | json_get 'browser_download_url' 'jar')
 	RV_PATCHES_JAR="${TEMP_DIR}/${RV_PATCHES_URL##*/}"
-	local rv_patches_filename=${RV_PATCHES_JAR#"$TEMP_DIR/"}
-	local rv_patches_ver=${rv_patches_filename##*'-'}
-	log "Patches: $rv_patches_filename"
-	log "[Patches Changelog](https://github.com/revanced/revanced-patches/releases/tag/v${rv_patches_ver%%'.jar'*})"
+	log "Patches: ${RV_PATCHES_URL##*/}"
+	log "${RV_PATCHES_CHANGELOG//# [/### [}\n"
 
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
@@ -72,7 +78,7 @@ reset_template() {
 }
 
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
-log() { echo -e "$1  " >>build.log; }
+log() { echo -e "$1  " >>build.md; }
 get_apk_vers() { req "https://www.apkmirror.com/uploads/?appcategory=${1}" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'; }
 get_largest_ver() {
 	local max=0
@@ -106,7 +112,7 @@ patch_apk() {
 	if [ -f "$patched_output" ]; then return; fi
 	# shellcheck disable=SC2086
 	# --rip-lib is only available in my own revanced-cli builds
-	java -jar "$RV_CLI_JAR" --rip-lib x86 --rip-lib x86_64 -a "$stock_input" -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
+	java -jar "$RV_CLI_JAR" --rip-lib x86 --rip-lib x86_64 -c -a "$stock_input" -o "$patched_output" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
 }
 
 zip_module() {
@@ -136,8 +142,7 @@ build_rv() {
 	local version
 	reset_template
 
-	echo "Building ${args[app_name]} ${args[arch]}"
-
+	echo "Building ${args[app_name]} (${args[arch]})"
 	if [ "${args[is_module]}" = true ]; then
 		if [[ ${args[patcher_args]} == *"--experimental"* ]]; then
 			local select_ver_experimental=true
@@ -178,13 +183,18 @@ build_rv() {
 			"${args[regexp]}" \
 			"$stock_apk"
 		if [ "${args[arch]}" = "all" ]; then
-			log "\n${args[app_name]} version: ${version}"
+			log "${args[app_name]}: ${version}"
 		else
-			log "\n${args[app_name]} (${args[arch]}) version: ${version}"
+			log "${args[app_name]} (${args[arch]}): ${version}"
 		fi
 	fi
 
 	patch_apk "$stock_apk" "$patched_apk" "${args[patcher_args]}"
+
+	if [ ! -f "$patched_apk" ]; then
+		echo "BUILD FAIL"
+		return
+	fi
 
 	if [ $is_root = false ]; then
 		echo "Built ${args[app_name]} (${args[arch]}) (non-root)"
@@ -293,10 +303,10 @@ build_tiktok() {
 	declare -A tiktok_args
 	tiktok_args[app_name]="TikTok"
 	tiktok_args[is_module]=false
-	tiktok_args[patcher_args]=""
+	tiktok_args[patcher_args]="-m ${RV_INTEGRATIONS_APK}"
 	tiktok_args[arch]="all"
-	tiktok_args[pkg_name]="com.ss.android.ugc.trill"
-	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok/tik-tok"
+	tiktok_args[pkg_name]="com.zhiliaoapp.musically"
+	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok-including-musical-ly/tik-tok-including-musical-ly"
 	#shellcheck disable=SC2034
 	tiktok_args[regexp]="APK</span>[^@]*@\([^#]*\)"
 
