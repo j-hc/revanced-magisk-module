@@ -1,10 +1,10 @@
 CLI: revanced-cli-2.15.0-all.jar  
 Integrations: app-release-unsigned-v0.54.0.apk  
-Patches: revanced-patches-2.85.0.jar  
+Patches: revanced-patches-2.85.1.jar  
 
-### [2.85.0](https://github.com/revanced/revanced-patches/compare/v2.84.1...v2.85.0) (2022-10-20)
-### Features
-* **youtube:**  patch ([#770](https://github.com/revanced/revanced-patches/issues/770)) ([478af6a](https://github.com/revanced/revanced-patches/commit/478af6ad54ffdf6f99abab35a84a4f50b59d28c8))
+#### [2.85.1](https://github.com/revanced/revanced-patches/compare/v2.85.0...v2.85.1) (2022-10-21)
+### Bug Fixes
+* **youtube/theme:** extend dark mode theming ([#827](https://github.com/revanced/revanced-patches/issues/827)) ([6d803c5](https://github.com/revanced/revanced-patches/commit/6d803c5386e1f6f6fb6a7fa0a9f0bb81ee1022ac))
 
   
 YouTube: 17.36.37  
