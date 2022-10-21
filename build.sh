@@ -33,22 +33,31 @@ if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
 reset_template
 get_cmpr
 
-if [ "$BUILD_TWITTER" = true ]; then build_twitter; fi
-if [ "$BUILD_REDDIT" = true ]; then build_reddit; fi
-if [ "$BUILD_WARN_WETTER" = true ]; then build_warn_wetter; fi
-if [ "$BUILD_TIKTOK" = true ]; then build_tiktok; fi
-if [ "$BUILD_YT" = true ]; then build_yt; fi
-if [ "$BUILD_MUSIC_ARM64_V8A" = true ]; then build_music $ARM64_V8A; fi
-if [ "$BUILD_MUSIC_ARM_V7A" = true ]; then build_music $ARM_V7A; fi
+if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 1)); then
+	abort "COMPRESSION_LEVEL must be between 1 and 9"
+fi
+
+build_youtube
+build_music $ARM64_V8A
+build_music $ARM_V7A
+build_twitter
+build_reddit
+build_tiktok
+build_spotify
+build_warn_wetter
+
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	echo "Building mindetach module"
 	cd mindetach-magisk/mindetach/
 	: >detach.txt
-	if [ "$BUILD_YT" = true ]; then echo "com.google.android.youtube" >>detach.txt; fi
-	if [ "$BUILD_MUSIC_ARM64_V8A" = true ] || [ "$BUILD_MUSIC_ARM_V7A" = true ]; then echo "com.google.android.apps.youtube.music" >>detach.txt; fi
+	if [ "${YOUTUBE_MODE%/*}" != none ]; then echo "com.google.android.youtube" >>detach.txt; fi
+	if [ "${MUSIC_ARM64_V8A_MODE%/*}" != none ] || [ "${MUSIC_ARM_V7A_MODE%/*}" != none ]; then
+		echo "com.google.android.apps.youtube.music" >>detach.txt
+	fi
 	zip -r ../../build/mindetach.zip .
 	cd ../../
 fi
+
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 
 reset_template

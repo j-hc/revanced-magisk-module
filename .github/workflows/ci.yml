@@ -21,7 +21,7 @@ jobs:
           source utils.sh
 
           is_youtube_latest() {
-            if [[ $YT_PATCHER_ARGS == *"--experimental"* ]]; then
+            if [ "${YOUTUBE_MODE%/*}" = latest ]; then
               declare -r cur_yt=$(sed -n 's/.*YouTube: \(.*\)/\1/p' build.md | xargs)
               [ -z "$cur_yt" ] && return 1 # empty, fail=>dont build
               declare -r last_ver=$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=youtube" | get_largest_ver)
