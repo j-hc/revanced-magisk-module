@@ -111,12 +111,18 @@ get_apkmirror_vers() {
 	req "https://www.apkmirror.com/uploads/?appcategory=${apkmirror_category}" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'
 }
 get_uptodown_ver() {
-	local app_name=$1
-	req "https://${app_name}.en.uptodown.com/android/download" - | json_get 'softwareVersion'
+	local last_ver app_name=$1 pkg_name=$2 select_ver_experimental=$3
+	last_ver=$(get_patch_last_supported_ver "$pkg_name")
+	if [ "$select_ver_experimental" = true ] || [ -z "$last_ver" ]; then
+		req "https://${app_name}.en.uptodown.com/android/download" - | json_get 'softwareVersion'
+	else
+		echo "$last_ver"
+	fi
 }
 dl_uptodown() {
-	local app_name=$1 output=$2
-	url=$(req "https://${app_name}.en.uptodown.com/android/download" - | sed -n 's;.*data-url="\(.*\)".*;\1;p')
+	local version_json=$1 output=$2 version=$3
+	version_url=$(curl -s "$version_json" | jq ".data[] | select(.version | contains(\"$version\")) | .versionURL")
+	url=$(curl -s "${version_url:1:-1}" | grep -oE "https:\/\/dw\.uptodown\.com.+\/")
 	req "$url" "$output"
 }
 
@@ -184,11 +190,13 @@ build_rv() {
 		fi
 		if [ "$version_mode" = auto ] && [ $dl_from = apkmirror ]; then
 			version=$(select_ver "${args[pkg_name]}" "${args[apkmirror_dlurl]##*/}" false)
+		elif [ "$version_mode" = auto ] && [ $dl_from = uptodown ]; then
+			version=$(get_uptodown_ver "${args[app_name],,}" "${args[pkg_name]}" false)
 		elif [ "$version_mode" = latest ]; then
 			if [ $dl_from = apkmirror ]; then
 				version=$(select_ver "${args[pkg_name]}" "${args[apkmirror_dlurl]##*/}" true)
 			elif [ $dl_from = uptodown ]; then
-				version=$(get_uptodown_ver "${args[app_name],,}")
+				version=$(get_uptodown_ver "${args[app_name],,}" "${args[pkg_name]}" true)
 			fi
 			patcher_args="$patcher_args --experimental"
 		else
@@ -224,8 +232,8 @@ build_rv() {
 					return 1
 				fi
 			elif [ $dl_from = uptodown ]; then
-				echo "Downloading the latest version from Uptodown"
-				if ! dl_uptodown "${args[app_name],,}" "$stock_apk"; then
+				echo "Downloading from UpToDown"
+				if ! dl_uptodown "${args[uptodown_dlurl]}" "$stock_apk" "${version}"; then
 					echo "ERROR: Could not download ${args[app_name]}"
 					return 1
 				fi
@@ -369,6 +377,7 @@ build_spotify() {
 	spotify_args[app_name]="Spotify"
 	spotify_args[mode]="$SPOTIFY_MODE"
 	spotify_args[pkg_name]="com.spotify.music"
+	spotify_args[uptodown_dlurl]="https://spotify.en.uptodown.com/android/apps/16806/versions"
 	spotify_args[module_prop_name]="sp-magisk"
 	#shellcheck disable=SC2034
 	spotify_args[module_update_json]="sp-update.json"
