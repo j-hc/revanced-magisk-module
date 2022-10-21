@@ -30,7 +30,7 @@ jobs:
           
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
           
       - name: Push release.json
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -66,7 +66,7 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
+          format: markdownV2
           message: |
             📑 *RELEASE*
             
