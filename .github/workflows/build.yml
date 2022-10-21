@@ -50,11 +50,7 @@ jobs:
           cd build
           yt_op=$(find . -maxdepth 1 -name "youtube-revanced-magisk-*.zip" -printf '%P')
           echo "YT_OUTPUT=$yt_op" >> $GITHUB_OUTPUT
-          if [ -z "$yt_op" ]; then
-            echo "RELEASE_NAME="ReVanced"" >> $GITHUB_OUTPUT
-          else
-            echo "RELEASE_NAME=$yt_op" >> $GITHUB_OUTPUT
-          fi
+          echo "RELEASE_NAME=$(date +'v%Y-%m-%d')" >> $GITHUB_OUTPUT
           echo "MUSIC_OUTPUT_ARM64=$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm64-v8a.zip" -printf '%P')" >> $GITHUB_OUTPUT
           echo "MUSIC_OUTPUT_ARM=$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm-v7a.zip" -printf '%P')" >> $GITHUB_OUTPUT
 
