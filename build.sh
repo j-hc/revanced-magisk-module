@@ -51,6 +51,11 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	cd mindetach-magisk/mindetach/
 	: >detach.txt
 	if [ "${YOUTUBE_MODE%/*}" != none ]; then echo "com.google.android.youtube" >>detach.txt; fi
+	if [ "${TWITTER_MODE%/*}" != none ]; then echo "com.twitter.android" >>detach.txt; fi
+	if [ "${REDDIT_MODE%/*}" != none ]; then echo "com.reddit.frontpage" >>detach.txt; fi
+	if [ "${TIKTOK_MODE%/*}" != none ]; then echo "com.zhiliaoapp.musically" >>detach.txt; fi
+	if [ "${SPOTIFY_MODE%/*}" != none ]; then echo "com.spotify.music" >>detach.txt; fi
+	if [ "${WARN_WETTER_MODE%/*}" != none ]; then echo "de.dwd.warnapp" >>detach.txt; fi
 	if [ "${MUSIC_ARM64_V8A_MODE%/*}" != none ] || [ "${MUSIC_ARM_V7A_MODE%/*}" != none ]; then
 		echo "com.google.android.apps.youtube.music" >>detach.txt
 	fi

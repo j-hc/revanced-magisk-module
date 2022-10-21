@@ -48,6 +48,11 @@ jobs:
           fi
           echo "MUSIC_OUTPUT_ARM64=$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm64-v8a.zip" -printf '%P')" >> $GITHUB_OUTPUT
           echo "MUSIC_OUTPUT_ARM=$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm-v7a.zip" -printf '%P')" >> $GITHUB_OUTPUT
+          echo "TW_OUTPUT=$(find . -maxdepth 1 -name "twitter-revanced-magisk-*.zip" -printf '%P')" >> $GITHUB_OUTPUT
+          echo "RDIT_OUTPUT=$(find . -maxdepth 1 -name "reddit-revanced-magisk-*.zip" -printf '%P')" >> $GITHUB_OUTPUT
+          echo "TT_OUTPUT=$(find . -maxdepth 1 -name "tiktok-revanced-magisk-*.zip" -printf '%P')" >> $GITHUB_OUTPUT
+          echo "SP_OUTPUT=$(find . -maxdepth 1 -name "spotify-revanced-magisk-*.zip" -printf '%P')" >> $GITHUB_OUTPUT
+          echo "WW_OUTPUT=$(find . -maxdepth 1 -name "warnwetter-revanced-magisk-*.zip" -printf '%P')" >> $GITHUB_OUTPUT
 
       - name: Upload modules to release
         uses: svenstaro/upload-release-action@v2
@@ -95,6 +100,36 @@ jobs:
             MUSIC_ARM_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM }}"
             UPDATE_MUSIC_ARM_JSON=$(get_update_json "$MUSIC_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" "$MUSIC_ARM_DLURL" "$CHANGELOG_URL")
             echo "$UPDATE_MUSIC_ARM_JSON" >music-update-arm-v7a.json
+          fi
+          if [ -n "${{ steps.get_output.outputs.TW_OUTPUT }}" ]; then
+            TW_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*Twitter: \(.*\)/\1/p' | xargs)
+            TW_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${{ steps.get_output.outputs.TW_OUTPUT }}"
+            UPDATE_TW_JSON=$(get_update_json "$TW_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$TW_DLURL" "$CHANGELOG_URL")
+            echo "$UPDATE_TW_JSON" >tw-update.json
+          fi
+          if [ -n "${{ steps.get_output.outputs.RDIT_OUTPUT }}" ]; then
+            RDIT_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*Reddit: \(.*\)/\1/p' | xargs)
+            RDIT_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${{ steps.get_output.outputs.RDIT_OUTPUT }}"
+            UPDATE_RDIT_JSON=$(get_update_json "$RDIT_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$RDIT_DLURL" "$CHANGELOG_URL")
+            echo "$UPDATE_RDIT_JSON" >rdit-update.json
+          fi
+          if [ -n "${{ steps.get_output.outputs.TT_OUTPUT }}" ]; then
+            TT_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*TikTok: \(.*\)/\1/p' | xargs)
+            TT_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${{ steps.get_output.outputs.TT_OUTPUT }}"
+            UPDATE_TT_JSON=$(get_update_json "$TT_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$TT_DLURL" "$CHANGELOG_URL")
+            echo "$UPDATE_TT_JSON" tt-update.json
+          fi
+          if [ -n "${{ steps.get_output.outputs.SP_OUTPUT }}" ]; then
+            SP_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*Spotify: \(.*\)/\1/p' | xargs)
+            SP_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${{ steps.get_output.outputs.SP_OUTPUT }}"
+            UPDATE_SP_JSON=$(get_update_json "$SP_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$SP_DLURL" "$CHANGELOG_URL")
+            echo "$UPDATE_SP_JSON" >sp-update.json
+          fi
+          if [ -n "${{ steps.get_output.outputs.WW_OUTPUT }}" ]; then
+            WW_VER=$(echo "${{ env.BUILD_LOG }}" | sed -n 's/.*WarnWetter: \(.*\)/\1/p' | xargs)
+            WW_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${{ steps.get_output.outputs.WW_OUTPUT }}"
+            UPDATE_WW_JSON=$(get_update_json "$WW_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$WW_DLURL" "$CHANGELOG_URL")
+            echo "$UPDATE_WW_JSON" >ww-update.json
           fi
           if [ ! -f *.json ]; then : >dummy.json; fi
 

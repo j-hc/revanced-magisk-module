@@ -347,7 +347,7 @@ build_reddit() {
 	declare -A reddit_args
 	reddit_args[app_name]="Reddit"
 	reddit_args[mode]="$REDDIT_MODE"
-	reddit_args[pkg_name]="om.reddit.frontpage"
+	reddit_args[pkg_name]="com.reddit.frontpage"
 	reddit_args[apkmirror_dlurl]="redditinc/reddit/reddit"
 	reddit_args[regexp]='APK</span>[^@]*@\([^#]*\)'
 	reddit_args[module_prop_name]="rditrv-magisk"
@@ -365,7 +365,7 @@ build_tiktok() {
 	tiktok_args[pkg_name]="com.zhiliaoapp.musically"
 	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok-including-musical-ly/tik-tok-including-musical-ly"
 	tiktok_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-	tiktok_args[module_prop_name]="tt-magisk"
+	tiktok_args[module_prop_name]="ttrv-magisk"
 	#shellcheck disable=SC2034
 	tiktok_args[module_update_json]="tt-update.json"
 
@@ -378,7 +378,7 @@ build_spotify() {
 	spotify_args[mode]="$SPOTIFY_MODE"
 	spotify_args[pkg_name]="com.spotify.music"
 	spotify_args[uptodown_dlurl]="https://spotify.en.uptodown.com/android/apps/16806/versions"
-	spotify_args[module_prop_name]="sp-magisk"
+	spotify_args[module_prop_name]="sprv-magisk"
 	#shellcheck disable=SC2034
 	spotify_args[module_update_json]="sp-update.json"
 
@@ -392,7 +392,7 @@ build_warn_wetter() {
 	warn_wetter_args[pkg_name]="de.dwd.warnapp"
 	warn_wetter_args[apkmirror_dlurl]="deutscher-wetterdienst/warnwetter/warnwetter"
 	warn_wetter_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-	warn_wetter_args[module_prop_name]="ww-magisk"
+	warn_wetter_args[module_prop_name]="wwrv-magisk"
 	#shellcheck disable=SC2034
 	warn_wetter_args[module_update_json]="ww-update.json"
 
