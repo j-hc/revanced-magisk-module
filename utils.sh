@@ -242,10 +242,14 @@ build_rv() {
 			fi
 		fi
 
-		if [ "${args[arch]}" = "all" ]; then
-			log "${args[app_name]}: ${version}"
+		if ! grep -q -e "${args[app_name]}: ${version}" -e "${args[app_name]} (${args[arch]}): ${version}" build.md; then
+			if [ "${args[arch]}" = "all" ]; then
+				log "${args[app_name]}: ${version}"
+			else
+				log "${args[app_name]} (${args[arch]}): ${version}"
+			fi
 		else
-			log "${args[app_name]} (${args[arch]}): ${version}"
+			echo "Duplicate Entry found in build.md"
 		fi
 
 		if [ ! -f "$patched_apk" ] || [ "${args[microg_patch]:-}" ]; then
