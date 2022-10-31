@@ -58,7 +58,7 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	cd ../../
 fi
 
-log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
+log "\n[revanced-extended-magisk-module](https://github.com/nkoc6a15/revanced-extended-magisk-module)"
 
 reset_template
 echo "Done"
