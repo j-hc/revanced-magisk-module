@@ -1,8 +1,8 @@
 # ReVanced Magisk Module
-[![Build Modules](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml/badge.svg)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml)
-[![CI](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml)
+[![CI](https://github.com/nkoc6a15/revanced-extended-magisk-module/actions/workflows/ci.yml/badge.svg)](https://github.com/nkoc6a15/revanced-extended-magisk-module/actions/workflows/ci.yml)
+[![Build Modules](https://github.com/nkoc6a15/revanced-extended-magisk-module/actions/workflows/build.yml/badge.svg)](https://github.com/nkoc6a15/revanced-extended-magisk-module/actions/workflows/build.yml)
 
-You can get the [latest CI release from here](https://github.com/j-hc/revanced-magisk-module/releases).
+You can get the [latest CI release from here](https://github.com/nkoc6a15/revanced-extended-magisk-module/releases).
 
 The [**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
 
@@ -28,7 +28,7 @@ The [**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the rele
  * Run the [workflow](../../actions/workflows/build.yml)
  * Grab your modules from [releases](../../releases)
 
-To be able to use non-root variants of YT and Music you will need to install [Vanced MicroG](https://github.com/TeamVanced/VancedMicroG/releases).**
+To be able to use non-root variants of YT and Music you will need to install [Vanced MicroG](https://github.com/inotia00/VancedMicroG/releases).**
 
 ### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday if there is a change. You may want to disable it.**
 
