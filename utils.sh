@@ -235,14 +235,12 @@ build_rv() {
 		fi
 
 		if [ "${args[arch]}" = "all" ]; then
-			log "${args[app_name]}: ${version}"
+			! grep -q "${args[app_name]}" build.md && log "${args[app_name]}: ${version}"
 		else
-			log "${args[app_name]} (${args[arch]}): ${version}"
+			! grep -q "${args[app_name]} (${args[arch]})" build.md && log "${args[app_name]} (${args[arch]}): ${version}"
 		fi
 
-		if [ ! -f "$patched_apk" ] || [ "${args[microg_patch]:-}" ]; then
-			patch_apk "$stock_apk" "$patched_apk" "$patcher_args"
-		fi
+		[ ! -f "$patched_apk" ] && patch_apk "$stock_apk" "$patched_apk" "$patcher_args"
 		if [ ! -f "$patched_apk" ]; then
 			echo "BUILD FAIL"
 			return
@@ -339,12 +337,12 @@ build_reddit() {
 	declare -A reddit_args
 	reddit_args[app_name]="Reddit"
 	reddit_args[mode]="$REDDIT_MODE"
-	reddit_args[pkg_name]="om.reddit.frontpage"
+	reddit_args[pkg_name]="com.reddit.frontpage"
 	reddit_args[apkmirror_dlurl]="redditinc/reddit/reddit"
 	reddit_args[regexp]='APK</span>[^@]*@\([^#]*\)'
 	reddit_args[module_prop_name]="rditrv-magisk"
 	#shellcheck disable=SC2034
-	reddit_args[module_update_json]="rdit-update.json"
+	reddit_args[module_update_json]="rdrv-update.json"
 
 	build_rv reddit_args
 }
@@ -357,7 +355,7 @@ build_tiktok() {
 	tiktok_args[pkg_name]="com.zhiliaoapp.musically"
 	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok-including-musical-ly/tik-tok-including-musical-ly"
 	tiktok_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-	tiktok_args[module_prop_name]="tt-magisk"
+	tiktok_args[module_prop_name]="ttrv-magisk"
 	#shellcheck disable=SC2034
 	tiktok_args[module_update_json]="tt-update.json"
 
@@ -369,7 +367,7 @@ build_spotify() {
 	spotify_args[app_name]="Spotify"
 	spotify_args[mode]="$SPOTIFY_MODE"
 	spotify_args[pkg_name]="com.spotify.music"
-	spotify_args[module_prop_name]="sp-magisk"
+	spotify_args[module_prop_name]="sprv-magisk"
 	#shellcheck disable=SC2034
 	spotify_args[module_update_json]="sp-update.json"
 
@@ -383,7 +381,7 @@ build_warn_wetter() {
 	warn_wetter_args[pkg_name]="de.dwd.warnapp"
 	warn_wetter_args[apkmirror_dlurl]="deutscher-wetterdienst/warnwetter/warnwetter"
 	warn_wetter_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-	warn_wetter_args[module_prop_name]="ww-magisk"
+	warn_wetter_args[module_prop_name]="wwrv-magisk"
 	#shellcheck disable=SC2034
 	warn_wetter_args[module_update_json]="ww-update.json"
 
@@ -406,7 +404,5 @@ versionCode=${NEXT_VER_CODE}
 author=j-hc
 description=${4}" >"${MODULE_TEMPLATE_DIR}/module.prop"
 
-	if [ "$ENABLE_MAGISK_UPDATE" = true ]; then
-		echo "updateJson=${5}" >>"${MODULE_TEMPLATE_DIR}/module.prop"
-	fi
+	[ "$ENABLE_MAGISK_UPDATE" = true ] && echo "updateJson=${5}" >>"${MODULE_TEMPLATE_DIR}/module.prop"
 }
