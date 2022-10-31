@@ -53,7 +53,7 @@ jobs:
             with open('release.json', 'r') as f:
                 release = json.load(f)
 
-            print("Date: "+release['body'], end="\n\n")
+            print(release['body'], end="\n\n")
 
             print("📦 *Downloads*")
 
