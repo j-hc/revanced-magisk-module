@@ -9,7 +9,7 @@ BUILD_DIR="build"
 
 ARM64_V8A="arm64-v8a"
 ARM_V7A="arm-v7a"
-GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"j-hc/revanced-magisk-module"}
+GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"nkoc6a15/revanced-extended-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
 
@@ -29,13 +29,13 @@ get_prebuilts() {
 	RV_CLI_JAR="${TEMP_DIR}/${RV_CLI_URL##*/}"
 	log "CLI: ${RV_CLI_URL##*/}"
 
-	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | json_get 'browser_download_url')
+	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/inotia00/revanced-integrations/releases/latest - | json_get 'browser_download_url')
 	RV_INTEGRATIONS_APK=${RV_INTEGRATIONS_URL##*/}
 	RV_INTEGRATIONS_APK="${RV_INTEGRATIONS_APK%.apk}-$(cut -d/ -f8 <<<"$RV_INTEGRATIONS_URL").apk"
 	log "Integrations: $RV_INTEGRATIONS_APK"
 	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK}"
 
-	RV_PATCHES=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
+	RV_PATCHES=$(req https://api.github.com/repos/inotia00/revanced-patches/releases/latest -)
 	RV_PATCHES_CHANGELOG=$(echo "$RV_PATCHES" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
 	RV_PATCHES_URL=$(echo "$RV_PATCHES" | json_get 'browser_download_url' 'jar')
 	RV_PATCHES_JAR="${TEMP_DIR}/${RV_PATCHES_URL##*/}"
@@ -208,11 +208,11 @@ build_rv() {
 		fi
 
 		local stock_apk="${TEMP_DIR}/${args[app_name],,}-stock-v${version}-${args[arch]}.apk"
-		local apk_output="${BUILD_DIR}/${args[app_name],,}-revanced-v${version}-${args[arch]}.apk"
+		local apk_output="${BUILD_DIR}/${args[app_name],,}-revanced-extended-v${version}-${args[arch]}.apk"
 		if [ "${args[microg_patch]:-}" ]; then
-			local patched_apk="${TEMP_DIR}/${args[app_name],,}-revanced-v${version}-${args[arch]}-${build_mode}.apk"
+			local patched_apk="${TEMP_DIR}/${args[app_name],,}-revanced-extended-v${version}-${args[arch]}-${build_mode}.apk"
 		else
-			local patched_apk="${TEMP_DIR}/${args[app_name],,}-revanced-v${version}-${args[arch]}.apk"
+			local patched_apk="${TEMP_DIR}/${args[app_name],,}-revanced-extended-v${version}-${args[arch]}.apk"
 		fi
 		if [ ! -f "$stock_apk" ]; then
 			if [ $dl_from = apkmirror ]; then
@@ -256,12 +256,12 @@ build_rv() {
 		postfsdata_sh "${args[pkg_name]}"
 		customize_sh "${args[pkg_name]}" "${version}"
 		module_prop "${args[module_prop_name]}" \
-			"${args[app_name]} ReVanced" \
+			"${args[app_name]} ReVanced Extended" \
 			"${version}" \
-			"${args[app_name]} ReVanced Magisk module" \
+			"${args[app_name]} ReVanced Extended Magisk module" \
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${args[module_update_json]}"
 
-		local module_output="${args[app_name],,}-revanced-magisk-v${version}-${args[arch]}.zip"
+		local module_output="${args[app_name],,}-revanced-extended-magisk-v${version}-${args[arch]}.zip"
 		zip_module "$patched_apk" "$module_output" "$stock_apk" "${args[pkg_name]}"
 
 		echo "Built ${args[app_name]} (${args[arch]}) (root): '${BUILD_DIR}/${module_output}'"
@@ -401,7 +401,7 @@ module_prop() {
 name=${2}
 version=v${3}
 versionCode=${NEXT_VER_CODE}
-author=j-hc
+author=nkoc6a15
 description=${4}" >"${MODULE_TEMPLATE_DIR}/module.prop"
 
 	[ "$ENABLE_MAGISK_UPDATE" = true ] && echo "updateJson=${5}" >>"${MODULE_TEMPLATE_DIR}/module.prop"
