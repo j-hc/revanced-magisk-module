@@ -54,9 +54,9 @@ jobs:
             with open('release.json', 'r') as f:
                 release = json.load(f)
 
-            print(release['name'], end="\n")
+            print(release['name'], end="\n\n")
             
-            print(re.findall(r"CLI:[a-zA-Z-.\s0-9:]+\n", release['body'])[0] or "", end="\n\n")
+            print(re.findall(r"CLI:[a-zA-Z-.\s0-9:]+\n", release['body'])[0] or "")
             
             print("*Note:* \n - `mindtech.zip` is used to detach play store updates for YT and YT Music for rooted users.\n - Use `vanced microg` for non root YT and YT Music.", end="\n\n")
 
