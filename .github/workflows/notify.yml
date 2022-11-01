@@ -54,6 +54,8 @@ jobs:
                 release = json.load(f)
 
             print(release['name'], end="\n\n")
+            
+            print("*Note:* \n - `mindtech.zip` is used to detach play store updates for YT and YT Music for rooted users.\n - Use `vanced microg` for non root YT and YT Music.", end="\n\n")
 
             print("📦 *Downloads*")
 
