@@ -274,10 +274,19 @@ excluded_patches() {
 	fi
 }
 
+included_patches() {
+	if [ "$1" ]; then
+		echo "$1" | tr -d '\t\r' | tr ' ' '\n' | grep -v '^$' | sed 's/^/-i /' | paste -sd " " -
+	else
+		echo ""
+	fi
+}
+
 build_youtube() {
 	declare -A youtube_args
 	youtube_args[app_name]="YouTube"
 	youtube_args[patcher_args]="-m ${RV_INTEGRATIONS_APK} $(excluded_patches "${YOUTUBE_EXCLUDED_PATCHES}")"
+	youtube_args[patcher_args]="-m ${RV_INTEGRATIONS_APK} $(included_patches "${YOUTUBE_INCLUDED_PATCHES}")"
 	youtube_args[mode]="$YOUTUBE_MODE"
 	youtube_args[microg_patch]="microg-support"
 	youtube_args[pkg_name]="com.google.android.youtube"
@@ -296,6 +305,7 @@ build_music() {
 	local arch=$1
 	ytmusic_args[app_name]="Music"
 	ytmusic_args[patcher_args]="$(excluded_patches "${MUSIC_EXCLUDED_PATCHES}")"
+	ytmusic_args[patcher_args]="$(included_patches "${MUSIC_INCLUDED_PATCHES}")"
 	ytmusic_args[microg_patch]="music-microg-support"
 	ytmusic_args[arch]=$arch
 	ytmusic_args[pkg_name]="com.google.android.apps.youtube.music"
