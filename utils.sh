@@ -36,9 +36,11 @@ get_prebuilts() {
 	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK}"
 
 	RV_PATCHES=$(req https://api.github.com/repos/inotia00/revanced-patches/releases/latest -)
+	RV_PATCHES_CHANGELOG=$(echo "$RV_PATCHES" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
 	RV_PATCHES_URL=$(echo "$RV_PATCHES" | json_get 'browser_download_url' 'jar')
 	RV_PATCHES_JAR="${TEMP_DIR}/${RV_PATCHES_URL##*/}"
 	log "Patches: ${RV_PATCHES_URL##*/}"
+	log "\n${RV_PATCHES_CHANGELOG//# [/### [}\n"
 
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
