@@ -63,8 +63,20 @@ jobs:
             print("📦 *Downloads*")
 
             # Collect browser_download_url from assets in release
+            nonroot_files = []
+            root_files = []
             for asset in release['assets'][::-1]:
-                print(f"🔗 [{asset['name']}]({asset['browser_download_url']})")
+                file_name = asset['name']
+                file_url = asset['browser_download_url']
+                if 'magisk' in file_name:
+                  root_files.append(f"🔗 [{file_name}]({file_url})")
+                else:
+                  nonroot_files.append(f"🔗 [{file_name}]({file_url})")
+            print("_Non Root_ :")
+            print("\n".join(nonroot_files))
+            print()
+            print("_Root_ :")
+            print("\n".join(root_files))
           
       - name: Telegram Channel Update
         uses: appleboy/telegram-action@master
