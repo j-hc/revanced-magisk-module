@@ -37,9 +37,9 @@ if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 1)); then
 	abort "COMPRESSION_LEVEL must be between 1 and 9"
 fi
 
+log "**App Versions:**"
 build_youtube
-build_music $ARM64_V8A
-build_music $ARM_V7A
+build_music
 build_twitter
 build_reddit
 build_tiktok
@@ -50,14 +50,17 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	echo "Building mindetach module"
 	cd mindetach-magisk/mindetach/
 	: >detach.txt
-	if [ "${YOUTUBE_MODE%/*}" != none ]; then echo "com.google.android.youtube" >>detach.txt; fi
-	if [ "${MUSIC_ARM64_V8A_MODE%/*}" != none ] || [ "${MUSIC_ARM_V7A_MODE%/*}" != none ]; then
+	if [ "${YOUTUBE_MODE%/*}" = module ]; then echo "com.google.android.youtube" >>detach.txt; fi
+	if [ "${MUSIC_ARM64_V8A_MODE%/*}" = module ] || [ "${MUSIC_ARM_V7A_MODE%/*}" = module ]; then
 		echo "com.google.android.apps.youtube.music" >>detach.txt
 	fi
 	zip -r ../../build/mindetach.zip .
 	cd ../../
 fi
 
+if [ "${YOUTUBE_MODE%/*}" = apk ] || [ "${MUSIC_ARM64_V8A_MODE%/*}" = apk ] || [ "${MUSIC_ARM_V7A_MODE%/*}" = apk ]; then
+	log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) to be able to use non-root YouTube or Music"
+fi
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 
 reset_template

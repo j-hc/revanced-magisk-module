@@ -7,8 +7,6 @@ MODULE_SCRIPTS_DIR="scripts"
 TEMP_DIR="temp"
 BUILD_DIR="build"
 
-ARM64_V8A="arm64-v8a"
-ARM_V7A="arm-v7a"
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"j-hc/revanced-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
@@ -19,8 +17,7 @@ CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
 UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
 
 json_get() {
-	local key=$1 grep_for=${2:-}
-	grep -o "\"${key}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/' | if [ "$grep_for" ]; then grep "$grep_for"; else cat; fi
+	grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/' | if [ $# -eq 2 ]; then grep "$2"; else cat; fi || echo ""
 }
 
 get_prebuilts() {
@@ -99,7 +96,8 @@ dl_if_dne() {
 
 # if you are here to copy paste this piece of code, acknowledge it:)
 dl_apkmirror() {
-	local url=$1 regexp=$2 output=$3
+	local url=$1 version=$2 regexp=$3 output=$4
+	url="https://www.apkmirror.com/apk/${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	url="https://www.apkmirror.com$(echo "$resp" | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
@@ -137,24 +135,11 @@ zip_module() {
 	cd ..
 }
 
-select_ver() {
-	local last_ver pkg_name=$1 apkmirror_category=$2 select_ver_experimental=$3
-	last_ver=$(get_patch_last_supported_ver "$pkg_name")
-	if [ "$select_ver_experimental" = true ] || [ -z "$last_ver" ]; then
-		if [ "$pkg_name" = "com.twitter.android" ]; then
-			last_ver=$(get_apkmirror_vers "$apkmirror_category" | grep "release" | get_largest_ver)
-		else
-			last_ver=$(get_apkmirror_vers "$apkmirror_category" | get_largest_ver)
-		fi
-	fi
-	echo "$last_ver"
-}
-
 build_rv() {
 	local -n args=$1
 	local version patcher_args dl_from build_mode_arr
 	local mode_arg=${args[mode]%/*} version_mode=${args[mode]#*/}
-	args[arch]=${args[arch]:-all}
+	local arch=${args[arch]:-all} app_name_l=${args[app_name],,}
 	if [ "${args[apkmirror_dlurl]:-}" ] && [ "${args[regexp]:-}" ]; then dl_from=apkmirror; else dl_from=uptodown; fi
 	reset_template
 
@@ -167,14 +152,14 @@ build_rv() {
 	elif [ "$mode_arg" = both ]; then
 		build_mode_arr=(apk module)
 	else
-		echo "ERROR: undefined build mode for YouTube: '$mode_arg'"
+		echo "ERROR: undefined build mode for ${args[app_name]}: '${mode_arg}'"
 		return
 	fi
+
 	for build_mode in "${build_mode_arr[@]}"; do
 		patcher_args="${args[patcher_args]:-}"
-		printf "Building '%s' (%s) in " "${args[app_name]}" "${args[arch]}"
+		printf "Building '%s' (%s) in " "${args[app_name]}" "${arch}"
 		if [ "$build_mode" = module ]; then echo "'module' mode"; else echo "'APK' mode"; fi
-
 		if [ "${args[microg_patch]:-}" ]; then
 			if [ "$build_mode" = module ]; then
 				patcher_args="$patcher_args -e ${args[microg_patch]}"
@@ -182,13 +167,17 @@ build_rv() {
 				abort "UNREACHABLE $LINENO"
 			fi
 		fi
+		local apkmirror_category=${args[apkmirror_dlurl]##*/}
 		if [ "$version_mode" = auto ] && [ $dl_from = apkmirror ]; then
-			version=$(select_ver "${args[pkg_name]}" "${args[apkmirror_dlurl]##*/}" false)
+			version=$(get_patch_last_supported_ver "${args[pkg_name]}")
+			if [ -z "$version" ]; then
+				version=$(get_apkmirror_vers "$apkmirror_category" | if [ "${args[pkg_name]}" = "com.twitter.android" ]; then grep release; else cat; fi | get_largest_ver)
+			fi
 		elif [ "$version_mode" = latest ]; then
 			if [ $dl_from = apkmirror ]; then
-				version=$(select_ver "${args[pkg_name]}" "${args[apkmirror_dlurl]##*/}" true)
+				version=$(get_apkmirror_vers "$apkmirror_category" | if [ "${args[pkg_name]}" = "com.twitter.android" ]; then grep release; else cat; fi | get_largest_ver)
 			elif [ $dl_from = uptodown ]; then
-				version=$(get_uptodown_ver "${args[app_name],,}")
+				version=$(get_uptodown_ver "${app_name_l}")
 			fi
 			patcher_args="$patcher_args --experimental"
 		else
@@ -207,25 +196,23 @@ build_rv() {
 			fi
 		fi
 
-		local stock_apk="${TEMP_DIR}/${args[app_name],,}-stock-v${version}-${args[arch]}.apk"
-		local apk_output="${BUILD_DIR}/${args[app_name],,}-revanced-v${version}-${args[arch]}.apk"
+		local stock_apk="${TEMP_DIR}/${app_name_l}-stock-v${version}-${arch}.apk"
+		local apk_output="${BUILD_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
 		if [ "${args[microg_patch]:-}" ]; then
-			local patched_apk="${TEMP_DIR}/${args[app_name],,}-revanced-v${version}-${args[arch]}-${build_mode}.apk"
+			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-v${version}-${arch}-${build_mode}.apk"
 		else
-			local patched_apk="${TEMP_DIR}/${args[app_name],,}-revanced-v${version}-${args[arch]}.apk"
+			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
 		fi
 		if [ ! -f "$stock_apk" ]; then
 			if [ $dl_from = apkmirror ]; then
 				echo "Downloading from APKMirror"
-				if ! dl_apkmirror "https://www.apkmirror.com/apk/${args[apkmirror_dlurl]}-${version//./-}-release/" \
-					"${args[regexp]}" \
-					"$stock_apk"; then
+				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "${args[regexp]}" "$stock_apk"; then
 					echo "ERROR: Could not find version '${version}' for ${args[app_name]}"
 					return 1
 				fi
 			elif [ $dl_from = uptodown ]; then
 				echo "Downloading the latest version from Uptodown"
-				if ! dl_uptodown "${args[app_name],,}" "$stock_apk"; then
+				if ! dl_uptodown "$app_name_l" "$stock_apk"; then
 					echo "ERROR: Could not download ${args[app_name]}"
 					return 1
 				fi
@@ -234,20 +221,20 @@ build_rv() {
 			fi
 		fi
 
-		if [ "${args[arch]}" = "all" ]; then
-			! grep -q "${args[app_name]}" build.md && log "${args[app_name]}: ${version}"
+		if [ "${arch}" = "all" ]; then
+			! grep -q "\$${args[app_name]}:" build.md && log "${args[app_name]}: ${version}"
 		else
-			! grep -q "${args[app_name]} (${args[arch]})" build.md && log "${args[app_name]} (${args[arch]}): ${version}"
+			! grep -q "\$${args[app_name]} (${arch}):" build.md && log "${args[app_name]} (${arch}): ${version}"
 		fi
 
 		[ ! -f "$patched_apk" ] && patch_apk "$stock_apk" "$patched_apk" "$patcher_args"
 		if [ ! -f "$patched_apk" ]; then
-			echo "BUILD FAIL"
+			echo "BUILDING FAILED"
 			return
 		fi
 		if [ "$build_mode" = apk ]; then
 			cp -f "$patched_apk" "${apk_output}"
-			echo "Built ${args[app_name]} (${args[arch]}) (non-root): '${apk_output}'"
+			echo "Built ${args[app_name]} (${arch}) (non-root): '${apk_output}'"
 			continue
 		fi
 
@@ -255,135 +242,129 @@ build_rv() {
 		service_sh "${args[pkg_name]}"
 		postfsdata_sh "${args[pkg_name]}"
 		customize_sh "${args[pkg_name]}" "${version}"
-		module_prop "${args[module_prop_name]}" \
-			"${args[app_name]} ReVanced" \
-			"${version}" \
-			"${args[app_name]} ReVanced Magisk module" \
-			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${args[module_update_json]}"
 
-		local module_output="${args[app_name],,}-revanced-magisk-v${version}-${args[arch]}.zip"
+		local upj pn
+		upj=$([ "${arch}" = "all" ] && echo "${app_name_l}-update.json" || echo "${app_name_l}-${arch}-update.json")
+		if [ "${args[module_prop_name]:-}" ]; then
+			pn=${args[module_prop_name]}
+		else
+			pn=$([ "${arch}" = "all" ] && echo "${app_name_l}-rv-jhc-magisk" || echo "${app_name_l}-${arch}-rv-jhc-magisk")
+		fi
+		module_prop "$pn" \
+			"${args[app_name]} ReVanced" \
+			"$version" \
+			"${args[app_name]} ReVanced Magisk module" \
+			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${upj}"
+
+		local module_output="${app_name_l}-revanced-magisk-v${version}-${arch}.zip"
 		zip_module "$patched_apk" "$module_output" "$stock_apk" "${args[pkg_name]}"
 
-		echo "Built ${args[app_name]} (${args[arch]}) (root): '${BUILD_DIR}/${module_output}'"
+		echo "Built ${args[app_name]} (${arch}) (root): '${BUILD_DIR}/${module_output}'"
 	done
 }
 
-excluded_patches() {
-	if [ "$1" ]; then
-		echo "$1" | tr -d '\t\r' | tr ' ' '\n' | grep -v '^$' | sed 's/^/-e /' | paste -sd " " -
-	else
-		echo ""
-	fi
+join_args() {
+	echo "$1" | tr -d '\t\r' | tr ' ' '\n' | grep -v '^$' | sed "s/^/${2} /" | paste -sd " " - || echo ""
 }
 
+#shellcheck disable=SC2034
 build_youtube() {
 	declare -A youtube_args
 	youtube_args[app_name]="YouTube"
-	youtube_args[patcher_args]="-m ${RV_INTEGRATIONS_APK} $(excluded_patches "${YOUTUBE_EXCLUDED_PATCHES}")"
+	youtube_args[patcher_args]="-m ${RV_INTEGRATIONS_APK} $(join_args "${YOUTUBE_EXCLUDED_PATCHES}" -e) $(join_args "${YOUTUBE_INCLUDED_PATCHES}" -i)"
 	youtube_args[mode]="$YOUTUBE_MODE"
 	youtube_args[microg_patch]="microg-support"
 	youtube_args[pkg_name]="com.google.android.youtube"
 	youtube_args[rip_all_libs]=true
-	youtube_args[apkmirror_dlurl]="google-inc/youtube/youtube"
+	youtube_args[apkmirror_dlurl]="google-inc/youtube"
 	youtube_args[regexp]="APK</span>[^@]*@\([^#]*\)"
 	youtube_args[module_prop_name]="ytrv-magisk"
-	# shellcheck disable=SC2034
-	youtube_args[module_update_json]="yt-update.json"
 
 	build_rv youtube_args
 }
 
+#shellcheck disable=SC2034
 build_music() {
 	declare -A ytmusic_args
-	local arch=$1
 	ytmusic_args[app_name]="Music"
-	ytmusic_args[patcher_args]="$(excluded_patches "${MUSIC_EXCLUDED_PATCHES}")"
+	ytmusic_args[patcher_args]="$(join_args "${MUSIC_EXCLUDED_PATCHES}" -e) $(join_args "${MUSIC_INCLUDED_PATCHES}" -i)"
 	ytmusic_args[microg_patch]="music-microg-support"
-	ytmusic_args[arch]=$arch
 	ytmusic_args[pkg_name]="com.google.android.apps.youtube.music"
 	ytmusic_args[rip_all_libs]=false
-	ytmusic_args[apkmirror_dlurl]="google-inc/youtube-music/youtube-music"
-	if [ "$arch" = "$ARM64_V8A" ]; then
-		ytmusic_args[regexp]='arm64-v8a</div>[^@]*@\([^"]*\)'
-		ytmusic_args[module_prop_name]="ytmusicrv-magisk"
-		ytmusic_args[mode]="$MUSIC_ARM64_V8A_MODE"
+	ytmusic_args[apkmirror_dlurl]="google-inc/youtube-music"
 
-	elif [ "$arch" = "$ARM_V7A" ]; then
-		ytmusic_args[regexp]='armeabi-v7a</div>[^@]*@\([^"]*\)'
-		ytmusic_args[module_prop_name]="ytmusicrv-arm-magisk"
-		ytmusic_args[mode]="$MUSIC_ARM_V7A_MODE"
-	fi
-	#shellcheck disable=SC2034
-	ytmusic_args[module_update_json]="music-update-${arch}.json"
+	for a in arm64-v8a arm-v7a; do
+		if [ $a = arm64-v8a ]; then
+			ytmusic_args[module_prop_name]="ytmusicrv-magisk"
+			ytmusic_args[arch]=arm64-v8a
+			ytmusic_args[regexp]='arm64-v8a</div>[^@]*@\([^"]*\)'
+			ytmusic_args[mode]="$MUSIC_ARM64_V8A_MODE"
+		elif [ $a = arm-v7a ]; then
+			ytmusic_args[module_prop_name]="ytmusicrv-arm-magisk"
+			ytmusic_args[arch]=arm-v7a
+			ytmusic_args[regexp]='armeabi-v7a</div>[^@]*@\([^"]*\)'
+			ytmusic_args[mode]="$MUSIC_ARM_V7A_MODE"
+		fi
 
-	build_rv ytmusic_args
+		build_rv ytmusic_args
+	done
 }
 
+#shellcheck disable=SC2034
 build_twitter() {
 	declare -A tw_args
 	tw_args[app_name]="Twitter"
 	tw_args[mode]="$TWITTER_MODE"
 	tw_args[pkg_name]="com.twitter.android"
-	tw_args[apkmirror_dlurl]="twitter-inc/twitter/twitter"
+	tw_args[apkmirror_dlurl]="twitter-inc/twitter"
 	tw_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-	tw_args[module_prop_name]="twrv-magisk"
-	#shellcheck disable=SC2034
-	tw_args[module_update_json]="tw-update.json"
 
 	build_rv tw_args
 }
 
+#shellcheck disable=SC2034
 build_reddit() {
 	declare -A reddit_args
 	reddit_args[app_name]="Reddit"
 	reddit_args[mode]="$REDDIT_MODE"
 	reddit_args[pkg_name]="com.reddit.frontpage"
-	reddit_args[apkmirror_dlurl]="redditinc/reddit/reddit"
+	reddit_args[apkmirror_dlurl]="redditinc/reddit"
 	reddit_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-	reddit_args[module_prop_name]="rditrv-magisk"
-	#shellcheck disable=SC2034
-	reddit_args[module_update_json]="rdrv-update.json"
 
 	build_rv reddit_args
 }
 
+#shellcheck disable=SC2034
 build_tiktok() {
 	declare -A tiktok_args
 	tiktok_args[app_name]="TikTok"
 	tiktok_args[patcher_args]="-m ${RV_INTEGRATIONS_APK}"
 	tiktok_args[mode]="$TIKTOK_MODE"
 	tiktok_args[pkg_name]="com.zhiliaoapp.musically"
-	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok-including-musical-ly/tik-tok-including-musical-ly"
+	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok-including-musical-ly"
 	tiktok_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-	tiktok_args[module_prop_name]="ttrv-magisk"
-	#shellcheck disable=SC2034
-	tiktok_args[module_update_json]="tt-update.json"
 
 	build_rv tiktok_args
 }
 
+#shellcheck disable=SC2034
 build_spotify() {
 	declare -A spotify_args
 	spotify_args[app_name]="Spotify"
 	spotify_args[mode]="$SPOTIFY_MODE"
 	spotify_args[pkg_name]="com.spotify.music"
-	spotify_args[module_prop_name]="sprv-magisk"
-	#shellcheck disable=SC2034
-	spotify_args[module_update_json]="sp-update.json"
 
 	build_rv spotify_args
 }
 
+#shellcheck disable=SC2034
 build_warn_wetter() {
 	declare -A warn_wetter_args
 	warn_wetter_args[app_name]="WarnWetter"
 	warn_wetter_args[mode]="$WARN_WETTER_MODE"
 	warn_wetter_args[pkg_name]="de.dwd.warnapp"
-	warn_wetter_args[apkmirror_dlurl]="deutscher-wetterdienst/warnwetter/warnwetter"
+	warn_wetter_args[apkmirror_dlurl]="deutscher-wetterdienst/warnwetter"
 	warn_wetter_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-	warn_wetter_args[module_prop_name]="wwrv-magisk"
-	#shellcheck disable=SC2034
-	warn_wetter_args[module_update_json]="ww-update.json"
 
 	build_rv warn_wetter_args
 }

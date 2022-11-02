@@ -39,14 +39,11 @@ jobs:
 
           cd build
           yt_op=$(find . -maxdepth 1 -name "youtube-revanced-magisk-*.zip" -printf '%P')
-          echo "YT_OUTPUT=$yt_op" >> $GITHUB_OUTPUT
           if [ -z "$yt_op" ]; then
-            echo "RELEASE_NAME="ReVanced"" >> $GITHUB_OUTPUT
+            echo "RELEASE_NAME=ReVanced" >> $GITHUB_OUTPUT
           else
             echo "RELEASE_NAME=$yt_op" >> $GITHUB_OUTPUT
           fi
-          echo "MUSIC_OUTPUT_ARM64=$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm64-v8a.zip" -printf '%P')" >> $GITHUB_OUTPUT
-          echo "MUSIC_OUTPUT_ARM=$(find . -maxdepth 1 -name "music-revanced-magisk-*-arm-v7a.zip" -printf '%P')" >> $GITHUB_OUTPUT
 
       - name: Upload modules to release
         uses: svenstaro/upload-release-action@v2
@@ -65,37 +62,27 @@ jobs:
       - name: Update changelog and Magisk update jsons
         id: update_config
         run: |
-          echo '${{ steps.get_output.outputs.BUILD_LOG }}' >build.md
-          CHANGELOG_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/build.md"
           get_update_json() {
             echo "{
-            \"version\": \"v$1\",
+            \"version\": \"$1\",
             \"versionCode\": $2,
             \"zipUrl\": \"$3\",
-            \"changelog\": \"$4\"
+            \"changelog\": \"https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/build.md\"
           }"
           }
-          if [ -n "${{ steps.get_output.outputs.YT_OUTPUT }}" ]; then
-            YT_VER=$(sed -n 's/.*YouTube: \(.*\)/\1/p' build.md | xargs)
-            YT_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${{ steps.get_output.outputs.YT_OUTPUT }}"
-            UPDATE_YT_JSON=$(get_update_json "$YT_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$YT_DLURL" "$CHANGELOG_URL")
-            echo "$UPDATE_YT_JSON" >yt-update.json
-          fi
 
-          if [ -n "${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM64 }}" ]; then
-            MUSIC_VER=$(sed -n 's/.*Music (arm64-v8a): \(.*\)/\1/p' build.md | xargs)
-            MUSIC_ARM64_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM64 }}"
-            UPDATE_MUSIC_ARM64_JSON=$(get_update_json "$MUSIC_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" "$MUSIC_ARM64_DLURL" "$CHANGELOG_URL")
-            echo "$UPDATE_MUSIC_ARM64_JSON" >music-update-arm64-v8a.json
-          fi
+          cd build || echo "build folder not found"; return
+          for OUTPUT in *.zip; do
+            ZIP_S=$(unzip -p "$OUTPUT" module.prop)
+            UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson)
+            UPDATE_JSON="${UPDATE_JSON##*/}"
+            VER=$(echo "$ZIP_S" | grep version=)
+            VER="${VER##*=}"
+            DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
+            get_update_json "$VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$DLURL" "$CHANGELOG_URL" >"../$UPDATE_JSON"
+          done
 
-          if [ -n "${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM }}" ]; then
-            MUSIC_VER=$(sed -n 's/.*Music (arm-v7a): \(.*\)/\1/p' build.md | xargs)
-            MUSIC_ARM_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${{ steps.get_output.outputs.MUSIC_OUTPUT_ARM }}"
-            UPDATE_MUSIC_ARM_JSON=$(get_update_json "$MUSIC_VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" "$MUSIC_ARM_DLURL" "$CHANGELOG_URL")
-            echo "$UPDATE_MUSIC_ARM_JSON" >music-update-arm-v7a.json
-          fi
-          [ -z "$(find . -quit -type f -name "*.json")" ] && : >dummy.json
+          [ -z "$(find . -type f -name "*.json")" ] && : >dummy.json
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
