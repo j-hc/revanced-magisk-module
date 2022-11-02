@@ -50,8 +50,8 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	echo "Building mindetach module"
 	cd mindetach-magisk/mindetach/
 	: >detach.txt
-	if [ "${YOUTUBE_MODE%/*}" = module ]; then echo "com.google.android.youtube" >>detach.txt; fi
-	if [ "${MUSIC_ARM64_V8A_MODE%/*}" = module ] || [ "${MUSIC_ARM_V7A_MODE%/*}" = module ]; then
+	if [ "${YOUTUBE_MODE%/*}" != apk ]; then echo "com.google.android.youtube" >>detach.txt; fi
+	if [ "${MUSIC_ARM64_V8A_MODE%/*}" != apk ] || [ "${MUSIC_ARM_V7A_MODE%/*}" != apk ]; then
 		echo "com.google.android.apps.youtube.music" >>detach.txt
 	fi
 	zip -r ../../build/mindetach-"$(grep version= module.prop | cut -d= -f2)".zip .
