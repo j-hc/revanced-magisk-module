@@ -54,7 +54,7 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	if [ "${MUSIC_ARM64_V8A_MODE%/*}" = module ] || [ "${MUSIC_ARM_V7A_MODE%/*}" = module ]; then
 		echo "com.google.android.apps.youtube.music" >>detach.txt
 	fi
-	zip -r ../../build/mindetach.zip .
+	zip -r ../../build/mindetach-"$(grep version= module.prop | cut -d= -f2)".zip .
 	cd ../../
 fi
 

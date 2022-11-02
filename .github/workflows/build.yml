@@ -71,7 +71,7 @@ jobs:
           }"
           }
 
-          cd build || echo "build folder not found"; return
+          cd build || echo "build folder not found"
           for OUTPUT in *.zip; do
             ZIP_S=$(unzip -p "$OUTPUT" module.prop)
             UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson)
@@ -81,6 +81,7 @@ jobs:
             DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
             get_update_json "$VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$DLURL" "$CHANGELOG_URL" >"../$UPDATE_JSON"
           done
+          cd ..
 
           [ -z "$(find . -type f -name "*.json")" ] && : >dummy.json
 
