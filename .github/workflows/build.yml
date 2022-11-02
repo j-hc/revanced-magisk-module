@@ -71,8 +71,9 @@ jobs:
           }"
           }
 
-          cd build || echo "build folder not found"; return
-          for OUTPUT in *.zip; do
+          cd build || echo "build folder not found"
+          for OUTPUT in *revanced*.zip; do
+            [ "$OUTPUT" = "*revanced*.zip" ] && continue
             ZIP_S=$(unzip -p "$OUTPUT" module.prop)
             UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson)
             UPDATE_JSON="${UPDATE_JSON##*/}"
@@ -81,8 +82,9 @@ jobs:
             DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
             get_update_json "$VER" "${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}" "$DLURL" "$CHANGELOG_URL" >"../$UPDATE_JSON"
           done
+          cd ..
 
-          [ -z "$(find . -type f -name "*.json")" ] && : >dummy.json
+          find . -name "*.json" | grep . || : >dummy.json
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
