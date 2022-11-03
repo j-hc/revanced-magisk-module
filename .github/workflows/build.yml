@@ -36,6 +36,7 @@ jobs:
           echo "BUILD_LOG<<${DELIM}" >> "$GITHUB_OUTPUT"
           cat build.md >> "$GITHUB_OUTPUT"
           echo "${DELIM}" >> "$GITHUB_OUTPUT"
+          cp -f build.md build.tmp
 
           cd build
           yt_op=$(find . -maxdepth 1 -name "youtube-revanced-magisk-*.zip" -printf '%P')
@@ -62,6 +63,7 @@ jobs:
       - name: Update changelog and Magisk update jsons
         id: update_config
         run: |
+          cp -f build.tmp build.md
           get_update_json() {
             echo "{
             \"version\": \"$1\",
