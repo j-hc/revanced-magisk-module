@@ -38,13 +38,15 @@ if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 1)); then
 fi
 
 log "**App Versions:**"
-build_youtube
-build_music
-build_twitter
-build_reddit
-build_tiktok
-build_spotify
-build_warn_wetter
+build_youtube &
+build_music &
+build_twitter &
+build_reddit &
+build_tiktok &
+build_spotify &
+build_warn_wetter &
+
+wait
 
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	echo "Building mindetach module"
@@ -58,7 +60,7 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	cd ../../
 fi
 
-if [ "${YOUTUBE_MODE%/*}" = apk ] || [ "${MUSIC_ARM64_V8A_MODE%/*}" = apk ] || [ "${MUSIC_ARM_V7A_MODE%/*}" = apk ]; then
+if [[ "${YOUTUBE_MODE%/*}" =~ ^(apk|both)$ || "${MUSIC_ARM64_V8A_MODE%/*}" =~ ^(apk|both)$ || "${MUSIC_ARM_V7A_MODE%/*}" =~ ^(apk|both)$ ]]; then
 	log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) to be able to use non-root YouTube or Music"
 fi
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"

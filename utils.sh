@@ -120,19 +120,20 @@ dl_uptodown() {
 
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3
-	echo "java -jar $RV_CLI_JAR --rip-lib x86 --rip-lib x86_64 -c -a $stock_input -o $patched_apk -b $RV_PATCHES_JAR --keystore=ks.keystore $patcher_args"
-	# shellcheck disable=SC2086
 	# --rip-lib is only available in my own revanced-cli builds
-	java -jar "$RV_CLI_JAR" --rip-lib x86 --rip-lib x86_64 -c -a "$stock_input" -o "$patched_apk" -b "$RV_PATCHES_JAR" --keystore=ks.keystore $patcher_args
+	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
+	local cmd="java -jar $RV_CLI_JAR --temp-dir=$tdir --rip-lib x86 --rip-lib x86_64 -c -a $stock_input -o $patched_apk -b $RV_PATCHES_JAR --keystore=ks.keystore $patcher_args"
+	echo "$cmd"
+	eval "$cmd"
 }
 
 zip_module() {
-	local patched_apk=$1 module_name=$2 stock_apk=$3 pkg_name=$4
-	cp -f "$patched_apk" "${MODULE_TEMPLATE_DIR}/base.apk"
-	cp -f "$stock_apk" "${MODULE_TEMPLATE_DIR}/${pkg_name}.apk"
-	cd "$MODULE_TEMPLATE_DIR" || abort "Module template dir not found"
-	zip -"$COMPRESSION_LEVEL" -FSr "../${BUILD_DIR}/${module_name}" .
-	cd ..
+	local patched_apk=$1 module_name=$2 stock_apk=$3 pkg_name=$4 template_dir=$5
+	cp -f "$patched_apk" "${template_dir}/base.apk"
+	cp -f "$stock_apk" "${template_dir}/${pkg_name}.apk"
+	cd "$template_dir" || abort "Module template dir not found"
+	zip -"$COMPRESSION_LEVEL" -FSr "../../${BUILD_DIR}/${module_name}" .
+	cd ../..
 }
 
 build_rv() {
@@ -141,7 +142,6 @@ build_rv() {
 	local mode_arg=${args[mode]%/*} version_mode=${args[mode]#*/}
 	local arch=${args[arch]:-all} app_name_l=${args[app_name],,}
 	if [ "${args[apkmirror_dlurl]:-}" ] && [ "${args[regexp]:-}" ]; then dl_from=apkmirror; else dl_from=uptodown; fi
-	reset_template
 
 	if [ "$mode_arg" = none ]; then
 		return
@@ -238,10 +238,13 @@ build_rv() {
 			continue
 		fi
 
-		uninstall_sh "${args[pkg_name]}"
-		service_sh "${args[pkg_name]}"
-		postfsdata_sh "${args[pkg_name]}"
-		customize_sh "${args[pkg_name]}" "${version}"
+		declare -r base_template=$(mktemp -d -p $TEMP_DIR)
+		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
+
+		uninstall_sh "${args[pkg_name]}" "$base_template"
+		service_sh "${args[pkg_name]}" "$base_template"
+		postfsdata_sh "${args[pkg_name]}" "$base_template"
+		customize_sh "${args[pkg_name]}" "$base_template"
 
 		local upj pn
 		upj=$([ "${arch}" = "all" ] && echo "${app_name_l}-update.json" || echo "${app_name_l}-${arch}-update.json")
@@ -254,10 +257,12 @@ build_rv() {
 			"${args[app_name]} ReVanced" \
 			"$version" \
 			"${args[app_name]} ReVanced Magisk module" \
-			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${upj}"
+			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${upj}" \
+			"$base_template"
 
 		local module_output="${app_name_l}-revanced-magisk-v${version}-${arch}.zip"
-		zip_module "$patched_apk" "$module_output" "$stock_apk" "${args[pkg_name]}"
+		zip_module "$patched_apk" "$module_output" "$stock_apk" "${args[pkg_name]}" "$base_template"
+		rm -rf "$base_template"
 
 		echo "Built ${args[app_name]} (${arch}) (root): '${BUILD_DIR}/${module_output}'"
 	done
@@ -369,21 +374,20 @@ build_warn_wetter() {
 	build_rv warn_wetter_args
 }
 
-postfsdata_sh() { echo "${POSTFSDATA_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"; }
-uninstall_sh() { echo "${UNINSTALL_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/uninstall.sh"; }
-customize_sh() { echo "${CUSTOMIZE_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/customize.sh"; }
+postfsdata_sh() { echo "${POSTFSDATA_SH//__PKGNAME/$1}" >"${2}/post-fs-data.sh"; }
+uninstall_sh() { echo "${UNINSTALL_SH//__PKGNAME/$1}" >"${2}/uninstall.sh"; }
+customize_sh() { echo "${CUSTOMIZE_SH//__PKGNAME/$1}" >"${2}/customize.sh"; }
 service_sh() {
 	s="${SERVICE_SH//__MNTDLY/$MOUNT_DELAY}"
-	echo "${s//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/service.sh"
+	echo "${s//__PKGNAME/$1}" >"${2}/service.sh"
 }
-
 module_prop() {
 	echo "id=${1}
 name=${2}
 version=v${3}
 versionCode=${NEXT_VER_CODE}
 author=j-hc
-description=${4}" >"${MODULE_TEMPLATE_DIR}/module.prop"
+description=${4}" >"${6}/module.prop"
 
-	[ "$ENABLE_MAGISK_UPDATE" = true ] && echo "updateJson=${5}" >>"${MODULE_TEMPLATE_DIR}/module.prop"
+	[ "$ENABLE_MAGISK_UPDATE" = true ] && echo "updateJson=${5}" >>"${6}/module.prop"
 }
