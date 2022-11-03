@@ -222,9 +222,9 @@ build_rv() {
 		fi
 
 		if [ "${arch}" = "all" ]; then
-			! grep -q "\$${args[app_name]}:" build.md && log "${args[app_name]}: ${version}"
+			! grep -q "${args[app_name]}:" build.md && log "${args[app_name]}: ${version}"
 		else
-			! grep -q "\$${args[app_name]} (${arch}):" build.md && log "${args[app_name]} (${arch}): ${version}"
+			! grep -q "${args[app_name]} (${arch}):" build.md && log "${args[app_name]} (${arch}): ${version}"
 		fi
 
 		[ ! -f "$patched_apk" ] && patch_apk "$stock_apk" "$patched_apk" "$patcher_args"
