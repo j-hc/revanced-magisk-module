@@ -77,7 +77,9 @@ jobs:
           for OUTPUT in *revanced*.zip; do
             [ "$OUTPUT" = "*revanced*.zip" ] && continue
             ZIP_S=$(unzip -p "$OUTPUT" module.prop)
-            UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson)
+            if ! UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson); then
+              continue
+            fi
             UPDATE_JSON="${UPDATE_JSON##*/}"
             VER=$(echo "$ZIP_S" | grep version=)
             VER="${VER##*=}"
