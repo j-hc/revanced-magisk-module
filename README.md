@@ -4,7 +4,7 @@
 
 You can get the [latest CI release from here](https://github.com/j-hc/revanced-magisk-module/releases).
 
-The [**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
+[**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
 
 ## Features
  * Can build Magisk modules or non-root APKs
@@ -12,25 +12,24 @@ The [**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the rele
  * Cleans APKs from unneeded libs to make them smaller
  * Fully open-source, every binary or APK is compiled without human intervention
  * Modules
-     * recompiles invalidated odex for YouTube and Music apps for faster usage
+     * recompile invalidated odex for YouTube and Music apps for faster usage
      * receive updates from Magisk app
      * do not break safetynet or trigger root detections used by certain apps
      * handle installation of the correct version of the stock app and all that
      * mount the patched app immediately without needing to reboot
-     * do not cause any permanent changes in /system or /data partitions
+
+#### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday if there is a change. You may want to disable it.**
 
 ## To include/exclude patches
 [**See the list of patches**](https://github.com/revanced/revanced-patches#-list-of-available-patches)
 
  * Star the repo :eyes:
- * Use the repo as template or fork it (if you choose the repo to be private, you won't receive updates from Magisk app)
+ * [Fork the repo](https://github.com/j-hc/revanced-magisk-module/fork) or use it as a template
  * Edit the patcher args in [`build.conf`](./build.conf)
  * Run the [workflow](../../actions/workflows/build.yml)
  * Grab your modules from [releases](../../releases)
 
-To be able to use non-root variants of YT and Music you will need to install [Vanced MicroG](https://github.com/TeamVanced/VancedMicroG/releases).**
-
-### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday if there is a change. You may want to disable it.**
+To be able to use non-root variants of YT and Music you will need to install [Vanced MicroG](https://github.com/TeamVanced/VancedMicroG/releases).
 
 # Building Locally
 Make sure you have JDK 17 installed. Then run:
