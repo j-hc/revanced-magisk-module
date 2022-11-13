@@ -42,8 +42,10 @@ build_youtube &
 build_music &
 build_twitter &
 build_reddit &
+build_twitch &
 build_tiktok &
 build_spotify &
+build_ticktick &
 build_warn_wetter &
 
 wait
