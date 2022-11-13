@@ -9,7 +9,7 @@ BUILD_DIR="build"
 
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"j-hc/revanced-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
-WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
+WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:106.0) Gecko/20100101 Firefox/106.0"
 
 SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
 POSTFSDATA_SH=$(cat $MODULE_SCRIPTS_DIR/post-fs-data.sh)
@@ -340,6 +340,18 @@ build_reddit() {
 }
 
 #shellcheck disable=SC2034
+build_twitch() {
+	declare -A twitch_args
+	twitch_args[app_name]="Twitch"
+	twitch_args[mode]="$TWITCH_MODE"
+	twitch_args[pkg_name]="tv.twitch.android.app"
+	twitch_args[apkmirror_dlurl]="twitch-interactive-inc/twitch"
+	twitch_args[regexp]='APK</span>[^@]*@\([^#]*\)'
+
+	build_rv twitch_args
+}
+
+#shellcheck disable=SC2034
 build_tiktok() {
 	declare -A tiktok_args
 	tiktok_args[app_name]="TikTok"
@@ -360,6 +372,18 @@ build_spotify() {
 	spotify_args[pkg_name]="com.spotify.music"
 
 	build_rv spotify_args
+}
+
+#shellcheck disable=SC2034
+build_ticktick() {
+	declare -A ticktick_args
+	ticktick_args[app_name]="TickTick"
+	ticktick_args[mode]="$TICKTICK_MODE"
+	ticktick_args[pkg_name]="com.ticktick.task"
+	ticktick_args[apkmirror_dlurl]="appest-inc/ticktick-to-do-list-with-reminder-day-planner"
+	ticktick_args[regexp]='APK</span>[^@]*@\([^#]*\)'
+
+	build_rv ticktick_args
 }
 
 #shellcheck disable=SC2034
