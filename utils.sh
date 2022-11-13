@@ -342,7 +342,7 @@ build_reddit() {
 #shellcheck disable=SC2034
 build_twitch() {
 	declare -A twitch_args
-	twitch_args[app_name]="twitch"
+	twitch_args[app_name]="Twitch"
 	twitch_args[mode]="$TWITCH_MODE"
 	twitch_args[pkg_name]="tv.twitch.android.app"
 	twitch_args[apkmirror_dlurl]="twitch-interactive-inc/twitch"
@@ -377,7 +377,7 @@ build_spotify() {
 #shellcheck disable=SC2034
 build_ticktick() {
 	declare -A ticktick_args
-	ticktick_args[app_name]="ticktick"
+	ticktick_args[app_name]="TickTick"
 	ticktick_args[mode]="$TICKTICK_MODE"
 	ticktick_args[pkg_name]="com.ticktick.task"
 	ticktick_args[apkmirror_dlurl]="appest-inc/ticktick-to-do-list-with-reminder-day-planner"
