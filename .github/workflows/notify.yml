@@ -44,6 +44,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10' # The python version to use.
+          cache: 'pip' # caching pip dependencies
+          
+      - name: Install python dependency
+        run: pip install requests
         
       - name: Run release py script
         uses: jannekem/run-python-script-action@v1
@@ -52,6 +56,7 @@ jobs:
           script: |
             import json
             import re
+            import requests
 
             # Read release.json file
             with open('release.json', 'r') as f:
@@ -77,6 +82,16 @@ jobs:
                 else:
                   nonroot_files.append(f"🔗 [{file_name}]({file_url})")
                   
+            vanced_microg_release = requests.get("https://api.github.com/repos/TeamVanced/VancedMicroG/releases/latest").json()
+
+            microg_file = vanced_microg_release['assets'][0] or []
+            
+            microg_name = microg_file['name'].strip('.apk')+'-'+vanced_microg_release['tag_name']+'.apk' or  "microg.apk"
+            microg_file = microg_file['browser_download_url'] or ""
+            
+            if 'microg' in microg_file:
+              nonroot_files.append(f"🔗 [{microg_name}]({microg_file})")
+            
             print("Non-Root:")
             print("\n".join(nonroot_files))
             
