@@ -9,3 +9,7 @@ build.md
 *.keystore
 !base-v17.24.34.apk
 .v*
+
+# Telegram script ignore
+telegram-script/release_notification.md
+telegram-script/__pycache__
