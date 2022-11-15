@@ -11,5 +11,5 @@ build.md
 .v*
 
 # Telegram script ignore
-telegram-script/release_notification.md
-telegram-script/__pycache__
+__pycache__
+release_notification.md
