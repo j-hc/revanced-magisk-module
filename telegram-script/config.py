@@ -5,6 +5,9 @@ class Config:
     MICROG_RELEASE_URL = (
         "https://api.github.com/repos/TeamVanced/VancedMicroG/releases/latest"
     )
+    REVANCED_CHANGES_URL = (
+        "https://api.github.com/repos/revanced/revanced-patches/compare"
+    )
 
     NOTES = """*≣ Note:*
  ➜ `mindetach.zip` is used to detach play store updates for YT and YT Music for rooted users.
@@ -14,6 +17,9 @@ class Config:
     RELEASE_MESSAGE = """📑 *RELEASE* {release_name}
 
 {revanced_version_message}
+
+*What's new:*
+{changelogs}
 
 {notes}
 
