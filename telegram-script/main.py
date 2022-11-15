@@ -68,15 +68,15 @@ def fetch_changelogs():
     previous_revanced_version = re.findall(re_exp, previous_version_release["body"])[0]
     current_revanced_version = re.findall(re_exp, release["body"])[0]
 
-    print(previous_revanced_version, current_revanced_version)
-
     changelogs = requests.get(
         Config.REVANCED_CHANGES_URL
         + f"/v{previous_revanced_version}...v{current_revanced_version}"
     ).json()["commits"]
 
     changelogs = [
-        "✴ " + ch['commit']['message'].split("\n")[0] for ch in changelogs if not 'chore' in ch['commit']['message']
+        "✴ " + ch["commit"]["message"].split("\n")[0]
+        for ch in changelogs
+        if not "chore" in ch["commit"]["message"]
     ]  # Remove signed-of in commit message
 
     return changelogs
@@ -84,17 +84,22 @@ def fetch_changelogs():
 
 def main():
     files = generate_files_message()
+    changelogs = fetch_changelogs()
 
     # Format release message
     release_message = Config.RELEASE_MESSAGE.format(
         release_name=release["name"],
         revanced_version_message=revanced_version_message(),
-        changelogs="\n".join(fetch_changelogs()),
+        changelogs="\n".join(changelogs),
         notes=Config.NOTES,
         nonroot_files="\n".join(files["nonroot_files"]),
         root_files="\n".join(files["root_files"]),
         credits_message=Config.CREDITS_MESSAGE,
     )
+
+    # remove whats new if changelogs is empty
+    if not changelogs:
+        release_message = release_message.replace("*What's new:*\n\n", "")
 
     print(release_message)
 
