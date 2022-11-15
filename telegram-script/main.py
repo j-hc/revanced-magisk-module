@@ -77,7 +77,7 @@ def fetch_changelogs():
         "✴ " + ch["commit"]["message"].split("\n")[0]
         for ch in changelogs
         if not "chore" in ch["commit"]["message"]
-    ]  # Remove signed-of in commit message
+    ] or []  # Remove signed-of in commit message
 
     return changelogs
 
