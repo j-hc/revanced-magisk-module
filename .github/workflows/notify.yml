@@ -20,84 +20,16 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-          
-      - name: Switch to release branch
-        run: git checkout -f release || git switch --discard-changes --orphan update
-        
-      - name: Update release JSON
-        run: |
-          curl https://api.github.com/repos/${{ github.repository }}/releases/latest > release.json
-          
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-          
-      - name: Push release.json
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          branch: release
-          skip_checkout: true
-          file_pattern: release.json
-          commit_message: Update release.json on ${{ steps.date.outputs.date }}
-          
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10' # The python version to use.
-          
-      - name: Install python dependency
-        run: pip install requests
-        
-      - name: Run release py script
-        uses: jannekem/run-python-script-action@v1
-        id: pyscript
-        with:
-          script: |
-            import json
-            import re
-            import requests
+          cache: 'pip'
+          cache-dependency-path: 'telegram-script/requirements.txt'
 
-            # Read release.json file
-            with open('release.json', 'r') as f:
-                release = json.load(f)
-
-            print(release['name'], end="\n\n")
-            
-            print(re.findall(r"CLI:[a-zA-Z-.\s0-9:]+\n", release['body'])[0] or "")
-            
-            print("*≣ Note:* \n ➜ `mindetach.zip` is used to detach play store updates for YT and YT Music for rooted users.\n ➜ Use `vanced microg` for non root YT and YT Music.", end="\n\n")
-
-            print("📦 *Downloads* \n")
-
-            # Collect browser_download_url from assets in release
-            nonroot_files = []
-            root_files = []
-            
-            for asset in release['assets'][::-1]:
-                file_name = asset['name']
-                file_url = asset['browser_download_url']
-                if '.zip' in file_name:
-                  root_files.append(f"🔗 [{file_name}]({file_url})")
-                else:
-                  nonroot_files.append(f"🔗 [{file_name}]({file_url})")
-                  
-            vanced_microg_release = requests.get("https://api.github.com/repos/TeamVanced/VancedMicroG/releases/latest").json()
-
-            microg_file = vanced_microg_release['assets'][0] or []
-            
-            microg_name = microg_file['name'].strip('.apk')+'-'+vanced_microg_release['tag_name']+'.apk' or  "microg.apk"
-            microg_file = microg_file['browser_download_url'] or ""
-            
-            if 'microg' in microg_file:
-              nonroot_files.append(f"🔗 [{microg_name}]({microg_file})")
-            
-            print("Non-Root:")
-            print("\n".join(nonroot_files))
-            
-            print()
-            
-            print("Magisk (Root):")
-            print("\n".join(root_files))
+      - name: Run telegram notification script
+        run: python3 telegram-script
           
       - name: Telegram Channel Update
         uses: appleboy/telegram-action@master
@@ -105,11 +37,4 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
-          message: |
-            📑 *RELEASE*
-            
-            ${{ steps.pyscript.outputs.stdout }}
-            
-            Credits to our upstream repository [j-hc/revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)
-            
-            @revanced_apks_web | revanced-apks.pages.dev
+          message_file: release_notification.md
