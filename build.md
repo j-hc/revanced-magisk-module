@@ -1,17 +1,17 @@
 CLI: revanced-cli-2.16.1-all.jar  
 Integrations: app-release-unsigned-v0.71.0.apk  
-Patches: revanced-patches-2.111.3.jar  
+Patches: revanced-patches-2.112.0.jar  
 
-#### [2.111.3](https://github.com/revanced/revanced-patches/compare/v2.111.2...v2.111.3) (2022-11-18)
-### Bug Fixes
-* **youtube/litho-filter:** use correct type for switch case ([#1068](https://github.com/revanced/revanced-patches/issues/1068)) ([ab03511](https://github.com/revanced/revanced-patches/commit/ab03511e23d07c7c40b58eae5791fb2a798289de))
+### [2.112.0](https://github.com/revanced/revanced-patches/compare/v2.111.3...v2.112.0) (2022-11-19)
+### Features
+* **anytracker:** `unlock-premium` patch ([#1076](https://github.com/revanced/revanced-patches/issues/1076)) ([52b3d90](https://github.com/revanced/revanced-patches/commit/52b3d909bbe59dafaea0cb9da1c27bdd0cda502f))
 
   
 **App Versions:**  
-Music (arm64-v8a): 5.31.50  
 YouTube: 17.43.36  
 Twitter: 9.65.5-release.0  
 Twitch: 14.2.0  
+Music (arm64-v8a): 5.31.50  
 TikTok: 27.0.16  
 Reddit: 2022.43.0  
 Music (arm-v7a): 5.31.50  
