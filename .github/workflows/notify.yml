@@ -33,6 +33,15 @@ jobs:
 
       - name: Run telegram notification script
         run: python3 telegram-script
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git checkout -b update
+          git commit -m "Update release notification $(date -u)"
+          git push origin update
           
       - name: Telegram Channel Update
         uses: appleboy/telegram-action@master
