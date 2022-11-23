@@ -30,23 +30,16 @@ jobs:
         
       - name: Install dependencies
         run: pip install -r telegram-script/requirements.txt
-        
-      - name: Setup git
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git checkout -b update
-          git config pull.rebase false
-          git fetch && git pull origin update
 
       - name: Run telegram notification script
         run: python3 telegram-script
 
-      - name: Commit changes
-        run: |
-          git add .
-          git commit -m "Update release notification $(date -u)"
-          git push origin update
+      - name: Commit release description changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update telegram release message ${{ github.run_id }}
+          branch: update
+          file_pattern: '*.md'
           
       - name: Telegram Channel Update
         uses: appleboy/telegram-action@master
