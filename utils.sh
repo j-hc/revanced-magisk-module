@@ -343,6 +343,7 @@ build_reddit() {
 build_twitch() {
 	declare -A twitch_args
 	twitch_args[app_name]="Twitch"
+	twitch_args[patcher_args]="-m ${RV_INTEGRATIONS_APK}"
 	twitch_args[mode]="$TWITCH_MODE"
 	twitch_args[pkg_name]="tv.twitch.android.app"
 	twitch_args[apkmirror_dlurl]="twitch-interactive-inc/twitch"
