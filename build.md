@@ -1,18 +1,20 @@
 CLI: revanced-cli-2.17.0-all.jar  
-Integrations: app-release-unsigned-v0.79.0.apk  
-Patches: revanced-patches-2.131.0.jar  
+Integrations: app-release-unsigned-v0.80.0.apk  
+Patches: revanced-patches-2.136.0.jar  
 
-### [2.131.0](https://github.com/revanced/revanced-patches/compare/v2.130.0...v2.131.0) (2022-11-30)
+### [2.136.0](https://github.com/revanced/revanced-patches/compare/v2.135.0...v2.136.0) (2022-12-02)
+### Bug Fixes
+* syntax error in compatiblity annotation ([#1181](https://github.com/revanced/revanced-patches/issues/1181)) ([0830c7e](https://github.com/revanced/revanced-patches/commit/0830c7ed1064757cf6354b426549275ece55408e))
 ### Features
-* **twitch/block-embedded-ads:** `block-embedded-ads` patch support ([#1160](https://github.com/revanced/revanced-patches/issues/1160)) ([641d33f](https://github.com/revanced/revanced-patches/commit/641d33fc7e213031124491bb468fb382267769aa))
+* **youtube:** drop support for compatibility of old versions ([7413aad](https://github.com/revanced/revanced-patches/commit/7413aad6d215f24a66ba9a33917c73dbdb0b7bc3))
 
   
 **App Versions:**  
 YouTube: 17.45.36  
-Twitch: 14.2.0  
 Music (arm64-v8a): 5.31.50  
-Reddit: 2022.44.0  
 Twitter: 9.65.6-release.0  
+Reddit: 2022.44.0  
+Twitch: 14.2.0  
 TikTok: 27.0.3  
 Music (arm-v7a): 5.31.50  
 
