@@ -47,6 +47,8 @@ build_tiktok &
 build_spotify &
 build_ticktick &
 build_warn_wetter &
+build_backdrops &
+build_windy &
 
 wait
 
