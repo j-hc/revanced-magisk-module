@@ -21,7 +21,7 @@ You can get the [latest CI release from here](https://github.com/j-hc/revanced-m
 #### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday if there is a change. You may want to disable it.**
 
 ## To include/exclude patches
-[**See the list of patches**](https://github.com/revanced/revanced-patches#-list-of-available-patches)
+[**See the list of patches**](https://github.com/PalmDevs/rvp#-patches)
 
  * Star the repo :eyes:
  * [Fork the repo](https://github.com/j-hc/revanced-magisk-module/fork) or use it as a template
