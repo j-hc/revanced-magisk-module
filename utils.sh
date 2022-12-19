@@ -17,12 +17,12 @@ CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
 UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
 
 json_get() {
-	grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/' | if [ $# -eq 2 ]; then grep "$2"; else cat; fi || echo ""
+	grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/'
 }
 
 get_prebuilts() {
 	echo "Getting prebuilts"
-	RV_CLI_URL=$(req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | json_get 'browser_download_url')
+	RV_CLI_URL=$(req https://api.github.com/repos/revanced/revanced-cli/releases/latest - | json_get 'browser_download_url')
 	RV_CLI_JAR="${TEMP_DIR}/${RV_CLI_URL##*/}"
 	log "CLI: ${RV_CLI_URL##*/}"
 
@@ -34,7 +34,7 @@ get_prebuilts() {
 
 	RV_PATCHES=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
 	RV_PATCHES_CHANGELOG=$(echo "$RV_PATCHES" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
-	RV_PATCHES_URL=$(echo "$RV_PATCHES" | json_get 'browser_download_url' 'jar')
+	RV_PATCHES_URL=$(echo "$RV_PATCHES" | json_get 'browser_download_url' | grep 'jar')
 	RV_PATCHES_JAR="${TEMP_DIR}/${RV_PATCHES_URL##*/}"
 	log "Patches: ${RV_PATCHES_URL##*/}"
 	log "\n${RV_PATCHES_CHANGELOG//# [/### [}\n"
@@ -127,9 +127,8 @@ dl_uptodown() {
 
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3
-	# --rip-lib is only available in my own revanced-cli builds
 	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
-	local cmd="java -jar $RV_CLI_JAR --temp-dir=$tdir --rip-lib x86 --rip-lib x86_64 -c -a $stock_input -o $patched_apk -b $RV_PATCHES_JAR --keystore=ks.keystore $patcher_args"
+	local cmd="java -jar $RV_CLI_JAR --temp-dir=$tdir -c -a $stock_input -o $patched_apk -b $RV_PATCHES_JAR --keystore=ks.keystore $patcher_args"
 	echo "$cmd"
 	eval "$cmd"
 }
@@ -176,15 +175,14 @@ build_rv() {
 				abort "UNREACHABLE $LINENO"
 			fi
 		fi
-		local apkmirror_category=${args[apkmirror_dlurl]##*/}
 		if [ "$version_mode" = auto ] && [ $dl_from = apkmirror ]; then
 			version=$(get_patch_last_supported_ver "${args[pkg_name]}")
 			if [ -z "$version" ]; then
-				version=$(get_apkmirror_vers "$apkmirror_category" | if [ "${args[pkg_name]}" = "com.twitter.android" ]; then grep release; else cat; fi | get_largest_ver)
+				version=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" | if [ "${args[pkg_name]}" = "com.twitter.android" ]; then grep release; else cat; fi | get_largest_ver)
 			fi
 		elif [ "$version_mode" = latest ]; then
 			if [ $dl_from = apkmirror ]; then
-				version=$(get_apkmirror_vers "$apkmirror_category" | if [ "${args[pkg_name]}" = "com.twitter.android" ]; then grep release; else cat; fi | get_largest_ver)
+				version=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" | if [ "${args[pkg_name]}" = "com.twitter.android" ]; then grep release; else cat; fi | get_largest_ver)
 			elif [ $dl_from = uptodown ]; then
 				version=$(get_uptodown_ver "${app_name_l}")
 			fi
@@ -193,17 +191,11 @@ build_rv() {
 			version=$version_mode
 			patcher_args="$patcher_args --experimental"
 		fi
-		echo "Choosing version '${version}'"
-
-		if [ "$build_mode" = module ]; then
-			if [ "${args[rip_all_libs]:-}" = true ]; then
-				# --unsigned is only available in my revanced-cli builds
-				# native libraries are already extracted. remove them all to keep apks smol
-				patcher_args="$patcher_args --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
-			else
-				patcher_args="$patcher_args --unsigned"
-			fi
+		if [ -z "${version}" ]; then
+			echo "ERROR: empty version"
+			return 1
 		fi
+		echo "Choosing version '${version}'"
 
 		local stock_apk="${TEMP_DIR}/${app_name_l}-stock-v${version}-${arch}.apk"
 		local apk_output="${BUILD_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
@@ -238,7 +230,7 @@ build_rv() {
 
 		[ ! -f "$patched_apk" ] && patch_apk "$stock_apk" "$patched_apk" "$patcher_args"
 		if [ ! -f "$patched_apk" ]; then
-			echo "BUILDING FAILED"
+			echo "BUILDING '${args[app_name]}' FAILED"
 			return
 		fi
 		if [ "$build_mode" = apk ]; then

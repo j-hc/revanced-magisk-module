@@ -88,11 +88,11 @@ jobs:
           done
           cd ..
 
-          find . -name "*.json" | grep . || : >dummy.json
+          find . -name "*-update.json" | grep . || : >dummy.json
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: update
           skip_checkout: true
-          file_pattern: build.md *.json
+          file_pattern: build.md *-update.json
           commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
