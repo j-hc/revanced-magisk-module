@@ -106,7 +106,14 @@ dl_apkmirror() {
 }
 get_apkmirror_vers() {
 	local apkmirror_category=$1
-	req "https://www.apkmirror.com/uploads/?appcategory=${apkmirror_category}" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p'
+	apkm_resp=$(req "https://www.apkmirror.com/uploads/?appcategory=${apkmirror_category}" -)
+	apkm_name=$(echo "$apkm_resp" | sed -n 's;.*Latest \(.*\) Uploads.*;\1;p')
+	vers=$(echo "$apkm_resp" | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p')
+	for v in $vers; do
+		if ! grep -q "${apkm_name} ${v} beta" <<<"$apkm_resp"; then
+			echo "$v"
+		fi
+	done
 }
 get_uptodown_ver() {
 	local app_name=$1
