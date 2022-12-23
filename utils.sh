@@ -150,7 +150,6 @@ build_rv() {
 	if [ "${args[apkmirror_dlurl]:-}" ] && [ "${args[regexp]:-}" ]; then dl_from=apkmirror; else dl_from=uptodown; fi
 
 	if [ "$mode_arg" = none ]; then
-		echo 2
 		return
 	elif [ "$mode_arg" = module ]; then
 		build_mode_arr=(module)
@@ -160,8 +159,7 @@ build_rv() {
 		build_mode_arr=(apk module)
 	else
 		echo "ERROR: undefined build mode for ${args[app_name]}: '${mode_arg}'"
-		echo 2
-		return
+		return 1
 	fi
 
 	for build_mode in "${build_mode_arr[@]}"; do

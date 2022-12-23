@@ -47,15 +47,11 @@ build_functions=(
 )
 
 log "**App Versions:**"
-idx=0
 for f in "${build_functions[@]}"; do
-	ret=$($f &)
-	if ! ((idx % 2)); then
-		wait
-	fi
-	if [[ $ret != 2 ]]; then
-		idx=$((idx + 1))
-	fi
+	eval "$f &"
+	while [ "$(jobs -r | wc -l)" -ge 3 ]; do
+		sleep 5
+	done
 done
 wait
 rm -rf temp/tmp.*
