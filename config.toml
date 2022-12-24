@@ -21,7 +21,7 @@ module-prop-name = "ytrv-magisk"
 merge-integrations = true
 
 [Music-arm64]
-build-mode = "module"
+build-mode = "both"
 app-name = "Music"
 excluded-patches = ""
 included-patches = ""
@@ -30,7 +30,6 @@ microg-patch = "music-microg-support"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 module-prop-name = "ytmusicrv-magisk"
 arch = "arm64-v8a"
-merge-integrations = true
 
 [Music-arm]
 build-mode = "both"
