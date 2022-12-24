@@ -43,11 +43,13 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
 
 # building from config
 log "**App Versions:**"
+idx=0
 for t in $(toml_get_all_tables); do
 	if [ "$t" = main-config ]; then continue; fi
 	enabled=$(toml_get "$t" enabled) || enabled=true
 	if [ "$enabled" = false ]; then continue; fi
 
+	if [ $idx -ge "$PARALLEL_JOBS" ]; then wait -n; else idx=$((idx + 1)); fi
 	declare -A app_args
 	merge_integrations=$(toml_get "$t" merge-integrations) || merge_integrations=false
 	excluded_patches=$(toml_get "$t" excluded-patches) || excluded_patches=""
@@ -80,7 +82,6 @@ for t in $(toml_get_all_tables); do
 	[ "$exclusive_patches" = true ] && app_args[patcher_args]="${app_args[patcher_args]} --exclusive"
 
 	build_rv app_args &
-	while [ "$(jobs -r | wc -l)" -ge "$PARALLEL_JOBS" ]; do sleep 3; done
 done
 wait
 
