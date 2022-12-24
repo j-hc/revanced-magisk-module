@@ -25,7 +25,6 @@ fi
 
 source utils.sh
 trap "rm -rf temp/tmp.*" INT
-trap "kill 0" EXIT
 
 : >build.md
 mkdir -p "$BUILD_DIR" "$TEMP_DIR"
