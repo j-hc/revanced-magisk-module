@@ -44,7 +44,7 @@ module-prop-name = "ytmusicrv-arm-magisk"
 arch = "arm-v7a"
 
 [Twitter]
-build-mode = "both"
+build-mode = "apk"
 excluded-patches = ""
 version = "latest"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"

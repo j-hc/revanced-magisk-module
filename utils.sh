@@ -291,9 +291,9 @@ build_rv() {
 		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
 
 		uninstall_sh "$pkg_name" "$base_template"
-		service_sh "$pkg_name" "$base_template"
+		service_sh "$pkg_name" "$version" "$base_template"
 		postfsdata_sh "$pkg_name" "$base_template"
-		customize_sh "$pkg_name" "$base_template"
+		customize_sh "$pkg_name" "$version" "$base_template"
 
 		local upj
 		upj=$([ "${arch}" = "all" ] && echo "${app_name_l}-update.json" || echo "${app_name_l}-${arch}-update.json")
@@ -318,10 +318,14 @@ join_args() {
 
 postfsdata_sh() { echo "${POSTFSDATA_SH//__PKGNAME/$1}" >"${2}/post-fs-data.sh"; }
 uninstall_sh() { echo "${UNINSTALL_SH//__PKGNAME/$1}" >"${2}/uninstall.sh"; }
-customize_sh() { echo "${CUSTOMIZE_SH//__PKGNAME/$1}" >"${2}/customize.sh"; }
+customize_sh() {
+	local s="${CUSTOMIZE_SH//__PKGNAME/$1}"
+	echo "${s//__PKGVER/$2}" >"${3}/customize.sh"
+}
 service_sh() {
-	s="${SERVICE_SH//__MNTDLY/$MOUNT_DELAY}"
-	echo "${s//__PKGNAME/$1}" >"${2}/service.sh"
+	local s="${SERVICE_SH//__MNTDLY/$MOUNT_DELAY}"
+	s="${s//__PKGNAME/$1}"
+	echo "${s//__PKGVER/$2}" >"${3}/service.sh"
 }
 module_prop() {
 	echo "id=${1}
