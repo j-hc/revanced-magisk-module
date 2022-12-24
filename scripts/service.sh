@@ -10,5 +10,5 @@ BASEPATH=$(pm path __PKGNAME | grep base)
 BASEPATH=${BASEPATH#*:}
 if [ "$BASEPATH" ] && [ -d ${BASEPATH%base.apk}/lib ]; then
 	chcon u:object_r:apk_data_file:s0 $RVPATH
-	su -Mc mount -o bind $RVPATH $BASEPATH
+	mount -o bind $RVPATH $BASEPATH
 fi

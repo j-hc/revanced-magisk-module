@@ -1,0 +1,96 @@
+
+[main-config]
+mount-delay = 5               # some low-end phones cannot mount apks on boot without a delay. increase to something like 20 if needed.
+compression-level = 9         # compression level for module zips. between 1 and 9
+enable-magisk-update = true   # set this to false if you do not want to receive updates from magisk app
+parallel-jobs = 3             # max number of concurrent building jobs at once
+update-prebuilts = true       # dont touch this
+build-mindetach-module = true
+
+
+[YouTube]
+enabled = true                                                        # add 'enabled = false' key to entries to not build them
+build-mode = "both"                                                   # 'both', 'apk' or 'module'
+excluded-patches = ""                                                 # whitespace seperated list of patches to exclude
+included-patches = "theme"                                            # whitespace seperated list of patches to include
+version = "auto"                                                      # 'auto', 'latest' or a custom one like '17.40.41'
+exclusive-patches = false                                             # excludes all patches by default
+microg-patch = "microg-support"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+module-prop-name = "ytrv-magisk"
+merge-integrations = true
+
+[Music-arm64]
+build-mode = "module"
+app-name = "Music"
+excluded-patches = ""
+included-patches = ""
+version = "auto"
+microg-patch = "music-microg-support"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+module-prop-name = "ytmusicrv-magisk"
+arch = "arm64-v8a"
+merge-integrations = true
+
+[Music-arm]
+build-mode = "both"
+app-name = "Music"
+excluded-patches = ""
+included-patches = ""
+version = "auto"
+microg-patch = "music-microg-support"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+module-prop-name = "ytmusicrv-arm-magisk"
+arch = "arm-v7a"
+
+[Twitter]
+build-mode = "both"
+excluded-patches = ""
+version = "latest"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
+
+[Reddit]
+build-mode = "apk"
+version = "latest"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
+
+[Twitch]
+build-mode = "apk"
+version = "latest"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
+merge-integrations = true
+
+[Tiktok]
+build-mode = "apk"
+version = "27.2.5"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
+merge-integrations = true
+
+[Spotify]
+enabled = false
+build-mode = "apk"
+version = "latest"
+
+[TickTick]
+enabled = false
+build-mode = "apk"
+version = "latest"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/ticktick-to-do-list-with-reminder-day-planner/"
+
+[WarnWetter]
+enabled = false
+version = "latest"
+build-mode = "apk"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/deutscher-wetterdienst/warnwetter/"
+
+[Backdrops]
+enabled = false
+build-mode = "apk"
+version = "latest"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/backdrops/backdrops-wallpapers/"
+
+[Windy]
+enabled = false
+build-mode = "apk"
+version = "latest"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/windy-weather-world-inc/windy-wind-weather-forecast/"

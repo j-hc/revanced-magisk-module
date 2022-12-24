@@ -24,8 +24,7 @@ am force-stop __PKGNAME
 
 BASEPATH=$(basepath)
 if [ -n "$BASEPATH" ] && cmpr $BASEPATH $MODPATH/__PKGNAME.apk; then
-	ui_print "* Installed __PKGNAME and module APKs are identical"
-	ui_print "* Skipping stock APK installation"
+	ui_print "* Updating with stock APK is not needed"
 else
 	ui_print "* Updating stock __PKGNAME"
 	set_perm $MODPATH/__PKGNAME.apk 1000 1000 644 u:object_r:apk_data_file:s0
@@ -45,12 +44,11 @@ ui_print "* Mounting __PKGNAME"
 RVPATH=/data/adb/__PKGNAME_rv.apk
 ln -f $MODPATH/base.apk $RVPATH
 
-if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH 2>&1); then
+if ! op=$(mount -o bind $RVPATH $BASEPATH 2>&1); then
 	ui_print "ERROR: Mount failed!"
 	abort "$op"
 fi
 rm -r $MODPATH/bin $MODPATH/__PKGNAME.apk
-rm -f /data/local/tmp/__PKGNAME_rv.apk
 am force-stop __PKGNAME
 
 ui_print "* Optimizing __PKGNAME"
