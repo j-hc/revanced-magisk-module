@@ -108,9 +108,10 @@ log() { echo -e "$1  " >>build.md; }
 get_largest_ver() {
 	local max=0
 	while read -r v || [ -n "$v" ]; do
-		if [ "$(command_compare "$v" "$max")" = 1 ]; then max=$v; fi
+		#shellcheck disable=SC2001
+		if [ "$(command_compare "$(sed 's/\./-/3' <<<"$v")" "$(sed 's/\./-/3' <<<"$max")")" = 1 ]; then max=$v; fi
 	done
-	if [[ $max = 0 ]]; then echo ""; else echo "$max"; fi
+	if [[ $max != 0 ]]; then echo "$max"; fi
 }
 get_patch_last_supported_ver() {
 	unzip -p "$RV_PATCHES_JAR" | strings -s , | sed -rn "s/.*${1},versions,(([0-9.]*,*)*),Lk.*/\1/p" | tr ',' '\n' | get_largest_ver
@@ -123,7 +124,7 @@ dl_if_dne() {
 	fi
 }
 
-# if you are here to copy paste this piece of code, acknowledge it:)
+# ------- apkmirror -------------
 dl_apkmirror() {
 	local url=$1 version=$2 regexp=$3 output=$4
 	local resp
@@ -140,20 +141,30 @@ get_apkmirror_vers() {
 	# apkm_resp=$(req "https://www.apkmirror.com/uploads/?appcategory=${apkmirror_category}" -)
 	# apkm_name=$(echo "$apkm_resp" | sed -n 's;.*Latest \(.*\) Uploads.*;\1;p')
 	vers=$(req "https://www.apkmirror.com/uploads/?appcategory=${apkmirror_category}" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p')
-	if [ "$allow_alpha_version" = false ]; then grep -v -e "beta" -e "alpha" <<<"$vers"; else echo "$vers"; fi
+	if [ "$allow_alpha_version" = false ]; then grep -i -v -e "beta" -e "alpha" <<<"$vers"; else echo "$vers"; fi
 }
 get_apkmirror_pkg_name() {
 	req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_color.*;\1;p'
 }
-get_uptodown_ver() {
-	local app_name=$1
-	req "https://${app_name}.en.uptodown.com/android/download" - | json_get 'softwareVersion'
+# ------------------------------
+
+# ------- uptodown -------------
+get_uptodown_resp() {
+	req "https://${1}.en.uptodown.com/android/versions" -
+}
+get_uptodown_vers() {
+	echo "$1" | grep -x '^[0-9.]* <span>.*</span>' | sed 's/ <s.*//'
 }
 dl_uptodown() {
-	local app_name=$1 output=$2
-	url=$(req "https://${app_name}.en.uptodown.com/android/download" - | sed -n 's;.*data-url="\(.*\)".*;\1;p')
+	local uptwod_resp=$1 version=$2 output=$3
+	url=$(echo "$uptwod_resp" | grep "${version} <span>" -B 1 | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p')
+	url=$(req "$url" - | sed -n 's;.*data-url="\(.*\)".*;\1;p')
 	req "$url" "$output"
 }
+get_uptodown_pkg_name() {
+	req "https://${1}.en.uptodown.com/android/download" - | grep -A 1 "Package Name" | tail -1 | tr -d '</td>'
+}
+# ------------------------------
 
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3
@@ -174,7 +185,7 @@ zip_module() {
 
 build_rv() {
 	local -n args=$1
-	local version patcher_args build_mode_arr
+	local version patcher_args build_mode_arr pkg_name uptwod_resp
 	local mode_arg=${args[build_mode]} version_mode=${args[version]}
 	local app_name_l=${args[app_name],,}
 	local dl_from=${args[dl_from]}
@@ -203,25 +214,31 @@ build_rv() {
 				abort "UNREACHABLE $LINENO"
 			fi
 		fi
+		if [ "$dl_from" = apkmirror ]; then
+			pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
+		elif [ "$dl_from" = uptodown ]; then
+			uptwod_resp=$(get_uptodown_resp "$app_name_l")
+			pkg_name=$(get_uptodown_pkg_name "$app_name_l")
+		fi
 
-		pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
-		if [ "$version_mode" = auto ] && [ "$dl_from" = apkmirror ]; then
+		local get_latest_ver=false
+		if [ "$version_mode" = auto ]; then
 			version=$(get_patch_last_supported_ver "$pkg_name")
-			if [ -z "$version" ]; then
-				version=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "${args[allow_alpha_version]}" | get_largest_ver)
-			fi
+			if [ -z "$version" ]; then get_latest_ver=true; fi
 		elif [ "$version_mode" = latest ]; then
-			if [ "$dl_from" = apkmirror ]; then
-				version=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "${args[allow_alpha_version]}" | get_largest_ver)
-			elif [ "$dl_from" = uptodown ]; then
-				version=$(get_uptodown_ver "${app_name_l}")
-			fi
-			patcher_args="$patcher_args --experimental"
+			get_latest_ver=true
 		else
 			version=$version_mode
 			patcher_args="$patcher_args --experimental"
 		fi
-		if [ -z "${version}" ]; then
+		if [ $get_latest_ver = true ]; then
+			if [ "$dl_from" = apkmirror ]; then
+				version=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "${args[allow_alpha_version]}" | get_largest_ver)
+			elif [ "$dl_from" = uptodown ]; then
+				version=$(get_uptodown_vers "$uptwod_resp" | get_largest_ver)
+			fi
+		fi
+		if [ -z "$version" ]; then
 			echo "ERROR: empty version"
 			return 1
 		fi
@@ -242,8 +259,8 @@ build_rv() {
 					return 1
 				fi
 			elif [ "$dl_from" = uptodown ]; then
-				echo "Downloading the latest version of '${args[app_name]}' from Uptodown"
-				if ! dl_uptodown "$app_name_l" "$stock_apk"; then
+				echo "Downloading '${args[app_name]}' from Uptodown"
+				if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
 					echo "ERROR: Could not download ${args[app_name]}"
 					return 1
 				fi
