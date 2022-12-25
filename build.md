@@ -1,3 +1,5 @@
+#### ⚠️ Do not download modules from 3rd party sources like random websites you found on google. Only use this repository. I am not responsible for anything they may contain.
+
 CLI: revanced-cli-2.18.2-all.jar  
 Integrations: app-release-unsigned-v0.86.0.apk  
 Patches: revanced-patches-2.147.0.jar  
