@@ -161,7 +161,9 @@ dl_uptodown() {
 	req "$url" "$output"
 }
 get_uptodown_pkg_name() {
-	req "https://${1}.en.uptodown.com/android/download" - | grep -A 1 "Package Name" | tail -1 | tr -d '</td>'
+	local p
+	p=$(req "https://${1}.en.uptodown.com/android/download" - | grep -A 1 "Package Name" | tail -1)
+	echo "${p:4:-5}"
 }
 # ------------------------------
 
