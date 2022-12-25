@@ -20,6 +20,7 @@ microg-patch = "microg-support"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
 merge-integrations = true
+rip-libs = true
 
 [Music-arm64]
 build-mode = "both"

@@ -16,6 +16,8 @@ Almost all keys are optional and are assigned their default values if not set ex
 app-name = "SomeApp"                                      # if set, app name becomes SomeApp instead of Some-App. default is same as table name.
 enabled = true                                            # whether to build the app. default: true
 build-mode = "both"                                       # 'both', 'apk' or 'module'. default: apk
+allow_alpha_version = false                               # allow downloading alpha versions from apkmirror. default: false
+rip-libs = false                                          # removes all native libs from the app. default: false
 excluded-patches = "some-patch"                           # whitespace seperated list of patches to exclude. default: "" (empty)
 included-patches = "patch-name"                           # whitespace seperated list of patches to include. default: "" (empty)
 version = "auto"                                          # 'auto', 'latest' or a custom one e.g. '17.40.41'. default: auto
