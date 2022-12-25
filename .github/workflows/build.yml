@@ -96,3 +96,41 @@ jobs:
           skip_checkout: true
           file_pattern: build.md *-update.json
           commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+
+      - name: Report to Telegram
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+        if: env.TG_TOKEN != null
+        run: |
+          cd build || echo "build folder not found"
+
+          TG_CHAT="@rvc_magisk"
+          NL=$'\n'
+          APKS=""
+          MODULES=""
+          for OUTPUT in *revanced*; do
+            DL_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${NEXT_VER_CODE}/${OUTPUT}"
+            if [[ $OUTPUT = *.apk ]]; then
+              APKS+="${NL}📦[${OUTPUT}](${DL_URL})"
+            elif [[ $OUTPUT = *.zip ]]; then
+              MODULES+="${NL}📦[${OUTPUT}](${DL_URL})"
+            fi
+          done
+          MODULES=${MODULES#"$NL"}
+          APKS=${APKS#"$NL"}
+
+          BODY="$(cat ../build.md | sed 's/\* \*\*/↪ \*\*/g; s/\*\*/\*/g; s/###//g')"
+          MSG="*New build!*
+
+          ${BODY}
+
+          *▼ Download Links:*
+          Modules:
+          ${MODULES}
+
+          APKs:
+          ${APKS}
+          "
+          echo "'$MSG'"
+          POST="https://api.telegram.org/bot${TG_TOKEN}/sendMessage"
+          curl -X POST --data-urlencode "parse_mode=Markdown" --data-urlencode "text=${MSG}" --data-urlencode "chat_id=${TG_CHAT}" "$POST"

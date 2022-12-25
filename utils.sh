@@ -10,7 +10,7 @@ PKGS_LIST="temp/module-pkgs"
 
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"j-hc/revanced-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
-WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:106.0) Gecko/20100101 Firefox/106.0"
+WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"
 DRYRUN=false
 
 SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
