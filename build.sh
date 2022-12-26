@@ -57,7 +57,7 @@ for t in $(toml_get_all_tables); do
 	exclusive_patches=$(toml_get "$t" exclusive-patches) || exclusive_patches=false
 	app_args[version]=$(toml_get "$t" version) || app_args[version]="auto"
 	app_args[app_name]=$(toml_get "$t" app-name) || app_args[app_name]=$t
-	app_args[allow_alpha_version]=$(toml_get "$t" app-name) || app_args[allow_alpha_version]=false
+	app_args[allow_alpha_version]=$(toml_get "$t" allow-alpha-version) || app_args[allow_alpha_version]=false
 	app_args[rip_libs]=$(toml_get "$t" rip-libs) || app_args[rip_libs]=false
 	app_args[build_mode]=$(toml_get "$t" build-mode) || app_args[build_mode]=apk
 	app_args[microg_patch]=$(toml_get "$t" microg-patch) || app_args[microg_patch]=""
