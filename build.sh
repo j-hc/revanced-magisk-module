@@ -14,6 +14,7 @@ read_main_config
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 1)); then abort "compression-level must be from 1 to 9"; fi
 if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
+mkdir -p revanced-magisk/bin/arm64 revanced-magisk/bin/arm
 get_cmpr
 
 log "**App Versions:**"
