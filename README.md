@@ -42,5 +42,5 @@ Make sure you have JDK 17 installed. Then run:
 ```console
 $ git clone --recurse-submodules https://github.com/j-hc/revanced-magisk-module
 $ cd revanced-magisk-module
-$ ./build.sh build
+$ ./build.sh
 ```

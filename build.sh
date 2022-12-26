@@ -2,46 +2,20 @@
 
 set -eu -o pipefail
 
-print_usage() {
-	echo -e "Usage:\n${0} build|clean|reset-template"
-}
-
-if [ -z ${1+x} ]; then
-	print_usage
-	exit 0
-elif [ "$1" = "clean" ]; then
-	rm -rf temp/tmp.* build.md build
-	reset_template
-	exit 0
-elif [ "$1" = "reset-template" ]; then
-	reset_template
-	exit 0
-elif [ "$1" = "build" ]; then
-	:
-else
-	print_usage
-	exit 1
-fi
-
 source utils.sh
 trap "rm -rf temp/tmp.*" INT
 
 : >build.md
 mkdir -p "$BUILD_DIR" "$TEMP_DIR"
 
-toml_prep "$(cat config.toml)"
+toml_prep "$(cat 2>/dev/null "${1:-config.toml}")" || abort "could not find config file '${1}'"
 read_main_config
 
+if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 1)); then abort "compression-level must be from 1 to 9"; fi
 if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
-reset_template
+if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
 get_cmpr
 
-if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 1)); then
-	abort "COMPRESSION_LEVEL must be between 1 and 9"
-fi
-if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
-
-# building from config
 log "**App Versions:**"
 idx=0
 for t in $(toml_get_all_tables); do
@@ -104,5 +78,4 @@ if [ "$youtube_mode" != module ] || [ "$music_arm_mode" != module ] || [ "$music
 fi
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 
-reset_template
 echo "Done"

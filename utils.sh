@@ -88,16 +88,6 @@ set_prebuilts() {
 	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
 }
 
-reset_template() {
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/service.sh"
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/customize.sh"
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/uninstall.sh"
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
-	rm -rf ${MODULE_TEMPLATE_DIR}/*.apk
-	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/arm64
-}
-
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
 log() { echo -e "$1  " >>build.md; }
 get_largest_ver() {
