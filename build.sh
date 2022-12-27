@@ -75,8 +75,9 @@ youtube_mode=$(toml_get "YouTube" "build-mode") || youtube_mode="module"
 music_arm_mode=$(toml_get "Music-arm" "build-mode") || music_arm_mode="module"
 music_arm64_mode=$(toml_get "Music-arm64" "build-mode") || music_arm64_mode="module"
 if [ "$youtube_mode" != module ] || [ "$music_arm_mode" != module ] || [ "$music_arm64_mode" != module ]; then
-	log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) to be able to use non-root YouTube or Music"
+	log "\nInstall [inotia00 Microg](https://github.com/inotia00/VancedMicroG/releases) to be able to use non-root YouTube or Music"
 fi
-log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
+log "\nCredits to our upstream repository [revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
+log "\n[ReVanced-Magisk repo](https://github.com/Kingsmanvn-Official/ReVanced-Magisk)"
 
 echo "Done"

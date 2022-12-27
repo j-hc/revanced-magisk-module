@@ -1,5 +1,11 @@
 name: Build Modules
-on: [workflow_call, workflow_dispatch]
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      TG_TOKEN:
+        required: false
 
 jobs:
   run:
@@ -104,7 +110,7 @@ jobs:
         run: |
           cd build || echo "build folder not found"
 
-          TG_CHAT="@rvc_magisk"
+          TG_CHAT="@revanced_kingsmanvn"
           NL=$'\n'
           APKS=""
           MODULES=""
@@ -120,7 +126,9 @@ jobs:
           APKS=${APKS#"$NL"}
 
           BODY="$(cat ../build.md | sed 's/\* \*\*/↪ \*\*/g; s/\*\*/\*/g; s/###//g')"
-          MSG="*New build!*
+          MSG="*ReVanced Magisk*
+
+          *New build!*
 
           ${BODY}
 

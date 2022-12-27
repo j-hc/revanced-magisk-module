@@ -1,11 +1,11 @@
 #### ⚠️ Do not download modules from 3rd party sources like random websites you found on Google. Only use this repository. I am not responsible for anything they may contain.
 
 # ReVanced Magisk Module
-[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
-[![Build Modules](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml/badge.svg)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml)
-[![CI](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml)
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/revanced_kingsmanvn)
+[![Build Modules](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml/badge.svg)](https://github.com/Kingsmanvn-Official/ReVanced-Magisk/actions/workflows/build.yml)
+[![CI](https://github.com/Kingsmanvn-Official/ReVanced-Magisk/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/Kingsmanvn-Official/ReVanced-Magisk/actions/workflows/ci.yml)
 
-Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases).
+Get the [latest CI release](https://github.com/Kingsmanvn-Official/ReVanced-Magisk/releases).
 
 [**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
 
@@ -34,7 +34,7 @@ Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/relea
 
 To get to know more about `config.toml`, read here [`CONFIG.md`](./CONFIG.md)
 
-To be able to use non-root variants of YouTube and YT Music, install [Vanced MicroG](https://github.com/TeamVanced/VancedMicroG/releases).
+To be able to use non-root variants of YouTube and YT Music, install [inotia00 MicroG](https://github.com/inotia00/VancedMicroG/releases).
 
 # Building Locally
 Make sure you have JDK 17 installed. Then run:

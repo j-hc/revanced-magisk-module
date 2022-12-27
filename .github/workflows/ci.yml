@@ -2,7 +2,7 @@ name: CI
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 16 * * *"
+    - cron: "0 0/6 * * *"
 
 jobs:
   check:
@@ -35,6 +35,28 @@ jobs:
             fi
           }
 
+          is_cli_latest() {
+            declare -r last_cli_url=$(req https://api.github.com/repos/revanced/revanced-cli/releases/latest - | json_get 'browser_download_url')
+            declare -r last_cli=${last_cli_url##*/}
+            cur_cli=$(sed -n 's/.*CLI: \(.*\)/\1/p' build.md | xargs)
+
+            echo "current integrations version: $cur_cli"
+            echo "latest integrations version: $last_cli"
+            [ "$cur_cli" != "$last_cli" ] # test success=>build, fail=>dont build
+          }
+
+          is_integrations_latest() {
+            mkdir -p temp
+            last_integrations_url=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | json_get 'browser_download_url')
+            last_integrations_apk=${last_integrations_url##*/}
+            last_integrations="${last_integrations_apk%.apk}-$(cut -d/ -f8 <<<"$last_integrations_url").apk"
+            cur_integrations=$(sed -n 's/.*Integrations: \(.*\)/\1/p' build.md | xargs)
+
+            echo "current integrations version: $cur_integrations"
+            echo "latest integrations version: $last_integrations"
+            [ "$cur_integrations" != "$last_integrations" ] # test success=>build, fail=>dont build
+          }
+
           is_patches_latest() {
             declare -r last_patches_url=$(wget -nv -O- https://api.github.com/repos/revanced/revanced-patches/releases/latest | json_get 'browser_download_url' | grep 'jar')
             declare -r last_patches=${last_patches_url##*/}
@@ -48,7 +70,7 @@ jobs:
           if ! git checkout update; then
             echo "first time building!"
             echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
-          elif is_patches_latest || is_youtube_latest; then
+          elif is_youtube_latest || is_cli_latest || is_integrations_latest || is_patches_latest; then
             echo "build!"
             echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
           else
@@ -63,3 +85,5 @@ jobs:
     needs: check
     uses: ./.github/workflows/build.yml
     if: ${{ needs.check.outputs.SHOULD_BUILD == 1 }}
+    secrets:
+      TG_TOKEN: ${{ secrets.TG_TOKEN }}
