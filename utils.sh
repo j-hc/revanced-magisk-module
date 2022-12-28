@@ -234,10 +234,15 @@ build_rv() {
 			fi
 		fi
 		if [ $get_latest_ver = true ]; then
+			local apkmvers uptwodvers
 			if [ "$dl_from" = apkmirror ]; then
-				version=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "${args[allow_alpha_version]}" | get_largest_ver)
+				apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "${args[allow_alpha_version]}")
+				version=$(echo "$apkmvers" | get_largest_ver)
+				[ "$version" ] || version=$(echo "$apkmvers" | head -1)
 			elif [ "$dl_from" = uptodown ]; then
-				version=$(get_uptodown_vers "$uptwod_resp" | get_largest_ver)
+				uptwodvers=$(get_uptodown_vers "$uptwod_resp")
+				version=$(echo "$uptwodvers" | get_largest_ver)
+				[ "$version" ] || version=$(echo "$uptwodvers" | head -1)
 			fi
 		fi
 		if [ -z "$version" ]; then
