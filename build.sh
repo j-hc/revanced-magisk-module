@@ -36,7 +36,13 @@ for t in $(toml_get_all_tables); do
 	app_args[rip_libs]=$(toml_get "$t" rip-libs) || app_args[rip_libs]=false
 	app_args[build_mode]=$(toml_get "$t" build-mode) || app_args[build_mode]=apk
 	app_args[microg_patch]=$(toml_get "$t" microg-patch) || app_args[microg_patch]=""
-	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) && app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/} || app_args[apkmirror_dlurl]=""
+	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) || app_args[apkmirror_dlurl]=""
+	if [ "${app_args[apkmirror_dlurl]}" ]; then
+		app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/}
+		if [[ "${app_args[apkmirror_dlurl]%/*}" == */apk ]]; then
+			app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/*}/${app_args[apkmirror_dlurl]##*/}/${app_args[apkmirror_dlurl]##*/}
+		fi
+	fi
 	app_args[arch]=$(toml_get "$t" arch) || app_args[arch]="all"
 	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || {
 		app_name_l=${app_args[app_name],,}
