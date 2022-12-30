@@ -1,7 +1,7 @@
 # SEE https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [main-config]
-mount-delay = 5               # some low-end phones cannot mount apks on boot without a delay. increase to something like 20 if needed.
+mount-delay = 1               # some low-end phones cannot mount apks on boot without a delay. increase to something like 20 if needed.
 compression-level = 9         # compression level for module zips. between 1 and 9
 enable-magisk-update = true   # set this to false if you do not want to receive updates from magisk app
 parallel-jobs = 3             # max number of concurrent building jobs
@@ -13,7 +13,7 @@ build-mindetach-module = true
 enabled = true                                                        # add 'enabled = false' key to entries to not build them
 build-mode = "both"                                                   # 'both', 'apk' or 'module'
 excluded-patches = "debugging"                                        # whitespace seperated list of patches to exclude
-included-patches = "theme"                                            # whitespace seperated list of patches to include
+included-patches = ""                                            # whitespace seperated list of patches to include
 version = "auto"                                                      # 'auto', 'latest' or a custom one like '17.40.41'
 exclusive-patches = false                                             # excludes all patches by default
 microg-patch = "microg-support"
