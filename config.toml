@@ -11,7 +11,7 @@ build-mindetach-module = true
 
 [YouTube]
 enabled = true                                                        # add 'enabled = false' key to entries to not build them
-build-mode = "both"                                                   # 'both', 'apk' or 'module'
+build-mode = "module"                                                   # 'both', 'apk' or 'module'
 excluded-patches = "
 always-autorepeat
 comments
@@ -50,7 +50,7 @@ rip-libs = true
 enabled = false
 
 [Music-arm]
-build-mode = "both"
+build-mode = "module"
 app-name = "Music"
 excluded-patches = "
 tasteBuilder-remover"
