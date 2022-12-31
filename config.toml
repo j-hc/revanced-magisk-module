@@ -53,6 +53,8 @@ enabled = false
 build-mode = "module"
 app-name = "Music"
 excluded-patches = "
+custom-branding
+compact-header
 tasteBuilder-remover"
 included-patches = ""
 version = "auto"
