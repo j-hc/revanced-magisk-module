@@ -12,31 +12,48 @@ build-mindetach-module = true
 [YouTube]
 enabled = true                                                        # add 'enabled = false' key to entries to not build them
 build-mode = "both"                                                   # 'both', 'apk' or 'module'
-excluded-patches = "debugging"                                        # whitespace seperated list of patches to exclude
+excluded-patches = "
+always-autorepeat
+comments
+custom-branding
+disable-auto-captions
+disable-auto-player-popup-panels
+disable-fullscreen-panels
+enable-wide-searchbar
+hide-album-cards
+hide-artist-card
+hide-autoplay-button
+hide-captions-button
+hide-cast-button
+hide-crowdfunding-box
+hide-email-address
+hide-endscreen-cards
+hide-info-cards
+hide-my-mix
+hide-time-and-seekbar
+hide-watch-in-vr
+hide-watermark
+old-quality-layout
+remove-player-button-background
+tablet-mini-player
+theme"                                        # whitespace seperated list of patches to exclude
 included-patches = ""                                            # whitespace seperated list of patches to include
 version = "auto"                                                      # 'auto', 'latest' or a custom one like '17.40.41'
 exclusive-patches = false                                             # excludes all patches by default
-microg-patch = "microg-support"
+microg-patch = ""
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
 merge-integrations = true
 rip-libs = true
 
 [Music-arm64]
-build-mode = "both"
-app-name = "Music"
-excluded-patches = ""
-included-patches = ""
-version = "auto"
-microg-patch = "music-microg-support"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-module-prop-name = "ytmusicrv-magisk"
-arch = "arm64-v8a"
+enabled = false
 
 [Music-arm]
 build-mode = "both"
 app-name = "Music"
-excluded-patches = ""
+excluded-patches = "
+tasteBuilder-remover"
 included-patches = ""
 version = "auto"
 microg-patch = "music-microg-support"
@@ -45,53 +62,28 @@ module-prop-name = "ytmusicrv-arm-magisk"
 arch = "arm-v7a"
 
 [Twitter]
-build-mode = "apk"
-excluded-patches = ""
-version = "latest"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
+enabled = false
 
 [Reddit]
-build-mode = "apk"
-version = "latest"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
+enabled = false
 
 [Twitch]
-build-mode = "apk"
-version = "latest"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
-merge-integrations = true
+enabled = false
 
 [Tiktok]
-build-mode = "apk"
-version = "27.2.5"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
-merge-integrations = true
+enabled = false
 
 [Spotify]
 enabled = false
-build-mode = "apk"
-version = "latest"
 
 [TickTick]
 enabled = false
-build-mode = "apk"
-version = "latest"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/ticktick-to-do-list-with-reminder-day-planner/"
 
 [WarnWetter]
 enabled = false
-version = "latest"
-build-mode = "apk"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/deutscher-wetterdienst/warnwetter/"
 
 [Backdrops]
 enabled = false
-build-mode = "apk"
-version = "latest"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/backdrops/backdrops-wallpapers/"
 
 [Windy]
 enabled = false
-build-mode = "apk"
-version = "latest"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/windy-weather-world-inc/windy-wind-weather-forecast/"
