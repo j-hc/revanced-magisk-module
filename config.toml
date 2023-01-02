@@ -1,7 +1,6 @@
 # SEE https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [main-config]
-mount-delay = 1               # some low-end phones cannot mount apks on boot without a delay. increase to something like 20 if needed.
 compression-level = 9         # compression level for module zips. between 1 and 9
 enable-magisk-update = true   # set this to false if you do not want to receive updates from magisk app
 parallel-jobs = 3             # max number of concurrent building jobs

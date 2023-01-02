@@ -40,7 +40,6 @@ toml_get() {
 
 #shellcheck disable=SC2034
 read_main_config() {
-	MOUNT_DELAY=$(toml_get "main-config" mount-delay)
 	COMPRESSION_LEVEL=$(toml_get "main-config" compression-level)
 	ENABLE_MAGISK_UPDATE=$(toml_get "main-config" enable-magisk-update)
 	PARALLEL_JOBS=$(toml_get "main-config" parallel-jobs)
@@ -334,8 +333,7 @@ customize_sh() {
 	echo "${s//__PKGVER/$2}" >"${3}/customize.sh"
 }
 service_sh() {
-	local s="${SERVICE_SH//__MNTDLY/$MOUNT_DELAY}"
-	s="${s//__PKGNAME/$1}"
+	local s="${SERVICE_SH//__PKGNAME/$1}"
 	echo "${s//__PKGVER/$2}" >"${3}/service.sh"
 }
 module_prop() {

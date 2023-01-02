@@ -4,7 +4,6 @@ MODDIR=${0%/*}
 RVPATH=/data/adb/__PKGNAME_rv.apk
 until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 1; done
 until [ -d /sdcard ]; do sleep 1; done
-sleep __MNTDLY
 
 grep __PKGNAME /proc/self/mountinfo | while read -r line; do
 	mountpoint=$(echo "$line" | cut -d' ' -f5)
