@@ -3,6 +3,7 @@ on: [workflow_call, workflow_dispatch]
 
 jobs:
   run:
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-java@v3
