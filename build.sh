@@ -24,7 +24,7 @@ for t in $(toml_get_all_tables); do
 	enabled=$(toml_get "$t" enabled) || enabled=true
 	if [ "$enabled" = false ]; then continue; fi
 
-	if [ $idx -ge "$PARALLEL_JOBS" ]; then wait -n; else idx=$((idx + 1)); fi
+	if (( idx >= PARALLEL_JOBS )); then wait -n; else idx=$((idx + 1)); fi
 	declare -A app_args
 	merge_integrations=$(toml_get "$t" merge-integrations) || merge_integrations=false
 	excluded_patches=$(toml_get "$t" excluded-patches) || excluded_patches=""
@@ -72,9 +72,9 @@ rm -rf temp/tmp.*
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	echo "Building mindetach module"
 	cp -f $PKGS_LIST mindetach-magisk/mindetach/detach.txt
-	cd mindetach-magisk/mindetach/
+	pushd mindetach-magisk/mindetach/
 	zip -r ../../build/mindetach-"$(grep version= module.prop | cut -d= -f2)".zip .
-	cd ../../
+	popd
 fi
 
 youtube_mode=$(toml_get "YouTube" "build-mode") || youtube_mode="module"
