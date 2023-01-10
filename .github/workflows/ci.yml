@@ -60,6 +60,7 @@ jobs:
       SHOULD_BUILD: ${{ steps.should_build.outputs.SHOULD_BUILD }}
 
   build:
+    permissions: write-all
     needs: check
     uses: ./.github/workflows/build.yml
     if: ${{ needs.check.outputs.SHOULD_BUILD == 1 }}
