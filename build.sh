@@ -14,7 +14,6 @@ read_main_config
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 1)); then abort "compression-level must be from 1 to 9"; fi
 if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
-mkdir -p revanced-magisk/bin/arm64 revanced-magisk/bin/arm
 get_cmpr
 
 log "**App Versions:**"
@@ -24,7 +23,7 @@ for t in $(toml_get_all_tables); do
 	enabled=$(toml_get "$t" enabled) || enabled=true
 	if [ "$enabled" = false ]; then continue; fi
 
-	if (( idx >= PARALLEL_JOBS )); then wait -n; else idx=$((idx + 1)); fi
+	if ((idx >= PARALLEL_JOBS)); then wait -n; else idx=$((idx + 1)); fi
 	declare -A app_args
 	merge_integrations=$(toml_get "$t" merge-integrations) || merge_integrations=false
 	excluded_patches=$(toml_get "$t" excluded-patches) || excluded_patches=""
@@ -36,13 +35,9 @@ for t in $(toml_get_all_tables); do
 	app_args[rip_libs]=$(toml_get "$t" rip-libs) || app_args[rip_libs]=false
 	app_args[build_mode]=$(toml_get "$t" build-mode) || app_args[build_mode]=apk
 	app_args[microg_patch]=$(toml_get "$t" microg-patch) || app_args[microg_patch]=""
-	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) || app_args[apkmirror_dlurl]=""
-	if [ "${app_args[apkmirror_dlurl]}" ]; then
-		app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/}
-		if [[ "${app_args[apkmirror_dlurl]%/*}" == */apk ]]; then
-			app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/*}/${app_args[apkmirror_dlurl]##*/}/${app_args[apkmirror_dlurl]##*/}
-		fi
-	fi
+	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/} || app_args[uptodown_dlurl]=""
+	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) && app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/} || app_args[apkmirror_dlurl]=""
+
 	app_args[arch]=$(toml_get "$t" arch) || app_args[arch]="all"
 	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || {
 		app_name_l=${app_args[app_name],,}

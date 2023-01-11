@@ -63,6 +63,7 @@ get_prebuilts() {
 }
 
 get_cmpr() {
+	mkdir -p revanced-magisk/bin/arm64 revanced-magisk/bin/arm
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
 }
@@ -72,13 +73,13 @@ abort() { echo "abort: $1" && exit 1; }
 set_prebuilts() {
 	[ -d "$TEMP_DIR" ] || abort "${TEMP_DIR} directory could not be found"
 	RV_CLI_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-cli-*.jar" | tail -n1)
-	[ -z "$RV_CLI_JAR" ] && abort "revanced cli not found"
+	[ "$RV_CLI_JAR" ] || abort "revanced cli not found"
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
-	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "app-release-unsigned-*.apk" | tail -n1)
-	[ -z "$RV_CLI_JAR" ] && abort "revanced integrations not found"
+	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-integrations-*.apk" | tail -n1)
+	[ "$RV_CLI_JAR" ] || abort "revanced integrations not found"
 	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
 	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*.jar" | tail -n1)
-	[ -z "$RV_CLI_JAR" ] && abort "revanced patches not found"
+	[ "$RV_CLI_JAR" ] || abort "revanced patches not found"
 	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
 }
 
@@ -154,7 +155,7 @@ get_apkmirror_pkg_name() { req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_col
 # ------------------------------
 
 # ------- uptodown -------------
-get_uptodown_resp() { req "https://${1}.en.uptodown.com/android/versions" -; }
+get_uptodown_resp() { req "${1}/versions" -; }
 get_uptodown_vers() { echo "$1" | grep -x '^[0-9.]* <span>.*</span>' | sed 's/ <s.*//'; }
 dl_uptodown() {
 	local uptwod_resp=$1 version=$2 output=$3
@@ -164,7 +165,7 @@ dl_uptodown() {
 }
 get_uptodown_pkg_name() {
 	local p
-	p=$(req "https://${1}.en.uptodown.com/android/download" - | grep -A 1 "Package Name" | tail -1)
+	p=$(req "${1}/download" - | grep -A 1 "Package Name" | tail -1)
 	echo "${p:4:-5}"
 }
 # ------------------------------
@@ -224,8 +225,8 @@ build_rv() {
 		if [ "$dl_from" = apkmirror ]; then
 			pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
 		elif [ "$dl_from" = uptodown ]; then
-			uptwod_resp=$(get_uptodown_resp "$app_name_l")
-			pkg_name=$(get_uptodown_pkg_name "$app_name_l")
+			uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}")
+			pkg_name=$(get_uptodown_pkg_name "${args[uptodown_dlurl]}")
 		fi
 
 		local get_latest_ver=false
@@ -305,7 +306,7 @@ build_rv() {
 			echo "Built ${args[app_name]} (${arch}) (non-root): '${apk_output}'"
 			continue
 		fi
-		if ! grep -q "$pkg_name" $PKGS_LIST; then echo "$pkg_name" >>$PKGS_LIST; fi
+		if [ "$BUILD_MINDETACH_MODULE" = true ] && ! grep -q "$pkg_name" $PKGS_LIST; then echo "$pkg_name" >>$PKGS_LIST; fi
 
 		declare -r base_template=$(mktemp -d -p $TEMP_DIR)
 		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
