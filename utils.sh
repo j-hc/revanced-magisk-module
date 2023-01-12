@@ -87,12 +87,12 @@ req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
 gh_req() { wget -nv -O "$2" --header="$GH_AUTH_HEADER" "$1"; }
 log() { echo -e "$1  " >>build.md; }
 get_largest_ver() {
-	local max=0
+	read -r max
 	while read -r v; do
-		if [ "$max" != 0 ] && ! semver_validate "$max" "$v"; then return 0; fi
+		if ! semver_validate "$max" "$v"; then continue; fi
 		if [ "$(semver_cmp "$max" "$v")" = 1 ]; then max=$v; fi
 	done
-	if [ "$max" != 0 ]; then echo "$max"; fi
+	echo "$max"
 }
 get_patch_last_supported_ver() {
 	local vs
@@ -100,10 +100,12 @@ get_patch_last_supported_ver() {
 	printf "%s\n" "$vs" | get_largest_ver
 }
 semver_cmp() {
-	local IFS=.
-	read -r -a v1 <<<"${1//[^.0-9]/}"
-	read -r -a v2 <<<"${2//[^.0-9]/}"
-	for i in ${!v1[*]}; do
+	IFS=. read -r -a v1 <<<"${1//[^.0-9]/}"
+	IFS=. read -r -a v2 <<<"${2//[^.0-9]/}"
+	local c1="${1//[^.]/}"
+	local c2="${2//[^.]/}"
+	local mi=$((${#c1} < ${#c2} ? ${#c1} : ${#c2}))
+	for ((i = 0; i <= mi; i++)); do
 		if ((v1[i] > v2[i])); then
 			echo -1
 			return 0
@@ -116,9 +118,8 @@ semver_cmp() {
 }
 semver_validate() {
 	local a1="${1%-*}" a2="${2%-*}"
-	local c1="${a1//[^.]/}" c2="${a2//[^.]/}"
 	local a1c="${a1//[.0-9]/}" a2c="${a2//[.0-9]/}"
-	[ ${#c1} = ${#c2} ] && [ ${#a1c} = 0 ] && [ ${#a2c} = 0 ]
+	[ ${#a1c} = 0 ] && [ ${#a2c} = 0 ]
 }
 
 dl_if_dne() {
@@ -139,6 +140,7 @@ dl_apkmirror() {
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	url="https://www.apkmirror.com$(echo "$resp" | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
+	[ "$url" != https://www.apkmirror.com ] || return 1
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$output"
