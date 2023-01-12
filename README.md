@@ -11,6 +11,7 @@ Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/relea
 
 ## Features
  * Can build Magisk modules and non-root APKs
+ * Support all present and future Revanced apps
  * Updated daily with the latest versions of apps and patches in accordance with your configuration
  * Cleans APKs from unneeded libs to make them smaller
  * Fully open-source, every binary or APK is compiled without human intervention
@@ -32,7 +33,7 @@ Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/relea
  * Run the build [workflow](../../actions/workflows/build.yml)
  * Grab your modules and APKs from [releases](../../releases)
 
-To get to know more about `config.toml`, read here [`CONFIG.md`](./CONFIG.md)
+To add more Revanced apps or know more about `config.toml`, read here [`CONFIG.md`](./CONFIG.md)
 
 To be able to use non-root variants of YouTube and YT Music, install [Vanced MicroG](https://github.com/TeamVanced/VancedMicroG/releases).
 

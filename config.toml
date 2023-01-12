@@ -1,4 +1,4 @@
-# See https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
+# see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [main-config]
 compression-level = 9         # compression level for module zips. between 1 and 9
@@ -19,7 +19,6 @@ microg-patch = "microg-support"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
 merge-integrations = true
-rip-libs = true
 
 [Music-arm64]
 build-mode = "both"
@@ -109,7 +108,7 @@ build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/awedea/nyx-music-player/"
 
 [IconPackStudio]
-enabled = true
+enabled = false
 version = "latest"
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"

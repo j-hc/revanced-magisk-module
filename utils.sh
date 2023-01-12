@@ -240,12 +240,8 @@ build_rv() {
 			patcher_args="$patcher_args --experimental"
 		fi
 		if [ "$build_mode" = module ]; then
-			if [ "${args[rip_libs]}" = true ]; then
-				# --unsigned and --rip-lib is only available in my revanced-cli builds
-				patcher_args="$patcher_args --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
-			else
-				patcher_args="$patcher_args --unsigned"
-			fi
+			# --unsigned and --rip-lib is only available in my revanced-cli builds
+			patcher_args="$patcher_args --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
 		fi
 		if [ $get_latest_ver = true ]; then
 			local apkmvers uptwodvers
@@ -326,7 +322,6 @@ build_rv() {
 
 		local module_output="${app_name_l}-revanced-magisk-v${version}-${arch}.zip"
 		zip_module "$patched_apk" "$module_output" "$stock_apk" "$pkg_name" "$base_template"
-		rm -rf "$base_template"
 
 		echo "Built ${args[app_name]} (${arch}) (root): '${BUILD_DIR}/${module_output}'"
 	done
