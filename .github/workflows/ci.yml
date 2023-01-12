@@ -21,7 +21,7 @@ jobs:
           toml_prep "$(cat config.toml)"
 
           is_youtube_latest() {
-            v=$(toml_get "YouTube" "version") || version=""
+            v=$(toml_get "$(toml_get_table "YouTube")" "version") || version=""
             if [ "$v" = latest ]; then
               declare -r cur_yt=$(sed -n 's/.*YouTube: \(.*\)/\1/p' build.md | xargs)
               [ -z "$cur_yt" ] && return 1 # empty, fail=>dont build

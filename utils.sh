@@ -21,21 +21,12 @@ CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
 UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
 
 json_get() { grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/'; }
-toml_prep() { __TOML__=$(echo "$1" | tr -d '\t\r' | tr "'" '"' | grep -o '^[^#]*' | grep -v '^$' | sed -r 's/(\".*\")|\s*/\1/g'); }
-toml_get_all_tables() { echo "$__TOML__" | grep -x '\[.*\]' | tr -d '[]' || return 1; }
+toml_prep() { __TOML__=$(echo "$1" | tr -d '\t\r' | tr "'" '"' | grep -o '^[^#]*' | grep -v '^$' | sed -r 's/(\".*\")|\s*/\1/g; 1i []'); }
+toml_get_table_names() { echo "$__TOML__" | grep -x '\[.*\]' | tr -d '[]' || return 1; }
+toml_get_table() { sed -n "/\[${1}]/,/^\[.*]$/p" <<<"$__TOML__"; }
 toml_get() {
-	local table=$1 key=$2
-	val=$(echo "$__TOML__" | sed -n "/\[${table}]/,/^\[.*]$/p" | grep "^${key}=")
-	[ "$val" ] && echo "${val#*=}" | sed -e "s/^\"//; s/\"$//"
-}
-
-#shellcheck disable=SC2034
-read_main_config() {
-	COMPRESSION_LEVEL=$(toml_get "main-config" compression-level)
-	ENABLE_MAGISK_UPDATE=$(toml_get "main-config" enable-magisk-update)
-	PARALLEL_JOBS=$(toml_get "main-config" parallel-jobs)
-	UPDATE_PREBUILTS=$(toml_get "main-config" update-prebuilts)
-	BUILD_MINDETACH_MODULE=$(toml_get "main-config" build-mindetach-module)
+	local table=$1 key=$2 val
+	val=$(grep "^${key}=" <<<"$table") && echo "${val#*=}" | sed -e "s/^\"//; s/\"$//"
 }
 
 get_prebuilts() {
@@ -46,7 +37,6 @@ get_prebuilts() {
 
 	RV_INTEGRATIONS_URL=$(gh_req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | json_get 'browser_download_url')
 	RV_INTEGRATIONS_APK=${RV_INTEGRATIONS_URL##*/}
-	RV_INTEGRATIONS_APK="${RV_INTEGRATIONS_APK%.apk}-$(cut -d/ -f8 <<<"$RV_INTEGRATIONS_URL").apk"
 	log "Integrations: $RV_INTEGRATIONS_APK"
 	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK}"
 
@@ -76,10 +66,10 @@ set_prebuilts() {
 	[ "$RV_CLI_JAR" ] || abort "revanced cli not found"
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
 	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-integrations-*.apk" | tail -n1)
-	[ "$RV_CLI_JAR" ] || abort "revanced integrations not found"
+	[ "$RV_INTEGRATIONS_APK" ] || abort "revanced integrations not found"
 	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
 	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*.jar" | tail -n1)
-	[ "$RV_CLI_JAR" ] || abort "revanced patches not found"
+	[ "$RV_PATCHES_JAR" ] || abort "revanced patches not found"
 	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
 }
 
@@ -263,12 +253,12 @@ build_rv() {
 		fi
 		echo "Choosing version '${version}' (${args[app_name]})"
 
-		local stock_apk="${TEMP_DIR}/${app_name_l}-stock-v${version}-${arch}.apk"
+		local stock_apk="${TEMP_DIR}/${pkg_name}-stock-${version}-${arch}.apk"
 		local apk_output="${BUILD_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
 		if [ "${args[microg_patch]}" ]; then
-			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-v${version}-${arch}-${build_mode}.apk"
+			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-${version}-${arch}-${build_mode}.apk"
 		else
-			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
+			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-${version}-${arch}.apk"
 		fi
 		if [ ! -f "$stock_apk" ]; then
 			if [ "$dl_from" = apkmirror ]; then
@@ -300,7 +290,7 @@ build_rv() {
 			return
 		fi
 		if [ "$build_mode" = apk ]; then
-			cp -f "$patched_apk" "${apk_output}"
+			cp -f "$patched_apk" "$apk_output"
 			echo "Built ${args[app_name]} (${arch}) (non-root): '${apk_output}'"
 			continue
 		fi

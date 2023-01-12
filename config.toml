@@ -1,6 +1,5 @@
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
-[main-config]
 compression-level = 9         # compression level for module zips. between 1 and 9
 enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
 parallel-jobs = 3             # max number of concurrent building jobs
@@ -60,7 +59,6 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
 merge-integrations = true
 
 [TikTok]
-build-mode = "apk"
 version = "27.2.5"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
 merge-integrations = true
@@ -73,54 +71,36 @@ uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 
 [Citra]
 enabled = false
-build-mode = "apk"
-version = "latest"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/citra-emulator/citra-emulator/"
 
 [Backdrops]
 enabled = false
-build-mode = "apk"
-version = "latest"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/backdrops/backdrops-wallpapers/"
 
 [WarnWetter]
 enabled = false
-version = "latest"
-build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/deutscher-wetterdienst/warnwetter/"
 
 [Windyapp]
 enabled = false
-version = "latest"
-build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/windy-weather-world-inc/windy-wind-weather-forecast/"
 
 [MyExpenses]
 enabled = false
-version = "latest"
-build-mode = "apk"
 uptodown-dlurl = "https://my-expenses.en.uptodown.com/android"
 
 [NyxMusicPlayer]
 enabled = false
-version = "latest"
-build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/awedea/nyx-music-player/"
 
 [IconPackStudio]
 enabled = false
-version = "latest"
-build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"
 
 [TickTick]
 enabled = false
-build-mode = "apk"
-version = "latest"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/ticktick-to-do-list-with-reminder-day-planner/"
 
 [Tasker]
 enabled = false
-build-mode = "apk"
-version = "latest"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/joaomgcd/tasker/"
