@@ -4,7 +4,8 @@
 /revanced-cache
 /temp
 /build
-build.md
 /test
+build.md
 cmpr
 test.toml
+options.toml

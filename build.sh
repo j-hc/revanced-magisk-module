@@ -16,7 +16,7 @@ PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs)
 UPDATE_PREBUILTS=$(toml_get "$main_config_t" update-prebuilts)
 BUILD_MINDETACH_MODULE=$(toml_get "$main_config_t" build-mindetach-module)
 
-if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 1)); then abort "compression-level must be from 1 to 9"; fi
+if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be from 0 to 9"; fi
 if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
 get_cmpr
