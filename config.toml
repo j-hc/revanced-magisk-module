@@ -61,7 +61,7 @@ merge-integrations = true
 [TikTok]
 version = "27.2.5"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
-merge-integrations = true
+merge-integrations = false
 
 [Spotify]
 enabled = true
@@ -78,7 +78,7 @@ enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/backdrops/backdrops-wallpapers/"
 
 [WarnWetter]
-enabled = true
+enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/deutscher-wetterdienst/warnwetter/"
 
 [Windyapp]
