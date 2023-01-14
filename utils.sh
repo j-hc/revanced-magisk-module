@@ -41,25 +41,28 @@ toml_get() {
 
 get_prebuilts() {
 	echo "Getting prebuilts"
-	RV_CLI_URL=$(gh_req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | json_get 'browser_download_url')
-	RV_CLI_JAR="${TEMP_DIR}/${RV_CLI_URL##*/}"
-	log "CLI: ${RV_CLI_URL##*/}"
+	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url
+	rv_cli_url=$(gh_req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | json_get 'browser_download_url')
+	RV_CLI_JAR="${TEMP_DIR}/${rv_cli_url##*/}"
+	log "CLI: ${rv_cli_url##*/}"
 
-	RV_INTEGRATIONS_URL=$(gh_req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | json_get 'browser_download_url')
-	RV_INTEGRATIONS_APK=${RV_INTEGRATIONS_URL##*/}
-	log "Integrations: $RV_INTEGRATIONS_APK"
-	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK}"
+	rv_integrations_url=$(gh_req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | json_get 'browser_download_url')
+	RV_INTEGRATIONS_APK="${TEMP_DIR}/${rv_integrations_url##*/}"
+	log "Integrations: ${rv_integrations_url##*/}"
 
-	RV_PATCHES=$(gh_req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
-	RV_PATCHES_CHANGELOG=$(echo "$RV_PATCHES" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
-	RV_PATCHES_URL=$(echo "$RV_PATCHES" | json_get 'browser_download_url' | grep 'jar')
-	RV_PATCHES_JAR="${TEMP_DIR}/${RV_PATCHES_URL##*/}"
-	log "Patches: ${RV_PATCHES_URL##*/}"
-	log "\n${RV_PATCHES_CHANGELOG//# [/### [}\n"
+	rv_patches=$(gh_req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
+	rv_patches_changelog=$(echo "$rv_patches" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
+	rv_patches_dl=$(json_get 'browser_download_url' <<<"$rv_patches")
+	RV_PATCHES_JSON="${TEMP_DIR}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
+	rv_patches_url=$(grep 'jar' <<<"$rv_patches_dl")
+	RV_PATCHES_JAR="${TEMP_DIR}/${rv_patches_url##*/}"
+	log "Patches: ${rv_patches_url##*/}"
+	log "\n${rv_patches_changelog//# [/### [}\n"
 
-	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
-	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
-	dl_if_dne "$RV_PATCHES_JAR" "$RV_PATCHES_URL"
+	dl_if_dne "$RV_CLI_JAR" "$rv_cli_url"
+	dl_if_dne "$RV_INTEGRATIONS_APK" "$rv_integrations_url"
+	dl_if_dne "$RV_PATCHES_JAR" "$rv_patches_url"
+	dl_if_dne "$RV_PATCHES_JSON" "$(grep 'json' <<<"$rv_patches_dl")"
 }
 
 get_cmpr() {
@@ -81,6 +84,8 @@ set_prebuilts() {
 	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*.jar" | tail -n1)
 	[ "$RV_PATCHES_JAR" ] || abort "revanced patches not found"
 	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
+	RV_PATCHES_JSON=$(find "$TEMP_DIR" -maxdepth 1 -name "patches-*.json" | tail -n1)
+	[ "$RV_PATCHES_JSON" ] || abort "patches.json not found"
 }
 
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
@@ -95,9 +100,7 @@ get_largest_ver() {
 	echo "$max"
 }
 get_patch_last_supported_ver() {
-	local vs
-	vs=$(unzip -p "$RV_PATCHES_JAR" | strings -s , | sed -rn "s/.*${1},versions,(([0-9.]*,*)*),Lk.*/\1/p" | tr ',' '\n')
-	echo "$vs" | get_largest_ver
+	jq ".[] | select(.compatiblePackages[].name==\"${1}\") | .compatiblePackages[].versions" "$RV_PATCHES_JSON" | tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || :
 }
 semver_cmp() {
 	IFS=. read -r -a v1 <<<"${1//[^.0-9]/}"
