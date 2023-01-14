@@ -19,6 +19,7 @@ BUILD_MINDETACH_MODULE=$(toml_get "$main_config_t" build-mindetach-module)
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be from 0 to 9"; fi
 if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
+jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt install jq' or equivalent"
 get_cmpr
 
 log "**App Versions:**"
@@ -48,14 +49,12 @@ for table_name in $(toml_get_table_names); do
 		app_name_l=${app_args[app_name],,}
 		app_args[module_prop_name]=$([ "${app_args[arch]}" = "all" ] && echo "${app_name_l}-rv-jhc-magisk" || echo "${app_name_l}-${app_args[arch]}-rv-jhc-magisk")
 	}
-	if ! app_args[apkmirror_regex]=$(toml_get "$t" apkmirror-regex); then
-		if [ "${app_args[arch]}" = "all" ]; then
-			app_args[apkmirror_regex]="APK</span>[^@]*@\([^#]*\)"
-		elif [ "${app_args[arch]}" = "arm64-v8a" ]; then
-			app_args[apkmirror_regex]='arm64-v8a</div>[^@]*@\([^"]*\)'
-		elif [ "${app_args[arch]}" = "arm-v7a" ]; then
-			app_args[apkmirror_regex]='armeabi-v7a</div>[^@]*@\([^"]*\)'
-		fi
+	if [ "${app_args[arch]}" = "all" ]; then
+		app_args[apkmirror_regex]="APK</span>[^@]*@\([^#]*\)"
+	elif [ "${app_args[arch]}" = "arm64-v8a" ]; then
+		app_args[apkmirror_regex]='arm64-v8a</div>[^@]*@\([^"]*\)'
+	elif [ "${app_args[arch]}" = "arm-v7a" ]; then
+		app_args[apkmirror_regex]='armeabi-v7a</div>[^@]*@\([^"]*\)'
 	fi
 	if [ "${app_args[apkmirror_dlurl]:-}" ] && [ "${app_args[apkmirror_regex]:-}" ]; then app_args[dl_from]=apkmirror; else app_args[dl_from]=uptodown; fi
 
