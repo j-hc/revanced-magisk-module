@@ -4,7 +4,6 @@
 /revanced-cache
 /temp
 /build
-build.md
 /test
 *.keystore
 !base-v17.24.34.apk
@@ -15,3 +14,7 @@ cmpr
 __pycache__
 test.toml
 test.toml
+build.md
+cmpr
+test.toml
+options.toml

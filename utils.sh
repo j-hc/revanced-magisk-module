@@ -20,14 +20,25 @@ SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
 CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
 UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
 
+
+# -------------------- json/toml --------------------
 json_get() { grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/'; }
 toml_prep() { __TOML__=$(echo "$1" | tr -d '\t\r' | tr "'" '"' | grep -o '^[^#]*' | grep -v '^$' | sed -r 's/(\".*\")|\s*/\1/g; 1i []'); }
-toml_get_table_names() { echo "$__TOML__" | grep -x '\[.*\]' | tr -d '[]' || return 1; }
+toml_get_table_names() {
+	local tn
+	tn=$(echo "$__TOML__" | grep -x '\[.*\]' | tr -d '[]') || return 1
+	if [ "$(echo "$tn" | sort | uniq -u | wc -l)" != "$(echo "$tn" | wc -l)" ]; then
+		echo >&2 "ERROR: Duplicate tables in TOML"
+		return 1
+	fi
+	echo "$tn"
+}
 toml_get_table() { sed -n "/\[${1}]/,/^\[.*]$/p" <<<"$__TOML__"; }
 toml_get() {
 	local table=$1 key=$2 val
-	val=$(grep "^${key}=" <<<"$table") && echo "${val#*=}" | sed -e "s/^\"//; s/\"$//"
+	val=$(grep -m 1 "^${key}=" <<<"$table") && echo "${val#*=}" | sed -e "s/^\"//; s/\"$//"
 }
+# ---------------------------------------------------
 
 get_prebuilts() {
 	echo "Getting prebuilts"
@@ -119,7 +130,7 @@ dl_if_dne() {
 	fi
 }
 
-# ------- apkmirror -------------
+# -------------------- apkmirror --------------------
 dl_apkmirror() {
 	local url=$1 version=$2 regexp=$3 output=$4
 	if [ $DRYRUN = true ]; then
@@ -144,9 +155,9 @@ get_apkmirror_vers() {
 	if [ "$allow_alpha_version" = false ]; then grep -i -v -e "beta" -e "alpha" <<<"$vers"; else echo "$vers"; fi
 }
 get_apkmirror_pkg_name() { req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_color.*;\1;p'; }
-# ------------------------------
+# --------------------------------------------------
 
-# ------- uptodown -------------
+# -------------------- uptodown --------------------
 get_uptodown_resp() { req "${1}/versions" -; }
 get_uptodown_vers() { echo "$1" | grep -x '^[0-9.]* <span>.*</span>' | sed 's/ <s.*//'; }
 dl_uptodown() {
@@ -160,7 +171,7 @@ get_uptodown_pkg_name() {
 	p=$(req "${1}/download" - | grep -A 1 "Package Name" | tail -1)
 	echo "${p:4:-5}"
 }
-# ------------------------------
+# --------------------------------------------------
 
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3
