@@ -13,3 +13,4 @@ cmpr
 
 # Telegram script ignore
 __pycache__
+test.toml

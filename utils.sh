@@ -1,39 +1,46 @@
 #!/usr/bin/env bash
 
-source semver
-
 MODULE_TEMPLATE_DIR="revanced-magisk"
 MODULE_SCRIPTS_DIR="scripts"
 TEMP_DIR="temp"
 BUILD_DIR="build"
+PKGS_LIST="${TEMP_DIR}/module-pkgs"
 
-
-GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"revanced-apks/build-apps"}
+if [ "${GITHUB_TOKEN+x}" ]; then
+	GH_AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
+else
+	GH_AUTH_HEADER=""
+fi
+GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-"revanced-apks/build-apps"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
-WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:106.0) Gecko/20100101 Firefox/106.0"
+WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"
+DRYRUN=false
 
 SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
-POSTFSDATA_SH=$(cat $MODULE_SCRIPTS_DIR/post-fs-data.sh)
 CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
 UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
 
-json_get() {
-	grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/'
+json_get() { grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/'; }
+toml_prep() { __TOML__=$(echo "$1" | tr -d '\t\r' | tr "'" '"' | grep -o '^[^#]*' | grep -v '^$' | sed -r 's/(\".*\")|\s*/\1/g; 1i []'); }
+toml_get_table_names() { echo "$__TOML__" | grep -x '\[.*\]' | tr -d '[]' || return 1; }
+toml_get_table() { sed -n "/\[${1}]/,/^\[.*]$/p" <<<"$__TOML__"; }
+toml_get() {
+	local table=$1 key=$2 val
+	val=$(grep "^${key}=" <<<"$table") && echo "${val#*=}" | sed -e "s/^\"//; s/\"$//"
 }
 
 get_prebuilts() {
 	echo "Getting prebuilts"
-	RV_CLI_URL=$(req https://api.github.com/repos/revanced/revanced-cli/releases/latest - | json_get 'browser_download_url')
+	RV_CLI_URL=$(gh_req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | json_get 'browser_download_url')
 	RV_CLI_JAR="${TEMP_DIR}/${RV_CLI_URL##*/}"
 	log "CLI: ${RV_CLI_URL##*/}"
 
-	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | json_get 'browser_download_url')
+	RV_INTEGRATIONS_URL=$(gh_req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | json_get 'browser_download_url')
 	RV_INTEGRATIONS_APK=${RV_INTEGRATIONS_URL##*/}
-	RV_INTEGRATIONS_APK="${RV_INTEGRATIONS_APK%.apk}-$(cut -d/ -f8 <<<"$RV_INTEGRATIONS_URL").apk"
 	log "Integrations: $RV_INTEGRATIONS_APK"
 	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK}"
 
-	RV_PATCHES=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
+	RV_PATCHES=$(gh_req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
 	RV_PATCHES_CHANGELOG=$(echo "$RV_PATCHES" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
 	RV_PATCHES_URL=$(echo "$RV_PATCHES" | json_get 'browser_download_url' | grep 'jar')
 	RV_PATCHES_JAR="${TEMP_DIR}/${RV_PATCHES_URL##*/}"
@@ -46,46 +53,63 @@ get_prebuilts() {
 }
 
 get_cmpr() {
-	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/download/20220811/cmpr-arm64-v8a"
-	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/download/20220811/cmpr-armeabi-v7a"
+	mkdir -p revanced-magisk/bin/arm64 revanced-magisk/bin/arm
+	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
+	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
 }
 
 abort() { echo "abort: $1" && exit 1; }
 
 set_prebuilts() {
 	[ -d "$TEMP_DIR" ] || abort "${TEMP_DIR} directory could not be found"
-	RV_CLI_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-cli-*" | tail -n1)
-	[ -z "$RV_CLI_JAR" ] && abort "revanced cli not found"
+	RV_CLI_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-cli-*.jar" | tail -n1)
+	[ "$RV_CLI_JAR" ] || abort "revanced cli not found"
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
-	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "app-release-unsigned-*" | tail -n1)
-	[ -z "$RV_CLI_JAR" ] && abort "revanced integrations not found"
+	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-integrations-*.apk" | tail -n1)
+	[ "$RV_INTEGRATIONS_APK" ] || abort "revanced integrations not found"
 	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
-	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*" | tail -n1)
-	[ -z "$RV_CLI_JAR" ] && abort "revanced patches not found"
+	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*.jar" | tail -n1)
+	[ "$RV_PATCHES_JAR" ] || abort "revanced patches not found"
 	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
 }
 
-reset_template() {
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/service.sh"
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/customize.sh"
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/uninstall.sh"
-	echo "# utils" >"${MODULE_TEMPLATE_DIR}/module.prop"
-	rm -rf ${MODULE_TEMPLATE_DIR}/*.apk
-	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/arm64
-}
-
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
+gh_req() { wget -nv -O "$2" --header="$GH_AUTH_HEADER" "$1"; }
 log() { echo -e "$1  " >>build.md; }
 get_largest_ver() {
-	local max=0
-	while read -r v || [ -n "$v" ]; do
-		if [ "$(command_compare "$v" "$max")" = 1 ]; then max=$v; fi
+	read -r max
+	while read -r v; do
+		if ! semver_validate "$max" "$v"; then continue; fi
+		if [ "$(semver_cmp "$max" "$v")" = 1 ]; then max=$v; fi
 	done
-	if [[ $max = 0 ]]; then echo ""; else echo "$max"; fi
+	echo "$max"
 }
 get_patch_last_supported_ver() {
-	unzip -p "$RV_PATCHES_JAR" | strings -s , | sed -rn "s/.*${1},versions,(([0-9.]*,*)*),Lk.*/\1/p" | tr ',' '\n' | get_largest_ver
+	local vs
+	vs=$(unzip -p "$RV_PATCHES_JAR" | strings -s , | sed -rn "s/.*${1},versions,(([0-9.]*,*)*),Lk.*/\1/p" | tr ',' '\n')
+	printf "%s\n" "$vs" | get_largest_ver
+}
+semver_cmp() {
+	IFS=. read -r -a v1 <<<"${1//[^.0-9]/}"
+	IFS=. read -r -a v2 <<<"${2//[^.0-9]/}"
+	local c1="${1//[^.]/}"
+	local c2="${2//[^.]/}"
+	local mi=$((${#c1} < ${#c2} ? ${#c1} : ${#c2}))
+	for ((i = 0; i <= mi; i++)); do
+		if ((v1[i] > v2[i])); then
+			echo -1
+			return 0
+		elif ((v2[i] > v1[i])); then
+			echo 1
+			return 0
+		fi
+	done
+	echo 0
+}
+semver_validate() {
+	local a1="${1%-*}" a2="${2%-*}"
+	local a1c="${a1//[.0-9]/}" a2c="${a2//[.0-9]/}"
+	[ ${#a1c} = 0 ] && [ ${#a2c} = 0 ]
 }
 
 dl_if_dne() {
@@ -95,124 +119,157 @@ dl_if_dne() {
 	fi
 }
 
-# if you are here to copy paste this piece of code, acknowledge it:)
+# ------- apkmirror -------------
 dl_apkmirror() {
 	local url=$1 version=$2 regexp=$3 output=$4
-	url="https://www.apkmirror.com/apk/${url}/${url##*/}-${version//./-}-release/"
+	if [ $DRYRUN = true ]; then
+		echo "#" >"$output"
+		return
+	fi
+	local resp
+	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	url="https://www.apkmirror.com$(echo "$resp" | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
+	[ "$url" != https://www.apkmirror.com ] || return 1
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$output"
 }
 get_apkmirror_vers() {
-	local apkmirror_category=$1
-	apkm_resp=$(req "https://www.apkmirror.com/uploads/?appcategory=${apkmirror_category}" -)
-	apkm_name=$(echo "$apkm_resp" | sed -n 's;.*Latest \(.*\) Uploads.*;\1;p')
-	vers=$(echo "$apkm_resp" | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p')
-	for v in $vers; do
-		if ! grep -q "${apkm_name} ${v} beta" <<<"$apkm_resp"; then
-			echo "$v"
-		fi
-	done
+	local apkmirror_category=$1 allow_alpha_version=$2
+	local vers
+	# apkm_resp=$(req "https://www.apkmirror.com/uploads/?appcategory=${apkmirror_category}" -)
+	# apkm_name=$(echo "$apkm_resp" | sed -n 's;.*Latest \(.*\) Uploads.*;\1;p')
+	vers=$(req "https://www.apkmirror.com/uploads/?appcategory=${apkmirror_category}" - | sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p')
+	if [ "$allow_alpha_version" = false ]; then grep -i -v -e "beta" -e "alpha" <<<"$vers"; else echo "$vers"; fi
 }
-get_uptodown_ver() {
-	local app_name=$1
-	req "https://${app_name}.en.uptodown.com/android/download" - | json_get 'softwareVersion'
-}
+get_apkmirror_pkg_name() { req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_color.*;\1;p'; }
+# ------------------------------
+
+# ------- uptodown -------------
+get_uptodown_resp() { req "${1}/versions" -; }
+get_uptodown_vers() { echo "$1" | grep -x '^[0-9.]* <span>.*</span>' | sed 's/ <s.*//'; }
 dl_uptodown() {
-	local app_name=$1 output=$2
-	url=$(req "https://${app_name}.en.uptodown.com/android/download" - | sed -n 's;.*data-url="\(.*\)".*;\1;p')
+	local uptwod_resp=$1 version=$2 output=$3
+	url=$(echo "$uptwod_resp" | grep "${version} <span>" -B 1 | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p')
+	url=$(req "$url" - | sed -n 's;.*data-url="\(.*\)".*;\1;p')
 	req "$url" "$output"
 }
+get_uptodown_pkg_name() {
+	local p
+	p=$(req "${1}/download" - | grep -A 1 "Package Name" | tail -1)
+	echo "${p:4:-5}"
+}
+# ------------------------------
 
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3
 	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
-	local cmd="java -jar $RV_CLI_JAR --temp-dir=$tdir -c -a $stock_input -o $patched_apk -b $RV_PATCHES_JAR --keystore=ks.keystore $patcher_args"
+	local cmd="java -jar $RV_CLI_JAR --rip-lib x86_64 --rip-lib x86 --temp-dir=$tdir -c -a $stock_input -o $patched_apk -b $RV_PATCHES_JAR --keystore=ks.keystore $patcher_args"
 	echo "$cmd"
-	eval "$cmd"
+	if [ $DRYRUN = true ]; then
+		cp -f "$stock_input" "$patched_apk"
+	else
+		eval "$cmd"
+	fi
 }
 
 zip_module() {
 	local patched_apk=$1 module_name=$2 stock_apk=$3 pkg_name=$4 template_dir=$5
 	cp -f "$patched_apk" "${template_dir}/base.apk"
 	cp -f "$stock_apk" "${template_dir}/${pkg_name}.apk"
-	cd "$template_dir" || abort "Module template dir not found"
+	pushd "$template_dir" || abort "Module template dir not found"
 	zip -"$COMPRESSION_LEVEL" -FSr "../../${BUILD_DIR}/${module_name}" .
-	cd ../..
+	popd || :
 }
 
 build_rv() {
 	local -n args=$1
-	local version patcher_args dl_from build_mode_arr
-	local mode_arg=${args[mode]%/*} version_mode=${args[mode]#*/}
-	local arch=${args[arch]:-all} app_name_l=${args[app_name],,}
-	if [ "${args[apkmirror_dlurl]:-}" ] && [ "${args[regexp]:-}" ]; then dl_from=apkmirror; else dl_from=uptodown; fi
+	local version patcher_args build_mode_arr pkg_name uptwod_resp
+	local mode_arg=${args[build_mode]} version_mode=${args[version]}
+	local app_name_l=${args[app_name],,}
+	local dl_from=${args[dl_from]}
+	local arch=${args[arch]}
 
-	if [ "$mode_arg" = none ]; then
-		return
-	elif [ "$mode_arg" = module ]; then
+	if [ "$mode_arg" = module ]; then
 		build_mode_arr=(module)
 	elif [ "$mode_arg" = apk ]; then
 		build_mode_arr=(apk)
 	elif [ "$mode_arg" = both ]; then
 		build_mode_arr=(apk module)
 	else
-		echo "ERROR: undefined build mode for ${args[app_name]}: '${mode_arg}'"
+		echo "ERROR: undefined build mode for '${args[app_name]}': '${mode_arg}'"
+		echo "    only 'both', 'apk' or 'module' are allowed"
 		return 1
 	fi
 
 	for build_mode in "${build_mode_arr[@]}"; do
-		patcher_args="${args[patcher_args]:-}"
-		printf "Building '%s' (%s) in " "${args[app_name]}" "${arch}"
+		patcher_args="${args[patcher_args]}"
+		echo -n "Building '${args[app_name]}' (${arch}) in "
 		if [ "$build_mode" = module ]; then echo "'module' mode"; else echo "'APK' mode"; fi
-		if [ "${args[microg_patch]:-}" ]; then
+		if [ "${args[microg_patch]}" ]; then
 			if [ "$build_mode" = module ]; then
 				patcher_args="$patcher_args -e ${args[microg_patch]}"
 			elif [[ "${args[patcher_args]}" = *"${args[microg_patch]}"* ]]; then
 				abort "UNREACHABLE $LINENO"
 			fi
 		fi
-		if [ "$version_mode" = auto ] && [ $dl_from = apkmirror ]; then
-			version=$(get_patch_last_supported_ver "${args[pkg_name]}")
-			if [ -z "$version" ]; then
-				version=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" | if [ "${args[pkg_name]}" = "com.twitter.android" ]; then grep release; else cat; fi | get_largest_ver)
-			fi
+		if [ "$dl_from" = apkmirror ]; then
+			pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
+		elif [ "$dl_from" = uptodown ]; then
+			uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}")
+			pkg_name=$(get_uptodown_pkg_name "${args[uptodown_dlurl]}")
+		fi
+
+		local get_latest_ver=false
+		if [ "$version_mode" = auto ]; then
+			version=$(get_patch_last_supported_ver "$pkg_name")
+			if [ -z "$version" ]; then get_latest_ver=true; fi
 		elif [ "$version_mode" = latest ]; then
-			if [ $dl_from = apkmirror ]; then
-				version=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" | if [ "${args[pkg_name]}" = "com.twitter.android" ]; then grep release; else cat; fi | get_largest_ver)
-			elif [ $dl_from = uptodown ]; then
-				version=$(get_uptodown_ver "${app_name_l}")
-			fi
-			patcher_args="$patcher_args --experimental"
+			get_latest_ver=true
 		else
 			version=$version_mode
 			patcher_args="$patcher_args --experimental"
 		fi
-		if [ -z "${version}" ]; then
+		if [ "$build_mode" = module ]; then
+			# --unsigned and --rip-lib is only available in my revanced-cli builds
+			patcher_args="$patcher_args --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
+		fi
+		if [ $get_latest_ver = true ]; then
+			local apkmvers uptwodvers
+			if [ "$dl_from" = apkmirror ]; then
+				apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "${args[allow_alpha_version]}")
+				version=$(echo "$apkmvers" | get_largest_ver)
+				[ "$version" ] || version=$(echo "$apkmvers" | head -1)
+			elif [ "$dl_from" = uptodown ]; then
+				uptwodvers=$(get_uptodown_vers "$uptwod_resp")
+				version=$(echo "$uptwodvers" | get_largest_ver)
+				[ "$version" ] || version=$(echo "$uptwodvers" | head -1)
+			fi
+		fi
+		if [ -z "$version" ]; then
 			echo "ERROR: empty version"
 			return 1
 		fi
-		echo "Choosing version '${version}'"
+		echo "Choosing version '${version}' (${args[app_name]})"
 
-		local stock_apk="${TEMP_DIR}/${app_name_l}-stock-v${version}-${arch}.apk"
+		local stock_apk="${TEMP_DIR}/${pkg_name}-stock-${version}-${arch}.apk"
 		local apk_output="${BUILD_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
-		if [ "${args[microg_patch]:-}" ]; then
-			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-v${version}-${arch}-${build_mode}.apk"
+		if [ "${args[microg_patch]}" ]; then
+			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-${version}-${arch}-${build_mode}.apk"
 		else
-			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
+			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-${version}-${arch}.apk"
 		fi
 		if [ ! -f "$stock_apk" ]; then
-			if [ $dl_from = apkmirror ]; then
-				echo "Downloading from APKMirror"
-				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "${args[regexp]}" "$stock_apk"; then
-					echo "ERROR: Could not find version '${version}' for ${args[app_name]}"
+			if [ "$dl_from" = apkmirror ]; then
+				echo "Downloading '${args[app_name]}' from APKMirror"
+				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "${args[apkmirror_regex]}" "$stock_apk"; then
+					echo "ERROR: Could not find any release of '${args[app_name]}' with the given version ('${version}') and regex"
 					return 1
 				fi
-			elif [ $dl_from = uptodown ]; then
-				echo "Downloading the latest version from Uptodown"
-				if ! dl_uptodown "$app_name_l" "$stock_apk"; then
+			elif [ "$dl_from" = uptodown ]; then
+				echo "Downloading '${args[app_name]}' from Uptodown"
+				if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
 					echo "ERROR: Could not download ${args[app_name]}"
 					return 1
 				fi
@@ -227,33 +284,28 @@ build_rv() {
 			! grep -q "${args[app_name]} (${arch}):" build.md && log "${args[app_name]} (${arch}): ${version}"
 		fi
 
-		[ ! -f "$patched_apk" ] && patch_apk "$stock_apk" "$patched_apk" "$patcher_args"
+		if [ ! -f "$patched_apk" ]; then patch_apk "$stock_apk" "$patched_apk" "$patcher_args"; fi
 		if [ ! -f "$patched_apk" ]; then
 			echo "BUILDING '${args[app_name]}' FAILED"
 			return
 		fi
 		if [ "$build_mode" = apk ]; then
-			cp -f "$patched_apk" "${apk_output}"
+			cp -f "$patched_apk" "$apk_output"
 			echo "Built ${args[app_name]} (${arch}) (non-root): '${apk_output}'"
 			continue
 		fi
+		if [ "$BUILD_MINDETACH_MODULE" = true ] && ! grep -q "$pkg_name" $PKGS_LIST; then echo "$pkg_name" >>$PKGS_LIST; fi
 
 		declare -r base_template=$(mktemp -d -p $TEMP_DIR)
 		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
 
-		uninstall_sh "${args[pkg_name]}" "$base_template"
-		service_sh "${args[pkg_name]}" "$base_template"
-		postfsdata_sh "${args[pkg_name]}" "$base_template"
-		customize_sh "${args[pkg_name]}" "$base_template"
+		uninstall_sh "$pkg_name" "$base_template"
+		service_sh "$pkg_name" "$version" "$base_template"
+		customize_sh "$pkg_name" "$version" "$base_template"
 
-		local upj pn
+		local upj
 		upj=$([ "${arch}" = "all" ] && echo "${app_name_l}-update.json" || echo "${app_name_l}-${arch}-update.json")
-		if [ "${args[module_prop_name]:-}" ]; then
-			pn=${args[module_prop_name]}
-		else
-			pn=$([ "${arch}" = "all" ] && echo "${app_name_l}-rv-jhc-magisk" || echo "${app_name_l}-${arch}-rv-jhc-magisk")
-		fi
-		module_prop "$pn" \
+		module_prop "${args[module_prop_name]}" \
 			"${args[app_name]} ReVanced" \
 			"$version" \
 			"${args[app_name]} ReVanced Magisk module" \
@@ -261,174 +313,24 @@ build_rv() {
 			"$base_template"
 
 		local module_output="${app_name_l}-revanced-magisk-v${version}-${arch}.zip"
-		zip_module "$patched_apk" "$module_output" "$stock_apk" "${args[pkg_name]}" "$base_template"
-		rm -rf "$base_template"
+		zip_module "$patched_apk" "$module_output" "$stock_apk" "$pkg_name" "$base_template"
 
 		echo "Built ${args[app_name]} (${arch}) (root): '${BUILD_DIR}/${module_output}'"
 	done
 }
 
 join_args() {
-	echo "$1" | tr -d '\t\r' | tr ' ' '\n' | grep -v '^$' | sed "s/^/${2} /" | paste -sd " " - || echo ""
+	echo "$1" | tr -d '\t\r' | tr ' ' '\n' | grep -v '^$' | sed "s/^/${2} /" | paste -sd " " - || :
 }
 
-#shellcheck disable=SC2034
-build_youtube() {
-	declare -A youtube_args
-	youtube_args[app_name]="YouTube"
-	youtube_args[patcher_args]="-m ${RV_INTEGRATIONS_APK} $(join_args "${YOUTUBE_EXCLUDED_PATCHES}" -e) $(join_args "${YOUTUBE_INCLUDED_PATCHES}" -i)"
-	youtube_args[mode]="$YOUTUBE_MODE"
-	youtube_args[microg_patch]="microg-support"
-	youtube_args[pkg_name]="com.google.android.youtube"
-	youtube_args[rip_all_libs]=true
-	youtube_args[apkmirror_dlurl]="google-inc/youtube"
-	youtube_args[regexp]="APK</span>[^@]*@\([^#]*\)"
-	youtube_args[module_prop_name]="ytrv-magisk"
-
-	build_rv youtube_args
-}
-
-#shellcheck disable=SC2034
-build_music() {
-	declare -A ytmusic_args
-	ytmusic_args[app_name]="Music"
-	ytmusic_args[patcher_args]="$(join_args "${MUSIC_EXCLUDED_PATCHES}" -e) $(join_args "${MUSIC_INCLUDED_PATCHES}" -i)"
-	ytmusic_args[microg_patch]="music-microg-support"
-	ytmusic_args[pkg_name]="com.google.android.apps.youtube.music"
-	ytmusic_args[rip_all_libs]=false
-	ytmusic_args[apkmirror_dlurl]="google-inc/youtube-music"
-
-	for a in arm64-v8a arm-v7a; do
-		if [ $a = arm64-v8a ]; then
-			ytmusic_args[module_prop_name]="ytmusicrv-magisk"
-			ytmusic_args[arch]=arm64-v8a
-			ytmusic_args[regexp]='arm64-v8a</div>[^@]*@\([^"]*\)'
-			ytmusic_args[mode]="$MUSIC_ARM64_V8A_MODE"
-		elif [ $a = arm-v7a ]; then
-			ytmusic_args[module_prop_name]="ytmusicrv-arm-magisk"
-			ytmusic_args[arch]=arm-v7a
-			ytmusic_args[regexp]='armeabi-v7a</div>[^@]*@\([^"]*\)'
-			ytmusic_args[mode]="$MUSIC_ARM_V7A_MODE"
-		fi
-
-		build_rv ytmusic_args
-	done
-}
-
-#shellcheck disable=SC2034
-build_twitter() {
-	declare -A tw_args
-	tw_args[app_name]="Twitter"
-	tw_args[mode]="$TWITTER_MODE"
-	tw_args[pkg_name]="com.twitter.android"
-	tw_args[apkmirror_dlurl]="twitter-inc/twitter"
-	tw_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-
-	build_rv tw_args
-}
-
-#shellcheck disable=SC2034
-build_reddit() {
-	declare -A reddit_args
-	reddit_args[app_name]="Reddit"
-	reddit_args[mode]="$REDDIT_MODE"
-	reddit_args[pkg_name]="com.reddit.frontpage"
-	reddit_args[apkmirror_dlurl]="redditinc/reddit"
-	reddit_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-
-	build_rv reddit_args
-}
-
-#shellcheck disable=SC2034
-build_twitch() {
-	declare -A twitch_args
-	twitch_args[app_name]="Twitch"
-	twitch_args[patcher_args]="-m ${RV_INTEGRATIONS_APK}"
-	twitch_args[mode]="$TWITCH_MODE"
-	twitch_args[pkg_name]="tv.twitch.android.app"
-	twitch_args[apkmirror_dlurl]="twitch-interactive-inc/twitch"
-	twitch_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-
-	build_rv twitch_args
-}
-
-#shellcheck disable=SC2034
-build_tiktok() {
-	declare -A tiktok_args
-	tiktok_args[app_name]="TikTok"
-	tiktok_args[patcher_args]="-m ${RV_INTEGRATIONS_APK}"
-	tiktok_args[mode]="$TIKTOK_MODE"
-	tiktok_args[pkg_name]="com.zhiliaoapp.musically"
-	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok-including-musical-ly"
-	tiktok_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-
-	build_rv tiktok_args
-}
-
-#shellcheck disable=SC2034
-build_spotify() {
-	declare -A spotify_args
-	spotify_args[app_name]="Spotify"
-	spotify_args[mode]="$SPOTIFY_MODE"
-	spotify_args[pkg_name]="com.spotify.music"
-
-	build_rv spotify_args
-}
-
-#shellcheck disable=SC2034
-build_ticktick() {
-	declare -A ticktick_args
-	ticktick_args[app_name]="TickTick"
-	ticktick_args[mode]="$TICKTICK_MODE"
-	ticktick_args[pkg_name]="com.ticktick.task"
-	ticktick_args[apkmirror_dlurl]="appest-inc/ticktick-to-do-list-with-reminder-day-planner"
-	ticktick_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-
-	build_rv ticktick_args
-}
-
-#shellcheck disable=SC2034
-build_warn_wetter() {
-	declare -A warn_wetter_args
-	warn_wetter_args[app_name]="WarnWetter"
-	warn_wetter_args[mode]="$WARN_WETTER_MODE"
-	warn_wetter_args[pkg_name]="de.dwd.warnapp"
-	warn_wetter_args[apkmirror_dlurl]="deutscher-wetterdienst/warnwetter"
-	warn_wetter_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-
-	build_rv warn_wetter_args
-}
-
-#shellcheck disable=SC2034
-build_backdrops() {
-	declare -A backdrops_args
-	backdrops_args[app_name]="Backdrops"
-	backdrops_args[mode]="$BACKDROPS_MODE"
-	backdrops_args[pkg_name]="com.backdrops.wallpapers"
-	backdrops_args[apkmirror_dlurl]="backdrops/backdrops-wallpapers"
-	backdrops_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-
-	build_rv backdrops_args
-}
-
-#shellcheck disable=SC2034
-build_windy() {
-	declare -A windy_args
-	windy_args[app_name]="Windy"
-	windy_args[mode]="$WINDY_MODE"
-	windy_args[pkg_name]="co.windyapp.android"
-	windy_args[apkmirror_dlurl]="windy-weather-world-inc/windy-wind-weather-forecast"
-	windy_args[regexp]='APK</span>[^@]*@\([^#]*\)'
-
-	build_rv windy_args
-}
-
-postfsdata_sh() { echo "${POSTFSDATA_SH//__PKGNAME/$1}" >"${2}/post-fs-data.sh"; }
 uninstall_sh() { echo "${UNINSTALL_SH//__PKGNAME/$1}" >"${2}/uninstall.sh"; }
-customize_sh() { echo "${CUSTOMIZE_SH//__PKGNAME/$1}" >"${2}/customize.sh"; }
+customize_sh() {
+	local s="${CUSTOMIZE_SH//__PKGNAME/$1}"
+	echo "${s//__PKGVER/$2}" >"${3}/customize.sh"
+}
 service_sh() {
-	s="${SERVICE_SH//__MNTDLY/$MOUNT_DELAY}"
-	echo "${s//__PKGNAME/$1}" >"${2}/service.sh"
+	local s="${SERVICE_SH//__PKGNAME/$1}"
+	echo "${s//__PKGVER/$2}" >"${3}/service.sh"
 }
 module_prop() {
 	echo "id=${1}
