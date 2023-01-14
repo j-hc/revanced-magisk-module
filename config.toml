@@ -44,29 +44,29 @@ arch = "arm-v7a"
 [Twitter]
 build-mode = "apk"
 excluded-patches = "hide-views-stats"
-version = "latest"
+version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
 
 [Reddit]
 build-mode = "apk"
-version = "latest"
+version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 
 [Twitch]
 build-mode = "apk"
-version = "latest"
+version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
 merge-integrations = true
 
 [TikTok]
-version = "27.2.5"
+version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
 merge-integrations = true
 
 [Spotify]
 enabled = false
 build-mode = "apk"
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 
 [Citra]
