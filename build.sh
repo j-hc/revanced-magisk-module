@@ -57,6 +57,10 @@ for table_name in $(toml_get_table_names); do
 		app_args[apkmirror_regex]='arm64-v8a</div>[^@]*@\([^"]*\)'
 	elif [ "${app_args[arch]}" = "arm-v7a" ]; then
 		app_args[apkmirror_regex]='armeabi-v7a</div>[^@]*@\([^"]*\)'
+	elif [ "${app_args[arch]}" = "x86" ]; then
+		app_args[apkmirror_regex]='x86</div>[^@]*@\([^"]*\)'
+	elif [ "${app_args[arch]}" = "x86_64" ]; then
+		app_args[apkmirror_regex]='x86_64</div>[^@]*@\([^"]*\)'		
 	fi
 	if [ "${app_args[apkmirror_dlurl]:-}" ] && [ "${app_args[apkmirror_regex]:-}" ]; then app_args[dl_from]=apkmirror; else app_args[dl_from]=uptodown; fi
 
