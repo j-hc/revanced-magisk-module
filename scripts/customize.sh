@@ -4,7 +4,7 @@ ui_print ""
 if [ $ARCH = "arm" ]; then
 	alias cmpr='$MODPATH/bin/arm/cmpr'
 	ARCH_LIB=armeabi-v7a
-elif [ $ARCH = "arm64" ]; then
+elif [ $ARCH = "arm64" ] || [ $ARCH = "x64" ]; then
 	ARCH_LIB=arm64-v8a
 	alias cmpr='$MODPATH/bin/arm64/cmpr'
 else
