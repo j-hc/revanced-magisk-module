@@ -36,7 +36,4 @@ merge-integrations = true                                  # whether to merge re
 arch = "arm64-v8a"                                         # 'arm64-v8a', 'arm-v7a' or 'all'. 
 # this option is sometimes needed to be able to download the apks from apkmirror. default: all
 # and does not affect anything else
-
-apkmirror-regex = 'APK</span>[^@]*@\([^#]*\)' # regex used to get the dl url in apkmirror. default: APK</span>[^@]*@\([^#]*\)
-# this default gets the url to the non-bundle apk.
 ```
