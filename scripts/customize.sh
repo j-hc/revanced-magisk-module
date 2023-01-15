@@ -1,5 +1,7 @@
 # shellcheck disable=SC2148,SC2086,SC2115
 ui_print ""
+HOUDINI64='/bin/houdini64'
+HOUDINI32='/bin/houdini'
 
 if [ $ARCH = "arm" ]; then
 	alias cmpr='$MODPATH/bin/arm/cmpr'
@@ -7,15 +9,16 @@ if [ $ARCH = "arm" ]; then
 elif [ $ARCH = "arm64" ]; then
 	ARCH_LIB=arm64-v8a
 	alias cmpr='$MODPATH/bin/arm64/cmpr'
-elif [ $ARCH = "x64" ]; then
+elif [ $ARCH = "x64" ] && [ -f "$HOUDINI64" ]; then
 	ARCH_LIB=x86_64
 	alias cmpr='$MODPATH/bin/arm64/cmpr'
-elif [ $ARCH = "x86" ]; then
+elif [ $ARCH = "x86" ] && [ -f "$HOUDINI32" ]; then
 	ARCH_LIB=x86
 	alias cmpr='$MODPATH/bin/arm/cmpr'
 else
 	abort "ERROR: unsupported arch: ${ARCH}"
 fi
+
 set_perm_recursive $MODPATH/bin 0 0 0755 0777
 
 basepath() {
