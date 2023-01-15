@@ -48,7 +48,14 @@ else
 		abort "ERROR: install __PKGNAME manually and reflash the module"
 	fi
 fi
-BASEPATHLIB=${BASEPATH%base.apk}lib/${ARCH_LIB}
+
+if [ $ARCH = "x64" ] || [ $ARCH = "x86" ]; then
+	BASEPATHLIB=${BASEPATH%base.apk}lib/${ARCH_LIB}
+else
+	BASEPATHLIB=${BASEPATH%base.apk}lib/${ARCH}
+fi
+
+
 if [ -z "$(ls -A1 ${BASEPATHLIB})" ]; then
 	ui_print "* Extracting native libs"
 	if ! op=$(unzip -j $MODPATH/__PKGNAME.apk lib/${ARCH_LIB}/* -d ${BASEPATHLIB} 2>&1); then
