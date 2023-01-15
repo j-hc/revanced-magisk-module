@@ -20,6 +20,28 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
 merge-integrations = true
 
+[Music-x64]
+build-mode = "both"
+app-name = "Music"
+excluded-patches = ""
+included-patches = ""
+version = "auto"
+microg-patch = "music-microg-support"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+module-prop-name = "ytmusicrv-magisk"
+arch = "x86_64"
+
+[Music-x86]
+build-mode = "both"
+app-name = "Music"
+excluded-patches = ""
+included-patches = ""
+version = "auto"
+microg-patch = "music-microg-support"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+module-prop-name = "ytmusicrv-magisk"
+arch = "x86"
+
 [Music-arm64]
 build-mode = "both"
 app-name = "Music"
