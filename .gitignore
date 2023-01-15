@@ -5,6 +5,7 @@
 /temp
 /build
 /test
+/logs
 build.md
 cmpr
 test.toml

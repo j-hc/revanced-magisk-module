@@ -121,7 +121,7 @@ jobs:
           MODULES=${MODULES#"$NL"}
           APKS=${APKS#"$NL"}
 
-          BODY="$(sed 's/^\* \*\*/↪ \*\*/g; s/^\* `/↪ \*\*/g; s/`/\*/g;  s/\*\*/\*/g; s/###//g;'  ../build.md)"
+          BODY="$(sed 's/^\* \*\*/↪ \*\*/g; s/^\* `/↪ \*\*/g; s/`/\*/g; s/\*\*/\*/g; s/###//g;' ../build.md)"
           MSG="*New build!*
 
           ${BODY}
@@ -136,3 +136,8 @@ jobs:
           echo "'$MSG'"
           POST="https://api.telegram.org/bot${TG_TOKEN}/sendMessage"
           curl -X POST --data-urlencode "parse_mode=Markdown" --data-urlencode "text=${MSG}" --data-urlencode "chat_id=${TG_CHAT}" "$POST"
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: logs
+          path: logs
