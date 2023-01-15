@@ -32,6 +32,7 @@ module-prop-name = "ytmusicrv-magisk"
 arch = "x86_64"
 
 [Music-x86]
+enabled = false
 build-mode = "both"
 app-name = "Music"
 excluded-patches = ""
