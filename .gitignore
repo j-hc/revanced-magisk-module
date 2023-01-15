@@ -14,6 +14,7 @@ cmpr
 __pycache__
 test.toml
 test.toml
+/logs
 build.md
 cmpr
 test.toml

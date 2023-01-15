@@ -10,15 +10,17 @@ mkdir -p "$BUILD_DIR" "$TEMP_DIR"
 
 toml_prep "$(cat 2>/dev/null "${1:-config.toml}")" || abort "could not find config file '${1}'"
 main_config_t=$(toml_get_table "")
-COMPRESSION_LEVEL=$(toml_get "$main_config_t" compression-level)
-ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update)
-PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs)
-UPDATE_PREBUILTS=$(toml_get "$main_config_t" update-prebuilts)
-BUILD_MINDETACH_MODULE=$(toml_get "$main_config_t" build-mindetach-module)
+COMPRESSION_LEVEL=$(toml_get "$main_config_t" compression-level) || abort "ERROR: compression-level is missing"
+ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || abort "ERROR: enable-magisk-update is missing"
+PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs) || abort "ERROR: parallel-jobs is missing"
+UPDATE_PREBUILTS=$(toml_get "$main_config_t" update-prebuilts) || abort "ERROR: update-prebuilts is missing"
+BUILD_MINDETACH_MODULE=$(toml_get "$main_config_t" build-mindetach-module) || abort "ERROR: build-mindetach-module is missing"
+LOGGING_F=$(toml_get "$main_config_t" logging-to-file) || LOGGING_F=false
 
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be from 0 to 9"; fi
 if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
+if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt install jq' or equivalent"
 get_cmpr
 
@@ -62,7 +64,13 @@ for table_name in $(toml_get_table_names); do
 	[ "$merge_integrations" = true ] && app_args[patcher_args]="${app_args[patcher_args]} -m ${RV_INTEGRATIONS_APK}"
 	[ "$exclusive_patches" = true ] && app_args[patcher_args]="${app_args[patcher_args]} --exclusive"
 
-	build_rv app_args &
+	if [ "$LOGGING_F" = true ]; then
+		logf=logs/"${table_name,,}.log"
+		: >"$logf"
+		(build_rv 2>&1 app_args | tee "$logf") &
+	else
+		build_rv app_args &
+	fi
 done
 wait
 
