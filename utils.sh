@@ -140,6 +140,7 @@ dl_apkmirror() {
 		return
 	fi
 	local resp
+	version=${version// /-}
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	url="https://www.apkmirror.com$(echo "$resp" | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
@@ -277,6 +278,7 @@ build_rv() {
 		fi
 		echo "Choosing version '${version}' (${app_name})"
 
+		version=${version// /-}
 		local stock_apk="${TEMP_DIR}/${pkg_name}-stock-${version}-${arch}.apk"
 		local apk_output="${BUILD_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
 		if [ "${args[microg_patch]}" ]; then
