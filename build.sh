@@ -43,7 +43,11 @@ for table_name in $(toml_get_table_names); do
 	app_args[allow_alpha_version]=$(toml_get "$t" allow-alpha-version) || app_args[allow_alpha_version]=false
 	app_args[build_mode]=$(toml_get "$t" build-mode) || app_args[build_mode]=apk
 	app_args[microg_patch]=$(toml_get "$t" microg-patch) || app_args[microg_patch]=""
-	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/} || app_args[uptodown_dlurl]=""
+	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && {
+		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/}
+		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%download}
+		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/}
+	} || app_args[uptodown_dlurl]=""
 	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) && app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/} || app_args[apkmirror_dlurl]=""
 
 	app_args[arch]=$(toml_get "$t" arch) || app_args[arch]="all"
@@ -58,7 +62,13 @@ for table_name in $(toml_get_table_names); do
 	elif [ "${app_args[arch]}" = "arm-v7a" ]; then
 		app_args[apkmirror_regex]='armeabi-v7a</div>[^@]*@\([^"]*\)'
 	fi
-	if [ "${app_args[apkmirror_dlurl]:-}" ] && [ "${app_args[apkmirror_regex]:-}" ]; then app_args[dl_from]=apkmirror; else app_args[dl_from]=uptodown; fi
+	if [ "${app_args[apkmirror_dlurl]:-}" ]; then
+		app_args[dl_from]=apkmirror
+	elif [ "${app_args[uptodown_dlurl]:-}" ]; then
+		app_args[dl_from]=uptodown
+	else
+		abort "ERROR: both 'apkmirror_dlurl' and 'uptodown_dlurl' were not set."
+	fi
 
 	app_args[patcher_args]="$(join_args "${excluded_patches}" -e) $(join_args "${included_patches}" -i)"
 	[ "$merge_integrations" = true ] && app_args[patcher_args]="${app_args[patcher_args]} -m ${RV_INTEGRATIONS_APK}"

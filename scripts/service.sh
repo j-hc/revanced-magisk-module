@@ -17,7 +17,7 @@ if [ $BASEPATH ] && [ -d ${BASEPATH%base.apk}lib ]; then
 		        umount -l "${mountpoint%%\\*}"
 		done
 		chcon u:object_r:apk_data_file:s0 $RVPATH
-		mount -o bind $RVPATH $BASEPATH
+		su -Mc mount -o bind $RVPATH $BASEPATH
 		am force-stop __PKGNAME
 	fi
 fi
