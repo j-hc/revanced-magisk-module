@@ -80,9 +80,16 @@ for table_name in $(toml_get_table_names); do
 		fi
 	}
 	app_args[patcher_args]="$(join_args "${excluded_patches}" -e) $(join_args "${included_patches}" -i)"
-	[ "$exclusive_patches" = true ] && app_args[patcher_args]="${app_args[patcher_args]} --exclusive"
+	[ "$exclusive_patches" = true ] && app_args[patcher_args]+=" --exclusive"
 	if [ "${app_args[microg_patch]}" ] && [[ "${app_args[patcher_args]}" = *"${app_args[microg_patch]}"* ]]; then
 		abort "ERROR: Do not include microg in included or excluded patches list"
+	fi
+	if [ "$LOGGING_F" = true ]; then
+		logf=logs/"${table_name,,}.log"
+		: >"$logf"
+		(build_rv 2>&1 app_args | tee "$logf") &
+	else
+		build_rv app_args &
 	fi
 done
 wait
