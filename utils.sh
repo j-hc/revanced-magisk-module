@@ -71,7 +71,7 @@ get_cmpr() {
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
 }
 
-abort() { echo >&2 "abort: $1" && exit 1; }
+abort() { echo >&2 "ABORT: $1" && exit 1; }
 
 set_prebuilts() {
 	[ -d "$TEMP_DIR" ] || abort "${TEMP_DIR} directory could not be found"
@@ -100,7 +100,7 @@ get_largest_ver() {
 	echo "$max"
 }
 get_patch_last_supported_ver() {
-	jq ".[] | select(.compatiblePackages[].name==\"${1}\") | .compatiblePackages[].versions" "$RV_PATCHES_JSON" | tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || :
+	jq -r ".[] | select(.compatiblePackages[].name==\"${1}\") | .compatiblePackages[].versions" "$RV_PATCHES_JSON" | tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || :
 }
 semver_cmp() {
 	IFS=. read -r -a v1 <<<"${1//[^.0-9]/}"
@@ -308,6 +308,9 @@ build_rv() {
 			grep -q "${app_name} (${arch}):" build.md || log "${app_name} (${arch}): ${version}"
 		fi
 
+		if jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .dependencies[]" "$RV_PATCHES_JSON" | grep -qFx integrations; then
+			patcher_args="$patcher_args -m ${RV_INTEGRATIONS_APK}"
+		fi
 		if [ ! -f "$patched_apk" ]; then patch_apk "$stock_apk" "$patched_apk" "$patcher_args"; fi
 		if [ ! -f "$patched_apk" ]; then
 			echo "BUILDING '${app_name}' FAILED"

@@ -41,7 +41,6 @@ for table_name in $(toml_get_table_names); do
 
 	if ((idx >= PARALLEL_JOBS)); then wait -n; else idx=$((idx + 1)); fi
 	declare -A app_args
-	merge_integrations=$(toml_get "$t" merge-integrations) || merge_integrations=false
 	excluded_patches=$(toml_get "$t" excluded-patches) || excluded_patches=""
 	included_patches=$(toml_get "$t" included-patches) || included_patches=""
 	exclusive_patches=$(toml_get "$t" exclusive-patches) || exclusive_patches=false
@@ -50,9 +49,8 @@ for table_name in $(toml_get_table_names); do
 	app_args[allow_alpha_version]=$(toml_get "$t" allow-alpha-version) || app_args[allow_alpha_version]=false
 	app_args[build_mode]=$(toml_get "$t" build-mode) && {
 		if ! isoneof "${app_args[build_mode]}" both apk module; then
-			abort "ERROR: ${app_args[arch]} is not a valid option for '$table_name'."
+			abort "ERROR: undefined build mode '${app_args[build_mode]}' for '${table_name}': only 'both', 'apk' or 'module' are allowed"
 		fi
-		abort "ERROR: undefined build mode for '${app_name}' ('${mode_arg}'): only 'both', 'apk' or 'module' are allowed"
 	} || app_args[build_mode]=apk
 	app_args[microg_patch]=$(toml_get "$t" microg-patch) || app_args[microg_patch]=""
 	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && {
@@ -82,9 +80,8 @@ for table_name in $(toml_get_table_names); do
 		fi
 	}
 	app_args[patcher_args]="$(join_args "${excluded_patches}" -e) $(join_args "${included_patches}" -i)"
-	[ "$merge_integrations" = true ] && app_args[patcher_args]="${app_args[patcher_args]} -m ${RV_INTEGRATIONS_APK}"
 	[ "$exclusive_patches" = true ] && app_args[patcher_args]="${app_args[patcher_args]} --exclusive"
-	if [ "${app_args[microg_patch]}" ] && [[ "${args[patcher_args]}" = *"${args[microg_patch]}"* ]]; then
+	if [ "${app_args[microg_patch]}" ] && [[ "${app_args[patcher_args]}" = *"${app_args[microg_patch]}"* ]]; then
 		abort "ERROR: Do not include microg in included or excluded patches list"
 	fi
 done

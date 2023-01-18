@@ -18,7 +18,6 @@ exclusive-patches = false                                             # excludes
 microg-patch = "microg-support"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
-merge-integrations = true
 
 [Music-arm64]
 build-mode = "both"
@@ -57,12 +56,10 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 build-mode = "apk"
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
-merge-integrations = true
 
 [TikTok]
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
-merge-integrations = true
 
 [Spotify]
 enabled = false
