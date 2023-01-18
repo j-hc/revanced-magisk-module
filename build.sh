@@ -24,6 +24,13 @@ if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt install jq' or equivalent"
 get_cmpr
 
+isoneof() {
+	local i=$1 v
+	shift
+	for v; do [ "$v" = "$i" ] && return 0; done
+	return 1
+}
+
 log "**App Versions:**"
 idx=0
 for table_name in $(toml_get_table_names); do
@@ -41,45 +48,44 @@ for table_name in $(toml_get_table_names); do
 	app_args[version]=$(toml_get "$t" version) || app_args[version]="auto"
 	app_args[app_name]=$(toml_get "$t" app-name) || app_args[app_name]=$table_name
 	app_args[allow_alpha_version]=$(toml_get "$t" allow-alpha-version) || app_args[allow_alpha_version]=false
-	app_args[build_mode]=$(toml_get "$t" build-mode) || app_args[build_mode]=apk
+	app_args[build_mode]=$(toml_get "$t" build-mode) && {
+		if ! isoneof "${app_args[build_mode]}" both apk module; then
+			abort "ERROR: ${app_args[arch]} is not a valid option for '$table_name'."
+		fi
+		abort "ERROR: undefined build mode for '${app_name}' ('${mode_arg}'): only 'both', 'apk' or 'module' are allowed"
+	} || app_args[build_mode]=apk
 	app_args[microg_patch]=$(toml_get "$t" microg-patch) || app_args[microg_patch]=""
 	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && {
 		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/}
 		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%download}
 		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/}
+		app_args[dl_from]=uptodown
 	} || app_args[uptodown_dlurl]=""
-	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) && app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/} || app_args[apkmirror_dlurl]=""
-
-	app_args[arch]=$(toml_get "$t" arch) || app_args[arch]="all"
+	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) && {
+		app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/}
+		app_args[dl_from]=apkmirror
+	} || app_args[apkmirror_dlurl]=""
+	if [ -z "${app_args[dl_from]:-}" ]; then
+		abort "ERROR: neither 'apkmirror_dlurl' nor 'uptodown_dlurl' were not set for '$table_name'."
+	fi
+	app_args[arch]=$(toml_get "$t" arch) && {
+		if ! isoneof "${app_args[arch]}" all arm64-v8a arm-v7a; then
+			abort "ERROR: ${app_args[arch]} is not a valid option for '$table_name': only 'all', 'arm64-v8a', 'arm-v7a' are allowed"
+		fi
+	} || app_args[arch]="all"
 	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || {
 		app_name_l=${app_args[app_name],,}
-		app_args[module_prop_name]=$([ "${app_args[arch]}" = "all" ] && echo "${app_name_l}-rv-jhc-magisk" || echo "${app_name_l}-${app_args[arch]}-rv-jhc-magisk")
+		if [ "${app_args[arch]}" = "all" ]; then
+			app_args[module_prop_name]="${app_name_l}-rv-jhc-magisk"
+		else
+			app_args[module_prop_name]="${app_name_l}-${app_args[arch]}-rv-jhc-magisk"
+		fi
 	}
-	if [ "${app_args[arch]}" = "all" ]; then
-		app_args[apkmirror_regex]="APK</span>[^@]*@\([^#]*\)"
-	elif [ "${app_args[arch]}" = "arm64-v8a" ]; then
-		app_args[apkmirror_regex]='arm64-v8a</div>[^@]*@\([^"]*\)'
-	elif [ "${app_args[arch]}" = "arm-v7a" ]; then
-		app_args[apkmirror_regex]='armeabi-v7a</div>[^@]*@\([^"]*\)'
-	fi
-	if [ "${app_args[apkmirror_dlurl]:-}" ]; then
-		app_args[dl_from]=apkmirror
-	elif [ "${app_args[uptodown_dlurl]:-}" ]; then
-		app_args[dl_from]=uptodown
-	else
-		abort "ERROR: both 'apkmirror_dlurl' and 'uptodown_dlurl' were not set."
-	fi
-
 	app_args[patcher_args]="$(join_args "${excluded_patches}" -e) $(join_args "${included_patches}" -i)"
 	[ "$merge_integrations" = true ] && app_args[patcher_args]="${app_args[patcher_args]} -m ${RV_INTEGRATIONS_APK}"
 	[ "$exclusive_patches" = true ] && app_args[patcher_args]="${app_args[patcher_args]} --exclusive"
-
-	if [ "$LOGGING_F" = true ]; then
-		logf=logs/"${table_name,,}.log"
-		: >"$logf"
-		(build_rv 2>&1 app_args | tee "$logf") &
-	else
-		build_rv app_args &
+	if [ "${app_args[microg_patch]}" ] && [[ "${args[patcher_args]}" = *"${args[microg_patch]}"* ]]; then
+		abort "ERROR: Do not include microg in included or excluded patches list"
 	fi
 done
 wait

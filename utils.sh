@@ -134,13 +134,12 @@ dl_if_dne() {
 
 # -------------------- apkmirror --------------------
 dl_apkmirror() {
-	local url=$1 version=$2 regexp=$3 output=$4
+	local url=$1 version=${2// /-} regexp=$3 output=$4
 	if [ $DRYRUN = true ]; then
 		echo "#" >"$output"
 		return
 	fi
 	local resp
-	version=${version// /-}
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	url="https://www.apkmirror.com$(echo "$resp" | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
@@ -222,22 +221,20 @@ build_rv() {
 		build_mode_arr=(apk)
 	elif [ "$mode_arg" = both ]; then
 		build_mode_arr=(apk module)
-	else
-		echo "ERROR: undefined build mode for '${app_name}': '${mode_arg}'"
-		echo "    only 'both', 'apk' or 'module' are allowed"
-		return 1
 	fi
 
 	for build_mode in "${build_mode_arr[@]}"; do
 		patcher_args="${args[patcher_args]}"
 		echo -n "Building '${app_name}' (${arch}) in "
-		if [ "$build_mode" = module ]; then echo "'module' mode"; else echo "'APK' mode"; fi
-		if [ "${args[microg_patch]}" ]; then
-			if [ "$build_mode" = module ]; then
-				patcher_args="$patcher_args -e ${args[microg_patch]}"
-			elif [[ "${args[patcher_args]}" = *"${args[microg_patch]}"* ]]; then
-				abort "UNREACHABLE $LINENO"
+		if [ "$build_mode" = module ]; then
+			echo "'module' mode"
+			if [ "${args[microg_patch]}" ]; then
+				patcher_args="$patcher_args -e ${args[microg_patch]} --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
+			else
+				patcher_args="$patcher_args --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
 			fi
+		else
+			echo "'APK' mode"
 		fi
 		if [ "$dl_from" = apkmirror ]; then
 			pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
@@ -257,10 +254,6 @@ build_rv() {
 			version=$version_mode
 			patcher_args="$patcher_args --experimental"
 		fi
-		if [ "$build_mode" = module ]; then
-			# --unsigned and --rip-lib is only available in my revanced-cli builds
-			patcher_args="$patcher_args --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
-		fi
 		if [ $get_latest_ver = true ]; then
 			local apkmvers uptwodvers
 			if [ "$dl_from" = apkmirror ]; then
@@ -279,8 +272,7 @@ build_rv() {
 		fi
 		echo "Choosing version '${version}' (${app_name})"
 
-		version=${version// /-}
-		local stock_apk="${TEMP_DIR}/${pkg_name}-stock-${version}-${arch}.apk"
+		local stock_apk="${TEMP_DIR}/${pkg_name}-stock-${version// /}-${arch}.apk"
 		local apk_output="${BUILD_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
 		if [ "${args[microg_patch]}" ]; then
 			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-${version}-${arch}-${build_mode}.apk"
@@ -290,8 +282,15 @@ build_rv() {
 		if [ ! -f "$stock_apk" ]; then
 			if [ "$dl_from" = apkmirror ]; then
 				echo "Downloading '${app_name}' from APKMirror"
-				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "${args[apkmirror_regex]}" "$stock_apk"; then
-					echo "ERROR: Could not find any release of '${app_name}' with the given version ('${version}') and regex from APKMirror"
+				if [ "$arch" = "all" ]; then
+					apkmirror_regex="APK</span>[^@]*@\([^#]*\)"
+				elif [ "$arch" = "arm64-v8a" ]; then
+					apkmirror_regex='arm64-v8a</div>[^@]*@\([^"]*\)'
+				elif [ "$arch" = "arm-v7a" ]; then
+					apkmirror_regex='armeabi-v7a</div>[^@]*@\([^"]*\)'
+				fi
+				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$apkmirror_regex" "$stock_apk"; then
+					echo "ERROR: Could not find any release of '${app_name}' with version '${version}'"
 					return 1
 				fi
 			elif [ "$dl_from" = uptodown ]; then
@@ -300,8 +299,6 @@ build_rv() {
 					echo "ERROR: Could not download ${app_name} from Uptodown"
 					return 1
 				fi
-			else
-				abort "UNREACHABLE $LINENO"
 			fi
 		fi
 
@@ -330,9 +327,22 @@ build_rv() {
 		service_sh "$pkg_name" "$version" "$base_template"
 		customize_sh "$pkg_name" "$version" "$base_template"
 
-		local upj
-		upj=$([ "${arch}" = "all" ] && echo "${app_name_l}-update.json" || echo "${app_name_l}-${arch}-update.json")
-		module_prop "${args[module_prop_name]}" \
+		if [ "$arch" = "all" ]; then
+			local upj="${app_name_l}-update.json"
+		else
+			local upj="${app_name_l}-${arch}-update.json"
+		fi
+		if [ "${args[module_prop_name]}" ]; then
+			if [ "$arch" = "all" ]; then
+				local module_prop_name="${app_name_l}-rv-jhc-magisk"
+			else
+				local module_prop_name="${app_name_l}-${arch}-rv-jhc-magisk"
+			fi
+		else
+			local module_prop_name=${args[module_prop_name]}
+		fi
+		module_prop \
+			"$module_prop_name" \
 			"${app_name} ReVanced" \
 			"$version" \
 			"${app_name} ReVanced Magisk module" \
