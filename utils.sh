@@ -316,31 +316,21 @@ build_rv() {
 			echo "Built ${app_name} (${arch}) (non-root): '${apk_output}'"
 			continue
 		fi
-		local base_template upj module_prop_name
+		local base_template upj
 		base_template=$(mktemp -d -p $TEMP_DIR)
 		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
 		if [ "$BUILD_MINDETACH_MODULE" = true ] && ! grep -q "$pkg_name" $PKGS_LIST; then echo "$pkg_name" >>$PKGS_LIST; fi
-
-		uninstall_sh "$pkg_name" "$base_template"
-		service_sh "$pkg_name" "$version" "$base_template"
-		customize_sh "$pkg_name" "$version" "$base_template"
-
 		if [ "$arch" = "all" ]; then
 			upj="${app_name_l}-update.json"
 		else
 			upj="${app_name_l}-${arch}-update.json"
 		fi
-		if [ -z "${args[module_prop_name]}" ]; then
-			if [ "$arch" = "all" ]; then
-				module_prop_name="${app_name_l}-rv-jhc-magisk"
-			else
-				module_prop_name="${app_name_l}-${arch}-rv-jhc-magisk"
-			fi
-		else
-			module_prop_name=${args[module_prop_name]}
-		fi
+
+		uninstall_sh "$pkg_name" "$base_template"
+		service_sh "$pkg_name" "$version" "$base_template"
+		customize_sh "$pkg_name" "$version" "$base_template"
 		module_prop \
-			"$module_prop_name" \
+			"${args[module_prop_name]}" \
 			"${app_name} ReVanced" \
 			"$version" \
 			"${app_name} ReVanced Magisk module" \
