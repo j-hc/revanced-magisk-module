@@ -41,7 +41,7 @@ jobs:
           cp -f build.md build.tmp
 
           cd build
-          yt_op=$(find . -maxdepth 1 -name "youtube-revanced-magisk-*.zip" -printf '%P')
+          yt_op=$(find . -maxdepth 1 -name "youtube-revanced-*.zip" -printf '%P')
           if [ -z "$yt_op" ]; then
             echo "RELEASE_NAME=ReVanced" >> $GITHUB_OUTPUT
           else
