@@ -4,11 +4,10 @@ logging-to-file = true # enables logging of every patch process to a seperate fi
 enable-magisk-update = true # set this to false if you do not want to receive updates for the module in magisk app
 parallel-jobs = 3 # max number of concurrent building jobs
 build-mindetach-module = true
-
+# extended
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 rv-brand = "ReVanced Extended"
-
 
 [YouTube]
 build-mode = "both"
@@ -16,7 +15,6 @@ excluded-patches = ""
 included-patches = ""
 version = "auto"
 exclusive-patches = false
-microg-patch = "microg-support"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music-arm64]
@@ -25,7 +23,6 @@ app-name = "Music"
 excluded-patches = ""
 included-patches = ""
 version = "auto"
-microg-patch = "music-microg-support"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 arch = "arm64-v8a"
 
@@ -35,6 +32,5 @@ app-name = "Music"
 excluded-patches = ""
 included-patches = ""
 version = "auto"
-microg-patch = "music-microg-support"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 arch = "arm-v7a"

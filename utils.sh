@@ -39,19 +39,19 @@ get_prebuilts() {
 	echo "Getting prebuilts"
 	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url
 	rv_cli_url=$(gh_req "https://api.github.com/repos/j-hc/revanced-cli/releases/latest" - | json_get 'browser_download_url')
-	RV_CLI_JAR="${TEMP_DIR}/${rv_cli_url##*/}"
+	RV_CLI_JAR="${PREBUILTS_DIR}/${rv_cli_url##*/}"
 	log "CLI: ${rv_cli_url##*/}"
 
 	rv_integrations_url=$(gh_req "https://api.github.com/repos/${INTEGRATIONS_SRC}/releases/latest" - | json_get 'browser_download_url')
-	RV_INTEGRATIONS_APK="${TEMP_DIR}/${rv_integrations_url##*/}"
+	RV_INTEGRATIONS_APK="${PREBUILTS_DIR}/${rv_integrations_url##*/}"
 	log "Integrations: ${rv_integrations_url##*/}"
 
 	rv_patches=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" -)
 	rv_patches_changelog=$(echo "$rv_patches" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
 	rv_patches_dl=$(json_get 'browser_download_url' <<<"$rv_patches")
-	RV_PATCHES_JSON="${TEMP_DIR}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
+	RV_PATCHES_JSON="${PREBUILTS_DIR}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
 	rv_patches_url=$(grep 'jar' <<<"$rv_patches_dl")
-	RV_PATCHES_JAR="${TEMP_DIR}/${rv_patches_url##*/}"
+	RV_PATCHES_JAR="${PREBUILTS_DIR}/${rv_patches_url##*/}"
 	log "Patches: ${rv_patches_url##*/}"
 	log "\n${rv_patches_changelog//# [/### [}\n"
 
@@ -277,7 +277,7 @@ build_rv() {
 	else
 		grep -q "${app_name} (${arch}):" build.md || log "${app_name} (${arch}): ${version}"
 	fi
-	if jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .dependencies[]" "$RV_PATCHES_JSON" | grep -qFx integrations; then
+	if jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .dependencies[]" "$RV_PATCHES_JSON" | grep -qF integrations; then
 		p_patcher_args+=" -m ${RV_INTEGRATIONS_APK}"
 	fi
 
@@ -291,12 +291,17 @@ build_rv() {
 	for build_mode in "${build_mode_arr[@]}"; do
 		patcher_args=$p_patcher_args
 		echo "Building '${app_name}' (${arch}) in '$build_mode' mode"
-		if [ "${args[microg_patch]}" ]; then
-			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-${version}-${arch}-${build_mode}.apk"
+		local microg_patch
+		microg_patch=$(jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .name" "$RV_PATCHES_JSON" | grep -F microg)
+		if [ "$microg_patch" ]; then
+			if [[ "${args[patcher_args]}" = *"$microg_patch"* ]]; then
+				abort "ERROR: Do not include microg in included or excluded patches list"
+			fi
+			local patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version}-${arch}-${build_mode}.apk"
 			if [ "$build_mode" = apk ]; then
-				patcher_args+=" -i ${args[microg_patch]}"
+				patcher_args+=" -i ${microg_patch}"
 			elif [ "$build_mode" = module ]; then
-				patcher_args+=" -e ${args[microg_patch]}"
+				patcher_args+=" -e ${microg_patch}"
 			fi
 		else
 			local patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version}-${arch}.apk"
