@@ -38,15 +38,15 @@ toml_get() {
 get_prebuilts() {
 	echo "Getting prebuilts"
 	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url
-	rv_cli_url=$(gh_req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | json_get 'browser_download_url')
+	rv_cli_url=$(gh_req "https://api.github.com/repos/j-hc/revanced-cli/releases/latest" - | json_get 'browser_download_url')
 	RV_CLI_JAR="${TEMP_DIR}/${rv_cli_url##*/}"
 	log "CLI: ${rv_cli_url##*/}"
 
-	rv_integrations_url=$(gh_req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | json_get 'browser_download_url')
+	rv_integrations_url=$(gh_req "https://api.github.com/repos/${INTEGRATIONS_SRC}/releases/latest" - | json_get 'browser_download_url')
 	RV_INTEGRATIONS_APK="${TEMP_DIR}/${rv_integrations_url##*/}"
 	log "Integrations: ${rv_integrations_url##*/}"
 
-	rv_patches=$(gh_req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
+	rv_patches=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" -)
 	rv_patches_changelog=$(echo "$rv_patches" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
 	rv_patches_dl=$(json_get 'browser_download_url' <<<"$rv_patches")
 	RV_PATCHES_JSON="${TEMP_DIR}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
@@ -299,7 +299,7 @@ build_rv() {
 				patcher_args+=" -e ${args[microg_patch]}"
 			fi
 		else
-			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-${version}-${arch}.apk"
+			local patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version}-${arch}.apk"
 		fi
 		if [ "$build_mode" = module ]; then
 			patcher_args+=" --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
@@ -311,7 +311,7 @@ build_rv() {
 			fi
 		fi
 		if [ "$build_mode" = apk ]; then
-			local apk_output="${BUILD_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
+			local apk_output="${BUILD_DIR}/${app_name_l}-${RV_BRAND_F}-v${version}-${arch}.apk"
 			cp -f "$patched_apk" "$apk_output"
 			echo "Built ${app_name} (${arch}) (non-root): '${apk_output}'"
 			continue
@@ -331,13 +331,13 @@ build_rv() {
 		customize_sh "$pkg_name" "$version" "$base_template"
 		module_prop \
 			"${args[module_prop_name]}" \
-			"${app_name} ReVanced" \
+			"${app_name} ${RV_BRAND}" \
 			"$version" \
-			"${app_name} ReVanced Magisk module" \
+			"${app_name} ${RV_BRAND} Magisk module" \
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${upj}" \
 			"$base_template"
 
-		local module_output="${app_name_l}-revanced-magisk-v${version}-${arch}.zip"
+		local module_output="${app_name_l}-${RV_BRAND_F}-magisk-v${version}-${arch}.zip"
 		zip_module "$patched_apk" "$module_output" "$stock_apk" "$pkg_name" "$base_template"
 
 		echo "Built ${app_name} (${arch}) (root): '${BUILD_DIR}/${module_output}'"
