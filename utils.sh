@@ -152,7 +152,7 @@ get_apkmirror_vers() {
 	vers=$(sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p' <<<"$apkm_resp")
 	if [ "$allow_alpha_version" = false ]; then
 		local IFS=$'\n'
-		vers=$(grep -i -v "\(beta\|alpha\)" <<<"$vers")
+		vers=$(grep -iv "\(beta\|alpha\)" <<<"$vers")
 		local r_vers=()
 		for v in $vers; do
 			grep -iq "${v} \(beta\|alpha\)" <<<"$apkm_resp" || r_vers+=("$v")
@@ -292,7 +292,7 @@ build_rv() {
 		patcher_args=$p_patcher_args
 		echo "Building '${app_name}' (${arch}) in '$build_mode' mode"
 		local microg_patch
-		microg_patch=$(jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .name" "$RV_PATCHES_JSON" | grep -F microg)
+		microg_patch=$(jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .name" "$RV_PATCHES_JSON" | grep -F microg || :)
 		if [ "$microg_patch" ]; then
 			if [[ "${args[patcher_args]}" = *"$microg_patch"* ]]; then
 				abort "ERROR: Do not include microg in included or excluded patches list"
