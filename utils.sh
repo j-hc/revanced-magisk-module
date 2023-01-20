@@ -6,12 +6,8 @@ TEMP_DIR="temp"
 BUILD_DIR="build"
 PKGS_LIST="${TEMP_DIR}/module-pkgs"
 
-if [ "${GITHUB_TOKEN+x}" ]; then
-	GH_AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
-else
-	GH_AUTH_HEADER=""
-fi
-GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-"revanced-apks/build-apps"}
+if [ "${GITHUB_TOKEN:-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
+GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-"j-hc/revanced-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"
 DRYRUN=false
@@ -42,20 +38,20 @@ toml_get() {
 get_prebuilts() {
 	echo "Getting prebuilts"
 	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url
-	rv_cli_url=$(gh_req https://api.github.com/repos/j-hc/revanced-cli/releases/latest - | json_get 'browser_download_url')
-	RV_CLI_JAR="${TEMP_DIR}/${rv_cli_url##*/}"
+	rv_cli_url=$(gh_req "https://api.github.com/repos/j-hc/revanced-cli/releases/latest" - | json_get 'browser_download_url')
+	RV_CLI_JAR="${PREBUILTS_DIR}/${rv_cli_url##*/}"
 	log "CLI: ${rv_cli_url##*/}"
 
-	rv_integrations_url=$(gh_req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | json_get 'browser_download_url')
-	RV_INTEGRATIONS_APK="${TEMP_DIR}/${rv_integrations_url##*/}"
+	rv_integrations_url=$(gh_req "https://api.github.com/repos/${INTEGRATIONS_SRC}/releases/latest" - | json_get 'browser_download_url')
+	RV_INTEGRATIONS_APK="${PREBUILTS_DIR}/${rv_integrations_url##*/}"
 	log "Integrations: ${rv_integrations_url##*/}"
 
-	rv_patches=$(gh_req https://api.github.com/repos/revanced/revanced-patches/releases/latest -)
+	rv_patches=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" -)
 	rv_patches_changelog=$(echo "$rv_patches" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
 	rv_patches_dl=$(json_get 'browser_download_url' <<<"$rv_patches")
-	RV_PATCHES_JSON="${TEMP_DIR}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
+	RV_PATCHES_JSON="${PREBUILTS_DIR}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
 	rv_patches_url=$(grep 'jar' <<<"$rv_patches_dl")
-	RV_PATCHES_JAR="${TEMP_DIR}/${rv_patches_url##*/}"
+	RV_PATCHES_JAR="${PREBUILTS_DIR}/${rv_patches_url##*/}"
 	log "Patches: ${rv_patches_url##*/}"
 	log "\n${rv_patches_changelog//# [/### [}\n"
 
@@ -66,12 +62,12 @@ get_prebuilts() {
 }
 
 get_cmpr() {
-	mkdir -p revanced-magisk/bin/arm64 revanced-magisk/bin/arm
+	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
 }
 
-abort() { echo "abort: $1" && exit 1; }
+abort() { echo >&2 "ABORT: $1" && exit 1; }
 
 set_prebuilts() {
 	[ -d "$TEMP_DIR" ] || abort "${TEMP_DIR} directory could not be found"
@@ -89,7 +85,7 @@ set_prebuilts() {
 }
 
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
-gh_req() { wget -nv -O "$2" --header="$GH_AUTH_HEADER" "$1"; }
+gh_req() { wget -nv -O "$2" --header="$GH_HEADER" "$1"; }
 log() { echo -e "$1  " >>build.md; }
 get_largest_ver() {
 	read -r max
@@ -100,7 +96,7 @@ get_largest_ver() {
 	echo "$max"
 }
 get_patch_last_supported_ver() {
-	jq ".[] | select(.compatiblePackages[].name==\"${1}\") | .compatiblePackages[].versions" "$RV_PATCHES_JSON" | tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || :
+	jq -r ".[] | select(.compatiblePackages[].name==\"${1}\") | .compatiblePackages[].versions" "$RV_PATCHES_JSON" | tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || :
 }
 semver_cmp() {
 	IFS=. read -r -a v1 <<<"${1//[^.0-9]/}"
@@ -134,13 +130,12 @@ dl_if_dne() {
 
 # -------------------- apkmirror --------------------
 dl_apkmirror() {
-	local url=$1 version=$2 regexp=$3 output=$4
+	local url=$1 version=${2// /-} regexp=$3 output=$4
 	if [ $DRYRUN = true ]; then
 		echo "#" >"$output"
 		return
 	fi
 	local resp
-	version=${version// /-}
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	url="https://www.apkmirror.com$(echo "$resp" | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
@@ -196,6 +191,7 @@ patch_apk() {
 	else
 		eval "$cmd"
 	fi
+	[ -f "$patched_apk" ]
 }
 
 zip_module() {
@@ -215,6 +211,75 @@ build_rv() {
 	local app_name_l=${app_name,,}
 	local dl_from=${args[dl_from]}
 	local arch=${args[arch]}
+	local p_patcher_args=${args[patcher_args]}
+
+	if [ "$dl_from" = apkmirror ]; then
+		pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
+	elif [ "$dl_from" = uptodown ]; then
+		uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}")
+		pkg_name=$(get_uptodown_pkg_name "${args[uptodown_dlurl]}")
+	fi
+
+	local get_latest_ver=false
+	if [ "$version_mode" = auto ]; then
+		version=$(get_patch_last_supported_ver "$pkg_name")
+		if [ -z "$version" ]; then get_latest_ver=true; fi
+	elif [ "$version_mode" = latest ]; then
+		get_latest_ver=true
+		p_patcher_args+=" --experimental"
+	else
+		version=$version_mode
+		p_patcher_args+=" --experimental"
+	fi
+	if [ $get_latest_ver = true ]; then
+		local apkmvers uptwodvers
+		if [ "$dl_from" = apkmirror ]; then
+			apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "${args[allow_alpha_version]}")
+			version=$(echo "$apkmvers" | get_largest_ver)
+			[ "$version" ] || version=$(echo "$apkmvers" | head -1)
+		elif [ "$dl_from" = uptodown ]; then
+			uptwodvers=$(get_uptodown_vers "$uptwod_resp")
+			version=$(echo "$uptwodvers" | get_largest_ver)
+			[ "$version" ] || version=$(echo "$uptwodvers" | head -1)
+		fi
+	fi
+	if [ -z "$version" ]; then
+		echo "ERROR: empty version"
+		return 1
+	fi
+	echo "Choosing version '${version}' (${app_name})"
+
+	local stock_apk="${TEMP_DIR}/${pkg_name}-stock-${version// /}-${arch}.apk"
+	if [ ! -f "$stock_apk" ]; then
+		if [ "$dl_from" = apkmirror ]; then
+			echo "Downloading '${app_name}' from APKMirror"
+			if [ "$arch" = "all" ]; then
+				apkmirror_regex="APK</span>[^@]*@\([^#]*\)"
+			elif [ "$arch" = "arm64-v8a" ]; then
+				apkmirror_regex='arm64-v8a</div>[^@]*@\([^"]*\)'
+			elif [ "$arch" = "arm-v7a" ]; then
+				apkmirror_regex='armeabi-v7a</div>[^@]*@\([^"]*\)'
+			fi
+			if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$apkmirror_regex" "$stock_apk"; then
+				echo "ERROR: Could not find any release of '${app_name}' with version '${version}'"
+				return 1
+			fi
+		elif [ "$dl_from" = uptodown ]; then
+			echo "Downloading '${app_name}' from Uptodown"
+			if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
+				echo "ERROR: Could not download ${app_name} from Uptodown"
+				return 1
+			fi
+		fi
+	fi
+	if [ "${arch}" = "all" ]; then
+		grep -q "${app_name}:" build.md || log "${app_name}: ${version}"
+	else
+		grep -q "${app_name} (${arch}):" build.md || log "${app_name} (${arch}): ${version}"
+	fi
+	if jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .dependencies[]" "$RV_PATCHES_JSON" | grep -qF integrations; then
+		p_patcher_args+=" -m ${RV_INTEGRATIONS_APK}"
+	fi
 
 	if [ "$mode_arg" = module ]; then
 		build_mode_arr=(module)
@@ -222,123 +287,62 @@ build_rv() {
 		build_mode_arr=(apk)
 	elif [ "$mode_arg" = both ]; then
 		build_mode_arr=(apk module)
-	else
-		echo "ERROR: undefined build mode for '${app_name}': '${mode_arg}'"
-		echo "    only 'both', 'apk' or 'module' are allowed"
-		return 1
 	fi
-
 	for build_mode in "${build_mode_arr[@]}"; do
-		patcher_args="${args[patcher_args]}"
-		echo -n "Building '${app_name}' (${arch}) in "
-		if [ "$build_mode" = module ]; then echo "'module' mode"; else echo "'APK' mode"; fi
-		if [ "${args[microg_patch]}" ]; then
-			if [ "$build_mode" = module ]; then
-				patcher_args="$patcher_args -e ${args[microg_patch]}"
-			elif [[ "${args[patcher_args]}" = *"${args[microg_patch]}"* ]]; then
-				abort "UNREACHABLE $LINENO"
+		patcher_args=$p_patcher_args
+		echo "Building '${app_name}' (${arch}) in '$build_mode' mode"
+		local microg_patch
+		microg_patch=$(jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .name" "$RV_PATCHES_JSON" | grep -F microg)
+		if [ "$microg_patch" ]; then
+			if [[ "${args[patcher_args]}" = *"$microg_patch"* ]]; then
+				abort "ERROR: Do not include microg in included or excluded patches list"
 			fi
-		fi
-		if [ "$dl_from" = apkmirror ]; then
-			pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
-		elif [ "$dl_from" = uptodown ]; then
-			uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}")
-			pkg_name=$(get_uptodown_pkg_name "${args[uptodown_dlurl]}")
-		fi
-
-		local get_latest_ver=false
-		if [ "$version_mode" = auto ]; then
-			version=$(get_patch_last_supported_ver "$pkg_name")
-			if [ -z "$version" ]; then get_latest_ver=true; fi
-		elif [ "$version_mode" = latest ]; then
-			get_latest_ver=true
+			local patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version}-${arch}-${build_mode}.apk"
+			if [ "$build_mode" = apk ]; then
+				patcher_args+=" -i ${microg_patch}"
+			elif [ "$build_mode" = module ]; then
+				patcher_args+=" -e ${microg_patch}"
+			fi
 		else
-			version=$version_mode
-			patcher_args="$patcher_args --experimental"
+			local patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version}-${arch}.apk"
 		fi
 		if [ "$build_mode" = module ]; then
-			# --unsigned and --rip-lib is only available in my revanced-cli builds
-			patcher_args="$patcher_args --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
+			patcher_args+=" --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
 		fi
-		if [ $get_latest_ver = true ]; then
-			local apkmvers uptwodvers
-			if [ "$dl_from" = apkmirror ]; then
-				apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "${args[allow_alpha_version]}")
-				version=$(echo "$apkmvers" | get_largest_ver)
-				[ "$version" ] || version=$(echo "$apkmvers" | head -1)
-			elif [ "$dl_from" = uptodown ]; then
-				uptwodvers=$(get_uptodown_vers "$uptwod_resp")
-				version=$(echo "$uptwodvers" | get_largest_ver)
-				[ "$version" ] || version=$(echo "$uptwodvers" | head -1)
-			fi
-		fi
-		if [ -z "$version" ]; then
-			echo "ERROR: empty version"
-			return 1
-		fi
-		echo "Choosing version '${version}' (${app_name})"
-
-		version=${version// /-}
-		local stock_apk="${TEMP_DIR}/${pkg_name}-stock-${version}-${arch}.apk"
-		local apk_output="${BUILD_DIR}/${app_name_l}-revanced-v${version}-${arch}.apk"
-		if [ "${args[microg_patch]}" ]; then
-			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-${version}-${arch}-${build_mode}.apk"
-		else
-			local patched_apk="${TEMP_DIR}/${app_name_l}-revanced-${version}-${arch}.apk"
-		fi
-		if [ ! -f "$stock_apk" ]; then
-			if [ "$dl_from" = apkmirror ]; then
-				echo "Downloading '${app_name}' from APKMirror"
-				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "${args[apkmirror_regex]}" "$stock_apk"; then
-					echo "ERROR: Could not find any release of '${app_name}' with the given version ('${version}') and regex from APKMirror"
-					return 1
-				fi
-			elif [ "$dl_from" = uptodown ]; then
-				echo "Downloading '${app_name}' from Uptodown"
-				if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
-					echo "ERROR: Could not download ${app_name} from Uptodown"
-					return 1
-				fi
-			else
-				abort "UNREACHABLE $LINENO"
-			fi
-		fi
-
-		if [ "${arch}" = "all" ]; then
-			grep -q "${app_name}:" build.md || log "${app_name}: ${version}"
-		else
-			grep -q "${app_name} (${arch}):" build.md || log "${app_name} (${arch}): ${version}"
-		fi
-
-		if [ ! -f "$patched_apk" ]; then patch_apk "$stock_apk" "$patched_apk" "$patcher_args"; fi
 		if [ ! -f "$patched_apk" ]; then
-			echo "BUILDING '${app_name}' FAILED"
-			return
+			if ! patch_apk "$stock_apk" "$patched_apk" "$patcher_args"; then
+				echo "BUILDING '${app_name}' FAILED"
+				return
+			fi
 		fi
 		if [ "$build_mode" = apk ]; then
+			local apk_output="${BUILD_DIR}/${app_name_l}-${RV_BRAND_F}-v${version}-${arch}.apk"
 			cp -f "$patched_apk" "$apk_output"
 			echo "Built ${app_name} (${arch}) (non-root): '${apk_output}'"
 			continue
 		fi
-		if [ "$BUILD_MINDETACH_MODULE" = true ] && ! grep -q "$pkg_name" $PKGS_LIST; then echo "$pkg_name" >>$PKGS_LIST; fi
-
-		declare -r base_template=$(mktemp -d -p $TEMP_DIR)
+		local base_template upj
+		base_template=$(mktemp -d -p $TEMP_DIR)
 		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
+		if [ "$BUILD_MINDETACH_MODULE" = true ] && ! grep -q "$pkg_name" $PKGS_LIST; then echo "$pkg_name" >>$PKGS_LIST; fi
+		if [ "$arch" = "all" ]; then
+			upj="${app_name_l}-update.json"
+		else
+			upj="${app_name_l}-${arch}-update.json"
+		fi
 
 		uninstall_sh "$pkg_name" "$base_template"
 		service_sh "$pkg_name" "$version" "$base_template"
 		customize_sh "$pkg_name" "$version" "$base_template"
-
-		local upj
-		upj=$([ "${arch}" = "all" ] && echo "${app_name_l}-update.json" || echo "${app_name_l}-${arch}-update.json")
-		module_prop "${args[module_prop_name]}" \
-			"${app_name} ReVanced" \
+		module_prop \
+			"${args[module_prop_name]}" \
+			"${app_name} ${RV_BRAND}" \
 			"$version" \
-			"${app_name} ReVanced Magisk module" \
+			"${app_name} ${RV_BRAND} Magisk module" \
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${upj}" \
 			"$base_template"
 
-		local module_output="${app_name_l}-revanced-magisk-v${version}-${arch}.zip"
+		local module_output="${app_name_l}-${RV_BRAND_F}-magisk-v${version}-${arch}.zip"
 		zip_module "$patched_apk" "$module_output" "$stock_apk" "$pkg_name" "$base_template"
 
 		echo "Built ${app_name} (${arch}) (root): '${BUILD_DIR}/${module_output}'"

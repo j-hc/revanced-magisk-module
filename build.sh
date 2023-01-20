@@ -6,23 +6,36 @@ source utils.sh
 trap "rm -rf temp/tmp.*" INT
 
 : >build.md
-mkdir -p "$BUILD_DIR" "$TEMP_DIR"
 
 toml_prep "$(cat 2>/dev/null "${1:-config.toml}")" || abort "could not find config file '${1}'"
 main_config_t=$(toml_get_table "")
 COMPRESSION_LEVEL=$(toml_get "$main_config_t" compression-level) || abort "ERROR: compression-level is missing"
 ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || abort "ERROR: enable-magisk-update is missing"
 PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs) || abort "ERROR: parallel-jobs is missing"
-UPDATE_PREBUILTS=$(toml_get "$main_config_t" update-prebuilts) || abort "ERROR: update-prebuilts is missing"
 BUILD_MINDETACH_MODULE=$(toml_get "$main_config_t" build-mindetach-module) || abort "ERROR: build-mindetach-module is missing"
 LOGGING_F=$(toml_get "$main_config_t" logging-to-file) || LOGGING_F=false
 
+PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || PATCHES_SRC="revanced/revanced-patches"
+INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || INTEGRATIONS_SRC="revanced/revanced-integrations"
+RV_BRAND=$(toml_get "$main_config_t" rv-brand) || RV_BRAND="ReVanced"
+RV_BRAND_F=${RV_BRAND,,}
+RV_BRAND_F=${RV_BRAND_F// /-}
+PREBUILTS_DIR="${TEMP_DIR}/tools-${RV_BRAND_F}"
+mkdir -p "$BUILD_DIR" "$PREBUILTS_DIR"
+
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be from 0 to 9"; fi
-if [ "$UPDATE_PREBUILTS" = true ]; then get_prebuilts; else set_prebuilts; fi
+if [ "$DRYRUN" = true ]; then set_prebuilts; else get_prebuilts; fi
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
 if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt install jq' or equivalent"
 get_cmpr
+
+isoneof() {
+	local i=$1 v
+	shift
+	for v; do [ "$v" = "$i" ] && return 0; done
+	return 1
+}
 
 log "**App Versions:**"
 idx=0
@@ -34,36 +47,45 @@ for table_name in $(toml_get_table_names); do
 
 	if ((idx >= PARALLEL_JOBS)); then wait -n; else idx=$((idx + 1)); fi
 	declare -A app_args
-	merge_integrations=$(toml_get "$t" merge-integrations) || merge_integrations=false
 	excluded_patches=$(toml_get "$t" excluded-patches) || excluded_patches=""
 	included_patches=$(toml_get "$t" included-patches) || included_patches=""
 	exclusive_patches=$(toml_get "$t" exclusive-patches) || exclusive_patches=false
 	app_args[version]=$(toml_get "$t" version) || app_args[version]="auto"
 	app_args[app_name]=$(toml_get "$t" app-name) || app_args[app_name]=$table_name
 	app_args[allow_alpha_version]=$(toml_get "$t" allow-alpha-version) || app_args[allow_alpha_version]=false
-	app_args[build_mode]=$(toml_get "$t" build-mode) || app_args[build_mode]=apk
-	app_args[microg_patch]=$(toml_get "$t" microg-patch) || app_args[microg_patch]=""
-	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/} || app_args[uptodown_dlurl]=""
-	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) && app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/} || app_args[apkmirror_dlurl]=""
-
-	app_args[arch]=$(toml_get "$t" arch) || app_args[arch]="all"
+	app_args[build_mode]=$(toml_get "$t" build-mode) && {
+		if ! isoneof "${app_args[build_mode]}" both apk module; then
+			abort "ERROR: undefined build mode '${app_args[build_mode]}' for '${table_name}': only 'both', 'apk' or 'module' are allowed"
+		fi
+	} || app_args[build_mode]=apk
+	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && {
+		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/}
+		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%download}
+		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/}
+		app_args[dl_from]=uptodown
+	} || app_args[uptodown_dlurl]=""
+	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) && {
+		app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/}
+		app_args[dl_from]=apkmirror
+	} || app_args[apkmirror_dlurl]=""
+	if [ -z "${app_args[dl_from]:-}" ]; then
+		abort "ERROR: neither 'apkmirror_dlurl' nor 'uptodown_dlurl' were not set for '$table_name'."
+	fi
+	app_args[arch]=$(toml_get "$t" arch) && {
+		if ! isoneof "${app_args[arch]}" all arm64-v8a arm-v7a; then
+			abort "ERROR: ${app_args[arch]} is not a valid option for '$table_name': only 'all', 'arm64-v8a', 'arm-v7a' are allowed"
+		fi
+	} || app_args[arch]="all"
 	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || {
 		app_name_l=${app_args[app_name],,}
-		app_args[module_prop_name]=$([ "${app_args[arch]}" = "all" ] && echo "${app_name_l}-rv-jhc-magisk" || echo "${app_name_l}-${app_args[arch]}-rv-jhc-magisk")
+		if [ "${app_args[arch]}" = "all" ]; then
+			app_args[module_prop_name]="${app_name_l}-${RV_BRAND_F}-jhc"
+		else
+			app_args[module_prop_name]="${app_name_l}-${app_args[arch]}-${RV_BRAND_F}-jhc"
+		fi
 	}
-	if [ "${app_args[arch]}" = "all" ]; then
-		app_args[apkmirror_regex]="APK</span>[^@]*@\([^#]*\)"
-	elif [ "${app_args[arch]}" = "arm64-v8a" ]; then
-		app_args[apkmirror_regex]='arm64-v8a</div>[^@]*@\([^"]*\)'
-	elif [ "${app_args[arch]}" = "arm-v7a" ]; then
-		app_args[apkmirror_regex]='armeabi-v7a</div>[^@]*@\([^"]*\)'
-	fi
-	if [ "${app_args[apkmirror_dlurl]:-}" ] && [ "${app_args[apkmirror_regex]:-}" ]; then app_args[dl_from]=apkmirror; else app_args[dl_from]=uptodown; fi
-
 	app_args[patcher_args]="$(join_args "${excluded_patches}" -e) $(join_args "${included_patches}" -i)"
-	[ "$merge_integrations" = true ] && app_args[patcher_args]="${app_args[patcher_args]} -m ${RV_INTEGRATIONS_APK}"
-	[ "$exclusive_patches" = true ] && app_args[patcher_args]="${app_args[patcher_args]} --exclusive"
-
+	[ "$exclusive_patches" = true ] && app_args[patcher_args]+=" --exclusive"
 	if [ "$LOGGING_F" = true ]; then
 		logf=logs/"${table_name,,}.log"
 		: >"$logf"

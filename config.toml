@@ -1,24 +1,19 @@
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
-
-compression-level = 9         # compression level for module zips. between 1 and 9
-logging-to-file = true        # enables logging of every patch process to a seperate file
-enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
-parallel-jobs = 3             # max number of concurrent building jobs
-update-prebuilts = true       # dont touch this
+compression-level = 9 # compression level for module zips. between 1 and 9
+logging-to-file = true # enables logging of every patch process to a seperate file
+enable-magisk-update = true # set this to false if you do not want to receive updates for the module in magisk app
+parallel-jobs = 3 # max number of concurrent building jobs
 build-mindetach-module = true
 
-
 [YouTube]
-enabled = true                                                        # add 'enabled = false' key to entries to not build them
-build-mode = "both"                                                   # 'both', 'apk' or 'module'
-excluded-patches = "debugging"                                        # whitespace seperated list of patches to exclude (multiline strings are not supported)
-included-patches = ""                                                 # whitespace seperated list of patches to include
-version = "auto"                                                      # 'auto', 'latest' or a custom one like '17.40.41'
-exclusive-patches = false                                             # excludes all patches by default
-microg-patch = "microg-support"
+enabled = true # add 'enabled = false' key to entries to not build them
+build-mode = "both" # 'both', 'apk' or 'module'
+excluded-patches = "debugging" # whitespace seperated list of patches to exclude (multiline strings are not supported)
+included-patches = "" # whitespace seperated list of patches to include
+version = "auto" # 'auto', 'latest' or a custom one like '17.40.41'
+exclusive-patches = false # excludes all patches by default
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
-merge-integrations = true
 
 [Music-arm64]
 build-mode = "both"
@@ -26,7 +21,6 @@ app-name = "Music"
 excluded-patches = ""
 included-patches = ""
 version = "latest"
-microg-patch = "music-microg-support"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 module-prop-name = "ytmusicrv-magisk"
 arch = "arm64-v8a"
@@ -37,7 +31,6 @@ app-name = "Music"
 excluded-patches = ""
 included-patches = ""
 version = "latest"
-microg-patch = "music-microg-support"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 module-prop-name = "ytmusicrv-arm-magisk"
 arch = "arm-v7a"
@@ -57,12 +50,10 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 build-mode = "apk"
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
-merge-integrations = true
 
 [TikTok]
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
-merge-integrations = true
 
 [Spotify]
 enabled = true

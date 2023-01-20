@@ -12,11 +12,6 @@ else
 fi
 set_perm_recursive $MODPATH/bin 0 0 0755 0777
 
-basepath() {
-	basepath=$(pm path __PKGNAME | grep base)
-	echo ${basepath#*:}
-}
-
 grep __PKGNAME /proc/self/mountinfo | while read -r line; do
 	ui_print "* Un-mount"
 	mountpoint=$(echo "$line" | cut -d' ' -f5)
@@ -24,17 +19,19 @@ grep __PKGNAME /proc/self/mountinfo | while read -r line; do
 done
 am force-stop __PKGNAME
 
-BASEPATH=$(basepath)
+BASEPATH=$(pm path __PKGNAME | grep base)
+BASEPATH=${BASEPATH#*:}
 if [ -n "$BASEPATH" ] && cmpr $BASEPATH $MODPATH/__PKGNAME.apk; then
 	ui_print "* __PKGNAME is up-to-date"
 else
 	ui_print "* Updating __PKGNAME (v__PKGVER)"
 	set_perm $MODPATH/__PKGNAME.apk 1000 1000 644 u:object_r:apk_data_file:s0
-	if ! op=$(cmd package install --user 0 -i com.android.vending -r -d $MODPATH/__PKGNAME.apk 2>&1); then
+	if ! op=$(pm install --user 0 -i com.android.vending -r -d $MODPATH/__PKGNAME.apk 2>&1); then
 		ui_print "ERROR: APK installation failed!"
 		abort "$op"
 	fi
-	BASEPATH=$(basepath)
+	BASEPATH=$(pm path __PKGNAME | grep base)
+	BASEPATH=${BASEPATH#*:}
 	if [ -z "$BASEPATH" ]; then
 		abort "ERROR: install __PKGNAME manually and reflash the module"
 	fi
@@ -55,9 +52,10 @@ ui_print "* Mounting __PKGNAME"
 RVPATH=/data/adb/__PKGNAME_rv.apk
 ln -f $MODPATH/base.apk $RVPATH
 
-if ! op=$(mount -o bind $RVPATH $BASEPATH 2>&1); then
+if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH 2>&1); then
 	ui_print "ERROR: Mount failed!"
-	abort "$op"
+	ui_print "$op"
+	abort "Flash the module in official Magisk Manager app"
 fi
 am force-stop __PKGNAME
 ui_print "* Optimizing __PKGNAME"
