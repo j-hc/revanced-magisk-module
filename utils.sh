@@ -10,7 +10,6 @@ if [ "${GITHUB_TOKEN:-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-"j-hc/revanced-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"
-DRYRUN=false
 
 SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
 CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
@@ -23,8 +22,7 @@ toml_get_table_names() {
 	local tn
 	tn=$(echo "$__TOML__" | grep -x '\[.*\]' | tr -d '[]') || return 1
 	if [ "$(echo "$tn" | sort | uniq -u | wc -l)" != "$(echo "$tn" | wc -l)" ]; then
-		echo >&2 "ERROR: Duplicate tables in TOML"
-		return 1
+		abort "ERROR: Duplicate tables in TOML"
 	fi
 	echo "$tn"
 }
@@ -38,7 +36,7 @@ toml_get() {
 get_prebuilts() {
 	echo "Getting prebuilts"
 	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url
-	rv_cli_url=$(gh_req "https://api.github.com/repos/j-hc/revanced-cli/releases/latest" - | json_get 'browser_download_url')
+	rv_cli_url=$(gh_req "https://api.github.com/repos/j-hc/revanced-cli/releases/latest" - | json_get 'browser_download_url') || return 1
 	RV_CLI_JAR="${PREBUILTS_DIR}/${rv_cli_url##*/}"
 	log "CLI: ${rv_cli_url##*/}"
 
@@ -67,7 +65,7 @@ get_cmpr() {
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
 }
 
-abort() { echo >&2 "ABORT: $1" && exit 1; }
+abort() { echo >&2 -e "\033[0;31mABORT: $1\033[0m" && exit 1; }
 
 set_prebuilts() {
 	[ -d "$PREBUILTS_DIR" ] || abort "${PREBUILTS_DIR} directory could not be found"
@@ -88,15 +86,16 @@ req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
 gh_req() { wget -nv -O "$2" --header="$GH_HEADER" "$1"; }
 log() { echo -e "$1  " >>build.md; }
 get_largest_ver() {
+	local max v
 	read -r max
+	semver_validate "$max" || return 1
 	while read -r v; do
-		if ! semver_validate "$max" "$v"; then continue; fi
 		if [ "$(semver_cmp "$max" "$v")" = 1 ]; then max=$v; fi
 	done
 	echo "$max"
 }
 get_patch_last_supported_ver() {
-	jq -r ".[] | select(.compatiblePackages[].name==\"${1}\") | .compatiblePackages[].versions" "$RV_PATCHES_JSON" | tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || :
+	jq -r ".[] | select(.compatiblePackages[].name==\"${1}\") | .compatiblePackages[].versions" "$RV_PATCHES_JSON" | tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || return 1
 }
 semver_cmp() {
 	IFS=. read -r -a v1 <<<"${1//[^.0-9]/}"
@@ -116,9 +115,9 @@ semver_cmp() {
 	echo 0
 }
 semver_validate() {
-	local a1="${1%-*}" a2="${2%-*}"
-	local a1c="${a1//[.0-9]/}" a2c="${a2//[.0-9]/}"
-	[ ${#a1c} = 0 ] && [ ${#a2c} = 0 ]
+	local a="${1%-*}"
+	local ac="${a//[.0-9]/}"
+	[ ${#ac} = 0 ]
 }
 
 dl_if_dne() {
@@ -131,7 +130,7 @@ dl_if_dne() {
 # -------------------- apkmirror --------------------
 dl_apkmirror() {
 	local url=$1 version=${2// /-} regexp=$3 output=$4
-	if [ $DRYRUN = true ]; then
+	if [ "${DRYRUN:-}" = true ]; then
 		echo "#" >"$output"
 		return
 	fi
@@ -167,7 +166,7 @@ get_apkmirror_pkg_name() { req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_col
 
 # -------------------- uptodown --------------------
 get_uptodown_resp() { req "${1}/versions" -; }
-get_uptodown_vers() { echo "$1" | grep -x '^[0-9.]* <span>.*</span>' | sed 's/ <s.*//'; }
+get_uptodown_vers() { sed -n 's;\(^.*\) <span>.*</span>.*;\1;p' <<<"$1"; }
 dl_uptodown() {
 	local uptwod_resp=$1 version=$2 output=$3
 	url=$(echo "$uptwod_resp" | grep "${version} <span>" -B 1 | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p')
@@ -186,7 +185,7 @@ patch_apk() {
 	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
 	local cmd="java -jar $RV_CLI_JAR --rip-lib x86_64 --rip-lib x86 --temp-dir=$tdir -c -a $stock_input -o $patched_apk -b $RV_PATCHES_JAR --keystore=ks.keystore $patcher_args"
 	echo "$cmd"
-	if [ $DRYRUN = true ]; then
+	if [ "${DRYRUN:-}" = true ]; then
 		cp -f "$stock_input" "$patched_apk"
 	else
 		eval "$cmd"
@@ -205,13 +204,15 @@ zip_module() {
 
 build_rv() {
 	local -n args=$1
-	local version patcher_args build_mode_arr pkg_name uptwod_resp
+	local version build_mode_arr pkg_name uptwod_resp
 	local mode_arg=${args[build_mode]} version_mode=${args[version]}
 	local app_name=${args[app_name]}
 	local app_name_l=${app_name,,}
 	local dl_from=${args[dl_from]}
 	local arch=${args[arch]}
-	local p_patcher_args=${args[patcher_args]}
+	local p_patcher_args=()
+	p_patcher_args+=("$(join_args "${args[excluded_patches]}" -e) $(join_args "${args[included_patches]}" -i)")
+	[ "${args[exclusive_patches]}" = true ] && p_patcher_args+=("--exclusive")
 
 	if [ "$dl_from" = apkmirror ]; then
 		pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
@@ -222,34 +223,31 @@ build_rv() {
 
 	local get_latest_ver=false
 	if [ "$version_mode" = auto ]; then
-		version=$(get_patch_last_supported_ver "$pkg_name")
-		if [ -z "$version" ]; then get_latest_ver=true; fi
+		version=$(get_patch_last_supported_ver "$pkg_name") || get_latest_ver=true
 	elif [ "$version_mode" = latest ]; then
 		get_latest_ver=true
-		p_patcher_args+=" --experimental"
+		p_patcher_args+=("--experimental")
 	else
 		version=$version_mode
-		p_patcher_args+=" --experimental"
+		p_patcher_args+=("--experimental")
 	fi
 	if [ $get_latest_ver = true ]; then
 		local apkmvers uptwodvers
 		if [ "$dl_from" = apkmirror ]; then
 			apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "${args[allow_alpha_version]}")
-			version=$(echo "$apkmvers" | get_largest_ver)
-			[ "$version" ] || version=$(echo "$apkmvers" | head -1)
+			version=$(get_largest_ver <<<"$apkmvers") || version=$(head -1 <<<"$apkmvers")
 		elif [ "$dl_from" = uptodown ]; then
 			uptwodvers=$(get_uptodown_vers "$uptwod_resp")
-			version=$(echo "$uptwodvers" | get_largest_ver)
-			[ "$version" ] || version=$(echo "$uptwodvers" | head -1)
+			version=$(get_largest_ver <<<"$uptwodvers") || version=$(head -1 <<<"$uptwodvers")
 		fi
 	fi
 	if [ -z "$version" ]; then
-		echo "ERROR: empty version"
-		return 1
+		echo "ERROR: empty version,not building ${app_name}."
+		return 0
 	fi
 	echo "Choosing version '${version}' (${app_name})"
-
-	local stock_apk="${TEMP_DIR}/${pkg_name}-stock-${version// /}-${arch}.apk"
+	local version_f=${version// /}
+	local stock_apk="${TEMP_DIR}/${pkg_name}-stock-${version_f}-${arch}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		if [ "$dl_from" = apkmirror ]; then
 			echo "Downloading '${app_name}' from APKMirror"
@@ -261,14 +259,12 @@ build_rv() {
 				apkmirror_regex='armeabi-v7a</div>[^@]*@\([^"]*\)'
 			fi
 			if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$apkmirror_regex" "$stock_apk"; then
-				echo "ERROR: Could not find any release of '${app_name}' with version '${version}'"
-				return 1
+				abort "ERROR: Could not find any release of '${app_name}' with version '${version}' from APKMirror"
 			fi
 		elif [ "$dl_from" = uptodown ]; then
 			echo "Downloading '${app_name}' from Uptodown"
 			if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
-				echo "ERROR: Could not download ${app_name} from Uptodown"
-				return 1
+				abort "ERROR: Could not download ${app_name} from Uptodown"
 			fi
 		fi
 	fi
@@ -278,9 +274,14 @@ build_rv() {
 		grep -q "${app_name} (${arch}):" build.md || log "${app_name} (${arch}): ${version}"
 	fi
 	if jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .dependencies[]" "$RV_PATCHES_JSON" | grep -qF integrations; then
-		p_patcher_args+=" -m ${RV_INTEGRATIONS_APK}"
+		p_patcher_args+=("-m ${RV_INTEGRATIONS_APK}")
 	fi
 
+	local microg_patch
+	microg_patch=$(jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .name" "$RV_PATCHES_JSON" | grep -F microg || :)
+	if [ "$microg_patch" ]; then
+		p_patcher_args=("${p_patcher_args[@]//-[ei] ${microg_patch}/}")
+	fi
 	if [ "$mode_arg" = module ]; then
 		build_mode_arr=(module)
 	elif [ "$mode_arg" = apk ]; then
@@ -288,33 +289,32 @@ build_rv() {
 	elif [ "$mode_arg" = both ]; then
 		build_mode_arr=(apk module)
 	fi
+
+	local patcher_args patched_apk
 	for build_mode in "${build_mode_arr[@]}"; do
-		patcher_args=$p_patcher_args
+		patcher_args=("${p_patcher_args[@]}")
 		echo "Building '${app_name}' (${arch}) in '$build_mode' mode"
-		local microg_patch
-		microg_patch=$(jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .name" "$RV_PATCHES_JSON" | grep -F microg || :)
 		if [ "$microg_patch" ]; then
-			args[patcher_args]=${args[patcher_args]//-[ei] ${microg_patch}/}
-			local patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version}-${arch}-${build_mode}.apk"
+			patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version_f}-${arch}-${build_mode}.apk"
 			if [ "$build_mode" = apk ]; then
-				patcher_args+=" -i ${microg_patch}"
+				patcher_args+=("-i ${microg_patch}")
 			elif [ "$build_mode" = module ]; then
-				patcher_args+=" -e ${microg_patch}"
+				patcher_args+=("-e ${microg_patch}")
 			fi
 		else
-			local patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version}-${arch}.apk"
+			patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version_f}-${arch}.apk"
 		fi
 		if [ "$build_mode" = module ]; then
-			patcher_args+=" --unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a"
+			patcher_args+=("--unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a")
 		fi
 		if [ ! -f "$patched_apk" ]; then
-			if ! patch_apk "$stock_apk" "$patched_apk" "$patcher_args"; then
+			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}"; then
 				echo "BUILDING '${app_name}' FAILED"
-				return
+				return 0
 			fi
 		fi
 		if [ "$build_mode" = apk ]; then
-			local apk_output="${BUILD_DIR}/${app_name_l}-${RV_BRAND_F}-v${version}-${arch}.apk"
+			local apk_output="${BUILD_DIR}/${app_name_l}-${RV_BRAND_F}-v${version_f}-${arch}.apk"
 			cp -f "$patched_apk" "$apk_output"
 			echo "Built ${app_name} (${arch}) (non-root): '${apk_output}'"
 			continue
