@@ -52,6 +52,7 @@ version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
 
 [TikTok]
+enabled = false
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
 
@@ -86,11 +87,11 @@ enabled = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/awedea/nyx-music-player/"
 
 [IconPackStudio]
-enabled = false
+enabled = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"
 
 [TickTick]
-enabled = false
+enabled = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/ticktick-to-do-list-with-reminder-day-planner/"
 
 [Tasker]
