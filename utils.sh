@@ -70,17 +70,17 @@ get_cmpr() {
 abort() { echo >&2 "ABORT: $1" && exit 1; }
 
 set_prebuilts() {
-	[ -d "$TEMP_DIR" ] || abort "${TEMP_DIR} directory could not be found"
-	RV_CLI_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-cli-*.jar" | tail -n1)
+	[ -d "$PREBUILTS_DIR" ] || abort "${PREBUILTS_DIR} directory could not be found"
+	RV_CLI_JAR=$(find "$PREBUILTS_DIR" -maxdepth 1 -name "revanced-cli-*.jar" | tail -n1)
 	[ "$RV_CLI_JAR" ] || abort "revanced cli not found"
-	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
-	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-integrations-*.apk" | tail -n1)
+	log "CLI: ${RV_CLI_JAR#"$PREBUILTS_DIR/"}"
+	RV_INTEGRATIONS_APK=$(find "$PREBUILTS_DIR" -maxdepth 1 -name "revanced-integrations-*.apk" | tail -n1)
 	[ "$RV_INTEGRATIONS_APK" ] || abort "revanced integrations not found"
-	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
-	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*.jar" | tail -n1)
+	log "Integrations: ${RV_INTEGRATIONS_APK#"$PREBUILTS_DIR/"}"
+	RV_PATCHES_JAR=$(find "$PREBUILTS_DIR" -maxdepth 1 -name "revanced-patches-*.jar" | tail -n1)
 	[ "$RV_PATCHES_JAR" ] || abort "revanced patches not found"
-	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
-	RV_PATCHES_JSON=$(find "$TEMP_DIR" -maxdepth 1 -name "patches-*.json" | tail -n1)
+	log "Patches: ${RV_PATCHES_JAR#"$PREBUILTS_DIR/"}"
+	RV_PATCHES_JSON=$(find "$PREBUILTS_DIR" -maxdepth 1 -name "patches-*.json" | tail -n1)
 	[ "$RV_PATCHES_JSON" ] || abort "patches.json not found"
 }
 
@@ -294,9 +294,7 @@ build_rv() {
 		local microg_patch
 		microg_patch=$(jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .name" "$RV_PATCHES_JSON" | grep -F microg || :)
 		if [ "$microg_patch" ]; then
-			if [[ "${args[patcher_args]}" = *"$microg_patch"* ]]; then
-				abort "ERROR: Do not include microg in included or excluded patches list"
-			fi
+			args[patcher_args]=${args[patcher_args]//-[ei] ${microg_patch}/}
 			local patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version}-${arch}-${build_mode}.apk"
 			if [ "$build_mode" = apk ]; then
 				patcher_args+=" -i ${microg_patch}"
