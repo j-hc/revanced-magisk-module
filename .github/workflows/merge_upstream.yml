@@ -8,8 +8,27 @@ jobs:
   merge-upstream:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Sync Repo
-        run: gh repo sync ${{ github.repository }} -b main
-        env:
-          GH_TOKEN: ${{ secrets.PAT }}
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: main
+          
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+        with:
+          target_sync_branch: main
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          upstream_sync_branch: main
+          upstream_sync_repo: j-hc/revanced-magisk-module
+
+      - name: New commits found
+        if: steps.sync.outputs.has_new_commits == 'true'
+        run: echo "New commits were found to sync."
+
+      - name: No new commits
+        if: steps.sync.outputs.has_new_commits == 'false'
+        run: echo "There were no new commits."
+
+      - name: Show value of 'has_new_commits'
+        run: echo ${{ steps.sync.outputs.has_new_commits }}
