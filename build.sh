@@ -24,7 +24,7 @@ PREBUILTS_DIR="${TEMP_DIR}/tools-${RV_BRAND_F}"
 mkdir -p "$BUILD_DIR" "$PREBUILTS_DIR"
 
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be from 0 to 9"; fi
-if [ "$DRYRUN" = true ]; then set_prebuilts; else get_prebuilts; fi
+if [ "${DRYRUN:-}" = true ]; then set_prebuilts; else get_prebuilts || set_prebuilts; fi
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
 if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt install jq' or equivalent"
@@ -47,9 +47,9 @@ for table_name in $(toml_get_table_names); do
 
 	if ((idx >= PARALLEL_JOBS)); then wait -n; else idx=$((idx + 1)); fi
 	declare -A app_args
-	excluded_patches=$(toml_get "$t" excluded-patches) || excluded_patches=""
-	included_patches=$(toml_get "$t" included-patches) || included_patches=""
-	exclusive_patches=$(toml_get "$t" exclusive-patches) || exclusive_patches=false
+	app_args[excluded_patches]=$(toml_get "$t" excluded-patches) || app_args[excluded_patches]=""
+	app_args[included_patches]=$(toml_get "$t" included-patches) || app_args[included_patches]=""
+	app_args[exclusive_patches]=$(toml_get "$t" exclusive-patches) || app_args[exclusive_patches]=false
 	app_args[version]=$(toml_get "$t" version) || app_args[version]="auto"
 	app_args[app_name]=$(toml_get "$t" app-name) || app_args[app_name]=$table_name
 	app_args[allow_alpha_version]=$(toml_get "$t" allow-alpha-version) || app_args[allow_alpha_version]=false
@@ -84,8 +84,6 @@ for table_name in $(toml_get_table_names); do
 			app_args[module_prop_name]="${app_name_l}-${app_args[arch]}-${RV_BRAND_F}-jhc"
 		fi
 	}
-	app_args[patcher_args]="$(join_args "${excluded_patches}" -e) $(join_args "${included_patches}" -i)"
-	[ "$exclusive_patches" = true ] && app_args[patcher_args]+=" --exclusive"
 	if [ "$LOGGING_F" = true ]; then
 		logf=logs/"${table_name,,}.log"
 		: >"$logf"
