@@ -63,6 +63,5 @@ cmd package compile --reset __PKGNAME &
 
 rm -r $MODPATH/bin $MODPATH/__PKGNAME.apk
 
-ui_print "* Done"
-ui_print "  by j-hc (github.com/j-hc)"
-ui_print " "
+ui_print "Flashed Successful!"
+ui_print "Enjoy!"
