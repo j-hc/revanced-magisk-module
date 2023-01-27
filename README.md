@@ -40,7 +40,7 @@ To be able to use non-root variants of YouTube and YT Music, install [Vanced Mic
 # Building Locally
 ## On Termux
 ```console
-$ curl -sSf https://raw.githubusercontent.com/j-hc/revanced-magisk-module/main/build-termux.sh | bash
+bash <(curl -sSf https://raw.githubusercontent.com/j-hc/revanced-magisk-module/main/build-termux.sh)
 ```
 
 ## On Desktop
