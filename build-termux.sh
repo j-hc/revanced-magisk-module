@@ -54,6 +54,6 @@ for op in *; do
 done
 
 pr "Outputs are available in /sdcard/Download folder"
-termux-open-url file:///sdcard/Download/revanced-magisk-module
+am start -a android.intent.action.VIEW -d file:///sdcard/Download/revanced-magisk-module -t resource/folder
 sleep 2
-termux-open-url file:///sdcard/Download/revanced-magisk-module
+am start -a android.intent.action.VIEW -d file:///sdcard/Download/revanced-magisk-module -t resource/folder
