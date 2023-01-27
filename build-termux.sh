@@ -7,7 +7,8 @@ ask() {
 	local y
 	for ((n = 0; n < 3; n++)); do
 		pr "$1"
-		read -r y || : && break
+		if read -r y && { [ "$y" = y ] || [ "$y" = n ]; }; then break; fi
+		pr "Asking again..."
 	done
 	[ "$y" = y ]
 }
@@ -36,5 +37,23 @@ fi
 if ! ask "Setup is done. Do you want to start building? [y/n]"; then
 	exit 0
 fi
-
 ./build.sh
+
+cd build
+pr "Ask for storage permission"
+until ls /sdcard >/dev/null 2>&1; do
+	yes | termux-setup-storage >/dev/null 2>&1
+	sleep 1
+done
+
+PWD=$(pwd)
+mkdir ~/storage/downloads/revanced-magisk-module 2>/dev/null || :
+for op in *; do
+	[ "$op" = "*" ] && continue
+	cp -f "${PWD}/${op}" ~/storage/downloads/revanced-magisk-module/"${op}"
+done
+
+pr "Outputs are available in /sdcard/Download folder"
+termux-open-url file:///sdcard/Download/revanced-magisk-module
+sleep 2
+termux-open-url file:///sdcard/Download/revanced-magisk-module
