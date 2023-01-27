@@ -10,6 +10,7 @@ if [ "${GITHUB_TOKEN:-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-"j-hc/revanced-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"
+REBUILD=false
 OS=$(uname -o)
 
 SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
@@ -53,6 +54,7 @@ get_prebuilts() {
 	RV_PATCHES_JSON="${PREBUILTS_DIR}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
 	rv_patches_url=$(grep 'jar' <<<"$rv_patches_dl")
 	RV_PATCHES_JAR="${PREBUILTS_DIR}/${rv_patches_url##*/}"
+	[ -f "$RV_PATCHES_JAR" ] || REBUILD=true
 	log "Patches: ${rv_patches_url##*/}"
 	log "\n${rv_patches_changelog//# [/### [}\n"
 
@@ -319,7 +321,7 @@ build_rv() {
 		if [ "$build_mode" = module ]; then
 			patcher_args+=("--unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a")
 		fi
-		if [ ! -f "$patched_apk" ]; then
+		if [ ! -f "$patched_apk" ] || [ "$REBUILD" = true ]; then
 			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}"; then
 				pr "Building '${app_name}' failed!"
 				return 0
@@ -354,7 +356,9 @@ build_rv() {
 
 		local module_output="${app_name_l}-${RV_BRAND_F}-magisk-v${version}-${arch}.zip"
 		pr "Packing module ($app_name)"
-		zip_module "$patched_apk" "$module_output" "$stock_apk" "$pkg_name" "$base_template"
+		if [ ! -f "$module_output" ] || [ "$REBUILD" = true ]; then
+			zip_module "$patched_apk" "$module_output" "$stock_apk" "$pkg_name" "$base_template"
+		fi
 
 		pr "Built ${app_name} (${arch}) (root): '${BUILD_DIR}/${module_output}'"
 	done
