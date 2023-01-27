@@ -10,6 +10,7 @@ if [ "${GITHUB_TOKEN:-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-"j-hc/revanced-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"
+OS=$(uname -o)
 
 SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
 CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
@@ -33,8 +34,10 @@ toml_get() {
 }
 # ---------------------------------------------------
 
+pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
+
 get_prebuilts() {
-	echo "Getting prebuilts"
+	pr "Getting prebuilts"
 	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url
 	rv_cli_url=$(gh_req "https://api.github.com/repos/j-hc/revanced-cli/releases/latest" - | json_get 'browser_download_url') || return 1
 	RV_CLI_JAR="${PREBUILTS_DIR}/${rv_cli_url##*/}"
@@ -57,6 +60,12 @@ get_prebuilts() {
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$rv_integrations_url"
 	dl_if_dne "$RV_PATCHES_JAR" "$rv_patches_url"
 	dl_if_dne "$RV_PATCHES_JSON" "$(grep 'json' <<<"$rv_patches_dl")"
+
+	if [ "$OS" = Android ]; then
+		local arch
+		if [ "$(uname -m)" = aarch64 ]; then arch=arm64; else arch=arm; fi
+		dl_if_dne ${TEMP_DIR}/aapt2 https://github.com/rendiix/termux-aapt/raw/main/prebuilt-binary/${arch}/aapt2
+	fi
 }
 
 get_cmpr() {
@@ -122,7 +131,7 @@ semver_validate() {
 
 dl_if_dne() {
 	if [ ! -f "$1" ]; then
-		echo -e "\nGetting '$1' from '$2'"
+		pr "Getting '$1' from '$2'"
 		req "$2" "$1"
 	fi
 }
@@ -184,7 +193,10 @@ patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3
 	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
 	local cmd="java -jar $RV_CLI_JAR --rip-lib x86_64 --rip-lib x86 --temp-dir=$tdir -c -a $stock_input -o $patched_apk -b $RV_PATCHES_JAR --keystore=ks.keystore $patcher_args"
-	echo "$cmd"
+	if [ "$OS" = Android ]; then
+		cmd+=" --custom-aapt2-binary=${TEMP_DIR}/aapt2"
+	fi
+	pr "$cmd"
 	if [ "${DRYRUN:-}" = true ]; then
 		cp -f "$stock_input" "$patched_apk"
 	else
@@ -197,9 +209,9 @@ zip_module() {
 	local patched_apk=$1 module_name=$2 stock_apk=$3 pkg_name=$4 template_dir=$5
 	cp -f "$patched_apk" "${template_dir}/base.apk"
 	cp -f "$stock_apk" "${template_dir}/${pkg_name}.apk"
-	pushd "$template_dir" || abort "Module template dir not found"
-	zip -"$COMPRESSION_LEVEL" -FSr "../../${BUILD_DIR}/${module_name}" .
-	popd || :
+	pushd >/dev/null "$template_dir" || abort "Module template dir not found"
+	zip -"$COMPRESSION_LEVEL" -FSqr "../../${BUILD_DIR}/${module_name}" .
+	popd >/dev/null || :
 }
 
 build_rv() {
@@ -242,15 +254,15 @@ build_rv() {
 		fi
 	fi
 	if [ -z "$version" ]; then
-		echo "ERROR: empty version,not building ${app_name}."
+		pr "empty version, not building ${app_name}."
 		return 0
 	fi
-	echo "Choosing version '${version}' (${app_name})"
+	pr "Choosing version '${version}' (${app_name})"
 	local version_f=${version// /}
 	local stock_apk="${TEMP_DIR}/${pkg_name}-stock-${version_f}-${arch}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		if [ "$dl_from" = apkmirror ]; then
-			echo "Downloading '${app_name}' from APKMirror"
+			pr "Downloading '${app_name}' from APKMirror"
 			if [ "$arch" = "all" ]; then
 				apkmirror_regex="APK</span>[^@]*@\([^#]*\)"
 			elif [ "$arch" = "arm64-v8a" ]; then
@@ -262,7 +274,7 @@ build_rv() {
 				abort "ERROR: Could not find any release of '${app_name}' with version '${version}' from APKMirror"
 			fi
 		elif [ "$dl_from" = uptodown ]; then
-			echo "Downloading '${app_name}' from Uptodown"
+			pr "Downloading '${app_name}' from Uptodown"
 			if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
 				abort "ERROR: Could not download ${app_name} from Uptodown"
 			fi
@@ -293,7 +305,7 @@ build_rv() {
 	local patcher_args patched_apk
 	for build_mode in "${build_mode_arr[@]}"; do
 		patcher_args=("${p_patcher_args[@]}")
-		echo "Building '${app_name}' (${arch}) in '$build_mode' mode"
+		pr "Building '${app_name}' (${arch}) in '$build_mode' mode"
 		if [ "$microg_patch" ]; then
 			patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version_f}-${arch}-${build_mode}.apk"
 			if [ "$build_mode" = apk ]; then
@@ -309,14 +321,14 @@ build_rv() {
 		fi
 		if [ ! -f "$patched_apk" ]; then
 			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}"; then
-				echo "BUILDING '${app_name}' FAILED"
+				pr "Building '${app_name}' failed!"
 				return 0
 			fi
 		fi
 		if [ "$build_mode" = apk ]; then
 			local apk_output="${BUILD_DIR}/${app_name_l}-${RV_BRAND_F}-v${version_f}-${arch}.apk"
 			cp -f "$patched_apk" "$apk_output"
-			echo "Built ${app_name} (${arch}) (non-root): '${apk_output}'"
+			pr "Built ${app_name} (${arch}) (non-root): '${apk_output}'"
 			continue
 		fi
 		local base_template upj
@@ -341,9 +353,10 @@ build_rv() {
 			"$base_template"
 
 		local module_output="${app_name_l}-${RV_BRAND_F}-magisk-v${version}-${arch}.zip"
+		pr "Packing module ($app_name)"
 		zip_module "$patched_apk" "$module_output" "$stock_apk" "$pkg_name" "$base_template"
 
-		echo "Built ${app_name} (${arch}) (root): '${BUILD_DIR}/${module_output}'"
+		pr "Built ${app_name} (${arch}) (root): '${BUILD_DIR}/${module_output}'"
 	done
 }
 

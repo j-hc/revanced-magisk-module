@@ -55,7 +55,7 @@ for table_name in $(toml_get_table_names); do
 	app_args[allow_alpha_version]=$(toml_get "$t" allow-alpha-version) || app_args[allow_alpha_version]=false
 	app_args[build_mode]=$(toml_get "$t" build-mode) && {
 		if ! isoneof "${app_args[build_mode]}" both apk module; then
-			abort "ERROR: undefined build mode '${app_args[build_mode]}' for '${table_name}': only 'both', 'apk' or 'module' are allowed"
+			abort "ERROR: '${app_args[build_mode]}' is not a valid option for '${table_name}': only 'both', 'apk' or 'module' are allowed"
 		fi
 	} || app_args[build_mode]=apk
 	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && {
@@ -73,7 +73,7 @@ for table_name in $(toml_get_table_names); do
 	fi
 	app_args[arch]=$(toml_get "$t" arch) && {
 		if ! isoneof "${app_args[arch]}" all arm64-v8a arm-v7a; then
-			abort "ERROR: ${app_args[arch]} is not a valid option for '$table_name': only 'all', 'arm64-v8a', 'arm-v7a' are allowed"
+			abort "ERROR: '${app_args[arch]}' is not a valid option for '$table_name': only 'all', 'arm64-v8a', 'arm-v7a' are allowed"
 		fi
 	} || app_args[arch]="all"
 	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || {
@@ -97,10 +97,10 @@ wait
 rm -rf temp/tmp.*
 
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then
-	echo "Building mindetach module"
+	pr "Building mindetach module"
 	cp -f $PKGS_LIST mindetach-magisk/mindetach/detach.txt
 	pushd mindetach-magisk/mindetach/
-	zip -r ../../build/mindetach-"$(grep version= module.prop | cut -d= -f2)".zip .
+	zip -qr ../../build/mindetach-"$(grep version= module.prop | cut -d= -f2)".zip .
 	popd
 fi
 
@@ -112,4 +112,4 @@ if [ "$youtube_mode" != module ] || [ "$music_arm_mode" != module ] || [ "$music
 fi
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 
-echo "Done"
+pr "Done"

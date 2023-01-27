@@ -38,10 +38,16 @@ To add more Revanced apps or know more about `config.toml`, read here [`CONFIG.m
 To be able to use non-root variants of YouTube and YT Music, install [Vanced MicroG](https://github.com/TeamVanced/VancedMicroG/releases).
 
 # Building Locally
+## On Termux
+```console
+$ curl -sSf https://raw.githubusercontent.com/j-hc/revanced-magisk-module/main/build-termux.sh | bash
+```
+
+## On Desktop
 Make sure you have JDK 17 installed. Then run:
 
 ```console
-$ git clone --recurse-submodules https://github.com/j-hc/revanced-magisk-module
+$ git clone --recurse https://github.com/j-hc/revanced-magisk-module
 $ cd revanced-magisk-module
 $ ./build.sh
 ```
