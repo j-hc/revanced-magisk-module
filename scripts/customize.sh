@@ -21,9 +21,17 @@ am force-stop __PKGNAME
 
 BASEPATH=$(pm path __PKGNAME | grep base)
 BASEPATH=${BASEPATH#*:}
-if [ -n "$BASEPATH" ] && cmpr $BASEPATH $MODPATH/__PKGNAME.apk; then
-	ui_print "* __PKGNAME is up-to-date"
-else
+INS=true
+if [ "$BASEPATH" ]; then
+	if [ ! -d ${BASEPATH%base.apk}lib ]; then
+		ui_print "Invalid installation found. Uninstalling..."
+		pm uninstall -k --user 0 __PKGNAME
+	elif cmpr $BASEPATH $MODPATH/__PKGNAME.apk; then
+		ui_print "* __PKGNAME is up-to-date"
+		INS=false
+	fi
+fi
+if [ $INS = true ]; then
 	ui_print "* Updating __PKGNAME (v__PKGVER)"
 	set_perm $MODPATH/__PKGNAME.apk 1000 1000 644 u:object_r:apk_data_file:s0
 	if ! op=$(pm install --user 0 -i com.android.vending -r -d $MODPATH/__PKGNAME.apk 2>&1); then
