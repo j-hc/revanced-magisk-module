@@ -208,6 +208,7 @@ patch_apk() {
 }
 
 zip_module() {
+	pr "Packing module ($app_name)"
 	local patched_apk=$1 module_name=$2 stock_apk=$3 pkg_name=$4 template_dir=$5
 	cp -f "$patched_apk" "${template_dir}/base.apk"
 	cp -f "$stock_apk" "${template_dir}/${pkg_name}.apk"
@@ -355,7 +356,6 @@ build_rv() {
 			"$base_template"
 
 		local module_output="${app_name_l}-${RV_BRAND_F}-magisk-v${version}-${arch}.zip"
-		pr "Packing module ($app_name)"
 		if [ ! -f "$module_output" ] || [ "$REBUILD" = true ]; then
 			zip_module "$patched_apk" "$module_output" "$stock_apk" "$pkg_name" "$base_template"
 		fi
