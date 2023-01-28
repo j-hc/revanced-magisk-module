@@ -25,10 +25,9 @@ enabled = true # whether to build the app. default: true
 build-mode = "both" # 'both', 'apk' or 'module'. default: apk
 allow-alpha-version = false # allow downloading alpha versions from apkmirror. default: false
 excluded-patches = "some-patch" # whitespace seperated list of patches to exclude. default: "" (empty)
-included-patches = "patch-name" # whitespace seperated list of patches to include. default: "" (empty)
+included-patches = "patch-name" # whitespace seperated list of patches to include, all default patches are included by default. default: "" (empty)
 version = "auto" # 'auto', 'latest' or a custom one e.g. '17.40.41'. 'auto' option gets the latest version that is supported by the patches. default: auto
 exclusive-patches = false # exclude all patches by default. default: false
-microg-patch = "microg-support" # name of the microg-patch if exists for the app. default: "" (empty)
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app" # download url. if not set, uptodown dl url is used.
 uptodown-dlurl = "https://spotify.en.uptodown.com/android" # uptodown url. if not set, apkmirror dl url is used. apkmirror is prioritized
 module-prop-name = "ytrv-magisk" # magisk module prop name. not required.
@@ -38,5 +37,4 @@ arch = "arm64-v8a" # 'arm64-v8a', 'arm-v7a' or 'all'. default: all
 ```
 
 # Building ReVanced Extended
-Use [`config-rv-ex.toml`](./config-rv-ex.toml) as the config.  
-By replacing config.toml with config-rv-ex.toml.
+Use [`config-rv-ex.toml`](./config-rv-ex.toml) as the config by replacing config.toml with it
