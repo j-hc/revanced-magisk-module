@@ -24,7 +24,7 @@ BASEPATH=${BASEPATH#*:}
 INS=true
 if [ "$BASEPATH" ]; then
 	if [ ! -d ${BASEPATH%base.apk}lib ]; then
-		ui_print "Invalid installation found. Uninstalling..."
+		ui_print "* Invalid installation found. Uninstalling..."
 		pm uninstall -k --user 0 __PKGNAME
 	elif cmpr $BASEPATH $MODPATH/__PKGNAME.apk; then
 		ui_print "* __PKGNAME is up-to-date"
