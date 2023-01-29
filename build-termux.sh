@@ -7,10 +7,16 @@ ask() {
 	local y
 	for ((n = 0; n < 3; n++)); do
 		pr "$1"
-		if read -r y && { [ "$y" = y ] || [ "$y" = n ]; }; then break; fi
+		if read -r y; then
+			if [ "$y" = y ]; then
+				return 0
+			elif [ "$y" = n ]; then
+				return 1
+			fi
+		fi
 		pr "Asking again..."
 	done
-	[ "$y" = y ]
+	return 1
 }
 
 pr "Setting up environment..."
@@ -32,7 +38,7 @@ cd revanced-magisk-module
 if ask "Do you want to open the config.toml for customizations? [y/n]"; then
 	nano config.toml
 else
-	pr "No app is selected for patching."
+	pr "No app is selected for patching!"
 fi
 if ! ask "Setup is done. Do you want to start building? [y/n]"; then
 	exit 0
