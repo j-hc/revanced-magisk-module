@@ -3,8 +3,8 @@
 MODDIR=${0%/*}
 RVPATH=/data/adb/rvhc/__PKGNAME_rv.apk
 until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 1; done
-until [ -d /sdcard ]; do sleep 1; done
-sleep 5
+timeout 15 logcat -T1 -m1 -e HOME ActivityManager:I
+sleep 3
 
 err() {
 	cp -n $MODDIR/module.prop $MODDIR/err
