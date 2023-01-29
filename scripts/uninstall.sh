@@ -1,2 +1,5 @@
 #!/system/bin/sh
-rm /data/adb/__PKGNAME_rv.apk
+{
+	rm /data/adb/rvhc/__PKGNAME_rv.apk
+	rmdir /data/adb/rvhc
+} &
