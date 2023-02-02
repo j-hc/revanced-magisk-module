@@ -21,14 +21,16 @@ jobs:
           toml_prep "$(cat config.toml)"
 
           is_youtube_latest() {
-            v=$(toml_get "$(toml_get_table "YouTube")" "version") || version=""
+            t=$(toml_get_table YouTube)
+            v=$(toml_get "$t" "version") || v=
             if [ "$v" = latest ]; then
               cur_yt=$(sed -n 's/.*YouTube: \(.*\)/\1/p' build.md | xargs)
               [ -z "$cur_yt" ] && return 1 # empty, fail=>dont build
-              last_ver=$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=youtube" | get_largest_ver)
+              aav=$(toml_get "$t" "allow-alpha-version") || aav=false
+              last_ver=$(get_apkmirror_vers youtube "$aav" | get_largest_ver)
               [ -z "$last_ver" ] && return 1 # cant fetch, dont build
-              echo "current yt version: $cur_yt"
-              echo "latest yt version: $last_ver"
+              echo "current yt version: '$cur_yt'"
+              echo "latest yt version: '$last_ver'"
               [ "$cur_yt" != "$last_ver" ] # test success=>build, fail=>dont build
             else
               return 1 # not experimental, dont build
