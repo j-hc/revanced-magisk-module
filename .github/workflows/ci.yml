@@ -23,10 +23,10 @@ jobs:
           is_youtube_latest() {
             v=$(toml_get "$(toml_get_table "YouTube")" "version") || version=""
             if [ "$v" = latest ]; then
-              declare -r cur_yt=$(sed -n 's/.*YouTube: \(.*\)/\1/p' build.md | xargs)
+              cur_yt=$(sed -n 's/.*YouTube: \(.*\)/\1/p' build.md | xargs)
               [ -z "$cur_yt" ] && return 1 # empty, fail=>dont build
-              declare -r last_ver=$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=youtube" | get_largest_ver)
-
+              last_ver=$(get_apk_vers "https://www.apkmirror.com/uploads/?appcategory=youtube" | get_largest_ver)
+              [ -z "$last_ver" ] && return 1 # cant fetch, dont build
               echo "current yt version: $cur_yt"
               echo "latest yt version: $last_ver"
               [ "$cur_yt" != "$last_ver" ] # test success=>build, fail=>dont build
@@ -37,8 +37,8 @@ jobs:
 
           is_patches_latest() {
             PATCHES_SRC=$(toml_get "$(toml_get_table "")" patches-source) || PATCHES_SRC="revanced/revanced-patches"
-            declare -r last_patches_url=$(wget -nv --header="Authorization: token ${{ secrets.GITHUB_TOKEN }}" -O- https://api.github.com/repos/${PATCHES_SRC}/releases/latest | json_get 'browser_download_url' | grep 'jar')
-            declare -r last_patches=${last_patches_url##*/}
+            last_patches_url=$(wget -nv --header="Authorization: token ${{ secrets.GITHUB_TOKEN }}" -O- https://api.github.com/repos/${PATCHES_SRC}/releases/latest | json_get 'browser_download_url' | grep 'jar')
+            last_patches=${last_patches_url##*/}
             cur_patches=$(sed -n 's/.*Patches: \(.*\)/\1/p' build.md | xargs)
 
             echo "current patches version: $cur_patches"
