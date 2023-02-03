@@ -177,12 +177,12 @@ get_apkmirror_pkg_name() { req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_col
 
 # -------------------- uptodown --------------------
 get_uptodown_resp() { req "${1}/versions" -; }
-get_uptodown_vers() { sed -n 's;\(^.*\) <span>.*</span>.*;\1;p' <<<"$1"; }
+get_uptodown_vers() { sed -n 's;.*version>\(.*\)<\/span>$;\1;p' <<<"$1"; }
 dl_uptodown() {
 	local uptwod_resp=$1 version=$2 output=$3
 	local url
-	url=$(echo "$uptwod_resp" | grep "${version} <span>" -B 1 | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p')
-	url=$(req "$url" - | sed -n 's;.*data-url="\(.*\)".*;\1;p')
+	url=$(echo "$uptwod_resp" | grep "${version}<\/span>" -B 2 | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
+	url=$(req "$url" - | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
 	req "$url" "$output"
 }
 get_uptodown_pkg_name() {
