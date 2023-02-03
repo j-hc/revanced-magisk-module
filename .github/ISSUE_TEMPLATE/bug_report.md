@@ -1,8 +1,8 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Bug report
 title: ''
-labels: bug
+labels: ''
 assignees: ''
 
 ---
@@ -29,3 +29,4 @@ If applicable, add screenshots to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
+**DO NOT REPORT REVANCED BUGS IN THIS REPO**
