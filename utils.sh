@@ -156,7 +156,7 @@ dl_apkmirror() {
 }
 get_apkmirror_vers() {
 	local apkmirror_category=$1 allow_alpha_version=$2
-	local vers
+	local vers apkm_resp
 	apkm_resp=$(req "https://www.apkmirror.com/uploads/?appcategory=${apkmirror_category}" -)
 	# apkm_name=$(echo "$apkm_resp" | sed -n 's;.*Latest \(.*\) Uploads.*;\1;p')
 	vers=$(sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p' <<<"$apkm_resp")
@@ -180,6 +180,7 @@ get_uptodown_resp() { req "${1}/versions" -; }
 get_uptodown_vers() { sed -n 's;\(^.*\) <span>.*</span>.*;\1;p' <<<"$1"; }
 dl_uptodown() {
 	local uptwod_resp=$1 version=$2 output=$3
+	local url
 	url=$(echo "$uptwod_resp" | grep "${version} <span>" -B 1 | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p')
 	url=$(req "$url" - | sed -n 's;.*data-url="\(.*\)".*;\1;p')
 	req "$url" "$output"
@@ -305,7 +306,7 @@ build_rv() {
 		build_mode_arr=(apk module)
 	fi
 
-	local patcher_args patched_apk
+	local patcher_args patched_apk build_mode
 	for build_mode in "${build_mode_arr[@]}"; do
 		patcher_args=("${p_patcher_args[@]}")
 		pr "Building '${app_name}' (${arch}) in '$build_mode' mode"
@@ -346,7 +347,7 @@ build_rv() {
 
 		uninstall_sh "$pkg_name" "$base_template"
 		service_sh "$pkg_name" "$version" "$base_template"
-		customize_sh "$pkg_name" "$version" "$base_template"
+		customize_sh "$pkg_name" "$version" "$arch" "$base_template"
 		module_prop \
 			"${args[module_prop_name]}" \
 			"${app_name} ${RV_BRAND}" \
@@ -371,7 +372,13 @@ join_args() {
 uninstall_sh() { echo "${UNINSTALL_SH//__PKGNAME/$1}" >"${2}/uninstall.sh"; }
 customize_sh() {
 	local s="${CUSTOMIZE_SH//__PKGNAME/$1}"
-	echo "${s//__PKGVER/$2}" >"${3}/customize.sh"
+	# shellcheck disable=SC2016,SC2001
+	if [ "$3" = "arm64-v8a" ]; then
+		s=$(sed 's/#arm$/abort "ERROR: Wrong arch\nYour device: arm\nModule: arm64"/g' <<<"$s")
+	elif [ "$3" = "arm-v7a" ]; then
+		s=$(sed 's/#arm64$/abort "ERROR: Wrong arch\nYour device: arm64\nModule: arm"/g' <<<"$s")
+	fi
+	echo "${s//__PKGVER/$2}" >"${4}/customize.sh"
 }
 service_sh() {
 	local s="${SERVICE_SH//__PKGNAME/$1}"
