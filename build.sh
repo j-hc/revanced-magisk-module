@@ -3,7 +3,7 @@
 set -euo pipefail
 
 source utils.sh
-trap "rm -rf temp/tmp.*" INT
+trap "rm -rf temp/tmp.*; exit 1" INT
 
 : >build.md
 
@@ -21,12 +21,16 @@ vtf() {
 }
 
 toml_prep "$(cat 2>/dev/null "${1:-config.toml}")" || abort "could not find config file '${1}'"
+
+# -- Main config --
 main_config_t=$(toml_get_table "")
 COMPRESSION_LEVEL=$(toml_get "$main_config_t" compression-level) || abort "ERROR: compression-level is missing"
 ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || abort "ERROR: enable-magisk-update is missing"
 PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs) || abort "ERROR: parallel-jobs is missing"
 BUILD_MINDETACH_MODULE=$(toml_get "$main_config_t" build-mindetach-module) || abort "ERROR: build-mindetach-module is missing"
 LOGGING_F=$(toml_get "$main_config_t" logging-to-file) && vtf "$LOGGING_F" "logging-to-file" || LOGGING_F=false
+CONF_PATCHES_VER=$(toml_get "$main_config_t" patches-version) || CONF_PATCHES_VER=
+CONF_INTEGRATIONS_VER=$(toml_get "$main_config_t" integrations-version) || CONF_INTEGRATIONS_VER=
 
 PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || PATCHES_SRC="revanced/revanced-patches"
 INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || INTEGRATIONS_SRC="revanced/revanced-integrations"
@@ -35,13 +39,13 @@ RV_BRAND_F=${RV_BRAND,,}
 RV_BRAND_F=${RV_BRAND_F// /-}
 PREBUILTS_DIR="${TEMP_DIR}/tools-${RV_BRAND_F}"
 mkdir -p "$BUILD_DIR" "$PREBUILTS_DIR"
+# -- Main config --
 
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be from 0 to 9"; fi
 if [ "${DRYRUN:-}" = true ]; then set_prebuilts; else get_prebuilts || set_prebuilts; fi
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
 if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt install jq' or equivalent"
-get_cmpr
 
 log "**App Versions:**"
 idx=0
@@ -61,7 +65,7 @@ for table_name in $(toml_get_table_names); do
 	app_args[allow_alpha_version]=$(toml_get "$t" allow-alpha-version) && vtf "${app_args[allow_alpha_version]}" "allow-alpha-version" || app_args[allow_alpha_version]=false
 	app_args[build_mode]=$(toml_get "$t" build-mode) && {
 		if ! isoneof "${app_args[build_mode]}" both apk module; then
-			abort "ERROR: '${app_args[build_mode]}' is not a valid option for '${table_name}': only 'both', 'apk' or 'module' is allowed"
+			abort "ERROR: build-mode '${app_args[build_mode]}' is not a valid option for '${table_name}': only 'both', 'apk' or 'module' is allowed"
 		fi
 	} || app_args[build_mode]=apk
 	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && {
@@ -79,7 +83,7 @@ for table_name in $(toml_get_table_names); do
 	fi
 	app_args[arch]=$(toml_get "$t" arch) && {
 		if ! isoneof "${app_args[arch]}" all arm64-v8a arm-v7a; then
-			abort "ERROR: '${app_args[arch]}' is not a valid option for 'arch': only 'all', 'arm64-v8a', 'arm-v7a' is allowed"
+			abort "ERROR: arch '${app_args[arch]}' is not a valid option for '${table_name}': only 'all', 'arm64-v8a', 'arm-v7a' is allowed"
 		fi
 	} || app_args[arch]="all"
 	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || {
