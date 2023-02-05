@@ -68,9 +68,6 @@ get_prebuilts() {
 		if [ "$(uname -m)" = aarch64 ]; then arch=arm64; else arch=arm; fi
 		dl_if_dne ${TEMP_DIR}/aapt2 https://github.com/rendiix/termux-aapt/raw/main/prebuilt-binary/${arch}/aapt2
 	fi
-}
-
-get_cmpr() {
 	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
