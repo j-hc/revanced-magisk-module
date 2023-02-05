@@ -15,9 +15,16 @@ uptodown-dlurl = "https://app.en.uptodown.com/android"
 ## If you'd like to get to know more about other options:
 
 There exists an example below with all defaults shown and all the keys explicitly set.  
-All keys are optional (except download urls) and are assigned to their default values if not set explicitly.  
+**All keys are optional** (except download urls) and are assigned to their default values if not set explicitly.  
 
 ```toml
+patches-source = "revanced/revanced-patches" # where to fetch patches bundle from. default: "revanced/revanced-patches"
+integrations-source = "revanced/revanced-integrations" # where to fetch integrations from. default: "revanced/revanced-integrations"
+rv-brand = "ReVanced Extended" # rebrand from 'ReVanced' to something different. default: "ReVanced"
+
+patches-version = "v2.160.0" # locks the patches version. default: latest available
+integrations-version = "v0.95.0" # locks the integrations version. default: latest available
+
 [Some-App]
 app-name = "SomeApp" # if set, app name becomes SomeApp instead of Some-App. default is same as table name, which is 'Some-App' here.
 # this affects the release name and stuff like that
