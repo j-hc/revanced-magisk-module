@@ -1,7 +1,7 @@
 #!/system/bin/sh
 # shellcheck disable=SC2086
 MODDIR=${0%/*}
-RVPATH=/data/adb/rvhc/__PKGNAME_rv.apk
+RVPATH=${NVBASE}/rvhc/__PKGNAME_rv.apk
 until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 1; done
 until [ "$(getprop init.svc.bootanim)" = stopped ]; do sleep 1; done
 sleep 3
