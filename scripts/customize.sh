@@ -50,7 +50,8 @@ fi
 BASEPATHLIB=${BASEPATH%base.apk}lib/${ARCH}
 if [ -z "$(ls -A1 ${BASEPATHLIB})" ]; then
 	ui_print "* Extracting native libs"
-	if ! op=$(unzip -j $MODPATH/__PKGNAME.apk lib/${ARCH_LIB}/* -d ${BASEPATHLIB} 2>&1); then
+	mkdir -p $BASEPATHLIB
+	if ! op=$(unzip -j $MODPATH/__EXTRCT lib/${ARCH_LIB}/* -d ${BASEPATHLIB} 2>&1); then
 		ui_print "ERROR: extracting native libs failed"
 		abort "$op"
 	fi
@@ -65,15 +66,22 @@ RVPATH=$NVBASE/rvhc/__PKGNAME_rv.apk
 mv -f $MODPATH/base.apk $RVPATH
 
 if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH 2>&1); then
-	ui_print "ERROR: Mount failed!"
 	ui_print "$op"
-	abort "Flash the module in official Magisk Manager app"
+	ui_print "WARNING: Mount failed! Trying in non-global mountspace mode"
+	if ! op=$(mount -o bind $RVPATH $BASEPATH 2>&1); then
+		ui_print "ERROR: $op"
+		abort "Try flasing the module in official Magisk Manager app"
+	fi
 fi
 am force-stop __PKGNAME
 ui_print "* Optimizing __PKGNAME"
 cmd package compile --reset __PKGNAME &
 
+ui_print "* Cleanup"
 rm -rf $MODPATH/bin $MODPATH/__PKGNAME.apk $NVBASE/__PKGNAME_rv.apk
+for s in "uninstall.sh" "service.sh"; do
+	sed -i "2 i\NVBASE=${NVBASE}" $MODPATH/$s
+done
 
 ui_print "* Done"
 ui_print "  by j-hc (github.com/j-hc)"

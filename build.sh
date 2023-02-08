@@ -42,7 +42,7 @@ mkdir -p "$BUILD_DIR" "$PREBUILTS_DIR"
 # -- Main config --
 
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be from 0 to 9"; fi
-if [ "${DRYRUN:-}" = true ]; then set_prebuilts; else get_prebuilts || set_prebuilts; fi
+if [ "${NOSET:-}" = true ]; then set_prebuilts; else get_prebuilts || set_prebuilts; fi
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
 if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt install jq' or equivalent"
