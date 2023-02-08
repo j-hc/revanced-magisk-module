@@ -13,7 +13,7 @@ Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/relea
  * Support all present and future ReVanced and [ReVanced Extended](https://github.com//inotia00/revanced-patches) apps
  * Can build Magisk modules and non-root APKs
  * Updated daily with the latest versions of apps and patches
- * Cleans APKs
+ * Optimize APKs and modules for size
  * Modules
      * recompile invalidated odex for faster usage
      * receive updates from Magisk app
