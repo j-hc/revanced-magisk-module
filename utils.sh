@@ -314,7 +314,7 @@ build_rv() {
 	if [ "$mode_arg" = module ] || [ "$mode_arg" = both ]; then
 		if [ -f "$stock_bundle_apk" ]; then
 			is_bundle=true
-		elif [ "$dl_from" = apkmirror ]; then
+		elif [ "$dl_from" = TODO ]; then
 			pr "Downloading '${app_name}' bundle from APKMirror"
 			if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "BUNDLE</span>[^@]*@\([^#]*\)" "$stock_bundle"; then
 				pr "'${app_name}' bundle was downloaded successfully and will be used for the module"
