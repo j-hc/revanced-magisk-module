@@ -7,7 +7,7 @@ until [ "$(getprop init.svc.bootanim)" = stopped ]; do sleep 1; done
 sleep 3
 
 err() {
-	cp -n $MODDIR/module.prop $MODDIR/err
+	[ ! -f $MODDIR/err ] && cp $MODDIR/module.prop $MODDIR/err
 	sed -i "s/^des.*/description=⚠️ Module is inactive: ${1}/g" $MODDIR/module.prop
 }
 
