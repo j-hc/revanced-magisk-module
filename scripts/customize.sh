@@ -37,13 +37,10 @@ fi
 if [ $INS = true ]; then
 	ui_print "* Updating __PKGNAME (v__PKGVER)"
 	set_perm $MODPATH/__PKGNAME.apk 1000 1000 644 u:object_r:apk_data_file:s0
-	ADBV=$(settings get global verifier_verify_adb_installs)
-	[ $ADBV = 1 ] && settings put global verifier_verify_adb_installs 0
 	if ! op=$(pm install --user 0 -i com.android.vending -r -d $MODPATH/__PKGNAME.apk 2>&1); then
 		ui_print "ERROR: APK installation failed!"
 		abort "$op"
 	fi
-	[ $ADBV = 1 ] && settings put global verifier_verify_adb_installs $ADBV
 	BASEPATH=$(pm path __PKGNAME | grep base)
 	BASEPATH=${BASEPATH#*:}
 	if [ -z "$BASEPATH" ]; then
@@ -54,7 +51,7 @@ BASEPATHLIB=${BASEPATH%base.apk}lib/${ARCH}
 if [ -z "$(ls -A1 ${BASEPATHLIB})" ]; then
 	ui_print "* Extracting native libs"
 	mkdir -p $BASEPATHLIB
-	if ! op=$(unzip -j $MODPATH/__EXTRCT lib/${ARCH_LIB}/* -d ${BASEPATHLIB} 2>&1); then
+	if ! op=$(unzip -j $MODPATH/__PKGNAME.apk lib/${ARCH_LIB}/* -d ${BASEPATHLIB} 2>&1); then
 		ui_print "ERROR: extracting native libs failed"
 		abort "$op"
 	fi
@@ -81,10 +78,7 @@ ui_print "* Optimizing __PKGNAME"
 cmd package compile --reset __PKGNAME &
 
 ui_print "* Cleanup"
-rm -rf $MODPATH/bin $MODPATH/__PKGNAME.apk $NVBASE/__PKGNAME_rv.apk
-for s in "uninstall.sh" "service.sh"; do
-	sed -i "2 i\NVBASE=${NVBASE}" $MODPATH/$s
-done
+rm -rf $MODPATH/bin $MODPATH/__PKGNAME.apk
 
 ui_print "* Done"
 ui_print "  by j-hc (github.com/j-hc)"
