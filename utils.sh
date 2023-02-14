@@ -36,6 +36,8 @@ toml_get() {
 # ---------------------------------------------------
 
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
+epr() { echo -e "\033[0;31m[-] ${1}\033[0m"; }
+abort() { echo >&2 -e "\033[0;31mABORT: $1\033[0m" && exit 1; }
 
 get_prebuilts() {
 	pr "Getting prebuilts"
@@ -90,8 +92,6 @@ get_prebuilts() {
 		rm "${TEMP_DIR}/htmlq.tar.gz"
 	fi
 }
-
-abort() { echo >&2 -e "\033[0;31mABORT: $1\033[0m" && exit 1; }
 
 set_prebuilts() {
 	[ -d "$PREBUILTS_DIR" ] || abort "${PREBUILTS_DIR} directory could not be found"
@@ -307,12 +307,14 @@ build_rv() {
 				apkm_arch="armeabi-v7a"
 			fi
 			if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_apk" "$apkm_arch"; then
-				abort "ERROR: Could not find any release of '${app_name}' with version '${version}' and arch '${apkm_arch}' from APKMirror"
+				epr "ERROR: Could not find any release of '${app_name}' with version '${version}' and arch '${apkm_arch}' from APKMirror"
+				return 0
 			fi
 		elif [ "$dl_from" = uptodown ]; then
 			pr "Downloading '${app_name}' from Uptodown"
 			if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
-				abort "ERROR: Could not download ${app_name} from Uptodown"
+				epr "ERROR: Could not download ${app_name} from Uptodown"
+				return 0
 			fi
 		fi
 	fi
