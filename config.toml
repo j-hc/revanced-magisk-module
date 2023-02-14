@@ -16,6 +16,16 @@ exclusive-patches = false                                             # excludes
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
 
+[YouTube_Unstable]
+enabled = true
+build-mode = "both"                                                   # 'both', 'apk' or 'module'
+excluded-patches = "debugging"                                        # whitespace seperated list of patches to exclude (multiline strings are not supported)
+included-patches = ""                                                 # whitespace seperated list of patches to include
+version = "latest"                                                      # 'auto', 'latest' or a custom one like '17.40.41'
+exclusive-patches = false                                             # excludes all patches by default
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+module-prop-name = "ytrv-unstable-magisk"
+
 [Music-arm64]
 build-mode = "both"
 app-name = "Music"
