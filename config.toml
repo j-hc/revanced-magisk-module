@@ -1,17 +1,18 @@
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
-compression-level = 9 # compression level for module zips. between 1 and 9
-logging-to-file = true # enables logging of every patch process to a seperate file
-enable-magisk-update = true # set this to false if you do not want to receive updates for the module in magisk app
-parallel-jobs = 3 # max number of concurrent building jobs
+compression-level = 9         # compression level for module zips. between 1 and 9
+logging-to-file = true        # enables logging of every patch process to a seperate file
+enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
+parallel-jobs = 1             # max number of concurrent building jobs
 build-mindetach-module = true
 
+# add 'enabled = false' for not patching a specific app
 [YouTube]
-enabled = true # add 'enabled = false' key to entries to not build them
-build-mode = "both" # 'both', 'apk' or 'module'
-excluded-patches = "debugging" # whitespace seperated list of patches to exclude (multiline strings are not supported)
-included-patches = "" # whitespace seperated list of patches to include
-version = "auto" # 'auto', 'latest' or a custom one like '17.40.41'
-exclusive-patches = false # excludes all patches by default
+enabled = true
+build-mode = "both"                                                   # 'both', 'apk' or 'module'
+excluded-patches = "debugging"                                        # whitespace seperated list of patches to exclude (multiline strings are not supported)
+included-patches = ""                                                 # whitespace seperated list of patches to include
+version = "auto"                                                      # 'auto', 'latest' or a custom one like '17.40.41'
+exclusive-patches = false                                             # excludes all patches by default
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
 
@@ -37,7 +38,7 @@ arch = "arm-v7a"
 
 [Twitter]
 build-mode = "apk"
-excluded-patches = "hide-views-stats"
+excluded-patches = ""
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
 
@@ -65,10 +66,11 @@ uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 [Citra]
 enabled = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/citra-emulator/citra-emulator/"
+arch = "arm64-v8a"
 
 [Backdrops]
 enabled = false
-apkmirror-dlurl = "https://www.apkmirror.com/apk/backdrops/backdrops-wallpapers/"
+uptodown-dlurl = "https://backdrops.en.uptodown.com/android"
 
 [WarnWetter]
 enabled = true
@@ -93,6 +95,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-s
 [TickTick]
 enabled = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/ticktick-to-do-list-with-reminder-day-planner/"
+arch = "arm64-v8a"
 
 [Tasker]
 enabled = true

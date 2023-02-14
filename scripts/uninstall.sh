@@ -1,2 +1,8 @@
 #!/system/bin/sh
-rm /data/adb/__PKGNAME_rv.apk
+{
+	MODDIR=${0%/*}
+	MODULES=${MODDIR%/*}
+	NVBASE=${MODULES%/*}
+	rm $NVBASE/rvhc/__PKGNAME_rv.apk
+	rmdir $NVBASE/rvhc
+} &

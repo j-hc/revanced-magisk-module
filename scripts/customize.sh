@@ -2,9 +2,11 @@
 ui_print ""
 
 if [ $ARCH = "arm" ]; then
-	alias cmpr='$MODPATH/bin/arm/cmpr'
+	#arm
 	ARCH_LIB=armeabi-v7a
-elif [ $ARCH = "arm64" ] || [ $ARCH = "x64" ]; then
+	alias cmpr='$MODPATH/bin/arm/cmpr'
+elif [ $ARCH = "arm64" ]; then
+	#arm64
 	ARCH_LIB=arm64-v8a
 	alias cmpr='$MODPATH/bin/arm64/cmpr'
 else
@@ -12,18 +14,27 @@ else
 fi
 set_perm_recursive $MODPATH/bin 0 0 0755 0777
 
-grep __PKGNAME /proc/self/mountinfo | while read -r line; do
+grep __PKGNAME /proc/mounts | while read -r line; do
 	ui_print "* Un-mount"
-	mountpoint=$(echo "$line" | cut -d' ' -f5)
-	umount -l "${mountpoint%%\\*}"
+	mp=${line#* }
+	mp=${mp%% *}
+	umount -l ${mp%%\\*}
 done
 am force-stop __PKGNAME
 
 BASEPATH=$(pm path __PKGNAME | grep base)
 BASEPATH=${BASEPATH#*:}
-if [ -n "$BASEPATH" ] && cmpr $BASEPATH $MODPATH/__PKGNAME.apk; then
-	ui_print "* __PKGNAME is up-to-date"
-else
+INS=true
+if [ "$BASEPATH" ]; then
+	if [ ! -d ${BASEPATH%base.apk}lib ]; then
+		ui_print "* Invalid installation found. Uninstalling..."
+		pm uninstall -k --user 0 __PKGNAME
+	elif cmpr $BASEPATH $MODPATH/__PKGNAME.apk; then
+		ui_print "* __PKGNAME is up-to-date"
+		INS=false
+	fi
+fi
+if [ $INS = true ]; then
 	ui_print "* Updating __PKGNAME (v__PKGVER)"
 	set_perm $MODPATH/__PKGNAME.apk 1000 1000 644 u:object_r:apk_data_file:s0
 	if ! op=$(pm install --user 0 -i com.android.vending -r -d $MODPATH/__PKGNAME.apk 2>&1); then
@@ -39,6 +50,7 @@ fi
 BASEPATHLIB=${BASEPATH%base.apk}lib/${ARCH}
 if [ -z "$(ls -A1 ${BASEPATHLIB})" ]; then
 	ui_print "* Extracting native libs"
+	mkdir -p $BASEPATHLIB
 	if ! op=$(unzip -j $MODPATH/__PKGNAME.apk lib/${ARCH_LIB}/* -d ${BASEPATHLIB} 2>&1); then
 		ui_print "ERROR: extracting native libs failed"
 		abort "$op"
@@ -49,19 +61,20 @@ ui_print "* Setting Permissions"
 set_perm $MODPATH/base.apk 1000 1000 644 u:object_r:apk_data_file:s0
 
 ui_print "* Mounting __PKGNAME"
-RVPATH=/data/adb/__PKGNAME_rv.apk
-ln -f $MODPATH/base.apk $RVPATH
+mkdir $NVBASE/rvhc 2>/dev/null
+RVPATH=$NVBASE/rvhc/__PKGNAME_rv.apk
+mv -f $MODPATH/base.apk $RVPATH
 
 if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH 2>&1); then
 	ui_print "ERROR: Mount failed!"
-	ui_print "$op"
-	abort "Flash the module in official Magisk Manager app"
+	abort "$op"
 fi
 am force-stop __PKGNAME
 ui_print "* Optimizing __PKGNAME"
 cmd package compile --reset __PKGNAME &
 
-rm -r $MODPATH/bin $MODPATH/__PKGNAME.apk
+ui_print "* Cleanup"
+rm -rf $MODPATH/bin $MODPATH/__PKGNAME.apk
 
 ui_print "* Done"
 ui_print "  by j-hc (github.com/j-hc)"
