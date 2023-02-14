@@ -82,6 +82,13 @@ get_prebuilts() {
 	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
+
+	HTMLQ="${TEMP_DIR}/htmlq"
+	if [ ! -f "${TEMP_DIR}/htmlq" ]; then
+		req "https://github.com/mgdm/htmlq/releases/latest/download/htmlq-x86_64-linux.tar.gz" "${TEMP_DIR}/htmlq.tar.gz"
+		tar -xf "${TEMP_DIR}/htmlq.tar.gz" -C "$TEMP_DIR"
+		rm "${TEMP_DIR}/htmlq.tar.gz"
+	fi
 }
 
 abort() { echo >&2 -e "\033[0;31mABORT: $1\033[0m" && exit 1; }
@@ -99,6 +106,7 @@ set_prebuilts() {
 	log "Patches: ${RV_PATCHES_JAR#"$PREBUILTS_DIR/"}"
 	RV_PATCHES_JSON=$(find "$PREBUILTS_DIR" -maxdepth 1 -name "patches-*.json" | tail -n1)
 	[ "$RV_PATCHES_JSON" ] || abort "patches.json not found"
+	HTMLQ="${TEMP_DIR}/htmlq"
 }
 
 req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
@@ -148,17 +156,24 @@ dl_if_dne() {
 
 # -------------------- apkmirror --------------------
 dl_apkmirror() {
-	local url=$1 version=${2// /-} regexp=$3 output=$4
-	if [ "${DRYRUN:-}" = true ]; then
-		echo "#" >"$output"
-		return
-	fi
-	local resp
+	local url=$1 version=${2// /-} output=$3 arch=$4
+	local resp node app_table archalt dlurl=""
+	[ "$arch" = universal ] && archalt="arm64-v8a + armeabi-v7a" || archalt=$arch
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
-	url="https://www.apkmirror.com$(echo "$resp" | tr '\n' ' ' | sed -n "s/href=\"/@/g; s;.*${regexp}.*;\1;p")"
-	[ "$url" != https://www.apkmirror.com ] || return 1
-	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
+	for ((n = 2; n < 50; n++)); do
+		node=$($HTMLQ "div.table-row:nth-child($n)" -r "span.signature:nth-child(n)" <<<"$resp")
+		if [ -z "$node" ]; then break; fi
+		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
+		if [[ "$(sed -n 8p <<<"$app_table")" = nodpi &&
+		"$(sed -n 3p <<<"$app_table")" = APK &&
+		("$(sed -n 6p <<<"$app_table")" = "$arch" || "$(sed -n 6p <<<"$app_table")" = "$archalt") ]]; then
+			dlurl=https://www.apkmirror.com$($HTMLQ --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
+			break
+		fi
+	done
+	[ -z "$dlurl" ] && return 1
+	url="https://www.apkmirror.com$(req "$dlurl" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$output"
 }
@@ -186,7 +201,7 @@ get_apkmirror_pkg_name() { req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_col
 
 # -------------------- uptodown --------------------
 get_uptodown_resp() { req "${1}/versions" -; }
-get_uptodown_vers() { sed -n 's;.*version>\(.*\)<\/span>$;\1;p' <<<"$1"; }
+get_uptodown_vers() { sed -n 's;.*version">\(.*\)</span>$;\1;p' <<<"$1"; }
 dl_uptodown() {
 	local uptwod_resp=$1 version=$2 output=$3
 	local url
@@ -276,15 +291,16 @@ build_rv() {
 	if [ ! -f "$stock_apk" ]; then
 		if [ "$dl_from" = apkmirror ]; then
 			pr "Downloading '${app_name}' from APKMirror"
+			local apkm_arch
 			if [ "$arch" = "all" ]; then
-				apkmirror_regex="APK</span>[^@]*@\([^#]*\)"
+				apkm_arch="universal"
 			elif [ "$arch" = "arm64-v8a" ]; then
-				apkmirror_regex='arm64-v8a</div>[^@]*@\([^"]*\)'
+				apkm_arch="arm64-v8a"
 			elif [ "$arch" = "arm-v7a" ]; then
-				apkmirror_regex='armeabi-v7a</div>[^@]*@\([^"]*\)'
+				apkm_arch="armeabi-v7a"
 			fi
-			if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$apkmirror_regex" "$stock_apk"; then
-				abort "ERROR: Could not find any release of '${app_name}' with version '${version}' from APKMirror"
+			if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_apk" "$apkm_arch"; then
+				abort "ERROR: Could not find any release of '${app_name}' with version '${version}' and arch '${apkm_arch}' from APKMirror"
 			fi
 		elif [ "$dl_from" = uptodown ]; then
 			pr "Downloading '${app_name}' from Uptodown"

@@ -65,6 +65,7 @@ uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 [Citra]
 enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/citra-emulator/citra-emulator/"
+arch = "arm64-v8a"
 
 [Backdrops]
 enabled = false
