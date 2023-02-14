@@ -77,7 +77,7 @@ get_prebuilts() {
 	if [ "$OS" = Android ]; then
 		local arch
 		if [ "$(uname -m)" = aarch64 ]; then arch=arm64; else arch=arm; fi
-		dl_if_dne ${TEMP_DIR}/aapt2 https://github.com/rendiix/termux-aapt/raw/main/prebuilt-binary/${arch}/aapt2
+		dl_if_dne ${TEMP_DIR}/aapt2 https://github.com/rendiix/termux-aapt/raw/d7d4b4a344cc52b94bcdab3500be244151261d8e/prebuilt-binary/${arch}/aapt2
 	fi
 	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
@@ -154,20 +154,27 @@ dl_if_dne() {
 	fi
 }
 
+isoneof() {
+	local i=$1 v
+	shift
+	for v; do [ "$v" = "$i" ] && return 0; done
+	return 1
+}
+
 # -------------------- apkmirror --------------------
 dl_apkmirror() {
 	local url=$1 version=${2// /-} output=$3 arch=$4
-	local resp node app_table archalt dlurl=""
-	[ "$arch" = universal ] && archalt="arm64-v8a + armeabi-v7a" || archalt=$arch
+	local resp node app_table dlurl=""
+	[ "$arch" = universal ] && apparch=(universal noarch 'arm64-v8a + armeabi-v7a') || apparch=("$arch")
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	for ((n = 2; n < 50; n++)); do
 		node=$($HTMLQ "div.table-row:nth-child($n)" -r "span.signature:nth-child(n)" <<<"$resp")
 		if [ -z "$node" ]; then break; fi
 		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
-		if [[ "$(sed -n 8p <<<"$app_table")" = nodpi &&
-		"$(sed -n 3p <<<"$app_table")" = APK &&
-		("$(sed -n 6p <<<"$app_table")" = "$arch" || "$(sed -n 6p <<<"$app_table")" = "$archalt") ]]; then
+		if [ "$(sed -n 8p <<<"$app_table")" = nodpi ] &&
+			[ "$(sed -n 3p <<<"$app_table")" = APK ] &&
+			isoneof "$(sed -n 6p <<<"$app_table")" "${apparch[@]}"; then
 			dlurl=https://www.apkmirror.com$($HTMLQ --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
 			break
 		fi

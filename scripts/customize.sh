@@ -66,12 +66,8 @@ RVPATH=$NVBASE/rvhc/__PKGNAME_rv.apk
 mv -f $MODPATH/base.apk $RVPATH
 
 if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH 2>&1); then
-	ui_print "$op"
-	ui_print "WARNING: Mount failed! Trying in non-global mountspace mode"
-	if ! op=$(mount -o bind $RVPATH $BASEPATH 2>&1); then
-		ui_print "ERROR: $op"
-		abort "Try flasing the module in official Magisk Manager app"
-	fi
+	ui_print "ERROR: Mount failed!"
+	abort "$op"
 fi
 am force-stop __PKGNAME
 ui_print "* Optimizing __PKGNAME"

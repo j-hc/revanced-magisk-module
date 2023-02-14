@@ -7,13 +7,6 @@ trap "rm -rf temp/tmp.*; exit 1" INT
 
 : >build.md
 
-isoneof() {
-	local i=$1 v
-	shift
-	for v; do [ "$v" = "$i" ] && return 0; done
-	return 1
-}
-
 vtf() {
 	if ! isoneof "${1}" "true" "false"; then
 		abort "ERROR: '${1}' is not a valid option for '${2}': only true or false is allowed"
