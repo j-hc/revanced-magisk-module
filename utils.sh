@@ -87,9 +87,19 @@ get_prebuilts() {
 
 	HTMLQ="${TEMP_DIR}/htmlq"
 	if [ ! -f "${TEMP_DIR}/htmlq" ]; then
-		req "https://github.com/mgdm/htmlq/releases/latest/download/htmlq-x86_64-linux.tar.gz" "${TEMP_DIR}/htmlq.tar.gz"
-		tar -xf "${TEMP_DIR}/htmlq.tar.gz" -C "$TEMP_DIR"
-		rm "${TEMP_DIR}/htmlq.tar.gz"
+		if [ "$OS" = Android ]; then
+			if [ "$arch" = arm64 ]; then
+				arch=arm64-v8a
+			else
+				arch=armeabi-v7a
+			fi
+			dl_if_dne ${TEMP_DIR}/htmlq https://github.com/j-hc/htmlq-ndk/releases/latest/download/htmlq-${arch}
+		else
+			req "https://github.com/mgdm/htmlq/releases/latest/download/htmlq-x86_64-linux.tar.gz" "${TEMP_DIR}/htmlq.tar.gz"
+			tar -xf "${TEMP_DIR}/htmlq.tar.gz" -C "$TEMP_DIR"
+			rm "${TEMP_DIR}/htmlq.tar.gz"
+		fi
+
 	fi
 }
 
