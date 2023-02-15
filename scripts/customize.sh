@@ -14,11 +14,11 @@ else
 fi
 set_perm_recursive $MODPATH/bin 0 0 0755 0777
 
-grep __PKGNAME /proc/mounts | while read -r line; do
+su -Mc grep __PKGNAME /proc/mounts | while read -r line; do
 	ui_print "* Un-mount"
 	mp=${line#* }
 	mp=${mp%% *}
-	umount -l ${mp%%\\*}
+	su -Mc umount -l ${mp%%\\*}
 done
 am force-stop __PKGNAME
 
