@@ -7,9 +7,7 @@ BUILD_DIR="build"
 PKGS_LIST="${TEMP_DIR}/module-pkgs"
 
 if [ "${GITHUB_TOKEN:-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
-GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-"j-hc/revanced-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
-WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"
 REBUILD=false
 OS=$(uname -o)
 
@@ -36,7 +34,10 @@ toml_get() {
 # ---------------------------------------------------
 
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
-epr() { echo -e "\033[0;31m[-] ${1}\033[0m"; }
+epr() {
+	echo -e "\033[0;31m[-] ${1}\033[0m"
+	if [ "${GITHUB_REPOSITORY:-}" ]; then echo -e "::error::utils.sh \033[0;31m[-] ${1}\033[0m\n"; fi
+}
 abort() { echo >&2 -e "\033[0;31mABORT: $1\033[0m" && exit 1; }
 
 get_prebuilts() {
@@ -120,7 +121,7 @@ set_prebuilts() {
 	HTMLQ="${TEMP_DIR}/htmlq"
 }
 
-req() { wget -nv -O "$2" --header="$WGET_HEADER" "$1"; }
+req() { wget -nv -O "$2" --header="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0" "$1"; }
 gh_req() { wget -nv -O "$2" --header="$GH_HEADER" "$1"; }
 log() { echo -e "$1  " >>build.md; }
 get_largest_ver() {
@@ -155,6 +156,10 @@ isoneof() {
 # -------------------- apkmirror --------------------
 dl_apkmirror() {
 	local url=$1 version=${2// /-} output=$3 arch=$4 dpi=$5
+	[ "${DRYRUN:-}" ] && {
+		echo >"$output"
+		return 0
+	}
 	local resp node app_table dlurl=""
 	[ "$arch" = universal ] && apparch=(universal noarch 'arm64-v8a + armeabi-v7a') || apparch=("$arch")
 	url="${url}/${url##*/}-${version//./-}-release/"
@@ -171,8 +176,8 @@ dl_apkmirror() {
 		fi
 	done
 	[ -z "$dlurl" ] && return 1
-	url="https://www.apkmirror.com$(req "$dlurl" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
-	url="https://www.apkmirror.com$(req "$url" - | tr '\n' ' ' | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
+	url="https://www.apkmirror.com$(req "$dlurl" - | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
+	url="https://www.apkmirror.com$(req "$url" - | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$output"
 }
 get_apkmirror_vers() {
@@ -414,7 +419,7 @@ build_rv() {
 			"${app_name} ${RV_BRAND}" \
 			"$version" \
 			"${app_name} ${RV_BRAND} Magisk module" \
-			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${upj}" \
+			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY:-}/update/${upj}" \
 			"$base_template"
 
 		local module_output="${app_name_l}-${RV_BRAND_F}-magisk-v${version}-${arch}.zip"
