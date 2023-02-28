@@ -19,29 +19,29 @@ ask() {
 	return 1
 }
 
-pr "Setting up environment..."
-yes "" | pkg update -y && pkg install -y git wget openssl jq openjdk-17 zip
+if [ ! -f "$(date '+%Y%m%d')" ]; then
+	pr "Setting up environment..."
+	yes "" | pkg update -y && pkg install -y git wget openssl jq openjdk-17 zip
+	: >"$(date '+%Y%m%d')"
+fi
 
 pr "Cloning revanced-magisk-module repository..."
 if [ -d revanced-magisk-module ]; then
-	if ask "Directory revanced-magisk-module already exists. Do you want to clone the repo again and overwrite your config? [y/n]"; then
-		rm -rf revanced-magisk-module
-		git clone https://github.com/j-hc/revanced-magisk-module --recurse --depth 1
-		sed -i '/^enabled.*/d; /^\[.*\]/a enabled = false' revanced-magisk-module/config.toml
-	fi
+	cd revanced-magisk-module
+	git fetch
+	git rebase -X ours
+elif [ -f build.sh ]; then
+	git fetch
+	git rebase -X ours
 else
 	git clone https://github.com/j-hc/revanced-magisk-module --recurse --depth 1
 	sed -i '/^enabled.*/d; /^\[.*\]/a enabled = false' revanced-magisk-module/config.toml
-fi
-
-if [ ! -f build.sh ]; then
 	cd revanced-magisk-module
 fi
 
 if ask "Do you want to open the config.toml for customizations? [y/n]"; then
 	nano config.toml
-else
-	pr "No app is selected for patching!"
+	git add config.toml && git commit -m config || :
 fi
 if ! ask "Setup is done. Do you want to start building? [y/n]"; then
 	exit 0
