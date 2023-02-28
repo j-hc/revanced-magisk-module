@@ -1,4 +1,4 @@
-# shellcheck disable=SC2148,SC2086,SC2115
+# shellcheck disable=SC2148,SC2086
 ui_print ""
 
 if [ $ARCH = "arm" ]; then
@@ -22,36 +22,48 @@ su -Mc grep __PKGNAME /proc/mounts | while read -r line; do
 done
 am force-stop __PKGNAME
 
-BASEPATH=$(pm path __PKGNAME | grep base)
-BASEPATH=${BASEPATH#*:}
 INS=true
-if [ "$BASEPATH" ]; then
-	if [ ! -d ${BASEPATH%base.apk}lib ]; then
+if BASEPATH=$(pm path __PKGNAME); then
+	BASEPATH=${BASEPATH##*:}
+	BASEPATH=${BASEPATH%/*}
+	if [ ! -d ${BASEPATH}/lib ]; then
 		ui_print "* Invalid installation found. Uninstalling..."
 		pm uninstall -k --user 0 __PKGNAME
-	elif cmpr $BASEPATH $MODPATH/__PKGNAME.apk; then
+	elif cmpr $BASEPATH/base.apk $MODPATH/__PKGNAME.apk; then
 		ui_print "* __PKGNAME is up-to-date"
 		INS=false
 	fi
 fi
 if [ $INS = true ]; then
 	ui_print "* Updating __PKGNAME (v__PKGVER)"
-	set_perm $MODPATH/__PKGNAME.apk 1000 1000 644 u:object_r:apk_data_file:s0
-	if ! op=$(pm install --user 0 -i com.android.vending -r -d $MODPATH/__PKGNAME.apk 2>&1); then
-		ui_print "ERROR: APK installation failed!"
+	SZ=$(stat -c "%s" $MODPATH/__PKGNAME.apk)
+	if ! SES=$(pm install-create --user 0 -i com.android.vending -r -d -S "$SZ" 2>&1); then
+		ui_print "ERROR: session creation failed"
+		abort "$SES"
+	fi
+	SES=${SES#*[}
+	SES=${SES%]*}
+	set_perm "$MODPATH/__PKGNAME.apk" 1000 1000 644 u:object_r:apk_data_file:s0
+	if ! op=$(pm install-write -S "$SZ" "$SES" "__PKGNAME.apk" "$MODPATH/__PKGNAME.apk" 2>&1); then
+		ui_print "ERROR: install-write failed"
 		abort "$op"
 	fi
-	BASEPATH=$(pm path __PKGNAME | grep base)
-	BASEPATH=${BASEPATH#*:}
-	if [ -z "$BASEPATH" ]; then
+	if ! op=$(pm install-commit "$SES" 2>&1); then
+		ui_print "ERROR: install-commit failed"
+		abort "$op"
+	fi
+	if BASEPATH=$(pm path __PKGNAME); then
+		BASEPATH=${BASEPATH##*:}
+		BASEPATH=${BASEPATH%/*}
+	else
 		abort "ERROR: install __PKGNAME manually and reflash the module"
 	fi
 fi
-BASEPATHLIB=${BASEPATH%base.apk}lib/${ARCH}
+BASEPATHLIB=${BASEPATH}/lib/${ARCH}
 if [ -z "$(ls -A1 ${BASEPATHLIB})" ]; then
 	ui_print "* Extracting native libs"
 	mkdir -p $BASEPATHLIB
-	if ! op=$(unzip -j $MODPATH/__PKGNAME.apk lib/${ARCH_LIB}/* -d ${BASEPATHLIB} 2>&1); then
+	if ! op=$(unzip -j $MODPATH/__EXTRCT lib/${ARCH_LIB}/* -d ${BASEPATHLIB} 2>&1); then
 		ui_print "ERROR: extracting native libs failed"
 		abort "$op"
 	fi
@@ -65,7 +77,7 @@ mkdir $NVBASE/rvhc 2>/dev/null
 RVPATH=$NVBASE/rvhc/__PKGNAME_rv.apk
 mv -f $MODPATH/base.apk $RVPATH
 
-if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH 2>&1); then
+if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH/base.apk 2>&1); then
 	ui_print "ERROR: Mount failed!"
 	ui_print "$op"
 	abort "Flash in official Magisk app"

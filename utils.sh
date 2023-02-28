@@ -155,7 +155,7 @@ isoneof() {
 
 # -------------------- apkmirror --------------------
 dl_apkmirror() {
-	local url=$1 version=${2// /-} output=$3 arch=$4 dpi=$5
+	local url=$1 version=${2// /-} output=$3 apkorbundle=$4 arch=$5 dpi=$6
 	[ "${DRYRUN:-}" ] && {
 		echo >"$output"
 		return 0
@@ -165,14 +165,21 @@ dl_apkmirror() {
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	for ((n = 2; n < 50; n++)); do
-		node=$($HTMLQ "div.table-row:nth-child($n)" -r "span.signature:nth-child(n)" <<<"$resp")
+		node=$($HTMLQ "div.table-row:nth-child($n)" -r "span.success:nth-child(3)" -r "span.signature:nth-child(n)" <<<"$resp")
 		if [ -z "$node" ]; then break; fi
 		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
-		if [ "$(sed -n 8p <<<"$app_table")" = "$dpi" ] &&
-			[ "$(sed -n 3p <<<"$app_table")" = APK ] &&
-			isoneof "$(sed -n 6p <<<"$app_table")" "${apparch[@]}"; then
-			dlurl=https://www.apkmirror.com$($HTMLQ --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
-			break
+		if [ "$(sed -n 3p <<<"$app_table")" = "$apkorbundle" ]; then
+			if [ "$apkorbundle" = APK ]; then
+				if [ "$(sed -n 8p <<<"$app_table")" = "$dpi" ] && isoneof "$(sed -n 6p <<<"$app_table")" "${apparch[@]}"; then
+					dlurl=https://www.apkmirror.com$($HTMLQ --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
+					break
+				fi
+			elif [ "$apkorbundle" = BUNDLE ]; then
+				dlurl=https://www.apkmirror.com$($HTMLQ --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
+				break
+			else
+				abort "unreachable"
+			fi
 		fi
 	done
 	[ -z "$dlurl" ] && return 1
@@ -189,8 +196,7 @@ get_apkmirror_vers() {
 	if [ "$allow_alpha_version" = false ]; then
 		local IFS=$'\n'
 		vers=$(grep -iv "\(beta\|alpha\)" <<<"$vers")
-		local v
-		local r_vers=()
+		local v r_vers=()
 		for v in $vers; do
 			grep -iq "${v} \(beta\|alpha\)" <<<"$apkm_resp" || r_vers+=("$v")
 		done
@@ -235,16 +241,6 @@ patch_apk() {
 	[ -f "$patched_apk" ]
 }
 
-zip_module() {
-	pr "Packing module ($app_name)"
-	local patched_apk=$1 module_name=$2 stock_apk=$3 pkg_name=$4 template_dir=$5
-	cp -f "$patched_apk" "${template_dir}/base.apk"
-	cp -f "$stock_apk" "${template_dir}/${pkg_name}.apk"
-	pushd >/dev/null "$template_dir" || abort "Module template dir not found"
-	zip -"$COMPRESSION_LEVEL" -FSqr "../../${BUILD_DIR}/${module_name}" .
-	popd >/dev/null || :
-}
-
 build_rv() {
 	local -n args=$1
 	local version build_mode_arr pkg_name uptwod_resp
@@ -285,7 +281,7 @@ build_rv() {
 		fi
 	fi
 	if [ -z "$version" ]; then
-		pr "empty version, not building ${app_name}."
+		epr "empty version, not building ${app_name}."
 		return 0
 	fi
 	pr "Choosing version '${version}' (${app_name})"
@@ -302,7 +298,7 @@ build_rv() {
 			elif [ "$arch" = "arm-v7a" ]; then
 				apkm_arch="armeabi-v7a"
 			fi
-			if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_apk" "$apkm_arch" "${args[dpi]}"; then
+			if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_apk" APK "$apkm_arch" "${args[dpi]}"; then
 				epr "ERROR: Could not find any release of '${app_name}' with version '${version}' and arch '${apkm_arch}' from APKMirror"
 				return 0
 			fi
@@ -334,22 +330,22 @@ build_rv() {
 	local stock_bundle="${TEMP_DIR}/${pkg_name}-${version_f}-${arch}-bundle.zip"
 	local stock_bundle_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch}-bundle.apk"
 	local is_bundle=false
-	# if [ "$mode_arg" = module ] || [ "$mode_arg" = both ]; then
-	# 	if [ -f "$stock_bundle_apk" ]; then
-	# 		is_bundle=true
-	# 	elif [ "$dl_from" = TODO ]; then
-	# 		pr "Downloading '${app_name}' bundle from APKMirror"
-	# 		if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "BUNDLE</span>[^@]*@\([^#]*\)" "$stock_bundle"; then
-	# 			pr "'${app_name}' bundle was downloaded successfully and will be used for the module"
-	# 			is_bundle=true
-	# 			unzip "$stock_bundle" "base.apk" -d $TEMP_DIR
-	# 			mv ${TEMP_DIR}/base.apk "$stock_bundle_apk"
-	# 			rm -f "$stock_bundle"
-	# 		else
-	# 			pr "'${app_name}' bundle was not found"
-	# 		fi
-	# 	fi
-	# fi
+	if [ "$mode_arg" = module ] || [ "$mode_arg" = both ]; then
+		if [ -f "$stock_bundle_apk" ]; then
+			is_bundle=true
+		elif [ "$dl_from" = apkmirror ]; then
+			pr "Downloading '${app_name}' bundle from APKMirror"
+			if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_bundle" BUNDLE "" ""; then
+				pr "'${app_name}' bundle was downloaded successfully and will be used for the module"
+				is_bundle=true
+				unzip "$stock_bundle" "base.apk" -d $TEMP_DIR
+				mv ${TEMP_DIR}/base.apk "$stock_bundle_apk"
+				rm -f "$stock_bundle"
+			else
+				pr "'${app_name}' bundle was not found"
+			fi
+		fi
+	fi
 
 	if [ "$mode_arg" = module ]; then
 		build_mode_arr=(module)
@@ -424,7 +420,12 @@ build_rv() {
 
 		local module_output="${app_name_l}-${RV_BRAND_F}-magisk-v${version}-${arch}.zip"
 		if [ ! -f "$module_output" ] || [ "$REBUILD" = true ]; then
-			zip_module "$patched_apk" "$module_output" "$stock_apk_module" "$pkg_name" "$base_template"
+			pr "Packing module ($app_name)"
+			cp -f "$patched_apk" "${base_template}/base.apk"
+			cp -f "$stock_apk_module" "${base_template}/${pkg_name}.apk"
+			pushd >/dev/null "$base_template" || abort "Module template dir not found"
+			zip -"$COMPRESSION_LEVEL" -FSqr "../../${BUILD_DIR}/${module_output}" .
+			popd >/dev/null || :
 		fi
 
 		pr "Built ${app_name} (${arch}) (root): '${BUILD_DIR}/${module_output}'"
