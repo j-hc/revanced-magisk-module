@@ -2,11 +2,6 @@
 
 set -euo pipefail
 
-if [ "$1" = clean ]; then
-	rm -r build temp logs
-	exit 0
-fi
-
 source utils.sh
 trap "rm -rf temp/tmp.*; exit 1" INT
 
