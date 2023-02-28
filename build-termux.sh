@@ -19,10 +19,10 @@ ask() {
 	return 1
 }
 
-if [ ! -f "$(date '+%Y%m%d')" ]; then
+if [ ! -f ~/.rvmm_"$(date '+%Y%m')" ]; then
 	pr "Setting up environment..."
 	yes "" | pkg update -y && pkg install -y git wget openssl jq openjdk-17 zip
-	: >"$(date '+%Y%m%d')"
+	: >~/.rvmm_"$(date '+%Y%m')"
 fi
 
 pr "Cloning revanced-magisk-module repository..."
@@ -35,13 +35,13 @@ elif [ -f build.sh ]; then
 	git rebase -X ours
 else
 	git clone https://github.com/j-hc/revanced-magisk-module --recurse --depth 1
-	sed -i '/^enabled.*/d; /^\[.*\]/a enabled = false' revanced-magisk-module/config.toml
 	cd revanced-magisk-module
+	sed -i '/^enabled.*/d; /^\[.*\]/a enabled = false' config.toml
 fi
 
 if ask "Do you want to open the config.toml for customizations? [y/n]"; then
 	nano config.toml
-	git add config.toml && git commit -m config || :
+	git add config.toml && git -c user.name='rvmm' -c user.email='' commit -m config || :
 fi
 if ! ask "Setup is done. Do you want to start building? [y/n]"; then
 	exit 0
@@ -58,7 +58,7 @@ do
 done
 
 PWD=$(pwd)
-mkdir ~/storage/downloads/revanced-magisk-module 2>/dev/null || :
+mkdir -p ~/storage/downloads/revanced-magisk-module
 for op in *; do
 	[ "$op" = "*" ] && continue
 	cp -f "${PWD}/${op}" ~/storage/downloads/revanced-magisk-module/"${op}"
