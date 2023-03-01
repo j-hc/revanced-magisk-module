@@ -41,6 +41,7 @@ build-mode = "apk"
 merge-integrations = true
 excluded-patches = ""
 version = "auto"
+merge-integrations = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
 
 [Reddit]
