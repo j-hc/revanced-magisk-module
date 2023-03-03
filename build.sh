@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+trap "rm -rf temp/tmp.*; exit 1" INT
+
+if [ "${1:-}" = "clean" ]; then
+	rm -rf temp build logs
+fi
 
 source utils.sh
-trap "rm -rf temp/tmp.*; exit 1" INT
 
 : >build.md
 
