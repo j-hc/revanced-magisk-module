@@ -36,7 +36,7 @@ toml_get() {
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
 epr() {
 	echo -e "\033[0;31m[-] ${1}\033[0m"
-	if [ "${GITHUB_REPOSITORY:-}" ]; then echo -e "::error::utils.sh \033[0;31m[-] ${1}\033[0m\n"; fi
+	if [ "${GITHUB_REPOSITORY:-}" ]; then echo -e "::error::utils.sh [-] ${1}\n"; fi
 }
 abort() { echo >&2 -e "\033[0;31mABORT: $1\033[0m" && exit 1; }
 
@@ -121,8 +121,19 @@ set_prebuilts() {
 	HTMLQ="${TEMP_DIR}/htmlq"
 }
 
-req() { wget -nv -O "$2" --header="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0" "$1"; }
-gh_req() { wget -nv -O "$2" --header="$GH_HEADER" "$1"; }
+_req() {
+	if [ "$2" = - ]; then
+		wget -nv -O "$2" --header="$3" "$1"
+	else
+		local dlp
+		dlp="$(dirname "$2")/tmp.$(basename "$2")"
+		wget -nv -O "$dlp" --header="$3" "$1"
+		mv -f "$dlp" "$2"
+	fi
+}
+req() { _req "$1" "$2" "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"; }
+gh_req() { _req "$1" "$2" "$GH_HEADER"; }
+
 log() { echo -e "$1  " >>build.md; }
 get_largest_ver() {
 	local vers m
@@ -136,7 +147,8 @@ semver_validate() {
 	[ ${#ac} = 0 ]
 }
 get_patch_last_supported_ver() {
-	jq -r ".[] | select(.compatiblePackages[].name==\"${1}\" and .excluded==false) | .compatiblePackages[].versions" "$RV_PATCHES_JSON" | tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || return 1
+	jq -r ".[] | select(.compatiblePackages[].name==\"${1}\" and .excluded==false) | .compatiblePackages[].versions" "$RV_PATCHES_JSON" |
+		tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || return 1
 }
 
 dl_if_dne() {
@@ -164,13 +176,13 @@ dl_apkmirror() {
 	[ "$arch" = universal ] && apparch=(universal noarch 'arm64-v8a + armeabi-v7a') || apparch=("$arch")
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
-	for ((n = 2; n < 50; n++)); do
-		node=$($HTMLQ "div.table-row:nth-child($n)" -r "span.success:nth-child(3)" -r "span.signature:nth-child(n)" <<<"$resp")
+	for ((n = 2; n < 40; n++)); do
+		node=$($HTMLQ "div.table-row:nth-child($n)" -r "span:nth-child(n+3)" <<<"$resp")
 		if [ -z "$node" ]; then break; fi
 		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
 		if [ "$(sed -n 3p <<<"$app_table")" = "$apkorbundle" ]; then
 			if [ "$apkorbundle" = APK ]; then
-				if [ "$(sed -n 8p <<<"$app_table")" = "$dpi" ] && isoneof "$(sed -n 6p <<<"$app_table")" "${apparch[@]}"; then
+				if [ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] && isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; then
 					dlurl=https://www.apkmirror.com$($HTMLQ --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
 					break
 				fi

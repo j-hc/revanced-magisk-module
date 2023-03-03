@@ -21,7 +21,7 @@ ask() {
 
 if [ ! -f ~/.rvmm_"$(date '+%Y%m')" ]; then
 	pr "Setting up environment..."
-	yes "" | pkg update -y && pkg install -y git wget openssl jq openjdk-17 zip
+	yes "" | pkg update -y && pkg install -y openssl git wget jq openjdk-17 zip
 	: >~/.rvmm_"$(date '+%Y%m')"
 fi
 
