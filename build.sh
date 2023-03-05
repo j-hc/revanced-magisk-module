@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+trap "rm -rf temp/tmp.*; exit 1" INT
+
+if [ "${1:-}" = "clean" ]; then
+	rm -rf temp build logs
+fi
 
 source utils.sh
-trap "rm -rf temp/tmp.*; exit 1" INT
 
 : >build.md
 
@@ -19,7 +23,11 @@ toml_prep "$(cat 2>/dev/null "${1:-config.toml}")" || abort "could not find conf
 main_config_t=$(toml_get_table "")
 COMPRESSION_LEVEL=$(toml_get "$main_config_t" compression-level) || abort "ERROR: compression-level is missing"
 ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || abort "ERROR: enable-magisk-update is missing"
-PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs) || abort "ERROR: parallel-jobs is missing"
+if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY:-}" ]; then
+	pr "You are building locally. Magisk updates will not be enabled."
+	ENABLE_MAGISK_UPDATE=false
+fi
+PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs) || PARALLEL_JOBS=1
 BUILD_MINDETACH_MODULE=$(toml_get "$main_config_t" build-mindetach-module) || abort "ERROR: build-mindetach-module is missing"
 LOGGING_F=$(toml_get "$main_config_t" logging-to-file) && vtf "$LOGGING_F" "logging-to-file" || LOGGING_F=false
 CONF_PATCHES_VER=$(toml_get "$main_config_t" patches-version) || CONF_PATCHES_VER=
@@ -79,6 +87,8 @@ for table_name in $(toml_get_table_names); do
 			abort "ERROR: arch '${app_args[arch]}' is not a valid option for '${table_name}': only 'all', 'arm64-v8a', 'arm-v7a' is allowed"
 		fi
 	} || app_args[arch]="all"
+	app_args[merge_integrations]=$(toml_get "$t" merge-integrations) || app_args[merge_integrations]=false
+	app_args[dpi]=$(toml_get "$t" dpi) || app_args[dpi]="nodpi"
 	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || {
 		app_name_l=${app_args[app_name],,}
 		if [ "${app_args[arch]}" = "all" ]; then
@@ -90,7 +100,7 @@ for table_name in $(toml_get_table_names); do
 	if [ "$LOGGING_F" = true ]; then
 		logf=logs/"${table_name,,}.log"
 		: >"$logf"
-		(build_rv 2>&1 app_args | tee "$logf") &
+		{ build_rv 2>&1 app_args | tee "$logf"; } &
 	else
 		build_rv app_args &
 	fi

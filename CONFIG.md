@@ -26,8 +26,7 @@ patches-version = "v2.160.0" # locks the patches version. default: latest availa
 integrations-version = "v0.95.0" # locks the integrations version. default: latest available
 
 [Some-App]
-app-name = "SomeApp" # if set, app name becomes SomeApp instead of Some-App. default is same as table name, which is 'Some-App' here.
-# this affects the release name and stuff like that
+app-name = "SomeApp" # if set, release name becomes SomeApp instead of Some-App. default is same as table name, which is 'Some-App' here.
 enabled = true # whether to build the app. default: true
 build-mode = "both" # 'both', 'apk' or 'module'. default: apk
 allow-alpha-version = false # allow downloading alpha versions from apkmirror. default: false
@@ -37,7 +36,9 @@ version = "auto" # 'auto', 'latest' or a custom one e.g. '17.40.41'. 'auto' opti
 exclusive-patches = false # exclude all patches by default. default: false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app" # download url. if not set, uptodown dl url is used.
 uptodown-dlurl = "https://spotify.en.uptodown.com/android" # uptodown url. if not set, apkmirror dl url is used. apkmirror is prioritized
-module-prop-name = "ytrv-magisk" # magisk module prop name. not required.
+module-prop-name = "some-app-magisk" # magisk module prop name. not required.
+merge-integrations = false # merge integrations. used if cant be auto detected. default: false
+dpi = "360-480dpi" # used to select apk variant from apkmirror. default: nodpi
 arch = "arm64-v8a" # 'arm64-v8a', 'arm-v7a' or 'all'. default: all
 # arch option is sometimes needed to be able to download the apks from apkmirror.
 # and does not affect anything else
