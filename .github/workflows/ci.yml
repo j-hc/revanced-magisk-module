@@ -33,7 +33,7 @@ jobs:
               echo "latest yt version: '$last_ver'"
               [ "$cur_yt" != "$last_ver" ] # test success=>build, fail=>dont build
             else
-              return 1 # not experimental, dont build
+              return 0 # not experimental, dont build
             fi
           }
 
