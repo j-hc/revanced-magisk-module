@@ -5,6 +5,7 @@ trap "rm -rf temp/tmp.*; exit 1" INT
 
 if [ "${1:-}" = "clean" ]; then
 	rm -rf temp build logs
+	exit 0
 fi
 
 source utils.sh

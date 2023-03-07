@@ -26,7 +26,9 @@ INS=true
 if BASEPATH=$(pm path __PKGNAME); then
 	BASEPATH=${BASEPATH##*:}
 	BASEPATH=${BASEPATH%/*}
-	if [ ! -d ${BASEPATH}/lib ]; then
+	if [ ${BASEPATH:1:6} = system ]; then
+		ui_print "* __PKGNAME is a system app"
+	elif [ ! -d ${BASEPATH}/lib ]; then
 		ui_print "* Invalid installation found. Uninstalling..."
 		pm uninstall -k --user 0 __PKGNAME
 	elif cmpr $BASEPATH/base.apk $MODPATH/__PKGNAME.apk; then
@@ -84,7 +86,7 @@ if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH/base.apk 2>&1); then
 fi
 am force-stop __PKGNAME
 ui_print "* Optimizing __PKGNAME"
-cmd package compile --reset __PKGNAME &
+nohup cmd package compile --reset __PKGNAME >/dev/null 2>&1 &
 
 ui_print "* Cleanup"
 rm -rf $MODPATH/bin $MODPATH/__PKGNAME.apk

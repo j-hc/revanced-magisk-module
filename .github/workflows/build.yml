@@ -34,7 +34,7 @@ jobs:
           echo "NEXT_VER_CODE=$((TAG + 1))" >> $GITHUB_OUTPUT
 
       - name: Build modules/APKs
-        run: ./build.sh
+        run: ./build.sh config.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
