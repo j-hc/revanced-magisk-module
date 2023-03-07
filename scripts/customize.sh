@@ -14,11 +14,11 @@ else
 fi
 set_perm_recursive $MODPATH/bin 0 0 0755 0777
 
-su -Mc grep __PKGNAME /proc/mounts | while read -r line; do
+nsenter -t1 -m grep __PKGNAME /proc/mounts | while read -r line; do
 	ui_print "* Un-mount"
 	mp=${line#* }
 	mp=${mp%% *}
-	su -Mc umount -l ${mp%%\\*}
+	nsenter -t1 -m umount -l ${mp%%\\*}
 done
 am force-stop __PKGNAME
 
@@ -79,10 +79,9 @@ mkdir $NVBASE/rvhc 2>/dev/null
 RVPATH=$NVBASE/rvhc/__PKGNAME_rv.apk
 mv -f $MODPATH/base.apk $RVPATH
 
-if ! op=$(su -Mc mount -o bind $RVPATH $BASEPATH/base.apk 2>&1); then
+if ! op=$(nsenter -t1 -m mount -o bind $RVPATH $BASEPATH/base.apk 2>&1); then
 	ui_print "ERROR: Mount failed!"
 	ui_print "$op"
-	abort "Flash in official Magisk app"
 fi
 am force-stop __PKGNAME
 ui_print "* Optimizing __PKGNAME"
