@@ -14,7 +14,7 @@ sleep 5
 
 err() {
 	[ ! -f $MODDIR/err ] && cp $MODDIR/module.prop $MODDIR/err
-	sed -i "s/^des.*/description=⚠️ Module is inactive: '${1}'. Reflash is needed/g" $MODDIR/module.prop
+	sed -i "s/^des.*/description=⚠️ Module is inactive: '${1}'/g" $MODDIR/module.prop
 }
 
 if [ $svcl = 0 ]; then
@@ -22,7 +22,8 @@ if [ $svcl = 0 ]; then
 	BASEPATH=${BASEPATH%/*}
 	if [ -d $BASEPATH/lib ]; then
 		VERSION=$(dumpsys package __PKGNAME | grep -m1 versionName)
-		if [ ${VERSION#*=} = __PKGVER ]; then
+		VERSION="${VERSION#*=}"
+		if [ "$VERSION" = __PKGVER ]; then
 			grep __PKGNAME /proc/mounts | while read -r line; do
 				mp=${line#* }
 				mp=${mp%% *}
@@ -36,7 +37,7 @@ if [ $svcl = 0 ]; then
 				err "mount failed"
 			fi
 		else
-			err "version mismatch (${VERSION#*=})"
+			err "version mismatch (installed:${VERSION}, module:__PKGVER)"
 		fi
 	else
 		err "invalid installation"

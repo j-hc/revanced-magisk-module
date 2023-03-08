@@ -45,4 +45,4 @@ arch = "arm64-v8a" # 'arm64-v8a', 'arm-v7a' or 'all'. default: all
 ```
 
 # Building ReVanced Extended
-Use [`config-rv-ex.toml`](./config-rv-ex.toml) as the config by replacing config.toml with it
+Use [`config-rv-ex.toml`](./config-rv-ex.toml) as the config. Or you can run build.sh as: `./build.sh config-rv-ex.toml`
