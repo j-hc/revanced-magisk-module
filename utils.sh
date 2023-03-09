@@ -247,9 +247,7 @@ dl_apkmonk() {
 	url=$(req "$url" - | grep -oP 'https.+?(?=\",)')
 	req "$url" "$output"
 }
-get_apkmonk_pkg_name() {
-	echo $(echo ${1} | grep -oP '.*apkmonk\.com\/app\/\K([,\w,\.]*)')
-}
+get_apkmonk_pkg_name() { grep -oP '.*apkmonk\.com\/app\/\K([,\w,\.]*)' <<<"$1"; }
 # --------------------------------------------------
 
 patch_apk() {
