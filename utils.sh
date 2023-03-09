@@ -237,6 +237,19 @@ get_uptodown_pkg_name() {
 }
 # --------------------------------------------------
 
+# -------------------- apkmonk ---------------------
+get_apkmonk_resp() { req "${1}" -; }
+get_apkmonk_vers() { grep -oP 'download_ver.+?>\K([0-9,\.]*)' <<<"$1"; }
+dl_apkmonk() {
+	local apkmonk_resp=$1 version=$2 output=$3
+	local url
+	url="https://www.apkmonk.com/down_file?pkg="$(echo "$apkmonk_resp" | grep "$version</a>" | grep -oP 'href=\"/download-app/\K.+?(?=/?\">)' | sed 's;/;\&key=;') || return 1
+	url=$(req "$url" - | grep -oP 'https.+?(?=\",)')
+	req "$url" "$output"
+}
+get_apkmonk_pkg_name() { grep -oP '.*apkmonk\.com\/app\/\K([,\w,\.]*)' <<<"$1"; }
+# --------------------------------------------------
+
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3
 	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
@@ -270,6 +283,9 @@ build_rv() {
 	elif [ "$dl_from" = uptodown ]; then
 		uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}")
 		pkg_name=$(get_uptodown_pkg_name "${args[uptodown_dlurl]}")
+	elif [ "$dl_from" = apkmonk ]; then
+		pkg_name=$(get_apkmonk_pkg_name "${args[apkmonk_dlurl]}")
+		apkmonk_resp=$(get_apkmonk_resp "${args[apkmonk_dlurl]}")
 	fi
 
 	local get_latest_ver=false
@@ -290,6 +306,9 @@ build_rv() {
 		elif [ "$dl_from" = uptodown ]; then
 			uptwodvers=$(get_uptodown_vers "$uptwod_resp")
 			version=$(get_largest_ver <<<"$uptwodvers") || version=$(head -1 <<<"$uptwodvers")
+		elif [ "$dl_from" = apkmonk ]; then
+			apkmonkvers=$(get_apkmonk_vers "$apkmonk_resp")
+			version=$(get_largest_ver <<<"$apkmonkvers") || version=$(head -1 <<<"$apkmonkvers")
 		fi
 	fi
 	if [ -z "$version" ]; then
@@ -318,6 +337,12 @@ build_rv() {
 			pr "Downloading '${app_name}' from Uptodown"
 			if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
 				epr "ERROR: Could not download ${app_name} from Uptodown"
+				return 0
+			fi
+		elif [ "$dl_from" = apkmonk ]; then
+			pr "Downloading '${app_name}' from Apkmonk"
+			if ! dl_apkmonk "$apkmonk_resp" "$version" "$stock_apk"; then
+				epr "ERROR: Could not download ${app_name} from Apkmonk"
 				return 0
 			fi
 		fi
