@@ -76,6 +76,10 @@ for table_name in $(toml_get_table_names); do
 		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/}
 		app_args[dl_from]=uptodown
 	} || app_args[uptodown_dlurl]=""
+	app_args[apkmonk_dlurl]=$(toml_get "$t" apkmonk-dlurl) && {
+		app_args[apkmonk_dlurl]=${app_args[apkmonk_dlurl]%/}
+		app_args[dl_from]=apkmonk
+	} || app_args[apkmonk_dlurl]=""
 	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) && {
 		app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/}
 		app_args[dl_from]=apkmirror
