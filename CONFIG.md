@@ -1,15 +1,19 @@
 # Config
 
-Adding a new app is as easy as this:
+Three APK download websites are supported and adding a new app is as easy as this:
 ```toml
 [Some-App]
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app"
 ```
-
 or:
 ```toml
 [Some-App]
 uptodown-dlurl = "https://app.en.uptodown.com/android"
+```
+or:
+```toml
+[Some-App]
+apkmonk-dlurl = "https://www.apkmonk.com/app/com.app.app/"
 ```
 
 ## If you'd like to get to know more about other options:

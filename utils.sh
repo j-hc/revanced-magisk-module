@@ -180,22 +180,16 @@ dl_apkmirror() {
 		node=$($HTMLQ "div.table-row:nth-child($n)" -r "span:nth-child(n+3)" <<<"$resp")
 		if [ -z "$node" ]; then break; fi
 		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
-		if [ "$(sed -n 3p <<<"$app_table")" = "$apkorbundle" ]; then
-			if [ "$apkorbundle" = APK ]; then
-				if [ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] && isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; then
-					dlurl=https://www.apkmirror.com$($HTMLQ --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
-					break
-				fi
-			elif [ "$apkorbundle" = BUNDLE ]; then
-				dlurl=https://www.apkmirror.com$($HTMLQ --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
-				break
-			else
-				abort "unreachable"
-			fi
+		if [ "$(sed -n 3p <<<"$app_table")" = "$apkorbundle" ] && { [ "$apkorbundle" = BUNDLE ] ||
+			{ [ "$apkorbundle" = APK ] && [ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] &&
+				isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; }; }; then
+			dlurl=https://www.apkmirror.com$($HTMLQ --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
+			break
 		fi
 	done
 	[ -z "$dlurl" ] && return 1
-	url="https://www.apkmirror.com$(req "$dlurl" - | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
+	url="https://www.apkmirror.com$(req "$dlurl" - | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p' | tail -1)"
+	if [ "$apkorbundle" = BUNDLE ] && [[ "$url" != *"&forcebaseapk=true" ]]; then url="${url}&forcebaseapk=true"; fi
 	url="https://www.apkmirror.com$(req "$url" - | sed -n 's;.*href="\(.*key=[^"]*\)">.*;\1;p')"
 	req "$url" "$output"
 }
@@ -237,6 +231,19 @@ get_uptodown_pkg_name() {
 }
 # --------------------------------------------------
 
+# -------------------- apkmonk ---------------------
+get_apkmonk_resp() { req "${1}" -; }
+get_apkmonk_vers() { grep -oP 'download_ver.+?>\K([0-9,\.]*)' <<<"$1"; }
+dl_apkmonk() {
+	local apkmonk_resp=$1 version=$2 output=$3
+	local url
+	url="https://www.apkmonk.com/down_file?pkg="$(echo "$apkmonk_resp" | grep "$version</a>" | grep -oP 'href=\"/download-app/\K.+?(?=/?\">)' | sed 's;/;\&key=;') || return 1
+	url=$(req "$url" - | grep -oP 'https.+?(?=\",)')
+	req "$url" "$output"
+}
+get_apkmonk_pkg_name() { grep -oP '.*apkmonk\.com\/app\/\K([,\w,\.]*)' <<<"$1"; }
+# --------------------------------------------------
+
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3
 	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
@@ -270,6 +277,9 @@ build_rv() {
 	elif [ "$dl_from" = uptodown ]; then
 		uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}")
 		pkg_name=$(get_uptodown_pkg_name "${args[uptodown_dlurl]}")
+	elif [ "$dl_from" = apkmonk ]; then
+		pkg_name=$(get_apkmonk_pkg_name "${args[apkmonk_dlurl]}")
+		apkmonk_resp=$(get_apkmonk_resp "${args[apkmonk_dlurl]}")
 	fi
 
 	local get_latest_ver=false
@@ -290,6 +300,9 @@ build_rv() {
 		elif [ "$dl_from" = uptodown ]; then
 			uptwodvers=$(get_uptodown_vers "$uptwod_resp")
 			version=$(get_largest_ver <<<"$uptwodvers") || version=$(head -1 <<<"$uptwodvers")
+		elif [ "$dl_from" = apkmonk ]; then
+			apkmonkvers=$(get_apkmonk_vers "$apkmonk_resp")
+			version=$(get_largest_ver <<<"$apkmonkvers") || version=$(head -1 <<<"$apkmonkvers")
 		fi
 	fi
 	if [ -z "$version" ]; then
@@ -320,6 +333,12 @@ build_rv() {
 				epr "ERROR: Could not download ${app_name} from Uptodown"
 				return 0
 			fi
+		elif [ "$dl_from" = apkmonk ]; then
+			pr "Downloading '${app_name}' from Apkmonk"
+			if ! dl_apkmonk "$apkmonk_resp" "$version" "$stock_apk"; then
+				epr "ERROR: Could not download ${app_name} from Apkmonk"
+				return 0
+			fi
 		fi
 	fi
 	if [ "${arch}" = "all" ]; then
@@ -339,7 +358,6 @@ build_rv() {
 		p_patcher_args=("${p_patcher_args[@]//-[ei] ${microg_patch}/}")
 	fi
 
-	local stock_bundle="${TEMP_DIR}/${pkg_name}-${version_f}-${arch}-bundle.zip"
 	local stock_bundle_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch}-bundle.apk"
 	local is_bundle=false
 	if [ "$mode_arg" = module ] || [ "$mode_arg" = both ]; then
@@ -347,12 +365,13 @@ build_rv() {
 			is_bundle=true
 		elif [ "$dl_from" = apkmirror ]; then
 			pr "Downloading '${app_name}' bundle from APKMirror"
-			if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_bundle" BUNDLE "" ""; then
-				pr "'${app_name}' bundle was downloaded successfully and will be used for the module"
-				is_bundle=true
-				unzip "$stock_bundle" "base.apk" -d $TEMP_DIR
-				mv ${TEMP_DIR}/base.apk "$stock_bundle_apk"
-				rm -f "$stock_bundle"
+			if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_bundle_apk" BUNDLE "" ""; then
+				if (($(stat -c%s "$stock_apk") - $(stat -c%s "$stock_bundle_apk") > 10000000)); then
+					pr "'${app_name}' bundle was downloaded successfully and will be used for the module"
+					is_bundle=true
+				else
+					pr "'${app_name}' bundle was downloaded but will not be used"
+				fi
 			else
 				pr "'${app_name}' bundle was not found"
 			fi
