@@ -80,8 +80,12 @@ for table_name in $(toml_get_table_names); do
 		app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/}
 		app_args[dl_from]=apkmirror
 	} || app_args[apkmirror_dlurl]=""
+	app_args[apkmonk_dlurl]=$(toml_get "$t" apkmonk-dlurl) && {
+		app_args[apkmonk_dlurl]=${app_args[apkmonk_dlurl]%/}
+		app_args[dl_from]=apkmonk
+	} || app_args[apkmonk_dlurl]=""
 	if [ -z "${app_args[dl_from]:-}" ]; then
-		abort "ERROR: neither 'apkmirror_dlurl' nor 'uptodown_dlurl' were not set for '$table_name'."
+		abort "ERROR: neither 'apkmirror_dlurl' nor 'uptodown_dlurl' nor 'apkmonk_dlurl' were not set for '$table_name'."
 	fi
 	app_args[arch]=$(toml_get "$t" arch) && {
 		if ! isoneof "${app_args[arch]}" all arm64-v8a arm-v7a; then
