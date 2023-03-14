@@ -41,7 +41,7 @@ exclusive-patches = false # exclude all patches by default. default: false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app" # download url. if not set, uptodown dl url is used.
 uptodown-dlurl = "https://spotify.en.uptodown.com/android" # uptodown url. if not set, apkmirror dl url is used. apkmirror is prioritized
 module-prop-name = "some-app-magisk" # magisk module prop name. not required.
-merge-integrations = false # merge integrations. used if cant be auto detected. default: false
+merge-integrations = false # set false to never merge even when needed default: true
 dpi = "360-480dpi" # used to select apk variant from apkmirror. default: nodpi
 arch = "arm64-v8a" # 'arm64-v8a', 'arm-v7a' or 'all'. default: all
 # arch option is sometimes needed to be able to download the apks from apkmirror.
