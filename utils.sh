@@ -148,7 +148,7 @@ semver_validate() {
 }
 get_patch_last_supported_ver() {
 	jq -r ".[] | select(.compatiblePackages[].name==\"${1}\" and .excluded==false) | .compatiblePackages[].versions" "$RV_PATCHES_JSON" |
-		tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || return 1
+		tr -d ' ,\t[]"' | grep -v '^$' | sort | uniq -c | sort -nr | head -1 | xargs | cut -d' ' -f2 || return 1
 }
 
 dl_if_dne() {
@@ -346,9 +346,7 @@ build_rv() {
 	else
 		grep -q "${app_name} (${arch}):" build.md || log "${app_name} (${arch}): ${version}"
 	fi
-
-	if jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .dependencies[]" "$RV_PATCHES_JSON" | grep -qF integrations ||
-		[ "${args[merge_integrations]}" = true ]; then
+	if [ "${args[merge_integrations]}" = true ]; then
 		p_patcher_args+=("-m ${RV_INTEGRATIONS_APK}")
 	fi
 
