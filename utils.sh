@@ -148,7 +148,7 @@ semver_validate() {
 }
 get_patch_last_supported_ver() {
 	jq -r ".[] | select(.compatiblePackages[].name==\"${1}\" and .excluded==false) | .compatiblePackages[].versions" "$RV_PATCHES_JSON" |
-		tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || return 1
+		tr -d ' ,\t[]"' | grep -v '^$' | sort | uniq -c | sort -nr | head -1 | xargs | cut -d' ' -f2 || return 1
 }
 
 dl_if_dne() {
