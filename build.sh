@@ -64,7 +64,6 @@ for table_name in $(toml_get_table_names); do
 	app_args[exclusive_patches]=$(toml_get "$t" exclusive-patches) && vtf "${app_args[exclusive_patches]}" "exclusive-patches" || app_args[exclusive_patches]=false
 	app_args[version]=$(toml_get "$t" version) || app_args[version]="auto"
 	app_args[app_name]=$(toml_get "$t" app-name) || app_args[app_name]=$table_name
-	app_args[allow_alpha_version]=$(toml_get "$t" allow-alpha-version) && vtf "${app_args[allow_alpha_version]}" "allow-alpha-version" || app_args[allow_alpha_version]=false
 	app_args[build_mode]=$(toml_get "$t" build-mode) && {
 		if ! isoneof "${app_args[build_mode]}" both apk module; then
 			abort "ERROR: build-mode '${app_args[build_mode]}' is not a valid option for '${table_name}': only 'both', 'apk' or 'module' is allowed"

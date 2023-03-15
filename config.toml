@@ -10,8 +10,8 @@ build-mindetach-module = true
 [YouTube]
 enabled = true
 build-mode = "both"                                                   # 'both', 'apk' or 'module'
-excluded-patches = "debugging"                                        # whitespace seperated list of patches to exclude (multiline strings are not supported)
-included-patches = ""                                                 # whitespace seperated list of patches to include
+excluded-patches = "debugging"                                        # space-seperated patches to exclude (multiline strings are not supported)
+included-patches = ""                                                 # space-seperated patches to include (non-excluded patches are included by default)
 version = "auto"                                                      # 'auto', 'latest' or a custom one like '17.40.41'
 exclusive-patches = false                                             # excludes all patches by default
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
@@ -39,7 +39,7 @@ arch = "arm-v7a"
 
 [Twitter]
 build-mode = "apk"
-excluded-patches = ""
+excluded-patches = "hide-views-stats"
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
 

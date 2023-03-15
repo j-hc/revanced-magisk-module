@@ -22,11 +22,11 @@ jobs:
 
           is_youtube_latest() {
             t=$(toml_get_table YouTube)
-            v=$(toml_get "$t" "version") || v=
-            if [ "$v" = latest ]; then
+            v=$(toml_get "$t" "version") || v=""
+            if isoneof "$v" latest beta; then
               cur_yt=$(sed -n 's/.*YouTube: \(.*\)/\1/p' build.md | xargs)
               [ -z "$cur_yt" ] && return 1 # empty, fail=>dont build
-              aav=$(toml_get "$t" "allow-alpha-version") || aav=false
+              if [ "$v" = beta ]; aav="true"; else aav="false"; fi
               last_ver=$(get_apkmirror_vers youtube "$aav" | get_largest_ver)
               [ -z "$last_ver" ] && return 1 # cant fetch, dont build
               echo "current yt version: '$cur_yt'"
