@@ -17,11 +17,11 @@ UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
 
 # -------------------- json/toml --------------------
 json_get() { grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/'; }
-toml_prep() { __TOML__=$(echo "$1" | tr -d '\t\r' | tr "'" '"' | grep -o '^[^#]*' | grep -v '^$' | sed -r 's/(\".*\")|\s*/\1/g; 1i []'); }
+toml_prep() { __TOML__=$(tr -d '\t\r' <<<"$1" | tr "'" '"' | grep -o '^[^#]*' | grep -v '^$' | sed -r 's/(\".*\")|\s*/\1/g; 1i []'); }
 toml_get_table_names() {
 	local tn
-	tn=$(echo "$__TOML__" | grep -x '\[.*\]' | tr -d '[]') || return 1
-	if [ "$(echo "$tn" | sort | uniq -u | wc -l)" != "$(echo "$tn" | wc -l)" ]; then
+	tn=$(grep -x '\[.*\]' <<<"$__TOML__" | tr -d '[]') || return 1
+	if [ "$(sort <<<"$tn" | uniq -u | wc -l)" != "$(wc -l <<<"$tn")" ]; then
 		abort "ERROR: Duplicate tables in TOML"
 	fi
 	echo "$tn"
@@ -29,16 +29,19 @@ toml_get_table_names() {
 toml_get_table() { sed -n "/\[${1}]/,/^\[.*]$/p" <<<"$__TOML__"; }
 toml_get() {
 	local table=$1 key=$2 val
-	val=$(grep -m 1 "^${key}=" <<<"$table") && echo "${val#*=}" | sed -e "s/^\"//; s/\"$//"
+	val=$(grep -m 1 "^${key}=" <<<"$table") && sed -e "s/^\"//; s/\"$//" <<<"${val#*=}"
 }
 # ---------------------------------------------------
 
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
 epr() {
-	echo -e "\033[0;31m[-] ${1}\033[0m"
+	echo >&2 -e "\033[0;31m[-] ${1}\033[0m"
 	if [ "${GITHUB_REPOSITORY:-}" ]; then echo -e "::error::utils.sh [-] ${1}\n"; fi
 }
-abort() { echo >&2 -e "\033[0;31mABORT: $1\033[0m" && exit 1; }
+abort() {
+	epr "ABORT: ${1:-}"
+	exit 1
+}
 
 get_prebuilts() {
 	pr "Getting prebuilts"
@@ -63,7 +66,7 @@ get_prebuilts() {
 	log "Integrations: ${rv_integrations_url##*/}"
 
 	rv_patches=$(gh_req "$rv_patches_rel" -)
-	rv_patches_changelog=$(echo "$rv_patches" | json_get 'body' | sed 's/\(\\n\)\+/\\n/g')
+	rv_patches_changelog=$(json_get 'body' <<<"$rv_patches" | sed 's/\(\\n\)\+/\\n/g')
 	rv_patches_dl=$(json_get 'browser_download_url' <<<"$rv_patches")
 	RV_PATCHES_JSON="${PREBUILTS_DIR}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
 	rv_patches_url=$(grep 'jar' <<<"$rv_patches_dl")
@@ -147,7 +150,19 @@ semver_validate() {
 	[ ${#ac} = 0 ]
 }
 get_patch_last_supported_ver() {
-	jq -r ".[] | select(.compatiblePackages[].name==\"${1}\" and .excluded==false) | .compatiblePackages[].versions" "$RV_PATCHES_JSON" |
+	local inc_sel exc_sel exclus_sel
+	inc_sel=$(list_args "$2" | sed 's/.*/\.name == "&"/' | sed 'N;s/\n/ or /' || :)
+	exc_sel=$(list_args "$3" | sed 's/.*/\.name != "&"/' | sed 'N;s/\n/ and /' || :)
+	if [ "$4" = false ]; then exclus_sel=".excluded==false"; else
+		exclus_sel="true"
+		inc_sel=${inc_sel:-false}
+	fi
+	jq -r ".[]
+			| select(.compatiblePackages[].name==\"${1}\")
+			| select(${exclus_sel})
+			| select(${inc_sel:-true})
+			| select(${exc_sel:-true})
+			| .compatiblePackages[].versions" "$RV_PATCHES_JSON" |
 		tr -d ' ,\t[]"' | grep -v '^$' | sort | uniq -c | sort -nr | head -1 | xargs | cut -d' ' -f2 || return 1
 }
 
@@ -220,15 +235,11 @@ get_uptodown_vers() { sed -n 's;.*version">\(.*\)</span>$;\1;p' <<<"$1"; }
 dl_uptodown() {
 	local uptwod_resp=$1 version=$2 output=$3
 	local url
-	url=$(echo "$uptwod_resp" | grep "${version}<\/span>" -B 2 | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
+	url=$(grep -F "${version}</span>" -B 2 <<<"$uptwod_resp" | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
 	url=$(req "$url" - | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
 	req "$url" "$output"
 }
-get_uptodown_pkg_name() {
-	local p
-	p=$(req "${1}/download" - | grep -A 1 "Package Name" | tail -1)
-	echo "${p:4:-5}"
-}
+get_uptodown_pkg_name() { req "${1}/download" - | $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)"; }
 # --------------------------------------------------
 
 # -------------------- apkmonk ---------------------
@@ -237,7 +248,7 @@ get_apkmonk_vers() { grep -oP 'download_ver.+?>\K([0-9,\.]*)' <<<"$1"; }
 dl_apkmonk() {
 	local apkmonk_resp=$1 version=$2 output=$3
 	local url
-	url="https://www.apkmonk.com/down_file?pkg="$(echo "$apkmonk_resp" | grep "$version</a>" | grep -oP 'href=\"/download-app/\K.+?(?=/?\">)' | sed 's;/;\&key=;') || return 1
+	url="https://www.apkmonk.com/down_file?pkg="$(grep -F "$version</a>" <<<"$apkmonk_resp" | grep -oP 'href=\"/download-app/\K.+?(?=/?\">)' | sed 's;/;\&key=;') || return 1
 	url=$(req "$url" - | grep -oP 'https.+?(?=\",)')
 	req "$url" "$output"
 }
@@ -284,8 +295,11 @@ build_rv() {
 
 	local get_latest_ver=false
 	if [ "$version_mode" = auto ]; then
-		version=$(get_patch_last_supported_ver "$pkg_name") || get_latest_ver=true
-	elif [ "$version_mode" = latest ]; then
+		version=$(
+			get_patch_last_supported_ver "$pkg_name" \
+				"${args[included_patches]}" "${args[excluded_patches]}" "${args[exclusive_patches]}"
+		) || get_latest_ver=true
+	elif isoneof "$version_mode" latest beta; then
 		get_latest_ver=true
 		p_patcher_args+=("--experimental")
 	else
@@ -293,9 +307,10 @@ build_rv() {
 		p_patcher_args+=("--experimental")
 	fi
 	if [ $get_latest_ver = true ]; then
-		local apkmvers uptwodvers
+		local apkmvers uptwodvers aav
 		if [ "$dl_from" = apkmirror ]; then
-			apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "${args[allow_alpha_version]}")
+			if [ "$version_mode" = beta ]; then aav="true"; else aav="false"; fi
+			apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "$aav")
 			version=$(get_largest_ver <<<"$apkmvers") || version=$(head -1 <<<"$apkmvers")
 		elif [ "$dl_from" = uptodown ]; then
 			uptwodvers=$(get_uptodown_vers "$uptwod_resp")
@@ -461,9 +476,8 @@ build_rv() {
 	done
 }
 
-join_args() {
-	echo "$1" | tr -d '\t\r' | tr ' ' '\n' | grep -v '^$' | sed "s/^/${2} /" | paste -sd " " - || :
-}
+list_args() { tr -d '\t\r' <<<"$1" | tr ' ' '\n' | grep -v '^$' || :; }
+join_args() { list_args "$1" | sed "s/^/${2} /" | paste -sd " " - || :; }
 
 uninstall_sh() {
 	local s="${UNINSTALL_SH//__PKGNAME/$1}"

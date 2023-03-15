@@ -32,14 +32,16 @@ integrations-version = "v0.95.0" # locks the integrations version. default: late
 [Some-App]
 app-name = "SomeApp" # if set, release name becomes SomeApp instead of Some-App. default is same as table name, which is 'Some-App' here.
 enabled = true # whether to build the app. default: true
+version = "auto" # 'auto', 'latest', 'beta' or a custom one e.g. '17.40.41'. default: auto
+# 'auto' option gets the latest possible version supported by all the included patches
+# 'latest' gets the latest stable without checking patches support. 'beta' gets the latest beta/alpha
 build-mode = "both" # 'both', 'apk' or 'module'. default: apk
-allow-alpha-version = false # allow downloading alpha versions from apkmirror. default: false
-excluded-patches = "some-patch" # whitespace seperated list of patches to exclude. default: "" (empty)
+excluded-patches = "some-patch some-other-path" # whitespace seperated list of patches to exclude. default: "" (empty)
 included-patches = "patch-name" # whitespace seperated list of patches to include, all default patches are included by default. default: "" (empty)
-version = "auto" # 'auto', 'latest' or a custom one e.g. '17.40.41'. 'auto' option gets the latest version that is supported by the patches. default: auto
 exclusive-patches = false # exclude all patches by default. default: false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app" # download url. if not set, uptodown dl url is used.
 uptodown-dlurl = "https://spotify.en.uptodown.com/android" # uptodown url. if not set, apkmirror dl url is used. apkmirror is prioritized
+apkmonk-dlurl = "https://www.apkmonk.com/app/com.app.app/" # apkmonk url.
 module-prop-name = "some-app-magisk" # magisk module prop name. not required.
 merge-integrations = false # set false to never merge even when needed default: true
 dpi = "360-480dpi" # used to select apk variant from apkmirror. default: nodpi
