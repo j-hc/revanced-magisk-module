@@ -35,10 +35,13 @@ toml_get() {
 
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
 epr() {
-	echo -e "\033[0;31m[-] ${1}\033[0m"
+	echo >&2 -e "\033[0;31m[-] ${1}\033[0m"
 	if [ "${GITHUB_REPOSITORY:-}" ]; then echo -e "::error::utils.sh [-] ${1}\n"; fi
 }
-abort() { echo >&2 -e "\033[0;31mABORT: $1\033[0m" && exit 1; }
+abort() {
+	epr "ABORT: ${1:-}"
+	exit 1
+}
 
 get_prebuilts() {
 	pr "Getting prebuilts"
@@ -147,11 +150,16 @@ semver_validate() {
 	[ ${#ac} = 0 ]
 }
 get_patch_last_supported_ver() {
-	local inc_sel exc_sel
-	inc_sel=$(list_args "$2" | sed 's/.*/\.name == "&"/; N;s/\n/ and /' || :)
-	exc_sel=$(list_args "$3" | sed 's/.*/\.name != "&"/; N;s/\n/ and /' || :)
+	local inc_sel exc_sel exclus_sel
+	inc_sel=$(list_args "$2" | sed 's/.*/\.name == "&"/' | sed 'N;s/\n/ or /' || :)
+	exc_sel=$(list_args "$3" | sed 's/.*/\.name != "&"/' | sed 'N;s/\n/ and /' || :)
+	if [ "$4" = false ]; then exclus_sel=".excluded==false"; else
+		exclus_sel="true"
+		inc_sel=${inc_sel:-false}
+	fi
 	jq -r ".[]
-			| select(.compatiblePackages[].name==\"${1}\" and .excluded==false)
+			| select(.compatiblePackages[].name==\"${1}\")
+			| select(${exclus_sel})
 			| select(${inc_sel:-true})
 			| select(${exc_sel:-true})
 			| .compatiblePackages[].versions" "$RV_PATCHES_JSON" |
@@ -291,7 +299,10 @@ build_rv() {
 
 	local get_latest_ver=false
 	if [ "$version_mode" = auto ]; then
-		version=$(get_patch_last_supported_ver "$pkg_name" "${args[included_patches]}" "${args[excluded_patches]}") || get_latest_ver=true
+		version=$(
+			get_patch_last_supported_ver "$pkg_name" \
+				"${args[included_patches]}" "${args[excluded_patches]}" "${args[exclusive_patches]}"
+		) || get_latest_ver=true
 	elif isoneof "$version_mode" latest beta; then
 		get_latest_ver=true
 		p_patcher_args+=("--experimental")
