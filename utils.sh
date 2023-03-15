@@ -235,15 +235,11 @@ get_uptodown_vers() { sed -n 's;.*version">\(.*\)</span>$;\1;p' <<<"$1"; }
 dl_uptodown() {
 	local uptwod_resp=$1 version=$2 output=$3
 	local url
-	url=$(grep "${version}<\/span>" -B 2 <<<"$uptwod_resp" | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
+	url=$(grep -F "${version}</span>" -B 2 <<<"$uptwod_resp" | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
 	url=$(req "$url" - | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
 	req "$url" "$output"
 }
-get_uptodown_pkg_name() {
-	local p
-	p=$(req "${1}/download" - | grep -A 1 "Package Name" | tail -1)
-	echo "${p:4:-5}"
-}
+get_uptodown_pkg_name() { req "${1}/download" - | $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)"; }
 # --------------------------------------------------
 
 # -------------------- apkmonk ---------------------
@@ -252,7 +248,7 @@ get_apkmonk_vers() { grep -oP 'download_ver.+?>\K([0-9,\.]*)' <<<"$1"; }
 dl_apkmonk() {
 	local apkmonk_resp=$1 version=$2 output=$3
 	local url
-	url="https://www.apkmonk.com/down_file?pkg="$(grep "$version</a>" <<<"$apkmonk_resp" | grep -oP 'href=\"/download-app/\K.+?(?=/?\">)' | sed 's;/;\&key=;') || return 1
+	url="https://www.apkmonk.com/down_file?pkg="$(grep -F "$version</a>" <<<"$apkmonk_resp" | grep -oP 'href=\"/download-app/\K.+?(?=/?\">)' | sed 's;/;\&key=;') || return 1
 	url=$(req "$url" - | grep -oP 'https.+?(?=\",)')
 	req "$url" "$output"
 }
