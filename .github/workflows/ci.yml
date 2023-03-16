@@ -16,6 +16,8 @@ jobs:
       - name: Should build?
         id: should_build
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           source utils.sh
           toml_prep "$(cat config.toml)"
