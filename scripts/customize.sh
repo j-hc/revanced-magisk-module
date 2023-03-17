@@ -38,6 +38,7 @@ if BASEPATH=$(pm path __PKGNAME); then
 fi
 if [ $INS = true ]; then
 	ui_print "* Updating __PKGNAME (v__PKGVER)"
+	settings put global verifier_verify_adb_installs 0
 	SZ=$(stat -c "%s" $MODPATH/__PKGNAME.apk)
 	if ! SES=$(pm install-create --user 0 -i com.android.vending -r -d -S "$SZ" 2>&1); then
 		ui_print "ERROR: session creation failed"
@@ -54,6 +55,7 @@ if [ $INS = true ]; then
 		ui_print "ERROR: install-commit failed"
 		abort "$op"
 	fi
+	settings put global verifier_verify_adb_installs 1
 	if BASEPATH=$(pm path __PKGNAME); then
 		BASEPATH=${BASEPATH##*:}
 		BASEPATH=${BASEPATH%/*}
