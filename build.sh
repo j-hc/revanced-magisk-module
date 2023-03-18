@@ -28,8 +28,12 @@ if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY:-}" ]; then
 	pr "You are building locally. Magisk updates will not be enabled."
 	ENABLE_MAGISK_UPDATE=false
 fi
-PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs) || PARALLEL_JOBS=1
 BUILD_MINDETACH_MODULE=$(toml_get "$main_config_t" build-mindetach-module) || abort "ERROR: build-mindetach-module is missing"
+if [ "$BUILD_MINDETACH_MODULE" = true ] && [ ! -f "mindetach-magisk/mindetach/detach.txt" ]; then
+	pr "mindetach module was not found."
+	BUILD_MINDETACH_MODULE=false
+fi
+PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs) || PARALLEL_JOBS=1
 LOGGING_F=$(toml_get "$main_config_t" logging-to-file) && vtf "$LOGGING_F" "logging-to-file" || LOGGING_F=false
 CONF_PATCHES_VER=$(toml_get "$main_config_t" patches-version) || CONF_PATCHES_VER=
 CONF_INTEGRATIONS_VER=$(toml_get "$main_config_t" integrations-version) || CONF_INTEGRATIONS_VER=

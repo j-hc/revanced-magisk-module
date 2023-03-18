@@ -150,17 +150,14 @@ semver_validate() {
 	[ ${#ac} = 0 ]
 }
 get_patch_last_supported_ver() {
-	local inc_sel exc_sel exclus_sel
-	inc_sel=$(list_args "$2" | sed 's/.*/\.name == "&"/' | sed 'N;s/\n/ or /' || :)
-	exc_sel=$(list_args "$3" | sed 's/.*/\.name != "&"/' | sed 'N;s/\n/ and /' || :)
-	if [ "$4" = false ]; then exclus_sel=".excluded==false"; else
-		exclus_sel="true"
-		inc_sel=${inc_sel:-false}
-	fi
+	local inc_sel exc_sel
+	inc_sel=$(list_args "$2" | sed 's/.*/\.name == "&"/' | paste -sd '~' | sed 's/~/ or /g' || :)
+	exc_sel=$(list_args "$3" | sed 's/.*/\.name != "&"/' | paste -sd '~' | sed 's/~/ and /g' || :)
+	inc_sel=${inc_sel:-false}
+	if [ "$4" = false ]; then inc_sel="${inc_sel} or .excluded==false"; fi
 	jq -r ".[]
 			| select(.compatiblePackages[].name==\"${1}\")
-			| select(${exclus_sel})
-			| select(${inc_sel:-true})
+			| select(${inc_sel})
 			| select(${exc_sel:-true})
 			| .compatiblePackages[].versions" "$RV_PATCHES_JSON" |
 		tr -d ' ,\t[]"' | grep -v '^$' | sort | uniq -c | sort -nr | head -1 | xargs | cut -d' ' -f2 || return 1
