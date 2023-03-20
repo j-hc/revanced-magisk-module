@@ -9,8 +9,8 @@ while
 	BASEPATH=$(pm path __PKGNAME)
 	svcl=$?
 	[ $svcl = 20 ]
-do sleep 1; done
-sleep 5
+do sleep 2; done
+sleep 4
 
 err() {
 	[ ! -f $MODDIR/err ] && cp $MODDIR/module.prop $MODDIR/err
