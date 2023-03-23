@@ -33,7 +33,9 @@ if [ "$BUILD_MINDETACH_MODULE" = true ] && [ ! -f "mindetach-magisk/mindetach/de
 	pr "mindetach module was not found."
 	BUILD_MINDETACH_MODULE=false
 fi
-PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs) || PARALLEL_JOBS=1
+if ! PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs); then
+	if [ "$OS" = Android ]; then PARALLEL_JOBS=1; else PARALLEL_JOBS=$(nproc); fi
+fi
 LOGGING_F=$(toml_get "$main_config_t" logging-to-file) && vtf "$LOGGING_F" "logging-to-file" || LOGGING_F=false
 CONF_PATCHES_VER=$(toml_get "$main_config_t" patches-version) || CONF_PATCHES_VER=
 CONF_INTEGRATIONS_VER=$(toml_get "$main_config_t" integrations-version) || CONF_INTEGRATIONS_VER=
@@ -115,6 +117,7 @@ for table_name in $(toml_get_table_names); do
 done
 wait
 rm -rf temp/tmp.*
+if [ -z "$(ls -A1 ${BUILD_DIR})" ]; then abort "All builds failed."; fi
 
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	pr "Building mindetach module"

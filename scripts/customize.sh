@@ -18,7 +18,7 @@ nsenter -t1 -m -- grep __PKGNAME /proc/mounts | while read -r line; do
 	ui_print "* Un-mount"
 	mp=${line#* }
 	mp=${mp%% *}
-	nsenter -t1 -m -- umount -l ${mp%%\\*}
+	nsenter -t1 -m -- umount -l "${mp%%\\*}"
 done
 am force-stop __PKGNAME
 
@@ -91,6 +91,10 @@ nohup cmd package compile --reset __PKGNAME >/dev/null 2>&1 &
 
 ui_print "* Cleanup"
 rm -rf $MODPATH/bin $MODPATH/__PKGNAME.apk
+
+for s in "uninstall.sh" "service.sh"; do
+	sed -i "2 i\NVBASE=${NVBASE}" $MODPATH/$s
+done
 
 ui_print "* Done"
 ui_print "  by j-hc (github.com/j-hc)"
