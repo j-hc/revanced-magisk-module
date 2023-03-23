@@ -21,6 +21,7 @@ Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/relea
      * receive updates from Magisk app
      * do not break safetynet or trigger root detections
      * handle installation of the correct version of the stock app and all that
+     * support Magisk and KernelSU
 
 #### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday using GitHub Actions if there is a change in ReVanced patches. You may want to disable it.**
 
