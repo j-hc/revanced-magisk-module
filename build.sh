@@ -42,7 +42,7 @@ CONF_INTEGRATIONS_VER=$(toml_get "$main_config_t" integrations-version) || CONF_
 
 PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || PATCHES_SRC="revanced/revanced-patches"
 INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || INTEGRATIONS_SRC="revanced/revanced-integrations"
-RV_BRAND=$(toml_get "$main_config_t" rv-brand) || RV_BRAND="ReVanced"
+RV_BRAND=$(toml_get "$main_config_t" rv-brand) || RV_BRAND="ReVanced and Extended"
 RV_BRAND_F=${RV_BRAND,,}
 RV_BRAND_F=${RV_BRAND_F// /-}
 PREBUILTS_DIR="${TEMP_DIR}/tools-${RV_BRAND_F}"
