@@ -12,6 +12,8 @@ The applications cannot be installed on unrooted devices (without having uninsta
 #### For some reason, the releases notes are from inotia00 only, but the available Releases (here) contain ReVanced and Extended, i'll try to fix that, when i understand how it works.
 I also try to make a release available shortly after ReVanced or Extended release(s) their patches (and to avoid the same releases several times in a day) I use this [repository](https://github.com/revanced-apks/build-apps) for helping but it doesn't seem to work here.
 
+I've been trying for several days, but I can't do it (it's a problem not knowing how to code), so now I'll try to split the ReVanced releases, and the Extended releases in a few days (the time to understand how to do it)
+
 # ReVanced Magisk Module
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
 [![Build Modules](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml/badge.svg)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml)
