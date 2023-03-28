@@ -5,9 +5,7 @@ You can see the patches applied for [Revanced](https://github.com/kevinr99089/re
 
 - Available Apps: YouTube (RV), Twitch (RV), TikTok (RV), YouTube (Ex), YT Music (Ex).
 
-Please note that the signature of the applications here are different from if they were patched by ReVanced Manager.
-The applications cannot be installed on unrooted devices (without having uninstalled the application patched by ReVanced Manager before)
-(The signatures of the updates are not a problem, so you can install any version here, and update it on this same fork)
+Please note that the signature is different from ReVanced Manager. Applications patched here cannot be updated on an app patched by ReVanced Manager (without uninstalling the application first, remember to export your settings before uninstalling it) (but you can update applications present on kevinr99089/revanced.extended, the signatures do not change).
 
 #### For some reason, the releases notes are from inotia00 only, but the available Releases (here) contain ReVanced and Extended, i'll try to fix that, when i understand how it works.
 I also try to make a release available shortly after ReVanced or Extended release(s) their patches (and to avoid the same releases several times in a day) I use this [repository](https://github.com/revanced-apks/build-apps) for helping but it doesn't seem to work here.
