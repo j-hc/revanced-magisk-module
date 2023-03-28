@@ -13,8 +13,8 @@ After trying to make a version available shortly after the release of ReVanced o
 
 # ReVanced Magisk Module
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
-[![Build Modules](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml/badge.svg)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml)
-[![CI](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml)
+[![Build Modules](https://github.com/kevinr99089/revanced.extended/actions/workflows/build.yml/badge.svg)](https://github.com/kevinr99089/revanced.extended/actions/workflows/build.yml)
+[![CI](https://github.com/kevinr99089/revanced.extended/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/kevinr99089/revanced.extended/actions/workflows/ci.yml)
 
 Extensive ReVanced builder  
 
