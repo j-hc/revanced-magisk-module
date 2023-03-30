@@ -15,5 +15,5 @@ version = "auto"                                                      # 'auto', 
 exclusive-patches = false                                             # excludes all patches by default
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
-arch = ""
+
 
