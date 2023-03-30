@@ -11,7 +11,7 @@ The releases notes are from inotia00 only, this comes from the fact that I have 
 
 Despite all my attempts to try to separate ReVanced and Extended, I didn't succeed (because I would have to redo most of the code (which is out of my skill set) however, I did manage to make the builds go faster by separating the workflows. This is not really what I wanted to do, but it's interesting to know.
 
-After much thought, I decided to stop patching applications with ReVanced (since I don't use it anymore). You can find the patched apps with ReVanced here (since revanced-apks is also a fork of j-hc, the signature is identical, so you can update even if you have installed one of the apps on my fork). This will allow me to concentrate only on Extended, and to automate it.
+After much thought, I decided to stop patching applications with ReVanced (since I don't use it anymore). You can find the patched apps with ReVanced [here](https://github.com/revanced-apks/build-apps/releases/latest) (since revanced-apks is also a fork of j-hc, the signature is identical, so you can update even if you have installed one of the apps on my fork). This will allow me to concentrate only on Extended, and to automate it.
 
 # ReVanced Magisk Module
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
