@@ -50,7 +50,7 @@ jobs:
           cp -f build.md build.tmp
           yt_op=$(find build -maxdepth 1 -name "youtube-*-magisk-*.zip" -printf '%P\n')
           if [ -z "$yt_op" ]; then
-            echo "RELEASE_NAME=Extended" >> $GITHUB_OUTPUT
+            echo "RELEASE_NAME=ReVanced and Extended" >> $GITHUB_OUTPUT
           else
             echo "RELEASE_NAME=$yt_op" >> $GITHUB_OUTPUT
           fi
