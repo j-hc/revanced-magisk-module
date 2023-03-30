@@ -1,4 +1,4 @@
-name: Build Modules
+name: Build Modules ReVanced
 on: [workflow_call, workflow_dispatch]
 
 jobs:
