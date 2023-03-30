@@ -38,14 +38,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
-          NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
-          
-      - name: Build modules/Extended
-        run: ./build.sh config-rv-ex.toml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: $GITHUB_REPOSITORY
-          NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
 
       - name: Get output
         id: get_output
@@ -58,7 +50,7 @@ jobs:
 
           yt_op=$(find build -maxdepth 1 -name "youtube-*-magisk-*.zip" -printf '%P\n')
           if [ -z "$yt_op" ]; then
-            echo "RELEASE_NAME=ReVanced and Extended" >> $GITHUB_OUTPUT
+            echo "RELEASE_NAME=ReVanced" >> $GITHUB_OUTPUT
           else
             echo "RELEASE_NAME=$yt_op" >> $GITHUB_OUTPUT
           fi
