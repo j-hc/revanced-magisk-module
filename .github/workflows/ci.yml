@@ -1,4 +1,4 @@
-name: CI
+name: CI RV
 on:
   workflow_dispatch:
   schedule:
