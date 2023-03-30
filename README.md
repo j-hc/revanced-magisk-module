@@ -7,9 +7,9 @@ You can see the patches applied for [Revanced](https://github.com/kevinr99089/re
 
 #### Please note that the signature is different from ReVanced Manager. Applications patched here cannot be updated on an app patched by ReVanced Manager (without uninstalling the application first, remember to export your settings before uninstalling it) (but you can update applications present on kevinr99089/revanced.extended, the signatures do not change).
 
-For some reason, the releases notes are from inotia00 only, but the available Releases (here) contain ReVanced and Extended, i'll try to fix that, when i understand how it works.
+The releases notes are from inotia00 only, this comes from the fact that I have less applications to patch on Extended compared to ReVanced.
 
-After trying to make a version available shortly after the release of ReVanced or Extended patches (and to avoid the same releases several times a day) I can't do it (the disadvantages of not knowing how to code), so now I'm going to try to split the ReVanced versions, and the Extended versions (it should be in a few days, the time to understand how to do it).
+Despite all my attempts to try to separate ReVanced and Extended, I didn't succeed (because I would have to redo most of the code (which is out of my skill set) however, I did manage to make the builds go faster by separating the workflows. This is not really what I wanted to do, but it's interesting to know.
 
 # ReVanced Magisk Module
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
