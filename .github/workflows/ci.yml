@@ -2,7 +2,7 @@ name: CI
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 16 * * *"
+    - cron: "0 14 * * *"
 
 jobs:
   check:
@@ -20,7 +20,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           source utils.sh
-          toml_prep "$(cat config.toml)"
+          toml_prep "$(cat config-rv-ex.toml)"
 
           is_youtube_latest() {
             t=$(toml_get_table YouTube)
