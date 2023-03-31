@@ -1,7 +1,7 @@
 #### ⚠️ Do not download modules from 3rd party sources like random websites you found on Google. Only use this repository. I am not responsible for anything they may contain.
 #### ⚠️ Only non-root releases (Magisk's are disabled)
 
-You can see the patches applied for [Revanced](https://github.com/kevinr99089/revanced.extended/blob/main/config.toml) and for [ReVanced Extended](https://github.com/kevinr99089/revanced.extended/blob/main/config-rv-ex.toml)
+You can see the patches applied for [ReVanced Extended](https://github.com/kevinr99089/revanced.extended/blob/main/config-rv-ex.toml)
 
 - Available Apps: YouTube (Ex), YT Music (Ex).
 
