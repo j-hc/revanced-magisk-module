@@ -133,6 +133,6 @@ music_arm64_mode=$(toml_get "$(toml_get_table "Music-arm64")" "build-mode") || m
 if [ "$youtube_mode" != module ] || [ "$music_arm_mode" != module ] || [ "$music_arm64_mode" != module ]; then
 	log "\nInstall [Vanced Microg](https://github.com/inotia00/VancedMicroG/releases/latest) to be able to use non-root YouTube or Music"
 fi
-log "\nView patchs note for [inotia00](https://github.com/inotia00/revanced-patches/releases/latest)"
+log "nIf you want the ReVanced builds, click [here](https://github.com/kevinr99089/revanced.builder/releases/latest)"
 
 pr "Done"
