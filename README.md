@@ -15,8 +15,8 @@ After much thought, I decided to stop patching applications with ReVanced (since
 
 # ReVanced Magisk Module
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
-[![Build Modules](https://github.com/kevinr99089/revanced.extended/actions/workflows/build2.yml/badge.svg)](https://github.com/kevinr99089/revanced.extended/actions/workflows/build2.yml)
-[![CI](https://github.com/kevinr99089/revanced.extended/actions/workflows/ci2.yml/badge.svg?event=schedule)](https://github.com/kevinr99089/revanced.extended/actions/workflows/ci2.yml)
+[![Build Modules](https://github.com/kevinr99089/revanced.extended/actions/workflows/build.yml/badge.svg)](https://github.com/kevinr99089/revanced.extended/actions/workflows/build.yml)
+[![CI](https://github.com/kevinr99089/revanced.extended/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/kevinr99089/revanced.extended/actions/workflows/ci.yml)
 
 Extensive ReVanced builder  
 
