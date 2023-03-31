@@ -7,8 +7,7 @@ You can see the patches applied for [ReVanced Extended](https://github.com/kevin
 
 #### Please note that the signature is different from ReVanced Manager. Applications patched here cannot be updated on an app patched by ReVanced Manager (without uninstalling the application first, remember to export your settings before uninstalling it) (but you can update applications present on kevinr99089/revanced.extended, the signatures do not change).
 
-After much thought, I decided to stop patching applications with ReVanced here. You can find most patched apps with ReVanced [here](https://github.com/revanced-apks/build-apps/releases/latest) (since revanced-apks is also a fork of j-hc, the signature is identical, so you can update even if you have installed one of the apps on my fork). This will allow me to concentrate only on Extended, and to automate it.
-BUT, i'm trying to setup another repository to patch ReVanced, you can view here when it's ready.
+This Fork is dedicated to Extended builds, if you are looking for ReVanced builds, please visit my other [fork](https://github.com/kevinr99089/revanced.builder)
 
 # ReVanced Magisk Module
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
