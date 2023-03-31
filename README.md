@@ -3,13 +3,9 @@
 
 You can see the patches applied for [Revanced](https://github.com/kevinr99089/revanced.extended/blob/main/config.toml) and for [ReVanced Extended](https://github.com/kevinr99089/revanced.extended/blob/main/config-rv-ex.toml)
 
-- Available Apps: YouTube (RV), Twitch (RV), TikTok (RV), YouTube (Ex), YT Music (Ex).
+- Available Apps: YouTube (Ex), YT Music (Ex).
 
 #### Please note that the signature is different from ReVanced Manager. Applications patched here cannot be updated on an app patched by ReVanced Manager (without uninstalling the application first, remember to export your settings before uninstalling it) (but you can update applications present on kevinr99089/revanced.extended, the signatures do not change).
-
-The releases notes are from inotia00 only, this comes from the fact that I have less applications to patch on Extended compared to ReVanced.
-
-Despite all my attempts to try to separate ReVanced and Extended, I didn't succeed (because I would have to redo most of the code (which is out of my skill set) however, I did manage to make the builds go faster by separating the workflows. This is not really what I wanted to do, but it's interesting to know.
 
 After much thought, I decided to stop patching applications with ReVanced (since I don't use it anymore). You can find the patched apps with ReVanced [here](https://github.com/revanced-apks/build-apps/releases/latest) (since revanced-apks is also a fork of j-hc, the signature is identical, so you can update even if you have installed one of the apps on my fork). This will allow me to concentrate only on Extended, and to automate it.
 
