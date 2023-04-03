@@ -1,7 +1,7 @@
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 compression-level = 9         # compression level for module zips. between 1 and 9
 logging-to-file = true        # enables logging of every patch process to a seperate file
-enable-magisk-update = false   # set this to false if you do not want to receive updates for the module in magisk app
+enable-magisk-update = false  # set this to false if you do not want to receive updates for the module in magisk app
 build-mindetach-module = false
 
 # extended
@@ -11,17 +11,15 @@ rv-brand = "ReVanced Extended"
 
 [YouTube]
 build-mode = "apk"
-excluded-patches = "custom-branding-icon-afn-red custom-branding-name custom-seekbar-color disable-haptic-feedback hide-cast-button hide-channel-watermark"
-included-patches = "bypass-ambient-mode-restrictions custom-branding-icon-afn-blue"
+excluded-patches = "hide-cast-button"
+included-patches = "bypass-ambient-mode-restrictions"
 version = "auto"
-exclusive-patches = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music-arm64]
 build-mode = "apk"
-app-name = "Music"
-excluded-patches = "custom-branding-music-afn-red"
-included-patches = "custom-branding-music-afn-blue"
+excluded-patches = ""
+included-patches = ""
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 arch = "arm64-v8a"
