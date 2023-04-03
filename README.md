@@ -7,6 +7,8 @@ You can see the patches applied for [ReVanced Extended](https://github.com/kevin
 
 #### Please note that the signatures are different from ReVanced Manager. You will not be able to install these applications without uninstalling the application patched by RV Manager first, remember to export your settings before uninstalling it) (you can however update the applications present here, the signatures do not change).
 
+Attention, English not being my native language, I use DeepL, it is possible that what I write does not make sense in English or that it does not mean anything, I apologize.
+
 This Fork is dedicated to Extended builds, if you are looking for ReVanced builds, please visit my other [fork](https://github.com/kevinr99089/revanced.builder)
 
 # ReVanced Magisk Module
