@@ -11,8 +11,8 @@ rv-brand = "ReVanced Extended"
 
 [YouTube]
 build-mode = "apk"
-excluded-patches = "hide-cast-button"
-included-patches = "bypass-ambient-mode-restrictions"
+excluded-patches = "custom-branding-name hide-cast-button"
+included-patches = ""
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
