@@ -11,7 +11,7 @@ rv-brand = "ReVanced Extended"
 
 [YouTube]
 build-mode = "apk"
-excluded-patches = "custom-branding-name custom-seekbar-color disable-haptic-feedback hide-cast-button hide-channel-watermark"
+excluded-patches = "custom-branding-name custom-seekbar-color disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
 included-patches = ""
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
