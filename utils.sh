@@ -288,6 +288,18 @@ build_rv() {
 	elif [ "$dl_from" = apkmonk ]; then
 		pkg_name=$(get_apkmonk_pkg_name "${args[apkmonk_dlurl]}")
 		apkmonk_resp=$(get_apkmonk_resp "${args[apkmonk_dlurl]}")
+	elif [ "$dl_from" = direct ]; then
+		local tmp_filename=$(mktemp)
+		req "${args[direct_dlurl]}" "$tmp_filename"
+		local data=$(aapt dump badging "$tmp_filename")
+		pkg_name=$(echo "$data" | grep package | awk '{print $2}' | sed s/name=//g | sed s/\'//g)
+		version_mode=$(echo "$data" | grep package | awk '{print $4}' | sed s/versionName=//g | sed s/\'//g)
+		local arch_raw=$(echo "$data" | grep native-code | sed "s/'//g")
+		arch=$(echo "$arch_raw" | awk '{print $2}')
+		# check if package is multiarch
+		if [ $(echo "$arch_raw" | awk '{print $3}') ]; then
+			arch="all"
+		fi
 	fi
 
 	local get_latest_ver=false
@@ -324,6 +336,9 @@ build_rv() {
 	pr "Choosing version '${version}' (${app_name})"
 	local version_f=${version// /}
 	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch}.apk"
+	if [ "$dl_from" = direct ]; then
+		mv "$tmp_filename" "$stock_apk"
+	fi
 	if [ ! -f "$stock_apk" ]; then
 		if [ "$dl_from" = apkmirror ]; then
 			pr "Downloading '${app_name}' from APKMirror"

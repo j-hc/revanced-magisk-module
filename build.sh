@@ -75,6 +75,12 @@ for table_name in $(toml_get_table_names); do
 			abort "ERROR: build-mode '${app_args[build_mode]}' is not a valid option for '${table_name}': only 'both', 'apk' or 'module' is allowed"
 		fi
 	} || app_args[build_mode]=apk
+	app_args[direct_dlurl]=$(toml_get "$t" direct-dlurl) && {
+		app_args[direct_dlurl]=${app_args[direct_dlurl]%/}
+		app_args[direct_dlurl]=${app_args[direct_dlurl]%download}
+		app_args[direct_dlurl]=${app_args[direct_dlurl]%/}
+		app_args[dl_from]=direct
+	} || app_args[uptodown_dlurl]=""
 	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && {
 		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/}
 		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%download}
