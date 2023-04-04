@@ -16,6 +16,9 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
+        
+      - name: Install aapt (for APK metadata extraction)
+        run: sudo apt update && sudo apt install aapt
 
       - name: Get last tag
         id: last_tag
