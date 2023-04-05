@@ -1,9 +1,10 @@
 #### ⚠️ Do not download modules from 3rd party sources like random websites you found on Google. Only use this repository. I am not responsible for anything they may contain.
 #### ⚠️ Only non-root releases (Magisk's are disabled)
 
-You can see the patches applied for [ReVanced Extended](https://github.com/kevinr99089/revanced.extended/blob/main/config-rv-ex.toml)
+   See applied patches for [ReVanced Extended](https://github.com/kevinr99089/revanced.extended/blob/main/config-rv-ex.toml)
 
-- Available Apps: YouTube (Ex), YT Music (Ex).
+#### Available apps: 
+- YouTube (Ex) and YT Music (Ex).
 
 #### Please note that the signatures are different from ReVanced Manager. You will not be able to install these applications without uninstalling the application patched by RV Manager first, remember to export your settings before uninstalling it) (you can however update the applications present here, the signatures do not change).
 
