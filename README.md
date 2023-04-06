@@ -18,6 +18,6 @@ This Fork is dedicated to Extended builds, if you are looking for ReVanced build
 # Thanks to
 [j-hc](https://github.com/j-hc) for [mindetach](https://github.com/j-hc/mindetach-magisk/tree/b821dc8ec683802e572d79e18820f66a46a3ded0) and this [script on which it is based](https://github.com/j-hc/revanced-magisk-module).
 
-[ReVanced](https://github.com/revanced) for [ReVanced Patches](https://github.com/revanced/revanced-patches/tree/main) and [ReVanced Manager](https://github.com/revanced/revanced-manager/releases).
+[NoName](https://github.com/NoName-exe) for allowing me to reuse the j-jh script [on my other fork](https://github.com/kevinr99089/revanced.builder).
 
 [inotia00](https://github.com/inotia00) for [ReVanced Extended patches](https://github.com/inotia00/revanced-patches/tree/revanced-extended) and [Vanced MicroG](https://github.com/inotia00/VancedMicroG/releases).
