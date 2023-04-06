@@ -12,53 +12,12 @@ Attention, English not being my native language, I use DeepL, it is possible tha
 
 This Fork is dedicated to Extended builds, if you are looking for ReVanced builds, please visit my other [fork](https://github.com/kevinr99089/revanced.builder)
 
-# ReVanced Magisk Module
-[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
 [![Latest release](https://badgen.net/github/release/kevinr99089/revanced.extended)](https://github.com/kevinr99089/revanced.extended/releases)
 [![GitHub release](https://img.shields.io/github/release/kevinr99089/revanced.extended.svg)](https://GitHub.com/kevinr99089/revanced.extended/releases/latest)
 
-Extensive ReVanced builder  
+# Thanks to
+[j-hc](https://github.com/j-hc) for [mindetach](https://github.com/j-hc/mindetach-magisk/tree/b821dc8ec683802e572d79e18820f66a46a3ded0) and this [script on which it is based](https://github.com/j-hc/revanced-magisk-module).
 
-Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases).
+[ReVanced](https://github.com/revanced) for [ReVanced Patches](https://github.com/revanced/revanced-patches/tree/main) and [ReVanced Manager](https://github.com/revanced/revanced-manager/releases).
 
-[**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
-
-## Features
- * Support all present and future ReVanced and [ReVanced Extended](https://github.com/inotia00/revanced-patches) apps
- * Can build Magisk modules and non-root APKs
- * Updated daily with the latest versions of apps and patches
- * Optimize APKs and modules for size
- * Modules
-     * recompile invalidated odex for faster usage
-     * receive updates from Magisk app
-     * do not break safetynet or trigger root detections
-     * handle installation of the correct version of the stock app and all that
-     * support Magisk and KernelSU
-
-#### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday using GitHub Actions if there is a change in ReVanced patches. You may want to disable it.**
-
-## To include/exclude patches or patch more ReVanced Apps
-[**See the list of patches**](https://github.com/revanced/revanced-patches#-patches)
-
- * Star the repo :eyes:
- * [Fork the repo](https://github.com/j-hc/revanced-magisk-module/fork) or use it as a template
- * Customize [`config.toml`](./config.toml)
- * Run the build [workflow](../../actions/workflows/build.yml)
- * Grab your modules and APKs from [releases](../../releases)
-
-To add more ReVanced apps or build ReVanced Extended `config.toml`, read here [`CONFIG.md`](./CONFIG.md)
-
-# Building Locally
-## On Termux
-```console
-bash <(curl -sSf https://raw.githubusercontent.com/j-hc/revanced-magisk-module/main/build-termux.sh)
-```
-
-## On Desktop
-Make sure you have JDK 17 and jq installed. Then run:
-
-```console
-$ git clone --recurse https://github.com/j-hc/revanced-magisk-module
-$ cd revanced-magisk-module
-$ ./build.sh
-```
+[inotia00](https://github.com/inotia00) for [ReVanced Extended patches](https://github.com/inotia00/revanced-patches/tree/revanced-extended) and [Vanced MicroG](https://github.com/inotia00/VancedMicroG/releases).
