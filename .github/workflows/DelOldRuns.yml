@@ -1,0 +1,20 @@
+name: Delete old Workflow
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * wed"
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - uses: actions/checkout@v3
+      - name: Delete old workflow runs
+        uses: MajorScruffy/delete-old-workflow-runs@v0.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: $GITHUB_REPOSITORY
+        with:
+          repository: Kevinr99089/revanced.extended
+          older-than-seconds: 604800
