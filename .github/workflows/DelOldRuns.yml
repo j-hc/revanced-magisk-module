@@ -17,4 +17,3 @@ jobs:
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
         with:
           repository: Kevinr99089/revanced.extended
-          older-than-seconds: 604800
