@@ -1,5 +1,5 @@
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
-compression-level = 9         # compression level for module zips. between 1 and 9
+compression-level = 4         # compression level for module zips. between 1 and 9
 logging-to-file = true        # enables logging of every patch process to a seperate file
 enable-magisk-update = false  # set this to false if you do not want to receive updates for the module in magisk app
 build-mindetach-module = false
