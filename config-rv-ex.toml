@@ -9,11 +9,18 @@ patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 rv-brand = "ReVanced Extended"
 
-[YouTube]
+[YouTube Stable]
 build-mode = "apk"
 excluded-patches = "custom-branding-name custom-seekbar-color disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
 included-patches = ""
-version = "auto"
+version = "stable"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+
+[YouTube Latest]
+build-mode = "apk"
+excluded-patches = "custom-branding-name custom-seekbar-color disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
+included-patches = ""
+version = "latest"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music-arm64]
