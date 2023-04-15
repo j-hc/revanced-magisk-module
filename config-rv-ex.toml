@@ -11,16 +11,9 @@ rv-brand = "ReVanced Extended"
 
 [YouTube Stable]
 build-mode = "apk"
-excluded-patches = "custom-branding-name custom-seekbar-color disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
+excluded-patches = "custom-branding-name custom-seekbar-color disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls protobuf-spoof"
 included-patches = ""
 version = "stable"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
-
-[YouTube Latest]
-build-mode = "apk"
-excluded-patches = "custom-branding-name custom-seekbar-color disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
-included-patches = ""
-version = "latest"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music-arm64]
