@@ -4,7 +4,7 @@
    See applied patches for [ReVanced Extended](https://github.com/kevinr99089/revanced.extended/blob/main/config-rv-ex.toml)
 
 #### Available apps: 
-- YouTube (Ex) Stable, YouTube (Ex) Latest and YT Music (Ex).
+- YouTube (Ex) Latest and YT Music (Ex).
 
 #### Please note that the signatures are different from ReVanced Manager. You will not be able to install these applications without uninstalling the application patched by RV Manager first, remember to export your settings before uninstalling it) (you can however update the applications present here, the signatures do not change).
 
