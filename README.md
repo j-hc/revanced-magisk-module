@@ -1,4 +1,4 @@
-How to install Extended?
+# How to install Extended?
 
 <p align="center">
 Go to release:
