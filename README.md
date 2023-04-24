@@ -9,7 +9,7 @@ See applied patches for [ReVanced Extended](https://github.com/kevinr99089/revan
 
 Attention, English not being my native language, I use DeepL, it is possible that what I write does not make sense in English or that it does not mean anything, I apologize. moreover, I don't code, there is certainly a way to do much simpler, but I can't check it.
 
-Work in progress, file restructuring in progress. Adding the story of Extended.
+To view ReVanced history, [click here](https://github.com/kevinr99089/revanced.builder/blob/History/README.md)
 
 To install YouTube Extended, [click here](https://github.com/kevinr99089/revanced.extended/blob/install/README.md).
 
