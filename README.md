@@ -25,6 +25,6 @@ ReVanced Extended is the Fork of ReVanced, although ReVanced is not very popular
 ReVanced Extended updates are very regular (2-3 patch updates and bug fixes before new YouTube version) because Inotia00 has only 2 applications to focus on, he's very responsive to the community, and, does it all for free (I don't know how he keeps adding features without asking for anything in return, or even knowing how he lives)
 Extended is more feature-rich, but more focused on advanced users. Although Extended is slightly more complicated to configure, Inotia00 has set up a Crowdin allowing the community to translate the different settings of the application, allowing users from other countries to read the settings in their languages
 
-I thank Team Vanced for creating YouTube Vanced and Team ReVanced for resurrecting Vanced, and to Inotia00 to propose an improved version of ReVanced
+I thank [Team Vanced](https://github.com/TeamVanced) for creating YouTube Vanced and [Team ReVanced](https://github.com/revanced) for resurrecting Vanced, and to [Inotia00](https://github.com/inotia00) to propose an improved version of ReVanced.
 
 You deserve more popularity.
