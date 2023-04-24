@@ -20,9 +20,11 @@ In addition to creating patches for YouTube, YT Music and Vanced, ReVanced diver
 But as i write this, there have been a lot of updates to YouTube, a lot of features have been added, which makes Vanced contain more and more bugs, from time to time, some users complain that Vanced doesn't work anymore because the application asks to be updated or the ads are not blocked anymore.
 This makes Vanced not safe to use anymore (Security problems, update problems, missing features).
 
-Unfortunately, ReVanced is not as popular as its predecessor Vanced, but I would like it to be one day. (but not too much either to avoid Google banning their activities)
-I think the popularity of ReVanced is affected by the fact that the application is not available directly patched.
-That's also why I created this fork, to allow more people to discover ReVanced without having to patch the application, so that it is ready to use.
-ReVanced updates are not regular, but are stable.
+ReVanced Extended is the Fork of ReVanced, although ReVanced is not very popular, the fork of Inotia00 is even less, which allows its community to propose new patches.
 
-I thank Team Vanced for creating YouTube Vanced and I also thank Team ReVanced for resurrecting Vanced, and for allowing us to use YouTube with more features.
+ReVanced Extended updates are very regular (2-3 patch updates and bug fixes before new YouTube version) because Inotia00 has only 2 applications to focus on, he's very responsive to the community, and, does it all for free (I don't know how he keeps adding features without asking for anything in return, or even knowing how he lives)
+Extended is more feature-rich, but more focused on advanced users. Although Extended is slightly more complicated to configure, Inotia00 has set up a Crowdin allowing the community to translate the different settings of the application, allowing users from other countries to read the settings in their languages
+
+I thank Team Vanced for creating YouTube Vanced and Team ReVanced for resurrecting Vanced, and to Inotia00 to propose an improved version of ReVanced
+
+You deserve more popularity.
