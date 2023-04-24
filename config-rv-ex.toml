@@ -9,6 +9,10 @@ patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 rv-brand = "ReVanced Extended"
 
+[Vanced-MicroG]
+build-mode = "apk"
+apkmirror-dlurl = "https://github.com/inotia00/mMicroG/releases/download/v0.2.27.231515/microg.apk"
+
 [YouTube]
 build-mode = "apk"
 excluded-patches = "custom-branding-name custom-seekbar-color disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
