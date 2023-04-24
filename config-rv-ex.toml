@@ -11,7 +11,9 @@ rv-brand = "ReVanced Extended"
 
 [Vanced-MicroG]
 build-mode = "apk"
-apkmirror-dlurl = "https://github.com/inotia00/mMicroG/releases/download/v0.2.27.231515/microg.apk"
+version = "latest"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/team-vanced/microg-youtube-vanced/"
+arch = "universal"
 
 [YouTube]
 build-mode = "apk"
