@@ -5,7 +5,6 @@ See applied patches for [ReVanced Extended](https://github.com/kevinr99089/revan
 # Available apps: 
 - YouTube (Ex) Latest and YT Music (Ex).
 #
-#### Please note that the signatures are different from ReVanced Manager. You will not be able to install these applications without uninstalling the application patched by RV Manager first, remember to export your settings before uninstalling it) (you can however update the applications present here, the signatures do not change).
 
 Attention, English not being my native language, I use DeepL, it is possible that what I write does not make sense in English or that it does not mean anything, I apologize. moreover, I don't code, there is certainly a way to do much simpler, but I can't check it.
 
