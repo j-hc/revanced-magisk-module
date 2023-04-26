@@ -16,8 +16,8 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/team-vanced/microg-youtube-vanc
 
 [YouTube]
 build-mode = "apk"
-excluded-patches = "custom-branding-name disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls materialyou"
-included-patches = ""
+excluded-patches = "custom-branding-name disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
+included-patches = "materialyou"
 version = "latest"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
