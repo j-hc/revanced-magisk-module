@@ -410,7 +410,7 @@ build_rv() {
 			patched_apk="${TEMP_DIR}/${app_name_l}-${RV_BRAND_F}-${version_f}-${arch}.apk"
 		fi
 		if [ "$build_mode" = module ]; then
-			if [ $is_bundle = false ]; then
+			if [ $is_bundle = false ] || [ "${args[include_stock]}" = false ]; then
 				patcher_args+=("--unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a")
 			else
 				patcher_args+=("--unsigned")
@@ -439,11 +439,11 @@ build_rv() {
 		fi
 		local isbndl extrct stock_apk_module
 		if [ $is_bundle = true ]; then
-			isbndl=""
+			isbndl=":"
 			extrct="base.apk"
 			stock_apk_module=$stock_bundle_apk
 		else
-			isbndl="!"
+			isbndl="! :"
 			extrct="${pkg_name}.apk"
 			stock_apk_module=$stock_apk
 		fi
@@ -463,7 +463,7 @@ build_rv() {
 		if [ ! -f "$module_output" ] || [ "$REBUILD" = true ]; then
 			pr "Packing module ($app_name)"
 			cp -f "$patched_apk" "${base_template}/base.apk"
-			cp -f "$stock_apk_module" "${base_template}/${pkg_name}.apk"
+			if [ "${args[include_stock]}" = true ]; then cp -f "$stock_apk_module" "${base_template}/${pkg_name}.apk"; fi
 			pushd >/dev/null "$base_template" || abort "Module template dir not found"
 			zip -"$COMPRESSION_LEVEL" -FSqr "../../${BUILD_DIR}/${module_output}" .
 			popd >/dev/null || :
