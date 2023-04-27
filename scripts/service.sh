@@ -22,7 +22,7 @@ if [ $svcl = 0 ]; then
 	if [ -d $BASEPATH/lib ]; then
 		VERSION=$(dumpsys package __PKGNAME | grep -m1 versionName)
 		VERSION="${VERSION#*=}"
-		if [ "$VERSION" = __PKGVER ]; then
+		if [ "$VERSION" = __PKGVER ] || [ -z "$VERSION" ]; then
 			grep __PKGNAME /proc/mounts | while read -r line; do
 				mp=${line#* }
 				mp=${mp%% *}
