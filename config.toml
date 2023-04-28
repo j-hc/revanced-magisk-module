@@ -94,3 +94,19 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/joaomgcd/tasker/"
 [Photomath]
 enabled = false
 apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
+
+[HEX Editor]
+enabled = false
+apkmonk-dlurl = "https://www.apkmonk.com/app/com.myprog.hexedit/"
+
+[Nyx Music Player]
+enabled = false
+apkmonk-dlurl = "https://www.apkmonk.com/app/com.awedea.nyx/"
+
+[Spotify Lite]
+enabled = false
+apkmonk-dlurl = "https://www.apkmonk.com/app/com.spotify.lite/"
+
+[NetGuard - no-root firewall]
+enabled = false
+apkmonk-dlurl = "https://www.apkmonk.com/app/eu.faircode.netguard/"
