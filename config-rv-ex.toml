@@ -13,7 +13,14 @@ rv-brand = "ReVanced Extended"
 build-mode = "apk"
 excluded-patches = "custom-branding-name disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
 included-patches = "materialyou"
-version = "stable"
+version = "auto"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+
+[YouTube_latest]
+build-mode = "apk"
+excluded-patches = "custom-branding-name disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
+included-patches = "materialyou"
+version = "latest"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music-arm64]
