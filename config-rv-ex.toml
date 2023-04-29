@@ -18,7 +18,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/team-vanced/microg-youtube-vanc
 build-mode = "apk"
 excluded-patches = "custom-branding-name disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
 included-patches = "materialyou"
-version = "latest"
+version = "stable"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music-arm64]
