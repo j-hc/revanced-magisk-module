@@ -1,17 +1,13 @@
-compression-level = 9         # compression level for module zips. between 1 and 9
-logging-to-file = true        # enables logging of every patch process to a seperate file
-enable-magisk-update = false   # set this to false if you do not want to receive updates for the module in magisk app
+logging-to-file = true
+enable-magisk-update = false
 build-mindetach-module = false
-
-# add 'enabled = false' for not patching a specific app or remove its entry
-# see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [YouTube]
 enabled = false
-build-mode = "apk"                                                    # 'both', 'apk' or 'module'
-excluded-patches = "debugging"                                        # space-seperated patches to exclude (multiline strings are not supported)
-included-patches = ""                                                 # space-seperated patches to include (non-excluded patches are included by default)
-version = "auto"                                                      # 'auto', 'latest', 'beta' or a custom one like '17.40.41'
+build-mode = "apk"
+excluded-patches = "debugging"
+included-patches = ""
+version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Twitch]
