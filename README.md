@@ -1,6 +1,7 @@
 # How to install ReVanced/Extended?
 
-Please note that the signatures are different from ReVanced Manager. You will not be able to install these applications without uninstalling the application patched by RV Manager first, remember to export your settings before uninstalling it) (you can however update the applications present here, the signatures do not change).
+#### Please note that the signatures are different from ReVanced Manager. You will not be able to install these applications without uninstalling the application patched by RV Manager first, remember to export your settings before uninstalling it) (you can however update the applications present here, the signatures do not change).
+#
 <p align="center">
 Go to release:
     <img src="./Installation/01.jpg">
