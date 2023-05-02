@@ -24,7 +24,6 @@ if you have never installed applications from the Web, you will have to Enable i
 and check the browser that allowed you to download it
     <img src="./Installation/10.jpg">
     Another pop-up will appear, 
-(for my part, Vanced Microg is already installed)
 click on "install".
     <img src="./Installation/11.jpg">
 Once Microg is installed, click on YouTube Extended (in the notification bar) and click on "Install"
