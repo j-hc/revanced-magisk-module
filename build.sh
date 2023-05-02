@@ -139,6 +139,6 @@ if [ "$youtube_mode" != module ] || [ "$music_arm_mode" != module ] || [ "$music
 	log "\nInstall [Vanced MicroG](https://github.com/inotia00/VancedMicroG/releases/latest) to be able to use non-root YouTube or Music"
 fi
 
-log "\nSee [Revanced builds](https://github.com/kevinr99089/revanced.builder/releases/latest)"
+log "\nSee [builds for ReVanced](https://github.com/kevinr99089/revanced.builder/releases/latest)"
 
 pr "Done"
