@@ -4,7 +4,9 @@ Please note that the signatures are different from ReVanced Manager. You will no
 <p align="center">
 Go to release:
     <img src="./Installation/01.jpg">
-Click on the release you want to download (for example YouTube Extended) and on Vanced Microg Revanced release
+Click on the release you want to download (for example YouTube Extended) and on Vanced Microg* Revanced release
+<p align="center">
+*for non-rooted devices, Vanced MicroG is required to use your Google account.
     <img src="./Installation/02.jpg">
 <p align="center">
 During the download, we will disable Play Protect which will prevent us from installing (since it has not been downloaded from the Play Store)
