@@ -29,4 +29,4 @@ click on "install".
     <img src="./Installation/11.jpg">
 Once Microg is installed, click on YouTube Extended (in the notification bar) and click on "Install"
 <p align="center">
-and you're done. In YouTube settings, go to the "ReVanced Extended" tab, then to "Miscellaneous", Click on "Open MicroG" to be able to connect to your Google Account and find your subscriptions, likes and comments.
+and you're done. In YouTube settings, go to the "ReVanced Extended" tab, then to "Miscellaneous", Click on "Open MicroG" to be able to connect to your Google Account.
