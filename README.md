@@ -9,8 +9,7 @@ Click on the release you want to download (for example YouTube Extended) and on 
 *for non-rooted devices, Vanced MicroG is required to use your Google account.
     <img src="./Installation/02.jpg">
 <p align="center">
-During the download, we will disable Play Protect which will prevent us from installing (since it has not been downloaded from the Play Store)
-Go to the Google Play Store and click on your profile picture and press
+During the download, we will disable Play Protect which will prevent us from installing. Go to the Google Play Store and click on your profile picture and press
     <img src="./Installation/03.jpg">
 <p align="center">
 in your case, click on "No harmful apps found"
