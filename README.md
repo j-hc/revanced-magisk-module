@@ -3,7 +3,7 @@
 See applied patches for [ReVanced Extended](https://github.com/kevinr99089/revanced.extended/blob/main/config-rv-ex.toml)
 
 # Available apps: 
-- YouTube (Ex) Latest and YT Music (Ex).
+- YouTube Stable (Ex), YouTube Latest (Ex) and YT Music (Ex) Arm64-v8a, Vanced MicroG.
 #
 
 Attention, English not being my native language, I use DeepL, it is possible that what I write does not make sense in English or that it does not mean anything, I apologize. moreover, I don't code, there is certainly a way to do much simpler, but I can't check it.
