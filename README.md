@@ -4,7 +4,7 @@ Please note that the signatures are different from ReVanced Manager. You will no
 <p align="center">
 Go to release:
     <img src="./Installation/01.jpg">
-Click on the release you want to download (for example YouTube Extended) and then click on Vanced Microg
+Click on the release you want to download (for example YouTube Extended) and on Vanced Microg Revanced
     <img src="./Installation/02.jpg">
 <p align="center">
 at the bottom of the page, click on Microg.apk
