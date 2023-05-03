@@ -15,7 +15,7 @@ Click on the release you want to download (for example YouTube Extended) and on 
 ---
 This step is optional, but if the applications refuse to install, it is possible that Google Play Protect is preventing the installation. In these cases, and only in these cases, follow this step.
 <p align="center">
-Go to the Google Play Store and click on your profile picture and press
+Go to the Google Play Store and click on your profile picture and press:
     <img src="./Installation/03.jpg">
 <p align="center">
 click on "No harmful apps found"
