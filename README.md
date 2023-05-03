@@ -13,11 +13,11 @@ Click on the release you want to download (for example YouTube Extended) and on 
 During the download, we will disable Play Protect which will prevent us from installing. Go to the Google Play Store and click on your profile picture and press
     <img src="./Installation/03.jpg">
 <p align="center">
-in your case, click on "No harmful apps found"
+click on "No harmful apps found"
     <img src="./Installation/04.jpg">
 Click on the gear at the top right of the screen
     <img src="./Installation/05.jpg">
-and deactivate "Scan apps with Play Protect".
+and disable "Scan apps with Play Protect".
     <img src="./Installation/06.jpg">
 this step is finished, the application should be downloaded now, click (in the notification bar) on Microg first
     <img src="./Installation/08.jpg">
