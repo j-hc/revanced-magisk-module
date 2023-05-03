@@ -10,6 +10,8 @@ Click on the release you want to download (for example YouTube Extended) and on 
 *for non-rooted devices, Vanced MicroG is required to use your Google account.
     <img src="./Installation/02.jpg">
 <p align="center">
+
+---
 This step is optional, but if the applications refuse to install, it is possible that Google Play Protect is preventing the installation. In these cases, and only in these cases, follow this step.
 <p align="center">
 Go to the Google Play Store and click on your profile picture and press
@@ -21,6 +23,8 @@ Click on the gear at the top right of the screen
     <img src="./Installation/05.jpg">
 and disable "Scan apps with Play Protect".
     <img src="./Installation/06.jpg">
+If you had to deactivate it to install these applications, reactivate it once all the steps are finished.
+
 ---
 <p align="center">
 click (in the notification bar) on MicroG first
