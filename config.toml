@@ -72,11 +72,11 @@ enabled = true
 uptodown-dlurl = "https://backdrops.en.uptodown.com/android"
 
 [WarnWetter]
-enabled = true
+enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/deutscher-wetterdienst/warnwetter/"
 
 [Windyapp]
-enabled = true
+enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/windy-weather-world-inc/windy-wind-weather-forecast/"
 
 [MyExpenses]
@@ -108,4 +108,10 @@ apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
 enabled = true
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/instagram/instagram-instagram/"
+arch = "arm64-v8a"
+
+[InShorts-arm64]
+enabled = true
+version = "auto"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/inshorts-formerly-news-in-shorts/inshorts-news-in-60-words-2/"
 arch = "arm64-v8a"
