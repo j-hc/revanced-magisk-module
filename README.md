@@ -10,7 +10,9 @@ Click on the release you want to download (for example YouTube Extended) and on 
 *for non-rooted devices, Vanced MicroG is required to use your Google account.
     <img src="./Installation/02.jpg">
 <p align="center">
-During the download, we will disable Play Protect which will prevent us from installing. Go to the Google Play Store and click on your profile picture and press
+This step is optional, but if the applications refuse to install, it is possible that Google Play Protect is preventing the installation. In these cases, and only in these cases, follow this step.
+<p align="center">
+Go to the Google Play Store and click on your profile picture and press
     <img src="./Installation/03.jpg">
 <p align="center">
 click on "No harmful apps found"
@@ -19,7 +21,9 @@ Click on the gear at the top right of the screen
     <img src="./Installation/05.jpg">
 and disable "Scan apps with Play Protect".
     <img src="./Installation/06.jpg">
-this step is finished, the application should be downloaded now, click (in the notification bar) on Microg first
+---
+<p align="center">
+click (in the notification bar) on MicroG first
     <img src="./Installation/08.jpg">
 if you have never installed applications from the Web, you will have to Enable in the settings "Unknown Sources"
     <img src="./Installation/09.jpg">
@@ -28,6 +32,6 @@ and check the browser that allowed you to download it
     Another pop-up will appear, 
 click on "install".
     <img src="./Installation/11.jpg">
-Once Microg is installed, click on YouTube Extended (in the notification bar) and click on "Install"
+Once MicroG is installed, click on YouTube Extended (in the notification bar) and click on "Install"
 <p align="center">
 and you're done. In YouTube settings, go to the "ReVanced Extended" tab, then to "Miscellaneous", Click on "Open MicroG" to be able to connect to your Google Account.
