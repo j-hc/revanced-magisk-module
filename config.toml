@@ -2,19 +2,36 @@ logging-to-file = true
 enable-magisk-update = false
 build-mindetach-module = false
 
+# extended
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+rv-brand = "ReVanced Extended"
+
 [YouTube]
-enabled = false
 build-mode = "apk"
-excluded-patches = "debugging"
-included-patches = ""
+excluded-patches = "custom-branding-name disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
+included-patches = "materialyou"
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
-[Twitch]
+[YouTube_latest]
 build-mode = "apk"
-version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
+excluded-patches = "custom-branding-name disable-haptic-feedback hide-cast-button hide-channel-watermark swipe-controls"
+included-patches = "materialyou"
+version = "latest"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
-[TikTok]
+[Music-arm64]
+build-mode = "apk"
+excluded-patches = ""
+included-patches = ""
 version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+arch = "arm64-v8a"
+
+[Vanced-MicroG]
+build-mode = "apk"
+excluded-patches = "custom-branding-microg-revancify-blue hide-icon-from-launcher custom-branding-microg-name"
+included-patches = "custom-branding-microg-revancify-red"
+version = "latest"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/team-vanced/microg-youtube-vanced/"
