@@ -91,7 +91,9 @@ uptodown-dlurl = "https://my-expenses.en.uptodown.com/android"
 
 [NyxMusicPlayer]
 enabled = true
-apkmirror-dlurl = "https://www.apkmirror.com/apk/awedea/nyx-music-player/"
+build-mode = "apk"
+version = "auto"
+uptodown-dlurl = "https://nyx-music-player.en.uptodown.com/android"
 
 [IconPackStudio]
 enabled = true
@@ -125,13 +127,13 @@ arch = "arm-v7a"
 [Facebook-arm64]
 enabled = true
 version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/facebook/"
+uptodown-dlurl = "https://facebook.en.uptodown.com/android"
 arch = "arm64-v8a"
 
 [Facebook-arm]
 enabled = true
 version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/facebook/"
+uptodown-dlurl = "https://facebook.en.uptodown.com/android"
 arch = "arm-v7a"
 
 [InShorts-arm64]
