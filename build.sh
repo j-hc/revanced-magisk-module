@@ -141,6 +141,6 @@ fi
 
 log "\nSee [builds for ReVanced](https://github.com/kevinr99089/revanced.builder/releases/latest)."
 
-log "\nAttention, the new MicroG is not present in this release, so none of the mentioned patches are applied to MicroG from Team Vanced."
+log "\nAttention, the new MicroG is not present in this release, so none of the mentioned patches are applied to MicroG of Team Vanced except the new logo.
 
 pr "Done"
