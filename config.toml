@@ -120,7 +120,7 @@ arch = "arm64-v8a"
 enabled = true
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/instagram/instagram-instagram/"
-arch = "armeabi-v7a"
+arch = "arm-v7a"
 
 [Facebook-arm64]
 enabled = true
@@ -132,7 +132,7 @@ arch = "arm64-v8a"
 enabled = true
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/facebook/"
-arch = "armeabi-v7a"
+arch = "arm-v7a"
 
 [InShorts-arm64]
 enabled = true
