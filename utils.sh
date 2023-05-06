@@ -305,52 +305,42 @@ build_rv() {
 	fi
 	if [ $get_latest_ver = true ]; then
 		local apkmvers uptwodvers aav
-		if [ "$dl_from" = apkmirror ]; then
-			if [ "$version_mode" = beta ]; then aav="true"; else aav="false"; fi
-			apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "$aav")
-			version=$(get_largest_ver <<<"$apkmvers") || version=$(head -1 <<<"$apkmvers")
-		elif [ "$dl_from" = uptodown ]; then
-			uptwodvers=$(get_uptodown_vers "$uptwod_resp")
-			version=$(get_largest_ver <<<"$uptwodvers") || version=$(head -1 <<<"$uptwodvers")
-		elif [ "$dl_from" = apkmonk ]; then
-			apkmonkvers=$(get_apkmonk_vers "$apkmonk_resp")
-			version=$(get_largest_ver <<<"$apkmonkvers") || version=$(head -1 <<<"$apkmonkvers")
-		fi
-	fi
-	if [ -z "$version" ]; then
-		epr "empty version, not building ${app_name}."
-		return 0
-	fi
-	pr "Choosing version '${version}' (${app_name})"
-	local version_f=${version// /}
-	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch}.apk"
-	if [ ! -f "$stock_apk" ]; then
-		if [ "$dl_from" = apkmirror ]; then
-			pr "Downloading '${app_name}' from APKMirror"
-			local apkm_arch
-			if [ "$arch" = "all" ]; then
-				apkm_arch="universal"
-			elif [ "$arch" = "arm64-v8a" ]; then
-				apkm_arch="arm64-v8a"
-			elif [ "$arch" = "arm-v7a" ]; then
-				apkm_arch="armeabi-v7a"
+			for dl_p in apkmirror uptodown apkmonk; do
+			if [ "$dl_p" = apkmirror ]; then
+				if [ -z "${args[apkmirror_dlurl]}" ]; then continue; fi
+				pr "Downloading '${app_name}' from APKMirror"
+				local apkm_arch
+				if [ "$arch" = "all" ]; then apkm_arch="universal"; 
+				elif [ "$arch" = "arm64-v8a" ]; then apkm_arch="arm64-v8a";
+				elif [ "$arch" = "arm-v7a" ]; then apkm_arch="armeabi-v7a"; fi
+				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_apk" APK "$apkm_arch" "${args[dpi]}"; then
+					epr "ERROR: Could not find any release of '${app_name}' with version '${version}', arch '${apkm_arch}' and dpi '${args[dpi]}' from APKMirror"
+					continue
+				fi
+				break
+			elif [ "$dl_p" = uptodown ]; then
+				if [ -z "${args[uptodown_dlurl]}" ]; then continue; fi
+				if [ -z "${uptwod_resp:-}" ]; then uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}"); fi
+				pr "Downloading '${app_name}' from Uptodown"
+				if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
+					epr "ERROR: Could not download ${app_name} from Uptodown"
+					continue
+				fi
+				break
+			elif [ "$dl_p" = apkmonk ]; then
+				if [ -z "${args[apkmonk_dlurl]}" ]; then continue; fi
+				if [ -z "${apkmonk_resp:-}" ]; then apkmonk_resp=$(get_apkmonk_resp "${args[apkmonk_dlurl]}"); fi
+				pr "Downloading '${app_name}' from Apkmonk"
+				if ! dl_apkmonk "$apkmonk_resp" "$version" "$stock_apk"; then
+					epr "ERROR: Could not download ${app_name} from Apkmonk"
+					continue
+				fi
+				break
 			fi
-			if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_apk" APK "$apkm_arch" "${args[dpi]}"; then
-				epr "ERROR: Could not find any release of '${app_name}' with version '${version}', arch '${apkm_arch}' and dpi '${args[dpi]}' from APKMirror"
-				return 0
-			fi
-		elif [ "$dl_from" = uptodown ]; then
-			pr "Downloading '${app_name}' from Uptodown"
-			if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
-				epr "ERROR: Could not download ${app_name} from Uptodown"
-				return 0
-			fi
-		elif [ "$dl_from" = apkmonk ]; then
-			pr "Downloading '${app_name}' from Apkmonk"
-			if ! dl_apkmonk "$apkmonk_resp" "$version" "$stock_apk"; then
-				epr "ERROR: Could not download ${app_name} from Apkmonk"
-				return 0
-			fi
+		done
+		if [ ! -f "$stock_apk" ]; then
+			epr "ERROR: Could not download ${app_name} from any provider"
+			return 0
 		fi
 	fi
 	if [ "${arch}" = "all" ]; then
