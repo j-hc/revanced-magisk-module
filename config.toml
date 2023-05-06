@@ -91,7 +91,9 @@ uptodown-dlurl = "https://my-expenses.en.uptodown.com/android"
 
 [NyxMusicPlayer]
 enabled = true
-apkmirror-dlurl = "https://www.apkmirror.com/apk/awedea/nyx-music-player/"
+build-mode = "apk"
+version = "auto"
+uptodown-dlurl = "https://nyx-music-player.en.uptodown.com/android"
 
 [IconPackStudio]
 enabled = true
