@@ -127,13 +127,13 @@ arch = "arm-v7a"
 [Facebook-arm64]
 enabled = true
 version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/facebook/"
+uptodown-dlurl = "https://facebook.en.uptodown.com/android"
 arch = "arm64-v8a"
 
 [Facebook-arm]
 enabled = true
 version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/facebook/"
+uptodown-dlurl = "https://facebook.en.uptodown.com/android"
 arch = "arm-v7a"
 
 [InShorts-arm64]
