@@ -305,7 +305,27 @@ build_rv() {
 	fi
 	if [ $get_latest_ver = true ]; then
 		local apkmvers uptwodvers aav
-			for dl_p in apkmirror uptodown apkmonk; do
+		if [ "$dl_from" = apkmirror ]; then
+			if [ "$version_mode" = beta ]; then aav="true"; else aav="false"; fi
+			apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "$aav")
+			version=$(get_largest_ver <<<"$apkmvers") || version=$(head -1 <<<"$apkmvers")
+		elif [ "$dl_from" = uptodown ]; then
+			uptwodvers=$(get_uptodown_vers "$uptwod_resp")
+			version=$(get_largest_ver <<<"$uptwodvers") || version=$(head -1 <<<"$uptwodvers")
+		elif [ "$dl_from" = apkmonk ]; then
+			apkmonkvers=$(get_apkmonk_vers "$apkmonk_resp")
+			version=$(get_largest_ver <<<"$apkmonkvers") || version=$(head -1 <<<"$apkmonkvers")
+		fi
+	fi
+	if [ -z "$version" ]; then
+		epr "empty version, not building ${app_name}."
+		return 0
+	fi
+	pr "Choosing version '${version}' (${app_name})"
+	local version_f=${version// /}
+	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch}.apk"
+	if [ ! -f "$stock_apk" ]; then
+		for dl_p in apkmirror uptodown apkmonk; do
 			if [ "$dl_p" = apkmirror ]; then
 				if [ -z "${args[apkmirror_dlurl]}" ]; then continue; fi
 				pr "Downloading '${app_name}' from APKMirror"
