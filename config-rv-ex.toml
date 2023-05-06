@@ -31,5 +31,7 @@ arch = "arm64-v8a"
 
 [Vanced-MicroG]
 build-mode = "apk"
+excluded-patches = "custom-branding-microg-revancify-blue hide-icon-from-launcher custom-branding-microg-name"
+included-patches = ""
 version = "latest"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/team-vanced/microg-youtube-vanced/"
