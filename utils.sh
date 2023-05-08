@@ -382,13 +382,13 @@ build_rv() {
 	local is_bundle=false
 	if [ "$mode_arg" = module ] || [ "$mode_arg" = both ]; then
 		if [ -f "$stock_bundle_apk" ]; then
-			is_bundle=true
+			is_bundle=false
 		elif [ "$dl_from" = apkmirror ]; then
 			pr "Downloading '${app_name}' bundle from APKMirror"
 			if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_bundle_apk" BUNDLE "" ""; then
 				if (($(stat -c%s "$stock_apk") - $(stat -c%s "$stock_bundle_apk") > 10000000)); then
 					pr "'${app_name}' bundle was downloaded successfully and will be used for the module"
-					is_bundle=true
+					is_bundle=false
 				else
 					pr "'${app_name}' bundle was downloaded but will not be used"
 				fi
