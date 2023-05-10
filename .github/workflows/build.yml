@@ -81,9 +81,9 @@ jobs:
           }"
           }
 
-          cd build || echo "build folder not found"
-          for OUTPUT in *revanced*.zip; do
-            [ "$OUTPUT" = "*revanced*.zip" ] && continue
+          cd build || echo "build folder not found"; exit 1
+          for OUTPUT in *magisk*.zip; do
+            [ "$OUTPUT" = "*magisk*.zip" ] && continue
             ZIP_S=$(unzip -p "$OUTPUT" module.prop)
             if ! UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson); then
               continue
@@ -110,13 +110,13 @@ jobs:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
         if: env.TG_TOKEN != null
         run: |
-          cd build || echo "build folder not found"
+          cd build || echo "build folder not found"; exit 1
 
           TG_CHAT="@rvc_magisk"
           NL=$'\n'
           APKS=""
           MODULES=""
-          for OUTPUT in *revanced*; do
+          for OUTPUT in *; do
             DL_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
             if [[ $OUTPUT = *.apk ]]; then
               APKS+="${NL}📦[${OUTPUT}](${DL_URL})"

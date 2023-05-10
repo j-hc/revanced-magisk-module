@@ -274,6 +274,7 @@ build_rv() {
 	local mode_arg=${args[build_mode]} version_mode=${args[version]}
 	local app_name=${args[app_name]}
 	local app_name_l=${app_name,,}
+	app_name_l=${app_name_l// /-}
 	local dl_from=${args[dl_from]}
 	local arch=${args[arch]}
 	local p_patcher_args=()
