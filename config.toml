@@ -2,25 +2,32 @@ logging-to-file = true        # enables logging of every patch process to a sepe
 enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
 build-mindetach-module = true
 
-# add 'enabled = false' for not patching a specific app or remove its entry
+# add 'enabled = false' for not patching a specific app or remove it from the config
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [YouTube]
-enabled = true
 build-mode = "both"                                                   # 'both', 'apk' or 'module'
 excluded-patches = ""                                                 # space-seperated patches to exclude (multiline strings are not supported)
 included-patches = ""                                                 # space-seperated patches to include (non-excluded patches are included by default)
 version = "auto"                                                      # 'auto', 'latest', 'beta' or a custom one like '17.40.41'
-exclusive-patches = false                                             # excludes all patches by default
+exclusive-patches = false                                             # excludes all patches by default and only applies included-patches
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
+
+[YouTube-Extended]
+app-name = "YouTube"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+rv-brand = "ReVanced Extended"
+build-mode = "both"
+excluded-patches = ""
+included-patches = ""
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music-arm64]
 build-mode = "both"
 app-name = "Music"
 excluded-patches = ""
-included-patches = ""
-version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 module-prop-name = "ytmusicrv-magisk"
 arch = "arm64-v8a"
@@ -29,8 +36,6 @@ arch = "arm64-v8a"
 build-mode = "both"
 app-name = "Music"
 excluded-patches = ""
-included-patches = ""
-version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 module-prop-name = "ytmusicrv-arm-magisk"
 arch = "arm-v7a"
@@ -41,24 +46,19 @@ excluded-patches = "hide-views-stats"
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
 
-[Reddit]
-build-mode = "apk"
-version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
-
 [Twitch]
 build-mode = "apk"
-version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
 
 [TikTok]
-version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
+
+[Reddit]
+enabled = false
+apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 
 [Spotify]
 enabled = false
-build-mode = "apk"
-version = "auto"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 
 [Citra]

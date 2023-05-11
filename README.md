@@ -1,4 +1,4 @@
-#### ⚠️ Do not download modules from 3rd party sources like random websites you found on Google. Only use this repository. I am not responsible for anything they may contain.
+#### ⚠️ Do not download modules from 3rd party sources like random websites you found on Google. There are many that uses my modules and impersonates ReVanced.
 
 # ReVanced Magisk Module
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
@@ -9,7 +9,7 @@ Extensive ReVanced builder
 
 Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases).
 
-[**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
+[**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks their forced updates.
 
 ## Features
  * Support all present and future ReVanced and [ReVanced Extended](https://github.com/inotia00/revanced-patches) apps
@@ -34,7 +34,7 @@ Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/relea
  * Run the build [workflow](../../actions/workflows/build.yml)
  * Grab your modules and APKs from [releases](../../releases)
 
-To add more ReVanced apps or build ReVanced Extended `config.toml`, read here [`CONFIG.md`](./CONFIG.md)
+also see here [`CONFIG.md`](./CONFIG.md)
 
 # Building Locally
 ## On Termux
@@ -43,8 +43,6 @@ bash <(curl -sSf https://raw.githubusercontent.com/j-hc/revanced-magisk-module/m
 ```
 
 ## On Desktop
-Make sure you have JDK 17 and jq installed. Then run:
-
 ```console
 $ git clone --recurse https://github.com/j-hc/revanced-magisk-module
 $ cd revanced-magisk-module
