@@ -1,0 +1,39 @@
+# see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
+compression-level = 9         # compression level for module zips. between 1 and 9
+logging-to-file = true        # enables logging of every patch process to a seperate file
+enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
+build-mindetach-module = true
+
+# extended
+patches-source = "kitadai31/revanced-patches"
+integrations-source = "kitadai31/revanced-integrations"
+rv-brand = "ReVanced Extended"
+
+[YouTube]
+enabled = true
+build-mode = "apk"
+excluded-patches = ""
+included-patches = ""
+version = "17.34.36"
+exclusive-patches = false
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+
+[Music-arm64]
+enabled = false
+build-mode = "both"
+app-name = "Music"
+excluded-patches = ""
+included-patches = ""
+version = "auto"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+arch = "arm64-v8a"
+
+[Music-arm]
+enabled = false
+build-mode = "both"
+app-name = "Music"
+excluded-patches = ""
+included-patches = ""
+version = "auto"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+arch = "arm-v7a"

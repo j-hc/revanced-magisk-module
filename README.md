@@ -1,52 +1,32 @@
 #### ⚠️ Do not download modules from 3rd party sources like random websites you found on Google. Only use this repository. I am not responsible for anything they may contain.
 
-# ReVanced Magisk Module
-[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
-[![Build Modules](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml/badge.svg)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml)
-[![CI](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml)
+# ReVanced Extended
+[![Build Modules](https://github.com/NoName-exe/revanced-extended/actions/workflows/build.yml/badge.svg)](https://github.com/NoName-exe/revanced-extended/actions/workflows/build.yml)
+[![CI](https://github.com/NoName-exe/revanced-extended/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/NoName-exe/revanced-extended/actions/workflows/ci.yml)
 
-Extensive ReVanced builder  
-
-Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases).
-
-[**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks it from updating them.
+Get the [latest CI release](https://github.com/NoName-exe/revanced-extended/releases/latest).
 
 ## Features
- * Support all present and future ReVanced and [ReVanced Extended](https://github.com/inotia00/revanced-patches) apps
- * Can build Magisk modules and non-root APKs
- * Updated daily with the latest versions of apps and patches
- * Optimize APKs and modules for size
- * Modules
-     * recompile invalidated odex for faster usage
-     * receive updates from Magisk app
-     * do not break safetynet or trigger root detections
-     * handle installation of the correct version of the stock app and all that
-     * support Magisk and KernelSU
+ * Updated with the latest versions of patches.
+ * Cleans APKs from unneeded libs to make them smaller.
+ * Fully open-source, every binary or APK is compiled without human intervention.
+ * Modules:
+     * Recompile invalidated odex for YouTube and YouTube-Music for faster usage.
+     * Receive updates from Magisk app.
+     * Should not break safetynet or trigger root detections used by certain apps.
+     * Handle installation of the correct version of the stock app and all that.
 
-#### **Note that the [CI workflow](../../actions/workflows/ci.yml) is scheduled to build the modules and APKs everyday using GitHub Actions if there is a change in ReVanced patches. You may want to disable it.**
+ ## Notes
+* YouTube Magisk Module is installed as a system app and requires a reboot to install/update.
+* YouTube-Music Magisk Module is installed as a user app and does not require a reboot to install/update.
+* Use [mindetach](https://github.com/j-hc/mindetach-magisk) to block Play Store from updating YouTube and YouTube-Music.
+* Non-root versions of YouTube and YouTube-Music require [Vanced MicroG](https://github.com/inotia00/VancedMicroG/releases/latest) or [mMicroG](https://github.com/inotia00/mMicroG/releases/latest) to work.
 
-## To include/exclude patches or patch more ReVanced Apps
-[**See the list of patches**](https://github.com/revanced/revanced-patches#-patches)
+## Credits
+[j-hc](https://github.com/j-hc) for [mindetach](https://github.com/j-hc/mindetach-magisk) and the [script on which this is based on](https://github.com/j-hc/revanced-magisk-module).
 
- * Star the repo :eyes:
- * [Fork the repo](https://github.com/j-hc/revanced-magisk-module/fork) or use it as a template
- * Customize [`config.toml`](./config.toml)
- * Run the build [workflow](../../actions/workflows/build.yml)
- * Grab your modules and APKs from [releases](../../releases)
+[NoName-exe](https://github.com/NoName-exe) for the [repack script](https://github.com/NoName-exe/revanced-misc-stuff/) for Magisk module
 
-To add more ReVanced apps or build ReVanced Extended `config.toml`, read here [`CONFIG.md`](./CONFIG.md)
+[HuskyDG](https://github.com/HuskyDG) for his [Magisk Module Template](https://github.com/HuskyDG/revanced-build-ci) that installs YouTube as a system app.
 
-# Building Locally
-## On Termux
-```console
-bash <(curl -sSf https://raw.githubusercontent.com/j-hc/revanced-magisk-module/main/build-termux.sh)
-```
-
-## On Desktop
-Make sure you have JDK 17 and jq installed. Then run:
-
-```console
-$ git clone --recurse https://github.com/j-hc/revanced-magisk-module
-$ cd revanced-magisk-module
-$ ./build.sh
-```
+[inotia00](https://github.com/inotia00) for [revanced-extended patches](https://github.com/inotia00/revanced-patches/tree/revanced-extended) and  [Vanced MicroG](https://github.com/inotia00/VancedMicroG).

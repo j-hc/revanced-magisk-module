@@ -32,13 +32,23 @@ jobs:
           TAG="${{ steps.last_tag.outputs.tag }}"
           if [ -z "$TAG" ]; then TAG=0; fi
           echo "NEXT_VER_CODE=$((TAG + 1))" >> $GITHUB_OUTPUT
-
-      - name: Build modules/APKs
-        run: ./build.sh config.toml
+          
+      - name: Build APKs for Android v6 & 7
+        run: ./build.sh configv6.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
           NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+
+      - name: Build modules/APKs for Android v8+
+        run: ./build.sh configv8.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: $GITHUB_REPOSITORY
+          NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+          
+      - name : Repack YouTube to HuskyDG's magisk module template
+        run : curl -sSLO https://raw.githubusercontent.com/NoName-exe/revanced-misc-stuff/master/scripts/repack.sh && chmod +x repack.sh && ./repack.sh        
 
       - name: Get output
         id: get_output
@@ -49,9 +59,9 @@ jobs:
           echo "${DELIM}" >> "$GITHUB_OUTPUT"
           cp -f build.md build.tmp
 
-          yt_op=$(find build -maxdepth 1 -name "youtube-*-magisk-*.zip" -printf '%P\n')
+          yt_op=$(find build -maxdepth 1 -name "youtube-revanced-magisk-*.zip" -printf '%P\n')
           if [ -z "$yt_op" ]; then
-            echo "RELEASE_NAME=ReVanced" >> $GITHUB_OUTPUT
+            echo "RELEASE_NAME=ReVanced Extended" >> $GITHUB_OUTPUT
           else
             echo "RELEASE_NAME=$yt_op" >> $GITHUB_OUTPUT
           fi
@@ -104,44 +114,6 @@ jobs:
           skip_checkout: true
           file_pattern: build.md *-update.json
           commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
-
-      - name: Report to Telegram
-        env:
-          TG_TOKEN: ${{ secrets.TG_TOKEN }}
-        if: env.TG_TOKEN != null
-        run: |
-          cd build || echo "build folder not found"; exit 1
-
-          TG_CHAT="@rvc_magisk"
-          NL=$'\n'
-          APKS=""
-          MODULES=""
-          for OUTPUT in *; do
-            DL_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
-            if [[ $OUTPUT = *.apk ]]; then
-              APKS+="${NL}📦[${OUTPUT}](${DL_URL})"
-            elif [[ $OUTPUT = *.zip ]]; then
-              MODULES+="${NL}📦[${OUTPUT}](${DL_URL})"
-            fi
-          done
-          MODULES=${MODULES#"$NL"}
-          APKS=${APKS#"$NL"}
-
-          BODY="$(sed 's/^\* \*\*/↪ \*\*/g; s/^\* `/↪ \*\*/g; s/`/\*/g; s/^\* /\↪/g; s/\*\*/\*/g; s/###//g;' ../build.md)"
-          MSG="*New build!*
-
-          ${BODY}
-
-          *▼ Download Links:*
-          Modules:
-          ${MODULES}
-
-          APKs:
-          ${APKS}
-          "
-          echo "'$MSG'"
-          POST="https://api.telegram.org/bot${TG_TOKEN}/sendMessage"
-          curl -X POST --data-urlencode "parse_mode=Markdown" --data-urlencode "text=${MSG}" --data-urlencode "chat_id=${TG_CHAT}" "$POST"
 
       - uses: actions/upload-artifact@v3
         with:
