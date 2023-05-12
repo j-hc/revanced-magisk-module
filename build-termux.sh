@@ -19,8 +19,6 @@ ask() {
 	return 1
 }
 
-CFG=config.toml
-
 if [ ! -f ~/.rvmm_"$(date '+%Y%m')" ]; then
 	pr "Setting up environment..."
 	yes "" | pkg update -y && pkg install -y openssl git wget jq openjdk-17 zip
@@ -34,29 +32,26 @@ if [ -d revanced-magisk-module ]; then
 	if git -C revanced-magisk-module status | grep -q 'is behind'; then
 		pr "revanced-magisk-module already is not synced with upstream."
 		pr "Cloning revanced-magisk-module. config.toml will be preserved."
-		cp -f revanced-magisk-module/config*toml .
+		cp -f revanced-magisk-module/config.toml .
 		rm -rf revanced-magisk-module
 		git clone https://github.com/j-hc/revanced-magisk-module --recurse --depth 1
-		mv -f config*toml revanced-magisk-module/
+		mv -f config.toml revanced-magisk-module/config.toml
 	fi
 else
 	pr "Cloning revanced-magisk-module."
 	git clone https://github.com/j-hc/revanced-magisk-module --recurse --depth 1
-	sed -i '/^enabled.*/d; /^\[.*\]/a enabled = false' revanced-magisk-module/config*toml
+	sed -i '/^enabled.*/d; /^\[.*\]/a enabled = false' revanced-magisk-module/config.toml
 fi
 cd revanced-magisk-module
 chmod +x build.sh build-termux.sh
 
-if ! ask "Select config (y=revanced n=revanced extended)"; then
-	CFG=config-rv-ex.toml
-fi
-if ask "Do you want to open the config for customizations? [y/n]"; then
-	nano $CFG
+if ask "Do you want to open the config.toml for customizations? [y/n]"; then
+	nano config.toml
 fi
 if ! ask "Setup is done. Do you want to start building? [y/n]"; then
 	exit 0
 fi
-./build.sh $CFG
+./build.sh
 
 cd build
 pr "Ask for storage permission"
