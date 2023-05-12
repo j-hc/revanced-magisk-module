@@ -35,6 +35,7 @@ CONF_PATCHES_VER=$(toml_get "$main_config_t" patches-version) || CONF_PATCHES_VE
 CONF_INTEGRATIONS_VER=$(toml_get "$main_config_t" integrations-version) || CONF_INTEGRATIONS_VER=
 DEF_PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || DEF_PATCHES_SRC="revanced/revanced-patches"
 DEF_INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || DEF_INTEGRATIONS_SRC="revanced/revanced-integrations"
+DEF_RV_BRAND=$(toml_get "$main_config_t" rv-brand) || DEF_RV_BRAND="ReVanced"
 # -- Main config --
 mkdir -p $TEMP_DIR
 
@@ -79,7 +80,7 @@ for table_name in $(toml_get_table_names); do
 	app_args[integ]=$(find "$prebuilts_dir" -name "revanced-integrations-*.apk" -type f -print -quit)
 	app_args[ptjar]=$(find "$prebuilts_dir" -name "revanced-patches-*.jar" -type f -print -quit)
 	app_args[ptjs]=$(find "$prebuilts_dir" -name "patches-*.json" -type f -print -quit)
-	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]="ReVanced"
+	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]=$DEF_RV_BRAND
 
 	app_args[excluded_patches]=$(toml_get "$t" excluded-patches) || app_args[excluded_patches]=""
 	app_args[included_patches]=$(toml_get "$t" included-patches) || app_args[included_patches]=""
@@ -138,9 +139,9 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 	popd
 fi
 
-youtube_mode=$(toml_get "$(toml_get_table "YouTube")" "build-mode") || youtube_mode="module"
-music_arm_mode=$(toml_get "$(toml_get_table "Music-arm")" "build-mode") || music_arm_mode="module"
-music_arm64_mode=$(toml_get "$(toml_get_table "Music-arm64")" "build-mode") || music_arm64_mode="module"
+youtube_mode=$(toml_get "$(toml_get_table "YouTube")" "build-mode") || youtube_mode="apk"
+music_arm_mode=$(toml_get "$(toml_get_table "Music-arm")" "build-mode") || music_arm_mode="apk"
+music_arm64_mode=$(toml_get "$(toml_get_table "Music-arm64")" "build-mode") || music_arm64_mode="apk"
 if [ "$youtube_mode" != module ] || [ "$music_arm_mode" != module ] || [ "$music_arm64_mode" != module ]; then
 	log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) to be able to use non-root YouTube or Music"
 fi
