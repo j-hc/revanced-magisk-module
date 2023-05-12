@@ -1,4 +1,4 @@
-#### ⚠️ Do not download modules from 3rd party sources like random websites you found on Google. Only use this repository. I am not responsible for anything they may contain.
+#### ⚠️ Do not download modules from 3rd party sources like random websites you found on Google. There are many that uses my modules and impersonates ReVanced.
 
 # ReVanced Extended
 [![Build Modules](https://github.com/NoName-exe/revanced-extended/actions/workflows/build.yml/badge.svg)](https://github.com/NoName-exe/revanced-extended/actions/workflows/build.yml)
@@ -16,6 +16,7 @@ Get the [latest CI release](https://github.com/NoName-exe/revanced-extended/rele
      * Should not break safetynet or trigger root detections used by certain apps.
      * Handle installation of the correct version of the stock app and all that.
 
+
  ## Notes
 * YouTube Magisk Module is installed as a system app and requires a reboot to install/update.
 * YouTube-Music Magisk Module is installed as a user app and does not require a reboot to install/update.
@@ -30,3 +31,5 @@ Get the [latest CI release](https://github.com/NoName-exe/revanced-extended/rele
 [HuskyDG](https://github.com/HuskyDG) for his [Magisk Module Template](https://github.com/HuskyDG/revanced-build-ci) that installs YouTube as a system app.
 
 [inotia00](https://github.com/inotia00) for [revanced-extended patches](https://github.com/inotia00/revanced-patches/tree/revanced-extended) and  [Vanced MicroG](https://github.com/inotia00/VancedMicroG).
+=======
+[**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks their forced updates.

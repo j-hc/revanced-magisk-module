@@ -50,6 +50,3 @@ arch = "arm64-v8a" # 'arm64-v8a', 'arm-v7a' or 'all'. default: all
 # arch option is sometimes needed to be able to download the apks from apkmirror.
 # and does not affect anything else
 ```
-
-# Building ReVanced Extended
-Use [`config-rv-ex.toml`](./config-rv-ex.toml) as the config. Or you can run build.sh as: `./build.sh config-rv-ex.toml`
