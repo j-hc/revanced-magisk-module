@@ -1,18 +1,32 @@
 name: GitHub Cleanup
 
 on:
-  workflow_dispatch:
-    inputs:
-      CLEANUP:
-        description: 'Clear GitHub'
-        required: false
-        type: boolean
-        default: true
-
-jobs:
-  cleanup:
-    name: GitHub Cleanup
-    if: ${{ inputs.CLEANUP }}
-    uses: nikhilbadyal/ghactions/.github/workflows/github-cleanup.yml@main
+  workflow_call:
     secrets:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN:
+        required: true
+    inputs:
+      GITHUB_REPOSITORY:
+        required: false
+        default: ${{ github.repository }}
+        type: string
+      RELEASE_CLEANUP_PATTERN:
+        required: false
+        default: '[\s\S]*'
+        type: string
+jobs:
+  release-cleanup:
+    name: GitHub Cleanup
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Older Releases
+        uses: nikhilbadyal/ghaction-rm-releases@v0.0.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_PATTERN: ${{ inputs.RELEASE_CLEANUP_PATTERN }}
+  workflow-cleanup:
+    uses: ./.github/workflows/github-workflow-cleaner.yml
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GITHUB_REPOSITORY: ${{ inputs.GITHUB_REPOSITORY }}
