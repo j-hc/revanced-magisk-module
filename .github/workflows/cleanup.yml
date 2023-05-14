@@ -5,28 +5,11 @@ on:
     secrets:
       GH_TOKEN:
         required: true
-    inputs:
-      GITHUB_REPOSITORY:
-        required: false
-        default: ${{ github.repository }}
-        type: string
-      RELEASE_CLEANUP_PATTERN:
-        required: false
-        default: '[\s\S]*'
-        type: string
+  workflow_dispatch:
+
 jobs:
-  release-cleanup:
+  cleanup:
     name: GitHub Cleanup
-    timeout-minutes: 5
-    runs-on: ubuntu-latest
-    steps:
-      - name: Delete Older Releases
-        uses: nikhilbadyal/ghaction-rm-releases@v0.0.1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          RELEASE_PATTERN: ${{ inputs.RELEASE_CLEANUP_PATTERN }}
-  workflow-cleanup:
-    uses: ./.github/workflows/github-workflow-cleaner.yml
+    uses: nikhilbadyal/ghactions/.github/workflows/github-cleanup.yml@main
     secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      GITHUB_REPOSITORY: ${{ inputs.GITHUB_REPOSITORY }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
