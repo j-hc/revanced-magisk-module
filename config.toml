@@ -22,15 +22,3 @@ excluded-patches = "custom-branding-name custom-branding-icon-revancify-red cust
 included-patches = "materialyou"
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
-
-
-[YouTube-Amoled]
-app-name = "YouTube-Amoled"
-patches-source = "inotia00/revanced-patches"
-integrations-source = "inotia00/revanced-integrations"
-rv-brand = "ReVanced Extended"
-build-mode = "apk"
-excluded-patches = "custom-branding-name custom-branding-icon-revancify-red custom-branding-icon-revancify-blue custom-branding-icon-mmt custom-branding-icon-afn-red custom-branding-icon-afn-blue"
-included-patches = "theme"
-version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
