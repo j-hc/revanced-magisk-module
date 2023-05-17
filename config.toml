@@ -12,6 +12,8 @@ build-mindetach-module = false
 # excludes all patches by default and only applies included-patches
 
 [Music-arm64]
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
 build-mode = "apk"
 app-name = "YT-Music"
 excluded-patches = "custom-branding-music-afn-red custom-branding-music-afn-blue custom-branding-music-mmt custom-branding-music-revancify-blue custom-branding-music-revancify-red custom-branding-music-name"
