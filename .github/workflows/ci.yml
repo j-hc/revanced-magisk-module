@@ -44,9 +44,9 @@ jobs:
             last_patches_url=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'browser_download_url' | grep 'jar')
             last_patches=${last_patches_url##*/}
             cur_patches=$(sed -n "s/.*Patches: .*${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
-
             echo "current patches version: $cur_patches"
             echo "latest patches version: $last_patches"
+            if [ -z "$cur_patches" ] || [ -z "$last_patches" ]; then return 1; fi
             [ "$cur_patches" != "$last_patches" ] # test success=>build, fail=>dont build
           }
 

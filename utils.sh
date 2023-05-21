@@ -50,7 +50,7 @@ get_rv_prebuilts() {
 
 	rv_cli_url=$(gh_req "https://api.github.com/repos/j-hc/revanced-cli/releases/latest" - | json_get 'browser_download_url') || return 1
 	local rv_cli_jar="${prebuilts_dir}/${rv_cli_url##*/}"
-	log "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")" "$prebuilts_dir/changelog.md"
+	echo "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")  " >"$prebuilts_dir/changelog.md"
 
 	local rv_integrations_rel="https://api.github.com/repos/${integrations_src}/releases/"
 	if [ "$CONF_INTEGRATIONS_VER" ]; then rv_integrations_rel+="tags/${CONF_INTEGRATIONS_VER}"; else rv_integrations_rel+="latest"; fi
@@ -59,7 +59,7 @@ get_rv_prebuilts() {
 
 	rv_integrations_url=$(gh_req "$rv_integrations_rel" - | json_get 'browser_download_url')
 	local rv_integrations_apk="${prebuilts_dir}/${rv_integrations_url##*/}"
-	log "Integrations: $(cut -d/ -f4 <<<"$rv_integrations_url")/$(cut -d/ -f9 <<<"$rv_integrations_url")" "$prebuilts_dir/changelog.md"
+	echo "Integrations: $(cut -d/ -f4 <<<"$rv_integrations_url")/$(cut -d/ -f9 <<<"$rv_integrations_url")  " >"$prebuilts_dir/changelog.md"
 
 	rv_patches=$(gh_req "$rv_patches_rel" -)
 	rv_patches_changelog=$(json_get 'body' <<<"$rv_patches" | sed 's/\(\\n\)\+/\\n/g')
@@ -68,8 +68,8 @@ get_rv_prebuilts() {
 	rv_patches_url=$(grep 'jar' <<<"$rv_patches_dl")
 	local rv_patches_jar="${prebuilts_dir}/${rv_patches_url##*/}"
 	[ -f "$rv_patches_jar" ] || REBUILD=true
-	log "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$(cut -d/ -f9 <<<"$rv_patches_url")" "$prebuilts_dir/changelog.md"
-	log "\n${rv_patches_changelog//# [/### [}\n---\n" "$prebuilts_dir/changelog.md"
+	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$(cut -d/ -f9 <<<"$rv_patches_url")  " >"$prebuilts_dir/changelog.md"
+	echo -e "\n${rv_patches_changelog//# [/### [}\n---" >"$prebuilts_dir/changelog.md"
 
 	dl_if_dne "$rv_cli_jar" "$rv_cli_url"
 	dl_if_dne "$rv_integrations_apk" "$rv_integrations_url"
@@ -115,7 +115,7 @@ _req() {
 req() { _req "$1" "$2" "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0"; }
 gh_req() { _req "$1" "$2" "$GH_HEADER"; }
 
-log() { echo -e "$1  " >>"${2:-build.md}"; }
+log() { echo -e "$1  " >>"build.md"; }
 get_largest_ver() {
 	local vers m
 	vers=$(tee)
@@ -228,7 +228,7 @@ dl_apkmonk() {
 	local apkmonk_resp=$1 version=$2 output=$3
 	local url
 	url="https://www.apkmonk.com/down_file?pkg="$(grep -F "$version</a>" <<<"$apkmonk_resp" | grep -oP 'href=\"/download-app/\K.+?(?=/?\">)' | sed 's;/;\&key=;') || return 1
-	url=$(req "$url" - | grep -oP 'https.+?(?=\",)')
+	url=$(req "$url" - | grep -oP 'https.+?(?=\",)') || return 1
 	req "$url" "$output"
 }
 get_apkmonk_pkg_name() { grep -oP '.*apkmonk\.com\/app\/\K([,\w,\.]*)' <<<"$1"; }
@@ -249,7 +249,7 @@ patch_apk() {
 }
 
 build_rv() {
-	local -n args=$1
+	eval "declare -A args=${1#*=}"
 	local version build_mode_arr pkg_name uptwod_resp
 	local mode_arg=${args[build_mode]} version_mode=${args[version]}
 	local app_name=${args[app_name]}
@@ -258,6 +258,8 @@ build_rv() {
 	local table=${args[table]}
 	local dl_from=${args[dl_from]}
 	local arch=${args[arch]}
+	if [ "$arch" = 'universal' ]; then local arch_f="all"; else local arch_f="$arch"; fi
+
 	local p_patcher_args=()
 	p_patcher_args+=("$(join_args "${args[excluded_patches]}" -e) $(join_args "${args[included_patches]}" -i)")
 	[ "${args[exclusive_patches]}" = true ] && p_patcher_args+=("--exclusive")
@@ -303,20 +305,22 @@ build_rv() {
 		epr "empty version, not building ${table}."
 		return 0
 	fi
-	pr "Choosing version '${version}' (${table})"
+	pr "Choosing version '${version}' for ${table}"
 	local version_f=${version// /}
-	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch}.apk"
+	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		for dl_p in apkmirror uptodown apkmonk; do
 			if [ "$dl_p" = apkmirror ]; then
 				if [ -z "${args[apkmirror_dlurl]}" ]; then continue; fi
 				pr "Downloading '${table}' from APKMirror"
 				local apkm_arch
-				if [ "$arch" = "all" ]; then
+				if [ "$arch" = "universal" ]; then
 					apkm_arch="universal"
 				elif [ "$arch" = "arm64-v8a" ]; then
 					apkm_arch="arm64-v8a"
-				elif [ "$arch" = "arm-v7a" ]; then apkm_arch="armeabi-v7a"; fi
+				elif [ "$arch" = "arm-v7a" ]; then
+					apkm_arch="armeabi-v7a"
+				fi
 				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_apk" APK "$apkm_arch" "${args[dpi]}"; then
 					epr "ERROR: Could not find any release of '${table}' with version '${version}', arch '${apkm_arch}' and dpi '${args[dpi]}' from APKMirror"
 					continue
@@ -356,13 +360,13 @@ build_rv() {
 		p_patcher_args=("${p_patcher_args[@]//-[ei] ${microg_patch}/}")
 	fi
 
-	local stock_bundle_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch}-bundle.apk"
+	local stock_bundle_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}-bundle.apk"
 	local is_bundle=false
 	if [ "$mode_arg" = module ] || [ "$mode_arg" = both ]; then
 		if [ -f "$stock_bundle_apk" ]; then
 			is_bundle=true
 		elif [ "$dl_from" = apkmirror ]; then
-			pr "Downloading '${app_name}' bundle from APKMirror"
+			pr "Downloading '${table}' bundle from APKMirror"
 			if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_bundle_apk" BUNDLE "" ""; then
 				if (($(stat -c%s "$stock_apk") - $(stat -c%s "$stock_bundle_apk") > 10000000)); then
 					pr "'${table}' bundle was downloaded successfully and will be used for the module"
@@ -390,14 +394,14 @@ build_rv() {
 		patcher_args=("${p_patcher_args[@]}")
 		pr "Building '${table}' in '$build_mode' mode"
 		if [ "$microg_patch" ]; then
-			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch}-${build_mode}.apk"
+			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch_f}-${build_mode}.apk"
 			if [ "$build_mode" = apk ]; then
 				patcher_args+=("-i ${microg_patch}")
 			elif [ "$build_mode" = module ]; then
 				patcher_args+=("-e ${microg_patch}")
 			fi
 		else
-			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch}.apk"
+			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch_f}.apk"
 		fi
 		if [ "$build_mode" = module ]; then
 			if [ $is_bundle = false ] || [ "${args[include_stock]}" = false ]; then
@@ -413,7 +417,7 @@ build_rv() {
 			fi
 		fi
 		if [ "$build_mode" = apk ]; then
-			local apk_output="${BUILD_DIR}/${app_name_l}-${rv_brand_f}-v${version_f}-${arch}.apk"
+			local apk_output="${BUILD_DIR}/${app_name_l}-${rv_brand_f}-v${version_f}-${arch_f}.apk"
 			cp -f "$patched_apk" "$apk_output"
 			pr "Built ${table} (non-root): '${apk_output}'"
 			continue
@@ -446,9 +450,9 @@ build_rv() {
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY:-}/update/${upj}" \
 			"$base_template"
 
-		local module_output="${app_name_l}-${rv_brand_f}-magisk-v${version}-${arch}.zip"
+		local module_output="${app_name_l}-${rv_brand_f}-magisk-v${version}-${arch_f}.zip"
 		if [ ! -f "$module_output" ] || [ "$REBUILD" = true ]; then
-			pr "Packing module $table"
+			pr "Packing module ${table}"
 			cp -f "$patched_apk" "${base_template}/base.apk"
 			if [ "${args[include_stock]}" = true ]; then cp -f "$stock_apk_module" "${base_template}/${pkg_name}.apk"; fi
 			pushd >/dev/null "$base_template" || abort "Module template dir not found"

@@ -51,11 +51,20 @@ zip --version >/dev/null || abort "\`zip\` is not installed. install it with 'ap
 
 get_prebuilts
 set_prebuilts() {
-	local -n aa=$1
-	aa[cli]=$(find "$2" -name "revanced-cli*.jar" -type f -print -quit 2>/dev/null) && [ "${aa[cli]}" ] || return 1
-	aa[integ]=$(find "$2" -name "revanced-integrations-*.apk" -type f -print -quit) && [ "${aa[integ]}" ] || return 1
-	aa[ptjar]=$(find "$2" -name "revanced-patches-*.jar" -type f -print -quit) && [ "${aa[ptjar]}" ] || return 1
-	aa[ptjs]=$(find "$2" -name "patches-*.json" -type f -print -quit) && [ "${aa[ptjs]}" ] || return 1
+	app_args[cli]=$(find "$1" -name "revanced-cli*.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[cli]}" ] || return 1
+	app_args[integ]=$(find "$1" -name "revanced-integrations-*.apk" -type f -print -quit) && [ "${app_args[integ]}" ] || return 1
+	app_args[ptjar]=$(find "$1" -name "revanced-patches-*.jar" -type f -print -quit) && [ "${app_args[ptjar]}" ] || return 1
+	app_args[ptjs]=$(find "$1" -name "patches-*.json" -type f -print -quit) && [ "${app_args[ptjs]}" ] || return 1
+}
+
+build_rv_w() {
+	if [ "$LOGGING_F" = true ]; then
+		logf=logs/"${table_name,,}.log"
+		: >"$logf"
+		build_rv 2>&1 "$(declare -p app_args)"  | tee "$logf"
+	else
+		build_rv "$(declare -p app_args)"
+	fi
 }
 
 idx=0
@@ -71,16 +80,12 @@ for table_name in $(toml_get_table_names); do
 	integrations_src=$(toml_get "$t" integrations-source) || integrations_src=$DEF_INTEGRATIONS_SRC
 	prebuilts_dir=${patches_src%/*}
 	prebuilts_dir=${TEMP_DIR}/${prebuilts_dir//[^[:alnum:]]/}-rv
-	if ! set_prebuilts app_args "$prebuilts_dir"; then
+	if ! set_prebuilts "$prebuilts_dir"; then
 		mkdir -p "$BUILD_DIR" "$prebuilts_dir"
 		get_rv_prebuilts "$integrations_src" "$patches_src" "$prebuilts_dir"
-		set_prebuilts app_args "$prebuilts_dir"
+		set_prebuilts "$prebuilts_dir"
 	fi
-	app_args[cli]=$(find "$prebuilts_dir" -name "revanced-cli*.jar" -type f -print -quit)
-	app_args[integ]=$(find "$prebuilts_dir" -name "revanced-integrations-*.apk" -type f -print -quit)
-	app_args[ptjar]=$(find "$prebuilts_dir" -name "revanced-patches-*.jar" -type f -print -quit)
-	app_args[ptjs]=$(find "$prebuilts_dir" -name "patches-*.json" -type f -print -quit)
-	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]=$DEF_RV_BRAND
+	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]="$DEF_RV_BRAND"
 
 	app_args[excluded_patches]=$(toml_get "$t" excluded-patches) || app_args[excluded_patches]=""
 	app_args[included_patches]=$(toml_get "$t" included-patches) || app_args[included_patches]=""
@@ -109,22 +114,28 @@ for table_name in $(toml_get_table_names); do
 	} || app_args[apkmirror_dlurl]=""
 	if [ -z "${app_args[dl_from]:-}" ]; then abort "ERROR: no 'apkmirror_dlurl', 'uptodown_dlurl' or 'apkmonk_dlurl' option was set for '$table_name'."; fi
 	app_args[arch]=$(toml_get "$t" arch) && {
-		if ! isoneof "${app_args[arch]}" all arm64-v8a arm-v7a; then
-			abort "ERROR: arch '${app_args[arch]}' is not a valid option for '${table_name}': only 'all', 'arm64-v8a', 'arm-v7a' is allowed"
+		if ! isoneof "${app_args[arch]}" universal both arm64-v8a arm-v7a; then
+			abort "ERROR: arch '${app_args[arch]}' is not a valid option for '${table_name}': only 'universal', 'arm64-v8a', 'arm-v7a', 'both' is allowed"
 		fi
-	} || app_args[arch]="all"
+	} || app_args[arch]="universal"
 	app_args[include_stock]=$(toml_get "$t" include-stock) || app_args[include_stock]=true && vtf "${app_args[include_stock]}" "include-stock"
 	app_args[merge_integrations]=$(toml_get "$t" merge-integrations) || app_args[merge_integrations]=true && vtf "${app_args[merge_integrations]}" "merge-integrations"
 	app_args[dpi]=$(toml_get "$t" dpi) || app_args[dpi]="nodpi"
 	table_name_f=${table_name,,}
 	table_name_f=${table_name_f// /-}
 	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || app_args[module_prop_name]="${table_name_f}-jhc"
-	if [ "$LOGGING_F" = true ]; then
-		logf=logs/"${table_name,,}.log"
-		: >"$logf"
-		{ build_rv 2>&1 app_args | tee "$logf"; } &
+
+	if [ "${app_args[arch]}" = both ]; then
+		app_args[table]="$table_name (arm64-v8a)"
+		app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
+		app_args[arch]="arm64-v8a"
+		build_rv_w
+		app_args[table]="$table_name (arm-v7a)"
+		app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
+		app_args[arch]="arm-v7a"
+		build_rv_w &
 	else
-		build_rv app_args &
+		build_rv_w &
 	fi
 done
 wait
