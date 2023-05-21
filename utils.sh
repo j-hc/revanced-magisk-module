@@ -59,7 +59,7 @@ get_rv_prebuilts() {
 
 	rv_integrations_url=$(gh_req "$rv_integrations_rel" - | json_get 'browser_download_url')
 	local rv_integrations_apk="${prebuilts_dir}/${rv_integrations_url##*/}"
-	echo "Integrations: $(cut -d/ -f4 <<<"$rv_integrations_url")/$(cut -d/ -f9 <<<"$rv_integrations_url")  " >"$prebuilts_dir/changelog.md"
+	echo "Integrations: $(cut -d/ -f4 <<<"$rv_integrations_url")/$(cut -d/ -f9 <<<"$rv_integrations_url")  " >>"$prebuilts_dir/changelog.md"
 
 	rv_patches=$(gh_req "$rv_patches_rel" -)
 	rv_patches_changelog=$(json_get 'body' <<<"$rv_patches" | sed 's/\(\\n\)\+/\\n/g')
@@ -68,8 +68,8 @@ get_rv_prebuilts() {
 	rv_patches_url=$(grep 'jar' <<<"$rv_patches_dl")
 	local rv_patches_jar="${prebuilts_dir}/${rv_patches_url##*/}"
 	[ -f "$rv_patches_jar" ] || REBUILD=true
-	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$(cut -d/ -f9 <<<"$rv_patches_url")  " >"$prebuilts_dir/changelog.md"
-	echo -e "\n${rv_patches_changelog//# [/### [}\n---" >"$prebuilts_dir/changelog.md"
+	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$(cut -d/ -f9 <<<"$rv_patches_url")  " >>"$prebuilts_dir/changelog.md"
+	echo -e "\n${rv_patches_changelog//# [/### [}\n---" >>"$prebuilts_dir/changelog.md"
 
 	dl_if_dne "$rv_cli_jar" "$rv_cli_url"
 	dl_if_dne "$rv_integrations_apk" "$rv_integrations_url"

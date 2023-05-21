@@ -24,21 +24,22 @@ excluded-patches = ""
 included-patches = ""
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
-[Music-arm64]
+[Music]
 build-mode = "both"
 app-name = "Music"
 excluded-patches = ""
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-module-prop-name = "ytmusicrv-magisk"
-arch = "arm64-v8a"
+arch = "both"
 
-[Music-arm]
-build-mode = "both"
+[Music-Extended]
 app-name = "Music"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+rv-brand = "ReVanced Extended"
+build-mode = "both"
 excluded-patches = ""
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-module-prop-name = "ytmusicrv-arm-magisk"
-arch = "arm-v7a"
+arch = "both"
 
 [Twitter]
 build-mode = "apk"
