@@ -8,7 +8,7 @@ PKGS_LIST="${TEMP_DIR}/module-pkgs"
 
 if [ "${GITHUB_TOKEN:-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
-REBUILD=false
+REBUILD=${REBUILD:-false}
 OS=$(uname -o)
 
 SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
@@ -45,7 +45,7 @@ abort() {
 
 get_rv_prebuilts() {
 	local integrations_src=$1 patches_src=$2 prebuilts_dir=$3
-	pr "Getting prebuilts ($prebuilts_dir)"
+	pr "Getting prebuilts ($prebuilts_dir)" >&2
 	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url rv_patches_json
 
 	rv_cli_url=$(gh_req "https://api.github.com/repos/j-hc/revanced-cli/releases/latest" - | json_get 'browser_download_url') || return 1
@@ -71,10 +71,12 @@ get_rv_prebuilts() {
 	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$(cut -d/ -f9 <<<"$rv_patches_url")  " >>"$prebuilts_dir/changelog.md"
 	echo -e "\n${rv_patches_changelog//# [/### [}\n---" >>"$prebuilts_dir/changelog.md"
 
-	dl_if_dne "$rv_cli_jar" "$rv_cli_url"
-	dl_if_dne "$rv_integrations_apk" "$rv_integrations_url"
-	dl_if_dne "$rv_patches_jar" "$rv_patches_url"
-	dl_if_dne "$rv_patches_json" "$(grep 'json' <<<"$rv_patches_dl")"
+	dl_if_dne "$rv_cli_jar" "$rv_cli_url" >&2
+	dl_if_dne "$rv_integrations_apk" "$rv_integrations_url" >&2
+	dl_if_dne "$rv_patches_jar" "$rv_patches_url" >&2
+	dl_if_dne "$rv_patches_json" "$(grep 'json' <<<"$rv_patches_dl")" >&2
+
+	echo "$rv_cli_jar" "$rv_integrations_apk" "$rv_patches_jar" "$rv_patches_json"
 }
 
 get_prebuilts() {
@@ -170,8 +172,8 @@ dl_apkmirror() {
 	[ "$arch" = universal ] && apparch=(universal noarch 'arm64-v8a + armeabi-v7a') || apparch=("$arch")
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
-	for ((n = 2; n < 40; n++)); do
-		node=$($HTMLQ "div.table-row:nth-child($n)" -r "span:nth-child(n+3)" <<<"$resp")
+	for ((n = 1; n < 40; n++)); do
+		node=$($HTMLQ "div.table-row.headerFont:nth-last-child($n)" -r "span:nth-child(n+3)" <<<"$resp")
 		if [ -z "$node" ]; then break; fi
 		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
 		if [ "$(sed -n 3p <<<"$app_table")" = "$apkorbundle" ] && { [ "$apkorbundle" = BUNDLE ] ||
@@ -307,6 +309,7 @@ build_rv() {
 	fi
 	pr "Choosing version '${version}' for ${table}"
 	local version_f=${version// /}
+	version_f=${version_f#v}
 	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		for dl_p in apkmirror uptodown apkmonk; do
@@ -450,7 +453,7 @@ build_rv() {
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY:-}/update/${upj}" \
 			"$base_template"
 
-		local module_output="${app_name_l}-${rv_brand_f}-magisk-v${version}-${arch_f}.zip"
+		local module_output="${app_name_l}-${rv_brand_f}-magisk-v${version_f}-${arch_f}.zip"
 		if [ ! -f "$module_output" ] || [ "$REBUILD" = true ]; then
 			pr "Packing module ${table}"
 			cp -f "$patched_apk" "${base_template}/base.apk"

@@ -37,7 +37,7 @@ DEF_PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || DEF_PATCHES_SRC="
 DEF_INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || DEF_INTEGRATIONS_SRC="revanced/revanced-integrations"
 DEF_RV_BRAND=$(toml_get "$main_config_t" rv-brand) || DEF_RV_BRAND="ReVanced"
 # -- Main config --
-mkdir -p $TEMP_DIR
+mkdir -p $TEMP_DIR $BUILD_DIR
 
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be within 0-9"; fi
 if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
@@ -48,20 +48,20 @@ jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt 
 java --version >/dev/null || abort "\`openjdk 17\` is not installed. install it with 'apt install openjdk-17-jre-headless' or equivalent"
 zip --version >/dev/null || abort "\`zip\` is not installed. install it with 'apt install zip' or equivalent"
 # --
-
 get_prebuilts
+
 set_prebuilts() {
-	app_args[cli]=$(find "$1" -name "revanced-cli*.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[cli]}" ] || return 1
-	app_args[integ]=$(find "$1" -name "revanced-integrations-*.apk" -type f -print -quit) && [ "${app_args[integ]}" ] || return 1
-	app_args[ptjar]=$(find "$1" -name "revanced-patches-*.jar" -type f -print -quit) && [ "${app_args[ptjar]}" ] || return 1
-	app_args[ptjs]=$(find "$1" -name "patches-*.json" -type f -print -quit) && [ "${app_args[ptjs]}" ] || return 1
+	app_args[cli]=$(find "$1" -name "revanced-cli-*.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[cli]}" ] || return 1
+	app_args[integ]=$(find "$1" -name "revanced-integrations-*.apk" -type f -print -quit 2>/dev/null) && [ "${app_args[integ]}" ] || return 1
+	app_args[ptjar]=$(find "$1" -name "revanced-patches-*.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[ptjar]}" ] || return 1
+	app_args[ptjs]=$(find "$1" -name "patches-*.json" -type f -print -quit 2>/dev/null) && [ "${app_args[ptjs]}" ] || return 1
 }
 
 build_rv_w() {
 	if [ "$LOGGING_F" = true ]; then
 		logf=logs/"${table_name,,}.log"
 		: >"$logf"
-		build_rv 2>&1 "$(declare -p app_args)"  | tee "$logf"
+		build_rv 2>&1 "$(declare -p app_args)" | tee "$logf"
 	else
 		build_rv "$(declare -p app_args)"
 	fi
@@ -81,9 +81,12 @@ for table_name in $(toml_get_table_names); do
 	prebuilts_dir=${patches_src%/*}
 	prebuilts_dir=${TEMP_DIR}/${prebuilts_dir//[^[:alnum:]]/}-rv
 	if ! set_prebuilts "$prebuilts_dir"; then
-		mkdir -p "$BUILD_DIR" "$prebuilts_dir"
-		get_rv_prebuilts "$integrations_src" "$patches_src" "$prebuilts_dir"
-		set_prebuilts "$prebuilts_dir"
+		mkdir -p "$prebuilts_dir"
+		read -r rv_cli_jar rv_integrations_apk rv_patches_jar rv_patches_json <<<"$(get_rv_prebuilts "$integrations_src" "$patches_src" "$prebuilts_dir")"
+		app_args[cli]=$rv_cli_jar
+		app_args[integ]=$rv_integrations_apk
+		app_args[ptjar]=$rv_patches_jar
+		app_args[ptjs]=$rv_patches_json
 	fi
 	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]="$DEF_RV_BRAND"
 
@@ -151,10 +154,9 @@ if [ "$BUILD_MINDETACH_MODULE" = true ]; then
 fi
 
 if youtube_t=$(toml_get_table "YouTube"); then youtube_mode=$(toml_get "$youtube_t" "build-mode") || youtube_mode="apk"; else youtube_mode="module"; fi
-if music_arm_t=$(toml_get_table "Music-arm"); then music_arm_mode=$(toml_get "$music_arm_t" "build-mode") || music_arm_mode="apk"; else music_arm_mode="module"; fi
-if music_arm64_t=$(toml_get_table "Music-arm64"); then music_arm64_mode=$(toml_get "$music_arm64_t" "build-mode") || music_arm64_mode="apk"; else music_arm64_mode="module"; fi
-if [ "$youtube_mode" != module ] || [ "$music_arm_mode" != module ] || [ "$music_arm64_mode" != module ]; then
-	log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) to be able to use non-root YouTube or Music"
+if music_t=$(toml_get_table "Music"); then music_mode=$(toml_get "$music_t" "build-mode") || music_mode="apk"; else music_mode="module"; fi
+if [ "$youtube_mode" != module ] || [ "$music_mode" != module ]; then
+	log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) for non-root YouTube or YT Music"
 fi
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 log "\n---\nChangelog:"
