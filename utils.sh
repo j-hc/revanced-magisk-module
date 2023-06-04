@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 MODULE_TEMPLATE_DIR="revanced-magisk"
-MODULE_SCRIPTS_DIR="scripts"
 TEMP_DIR="temp"
 BUILD_DIR="build"
 PKGS_LIST="${TEMP_DIR}/module-pkgs"
@@ -11,9 +10,9 @@ NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 REBUILD=${REBUILD:-false}
 OS=$(uname -o)
 
-SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
-CUSTOMIZE_SH=$(cat $MODULE_SCRIPTS_DIR/customize.sh)
-UNINSTALL_SH=$(cat $MODULE_SCRIPTS_DIR/uninstall.sh)
+SERVICE_SH=$(cat scripts/service.sh)
+CUSTOMIZE_SH=$(cat scripts/customize.sh)
+UNINSTALL_SH=$(cat scripts/uninstall.sh)
 
 # -------------------- json/toml --------------------
 json_get() { grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/'; }
@@ -44,32 +43,38 @@ abort() {
 }
 
 get_rv_prebuilts() {
-	local integrations_src=$1 patches_src=$2 prebuilts_dir=$3
-	pr "Getting prebuilts ($prebuilts_dir)" >&2
+	local integrations_src=$1 patches_src=$2 integrations_ver=$3 patches_ver=$4
+	local patches_dir=${patches_src%/*}
+	patches_dir=${TEMP_DIR}/${patches_dir//[^[:alnum:]]/}-rv
+	local integrations_dir=${integrations_src%/*}
+	integrations_dir=${TEMP_DIR}/${integrations_dir//[^[:alnum:]]/}-rv
+	mkdir -p "$patches_dir" "$integrations_dir" "${TEMP_DIR}/jhc-rv"
+
+	pr "Getting prebuilts (${patches_src%/*})" >&2
 	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url rv_patches_json
 
 	rv_cli_url=$(gh_req "https://api.github.com/repos/j-hc/revanced-cli/releases/latest" - | json_get 'browser_download_url') || return 1
-	local rv_cli_jar="${prebuilts_dir}/${rv_cli_url##*/}"
-	echo "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")  " >"$prebuilts_dir/changelog.md"
+	local rv_cli_jar="${TEMP_DIR}/jhc-rv/${rv_cli_url##*/}"
+	echo "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")  " >"$patches_dir/changelog.md"
 
 	local rv_integrations_rel="https://api.github.com/repos/${integrations_src}/releases/"
-	if [ "$CONF_INTEGRATIONS_VER" ]; then rv_integrations_rel+="tags/${CONF_INTEGRATIONS_VER}"; else rv_integrations_rel+="latest"; fi
+	if [ "$integrations_ver" ]; then rv_integrations_rel+="tags/${integrations_ver}"; else rv_integrations_rel+="latest"; fi
 	local rv_patches_rel="https://api.github.com/repos/${patches_src}/releases/"
-	if [ "$CONF_PATCHES_VER" ]; then rv_patches_rel+="tags/${CONF_PATCHES_VER}"; else rv_patches_rel+="latest"; fi
+	if [ "$patches_ver" ]; then rv_patches_rel+="tags/${patches_ver}"; else rv_patches_rel+="latest"; fi
 
 	rv_integrations_url=$(gh_req "$rv_integrations_rel" - | json_get 'browser_download_url')
-	local rv_integrations_apk="${prebuilts_dir}/${rv_integrations_url##*/}"
-	echo "Integrations: $(cut -d/ -f4 <<<"$rv_integrations_url")/$(cut -d/ -f9 <<<"$rv_integrations_url")  " >>"$prebuilts_dir/changelog.md"
+	local rv_integrations_apk="${integrations_dir}/${rv_integrations_url##*/}"
+	echo "Integrations: $(cut -d/ -f4 <<<"$rv_integrations_url")/$(cut -d/ -f9 <<<"$rv_integrations_url")  " >>"$patches_dir/changelog.md"
 
 	rv_patches=$(gh_req "$rv_patches_rel" -)
 	rv_patches_changelog=$(json_get 'body' <<<"$rv_patches" | sed 's/\(\\n\)\+/\\n/g')
 	rv_patches_dl=$(json_get 'browser_download_url' <<<"$rv_patches")
-	rv_patches_json="${prebuilts_dir}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
+	rv_patches_json="${patches_dir}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
 	rv_patches_url=$(grep 'jar' <<<"$rv_patches_dl")
-	local rv_patches_jar="${prebuilts_dir}/${rv_patches_url##*/}"
+	local rv_patches_jar="${patches_dir}/${rv_patches_url##*/}"
 	[ -f "$rv_patches_jar" ] || REBUILD=true
-	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$(cut -d/ -f9 <<<"$rv_patches_url")  " >>"$prebuilts_dir/changelog.md"
-	echo -e "\n${rv_patches_changelog//# [/### [}\n---" >>"$prebuilts_dir/changelog.md"
+	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$(cut -d/ -f9 <<<"$rv_patches_url")  " >>"$patches_dir/changelog.md"
+	echo -e "\n${rv_patches_changelog//# [/### [}\n---" >>"$patches_dir/changelog.md"
 
 	dl_if_dne "$rv_cli_jar" "$rv_cli_url" >&2
 	dl_if_dne "$rv_integrations_apk" "$rv_integrations_url" >&2
@@ -90,15 +95,19 @@ get_prebuilts() {
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
 
 	HTMLQ="${TEMP_DIR}/htmlq"
-	if [ ! -f "${TEMP_DIR}/htmlq" ]; then
+	if [ ! -f "$HTMLQ" ]; then
 		if [ "$OS" = Android ]; then
 			if [ "$arch" = arm64 ]; then arch=arm64-v8a; else arch=armeabi-v7a; fi
 			dl_if_dne ${TEMP_DIR}/htmlq https://github.com/j-hc/htmlq-ndk/releases/latest/download/htmlq-${arch}
 			chmod +x $HTMLQ
 		else
-			req "https://github.com/mgdm/htmlq/releases/latest/download/htmlq-x86_64-linux.tar.gz" "${TEMP_DIR}/htmlq.tar.gz"
-			tar -xf "${TEMP_DIR}/htmlq.tar.gz" -C "$TEMP_DIR"
-			rm "${TEMP_DIR}/htmlq.tar.gz"
+			if [ "${DRYRUN:-}" ]; then
+				: >"$HTMLQ"
+			else
+				req "https://github.com/mgdm/htmlq/releases/latest/download/htmlq-x86_64-linux.tar.gz" "${TEMP_DIR}/htmlq.tar.gz"
+				tar -xf "${TEMP_DIR}/htmlq.tar.gz" -C "$TEMP_DIR"
+				rm "${TEMP_DIR}/htmlq.tar.gz"
+			fi
 		fi
 
 	fi

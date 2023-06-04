@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-trap "rm -rf temp/tmp.*; exit 130" INT
+trap "rm -rf temp/*tmp.* temp/*/*tmp.*; exit 130" INT
 
 if [ "${1:-}" = "clean" ]; then
 	rm -rf temp build logs build.md
@@ -31,8 +31,8 @@ if ! PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs); then
 	if [ "$OS" = Android ]; then PARALLEL_JOBS=1; else PARALLEL_JOBS=$(nproc); fi
 fi
 LOGGING_F=$(toml_get "$main_config_t" logging-to-file) && vtf "$LOGGING_F" "logging-to-file" || LOGGING_F=false
-CONF_PATCHES_VER=$(toml_get "$main_config_t" patches-version) || CONF_PATCHES_VER=
-CONF_INTEGRATIONS_VER=$(toml_get "$main_config_t" integrations-version) || CONF_INTEGRATIONS_VER=
+DEF_PATCHES_VER=$(toml_get "$main_config_t" patches-version) || DEF_PATCHES_VER=""
+DEF_INTEGRATIONS_VER=$(toml_get "$main_config_t" integrations-version) || DEF_INTEGRATIONS_VER=""
 DEF_PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || DEF_PATCHES_SRC="revanced/revanced-patches"
 DEF_INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || DEF_INTEGRATIONS_SRC="revanced/revanced-integrations"
 DEF_RV_BRAND=$(toml_get "$main_config_t" rv-brand) || DEF_RV_BRAND="ReVanced"
@@ -51,10 +51,16 @@ zip --version >/dev/null || abort "\`zip\` is not installed. install it with 'ap
 get_prebuilts
 
 set_prebuilts() {
-	app_args[cli]=$(find "$1" -name "revanced-cli-*.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[cli]}" ] || return 1
-	app_args[integ]=$(find "$1" -name "revanced-integrations-*.apk" -type f -print -quit 2>/dev/null) && [ "${app_args[integ]}" ] || return 1
-	app_args[ptjar]=$(find "$1" -name "revanced-patches-*.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[ptjar]}" ] || return 1
-	app_args[ptjs]=$(find "$1" -name "patches-*.json" -type f -print -quit 2>/dev/null) && [ "${app_args[ptjs]}" ] || return 1
+	local integrations_src=$1 patches_src=$2 integrations_ver=$3 patches_ver=$4
+	local patches_dir=${patches_src%/*}
+	patches_dir=${TEMP_DIR}/${patches_dir//[^[:alnum:]]/}-rv
+	local integrations_dir=${integrations_src%/*}
+	integrations_dir=${TEMP_DIR}/${integrations_dir//[^[:alnum:]]/}-rv
+
+	app_args[cli]=$(find "${TEMP_DIR}/jhc-rv" -name "revanced-cli-*.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[cli]}" ] || return 1
+	app_args[integ]=$(find "$integrations_dir" -name "revanced-integrations-${integrations_ver:-*}.apk" -type f -print -quit 2>/dev/null) && [ "${app_args[integ]}" ] || return 1
+	app_args[ptjar]=$(find "$patches_dir" -name "revanced-patches-${patches_ver:-*}.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[ptjar]}" ] || return 1
+	app_args[ptjs]=$(find "$patches_dir" -name "patches-${patches_ver:-*}.json" -type f -print -quit 2>/dev/null) && [ "${app_args[ptjs]}" ] || return 1
 }
 
 build_rv_w() {
@@ -77,12 +83,12 @@ for table_name in $(toml_get_table_names); do
 	if ((idx >= PARALLEL_JOBS)); then wait -n; else idx=$((idx + 1)); fi
 	declare -A app_args
 	patches_src=$(toml_get "$t" patches-source) || patches_src=$DEF_PATCHES_SRC
+	patches_ver=$(toml_get "$t" patches-version) || patches_ver=$DEF_PATCHES_VER
 	integrations_src=$(toml_get "$t" integrations-source) || integrations_src=$DEF_INTEGRATIONS_SRC
-	prebuilts_dir=${patches_src%/*}
-	prebuilts_dir=${TEMP_DIR}/${prebuilts_dir//[^[:alnum:]]/}-rv
-	if ! set_prebuilts "$prebuilts_dir"; then
-		mkdir -p "$prebuilts_dir"
-		read -r rv_cli_jar rv_integrations_apk rv_patches_jar rv_patches_json <<<"$(get_rv_prebuilts "$integrations_src" "$patches_src" "$prebuilts_dir")"
+	integrations_ver=$(toml_get "$t" integrations-version) || integrations_ver=$DEF_INTEGRATIONS_VER
+	if ! set_prebuilts "$integrations_src" "$patches_src" "$integrations_ver" "$patches_ver"; then
+		read -r rv_cli_jar rv_integrations_apk rv_patches_jar rv_patches_json \
+			<<<"$(get_rv_prebuilts "$integrations_src" "$patches_src" "$integrations_ver" "$patches_ver")"
 		app_args[cli]=$rv_cli_jar
 		app_args[integ]=$rv_integrations_apk
 		app_args[ptjar]=$rv_patches_jar
