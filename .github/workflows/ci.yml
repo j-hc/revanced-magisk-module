@@ -2,8 +2,8 @@ name: CI
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 16 * * *"
-
+    - cron: "0 16 */14 * *"
+    
 jobs:
   check:
     runs-on: ubuntu-latest
