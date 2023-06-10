@@ -67,9 +67,9 @@ build_rv_w() {
 	if [ "$LOGGING_F" = true ]; then
 		logf=logs/"${table_name,,}.log"
 		: >"$logf"
-		build_rv 2>&1 "$(declare -p app_args)" | tee "$logf"
+		{ build_rv 2>&1 "$(declare -p app_args)" | tee "$logf"; } &
 	else
-		build_rv "$(declare -p app_args)"
+		build_rv "$(declare -p app_args)" &
 	fi
 }
 
@@ -142,9 +142,9 @@ for table_name in $(toml_get_table_names); do
 		app_args[table]="$table_name (arm-v7a)"
 		app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
 		app_args[arch]="arm-v7a"
-		build_rv_w &
+		build_rv_w
 	else
-		build_rv_w &
+		build_rv_w
 	fi
 done
 wait
