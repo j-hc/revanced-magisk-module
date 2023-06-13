@@ -2,12 +2,13 @@ YouTube: 18.19.35
 YouTube-Extended: 18.17.43  
 Music (arm64-v8a): 5.39.52  
 Music (arm-v7a): 5.39.52  
-Music-Extended (arm64-v8a): 6.05.51  
 Music-Extended (arm-v7a): 6.05.51  
-Twitter: 9.92.0-release.0  
+Music-Extended (arm64-v8a): 6.05.51  
+Twitter: 9.93.0-release.1  
 Twitch: 14.6.1  
 TikTok: 29.9.4  
-Reddit: 2023.22.0  
+Reddit: 2023.23.0  
+Messenger: 412.0.0.15.69  
 
 Install [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) for non-root YouTube or YT Music  
 
@@ -45,10 +46,14 @@ YouTube Music
 ---
 CLI: j-hc/revanced-cli-2.22.0-all.jar  
 Integrations: revanced/revanced-integrations-0.110.0.apk  
-Patches: revanced/revanced-patches-2.176.1.jar  
+Patches: revanced/revanced-patches-2.177.0.jar  
 
-#### [2.176.1](https://github.com/revanced/revanced-patches/compare/v2.176.0...v2.176.1) (2023-06-12)
+### [2.177.0](https://github.com/revanced/revanced-patches/compare/v2.176.1...v2.177.0) (2023-06-12)
 ### Bug Fixes
-* **syncforreddit/change-oauth-client-id:** use correct signature for Android API ([4db2eba](https://github.com/revanced/revanced-patches/commit/4db2eba6d66f094f1d2400bfa8b9c15a175f796e))
+* **reddit/hide-ads:** search for correct reference class descriptor ([ad2a858](https://github.com/revanced/revanced-patches/commit/ad2a8585b2a5ecbc5eb92dd23b0ab124aa8a2541))
+* **syncforreddit/change-oauth-client-id:** trim whitespace from OAuth string ([#2402](https://github.com/revanced/revanced-patches/issues/2402)) ([2afea71](https://github.com/revanced/revanced-patches/commit/2afea71557cfe4eb64d7c7ebf5a07dfd24a11824))
+* **syncforreddit/change-oauth-client-id:** use downloads directory ([9b5af77](https://github.com/revanced/revanced-patches/commit/9b5af77a229a22466cfe8ed41a21d081beeae960))
+### Features
+* **syncforreddit/change-oauth-client-id:** support pro version ([d34288b](https://github.com/revanced/revanced-patches/commit/d34288b6e8c7f5bb944622a3c741fcc693868033))
 
 ---  
