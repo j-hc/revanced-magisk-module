@@ -374,23 +374,23 @@ build_rv() {
 
 	local stock_bundle_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}-bundle.apk"
 	local is_bundle=false
-	if [ "$mode_arg" = module ] || [ "$mode_arg" = both ]; then
-		if [ -f "$stock_bundle_apk" ]; then
-			is_bundle=true
-		elif [ "$dl_from" = apkmirror ]; then
-			pr "Downloading '${table}' bundle from APKMirror"
-			if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_bundle_apk" BUNDLE "" ""; then
-				if (($(stat -c%s "$stock_apk") - $(stat -c%s "$stock_bundle_apk") > 10000000)); then
-					pr "'${table}' bundle was downloaded successfully and will be used for the module"
-					is_bundle=true
-				else
-					pr "'${table}' bundle was downloaded but will not be used"
-				fi
-			else
-				pr "'${table}' bundle was not found"
-			fi
-		fi
-	fi
+	# if [ "$mode_arg" = module ] || [ "$mode_arg" = both ]; then
+	# 	if [ -f "$stock_bundle_apk" ]; then
+	# 		is_bundle=true
+	# 	elif [ "$dl_from" = apkmirror ]; then
+	# 		pr "Downloading '${table}' bundle from APKMirror"
+	# 		if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_bundle_apk" BUNDLE "" ""; then
+	# 			if (($(stat -c%s "$stock_apk") - $(stat -c%s "$stock_bundle_apk") > 10000000)); then
+	# 				pr "'${table}' bundle was downloaded successfully and will be used for the module"
+	# 				is_bundle=true
+	# 			else
+	# 				pr "'${table}' bundle was downloaded but will not be used"
+	# 			fi
+	# 		else
+	# 			pr "'${table}' bundle was not found"
+	# 		fi
+	# 	fi
+	# fi
 
 	if [ "$mode_arg" = module ]; then
 		build_mode_arr=(module)
