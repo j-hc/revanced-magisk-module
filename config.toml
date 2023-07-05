@@ -1,11 +1,12 @@
 logging-to-file = true        # enables logging of every patch process to a seperate file
-enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
-build-mindetach-module = true
+enable-magisk-update = false   # set this to false if you do not want to receive updates for the module in magisk app
+build-mindetach-module = false
 
 # add 'enabled = false' for not patching a specific app or remove it from the config
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [YouTube]
+enabled = false
 build-mode = "both"                                                   # 'both', 'apk' or 'module'
 excluded-patches = ""                                                 # space-seperated patches to exclude (multiline strings are not supported)
 included-patches = ""                                                 # space-seperated patches to include (non-excluded patches are included by default)
@@ -19,11 +20,20 @@ app-name = "YouTube"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 rv-brand = "ReVanced Extended"
-build-mode = "both"
+build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+# With oled
+# excluded-patches = "custom-branding-name custom-branding-icon-revancify custom-branding-icon-afn-red custom-branding-icon-afn-blue custom-branding-icon-mmt debugging"
+# Without oled
+# old excluded-patches = "custom-branding-name custom-branding-icon-revancify custom-branding-icon-afn-red custom-branding-icon-afn-blue custom-branding-icon-mmt theme debugging"
+excluded-patches = "custom-branding-icon-afn-blue custom-branding-icon-afn-red custom-branding-icon-mmt custom-branding-icon-revancify-blue custom-branding-icon-revancify-red custom-branding-name translations debugging theme"
+# Add materialyou
+included-patches = "materialyou"
 
 [Music]
+enabled = false
 build-mode = "both"
+app-name = "Music"
 excluded-patches = ""
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 arch = "both"
@@ -33,24 +43,29 @@ app-name = "Music"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 rv-brand = "ReVanced Extended"
-build-mode = "both"
+build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-arch = "both"
+arch = "arm64-v8a"
+excluded-patches = "custom-branding-music-afn-blue custom-branding-music-afn-red custom-branding-music-mmt custom-branding-music-revancify-blue custom-branding-music-revancify-red amoled custom-branding-music-name"
 
 [Twitter]
+enabled = false
 build-mode = "apk"
 excluded-patches = "hide-views-stats"
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
 
 [Twitch]
+enabled = false
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
 
 [TikTok]
+enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
 
 [Reddit]
+enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 
 [Messenger]

@@ -139,3 +139,14 @@ jobs:
           name: logs
           path: logs
           if-no-files-found: ignore
+
+  Upload_to_Telegram_KevinNitro:
+    uses: nikhilbadyal/ghactions/.github/workflows/telegram-uploader.yml@main
+    needs: run
+    secrets:
+      TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+      TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      STICKER_ID: ${{ secrets.STICKER_ID }}
+      MESSAGE: RVX bản mới êi 🥴🥴
