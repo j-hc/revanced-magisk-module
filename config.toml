@@ -23,7 +23,7 @@ included-patches = ""                                                 # space-se
 version = "latest"                                                      # 'auto', 'latest', 'beta' or a custom one like '17.40.41'
 exclusive-patches = false                                             # excludes all patches by default
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
-module-prop-name = "ytrv-latest-magisk"
+module-prop-name = "ytrvlatest-magisk"
 
 [Music-arm64]
 build-mode = "both"
