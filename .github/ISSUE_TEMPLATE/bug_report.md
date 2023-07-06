@@ -29,4 +29,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
+
 **DO NOT REPORT REVANCED BUGS IN THIS REPO**
+
+**Describe the bug of the rvmm builder or the modules**
