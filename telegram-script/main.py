@@ -65,8 +65,8 @@ def fetch_changelogs():
     ).json()[1]
 
     re_exp = r"(?<=revanced-patches-)[0-9.]+(?=.jar)"
-    previous_revanced_version = re.findall(re_exp, previous_version_release["body"])[0]
-    current_revanced_version = re.findall(re_exp, release["body"])[0]
+    previous_revanced_version = re.findall(re_exp, previous_version_release["body"])[1]
+    current_revanced_version = re.findall(re_exp, release["body"])[1]
 
     changelogs = requests.get(
         Config.REVANCED_CHANGES_URL
