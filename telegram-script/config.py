@@ -8,6 +8,9 @@ class Config:
     REVANCED_CHANGES_URL = (
         "https://api.github.com/repos/revanced/revanced-patches/compare"
     )
+    REVANCED_EXTENDED_CHANGES_URL = (
+        "https://api.github.com/repos/inotia00/revanced-patches/compare"
+    )
 
     NOTES = """*≣ Note:*
  ➜ `mindetach.zip` is used to detach play store updates for YT and YT Music for rooted users.

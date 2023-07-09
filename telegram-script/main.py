@@ -8,7 +8,10 @@ release = requests.get(Config.REVANCED_APKS_RELEASE_URL).json()
 
 
 def revanced_version_message():
-    return re.findall(r"CLI:[a-zA-Z-.\s0-9:]+\n", release["body"])[0].strip() or ""
+    version_message = "\n".join(re.findall(r"CLI:\s[a-zA-Z-.\s0-9:\/]+.jar", release["body"])) or ""
+    # Remove duplicate version message
+    version_message = "\n".join(list(dict.fromkeys(version_message.split("\n"))))
+    return version_message
 
 
 def generate_file_bullet(file_name, file_url):
@@ -71,13 +74,13 @@ def fetch_changelogs():
     changelogs = requests.get(
         Config.REVANCED_CHANGES_URL
         + f"/v{previous_revanced_version}...v{current_revanced_version}"
-    ).json()["commits"] or ["Same as previous release with minor source changes"]
+    ).json()["commits"]
 
     changelogs = [
         "✴ " + ch["commit"]["message"].split("\n")[0]
         for ch in changelogs
         if not "chore" in ch["commit"]["message"]
-    ] or []  # Remove signed-of in commit message
+    ] if changelogs else ["✴ Same as previous version with minor source changes."]
 
     return changelogs
 
