@@ -119,6 +119,10 @@ _req() {
 	else
 		local dlp
 		dlp="$(dirname "$2")/tmp.$(basename "$2")"
+		if [ -f "$dlp" ]; then
+			while [ -f "$dlp" ]; do sleep 1; done
+			return
+		fi
 		wget -nv -O "$dlp" --header="$3" "$1"
 		mv -f "$dlp" "$2"
 	fi
@@ -358,10 +362,7 @@ build_rv() {
 				break
 			fi
 		done
-		if [ ! -f "$stock_apk" ]; then
-			epr "ERROR: Could not download ${table} from any provider"
-			return 0
-		fi
+		if [ ! -f "$stock_apk" ]; then return 0; fi
 	fi
 	log "${table}: ${version}"
 
@@ -370,7 +371,7 @@ build_rv() {
 	microg_patch=$(jq -r ".[] | select(.compatiblePackages[].name==\"${pkg_name}\") | .name" "${args[ptjs]}" | grep -iF microg || :)
 	if [ "$microg_patch" ]; then
 		microg_patch="${microg_patch,,}"
-	        microg_patch="${microg_patch// /-}"
+		microg_patch="${microg_patch// /-}"
 		p_patcher_args=("${p_patcher_args[@]//-[ei] ${microg_patch}/}")
 	fi
 
