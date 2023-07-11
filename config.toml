@@ -26,7 +26,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 build-mode = "both"
 excluded-patches = ""
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-arch = "both"
+apkmirror-arch = "both"                                                     # both arm64-v8a and arm-v7a
 
 [Music-Extended]
 app-name = "Music"
@@ -35,7 +35,7 @@ integrations-source = "inotia00/revanced-integrations"
 rv-brand = "ReVanced Extended"
 build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-arch = "both"
+apkmirror-arch = "both"
 
 [Twitter]
 build-mode = "apk"
@@ -55,7 +55,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 
 [Messenger]
 apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
-arch = "arm64-v8a"
+apkmirror-arch = "arm64-v8a"
 
 [Spotify]
 enabled = false
@@ -64,7 +64,7 @@ uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 [Citra]
 enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/citra-emulator/citra-emulator/"
-arch = "arm64-v8a"
+apkmirror-arch = "arm64-v8a"
 
 [Backdrops]
 enabled = false
@@ -85,7 +85,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-s
 [TickTick]
 enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/ticktick-to-do-list-with-reminder-day-planner/"
-arch = "arm64-v8a"
+apkmirror-arch = "arm64-v8a"
 
 [Tasker]
 enabled = false
