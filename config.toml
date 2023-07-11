@@ -1,11 +1,15 @@
 logging-to-file = true        # enables logging of every patch process to a seperate file
-enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
+enable-magisk-update = true   # set this to true if you do not want to receive updates for the module in magisk app
 build-mindetach-module = true
 
-# add 'enabled = false' for not patching a specific app or remove it from the config
+# add 'enabled = true' for not patching a specific app or remove it from the config
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [YouTube]
+enabled = true
+logging-to-file = true
+enable-magisk-update = true
+build-mindetach-module = true
 build-mode = "both"                                                   # 'both', 'apk' or 'module'
 excluded-patches = ""                                                 # space-seperated patches to exclude (multiline strings are not supported)
 included-patches = ""                                                 # space-seperated patches to include (non-excluded patches are included by default)
@@ -15,6 +19,10 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
 
 [YouTube-Extended]
+enabled = true
+logging-to-file = true
+enable-magisk-update = true
+build-mindetach-module = true
 app-name = "YouTube"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
@@ -23,12 +31,20 @@ build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music]
+enabled = true
+logging-to-file = true
+enable-magisk-update = true
+build-mindetach-module = true
 build-mode = "both"
 excluded-patches = ""
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 arch = "both"
 
 [Music-Extended]
+enabled = true
+logging-to-file = true
+enable-magisk-update = true
+build-mindetach-module = true
 app-name = "Music"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
@@ -38,59 +54,78 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 arch = "both"
 
 [Twitter]
+enabled = true
+logging-to-file = true
 build-mode = "apk"
 excluded-patches = "hide-views-stats"
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
 
 [Twitch]
+enabled = true
+logging-to-file = true
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
 
 [TikTok]
+enabled = true
+logging-to-file = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
 
 [Reddit]
+enabled = true
+logging-to-file = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 
 [Messenger]
+enabled = true
+logging-to-file = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
 arch = "arm64-v8a"
 
 [Spotify]
-enabled = false
+enabled = true
+logging-to-file = true
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 
 [Citra]
-enabled = false
+enabled = true
+logging-to-file = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/citra-emulator/citra-emulator/"
 arch = "arm64-v8a"
 
 [Backdrops]
-enabled = false
+enabled = true
+logging-to-file = true
 uptodown-dlurl = "https://backdrops.en.uptodown.com/android"
 
 [WarnWetter]
-enabled = false
+enabled = true
+logging-to-file = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/deutscher-wetterdienst/warnwetter/"
 
 [Windyapp]
-enabled = false
+enabled = true
+logging-to-file = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/windy-weather-world-inc/windy-wind-weather-forecast/"
 
 [IconPackStudio]
-enabled = false
+enabled = true
+logging-to-file = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"
 
 [TickTick]
-enabled = false
+enabled = true
+logging-to-file = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/ticktick-to-do-list-with-reminder-day-planner/"
 arch = "arm64-v8a"
 
 [Tasker]
-enabled = false
+enabled = true
+logging-to-file = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/joaomgcd/tasker/"
 
 [Photomath]
-enabled = false
+enabled = true
+logging-to-file = true
 apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
