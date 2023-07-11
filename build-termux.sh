@@ -34,12 +34,12 @@ if [ -d revanced-magisk-module ]; then
 		pr "Cloning revanced-magisk-module. config.toml will be preserved."
 		cp -f revanced-magisk-module/config.toml .
 		rm -rf revanced-magisk-module
-		git clone https://github.com/j-hc/revanced-magisk-module --recurse --depth 1
+		git clone https://github.com/sipun9348/revanced-magisk-module --recurse --depth 1
 		mv -f config.toml revanced-magisk-module/config.toml
 	fi
 else
 	pr "Cloning revanced-magisk-module."
-	git clone https://github.com/j-hc/revanced-magisk-module --recurse --depth 1
+	git clone https://github.com/sipun9348/revanced-magisk-module --recurse --depth 1
 	sed -i '/^enabled.*/d; /^\[.*\]/a enabled = false' revanced-magisk-module/config.toml
 fi
 cd revanced-magisk-module
