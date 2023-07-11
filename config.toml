@@ -9,7 +9,7 @@ build-mindetach-module = true
 build-mode = "both"                                                   # 'both', 'apk' or 'module'
 included-patches = "Copy video url Disable Shorts on startup Enable debugging External downloads HDR auto brightness Hide Shorts components Hide ads Minimized playback Navigation buttons Old video quality menu Open links externally Premium heading Remember video quality Return YouTube Dislike Seekbar tapping SponsorBlock Theme Vanced MicroG support Video ads Video speed"                                                 # space-seperated patches to include (non-excluded patches are included by default)
 version = "auto"                                                      # 'auto', 'latest', 'beta' or a custom one like '17.40.41'
-exclusive-patches = true                                             # excludes all patches by default and only applies included-patches
+exclusive-patches = false                                             # excludes all patches by default and only applies included-patches
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 module-prop-name = "ytrv-magisk"
 
