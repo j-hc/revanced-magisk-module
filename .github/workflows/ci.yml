@@ -27,7 +27,7 @@ jobs:
             t=$(toml_get_table YouTube)
             v=$(toml_get "$t" "version") || v=""
             if isoneof "$v" latest beta; then
-              cur_yt=$(grep -F '**YouTube:**' build.md | cut -d' ' -f2)
+              cur_yt=$(sed -n 's/.*YouTube: \(.*\)/\1/p' build.md | xargs)
               [ -z "$cur_yt" ] && return 1 # empty, fail=>dont build
               if [ "$v" = beta ]; then aav="true"; else aav="false"; fi
               last_ver=$(get_apkmirror_vers youtube "$aav" | get_largest_ver)
@@ -44,7 +44,7 @@ jobs:
             PATCHES_SRC=$(toml_get "$(toml_get_table "")" patches-source) || PATCHES_SRC="revanced/revanced-patches"
             last_patches_url=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'browser_download_url' | grep 'jar')
             last_patches=${last_patches_url##*/}
-            cur_patches=$(grep -F "**Patches:** ${PATCHES_SRC%%/*}" build.md | cut -d' ' -f2)
+            cur_patches=$(sed -n "s/.*Patches: ${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
             echo "current patches version: $cur_patches"
             echo "latest patches version: $last_patches"
             if [ -z "$cur_patches" ] || [ -z "$last_patches" ]; then return 1; fi
