@@ -41,7 +41,7 @@ jobs:
           }
 
           is_patches_latest() {
-            PATCHES_SRC=$(toml_get "$(toml_get_table "")" patches-source) || PATCHES_SRC="revanced/revanced-patches"
+            PATCHES_SRC=$(toml_get "$(toml_get_table "")" patches-source) || PATCHES_SRC="ReVanced/revanced-patches"
             last_patches_url=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'browser_download_url' | grep 'jar')
             last_patches=${last_patches_url##*/}
             cur_patches=$(sed -n "s/.*Patches: ${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
