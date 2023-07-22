@@ -7,13 +7,14 @@ build-mindetach-module = true
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [YouTube]
-enabled = true
-build-mode = "both"                                                   # 'both', 'apk' or 'module'
-excluded-patches = "debugging custom-branding"                                        # space-seperated patches to exclude (multiline strings are not supported)
-included-patches = ""                                                 # space-seperated patches to include (non-excluded patches are included by default)
-version = "auto"                                                      # 'auto', 'latest', 'beta' or a custom one like '17.40.41'
-exclusive-patches = false                                             # excludes all patches by default
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
-module-prop-name = "ytrv-magisk"
+apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+rv-brand = "ReVanced Extended"
+version = "auto"
+included-patches = "force-premium-heading"
+excluded-patches = "change-homepage custom-branding-youtube-name custom-branding-icon-revancify-blue"
+
+
 
 
