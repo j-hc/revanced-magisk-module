@@ -43,18 +43,20 @@ abort() {
 }
 
 get_rv_prebuilts() {
-	local integrations_src=$1 patches_src=$2 integrations_ver=$3 patches_ver=$4
+	local integrations_src=$1 patches_src=$2 integrations_ver=$3 patches_ver=$4 cli_src=$5
 	local patches_dir=${patches_src%/*}
 	patches_dir=${TEMP_DIR}/${patches_dir//[^[:alnum:]]/}-rv
 	local integrations_dir=${integrations_src%/*}
 	integrations_dir=${TEMP_DIR}/${integrations_dir//[^[:alnum:]]/}-rv
-	mkdir -p "$patches_dir" "$integrations_dir" "${TEMP_DIR}/jhc-rv"
+	local cli_dir=${cli_src%/*}
+	cli_dir=${TEMP_DIR}/${cli_dir//[^[:alnum:]]/}-rv
+	mkdir -p "$patches_dir" "$integrations_dir" "$cli_dir"
 
 	pr "Getting prebuilts (${patches_src%/*})" >&2
 	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url rv_patches_json
 
-	rv_cli_url=$(gh_req "https://api.github.com/repos/j-hc/revanced-cli/releases/latest" - | json_get 'browser_download_url') || return 1
-	local rv_cli_jar="${TEMP_DIR}/jhc-rv/${rv_cli_url##*/}"
+	rv_cli_url=$(gh_req "https://api.github.com/repos/${cli_src}/releases/latest" - | json_get 'browser_download_url') || return 1
+	local rv_cli_jar="${cli_dir}/${rv_cli_url##*/}"
 	echo "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")  " >"$patches_dir/changelog.md"
 
 	local rv_integrations_rel="https://api.github.com/repos/${integrations_src}/releases/"
@@ -428,7 +430,7 @@ build_rv() {
 		fi
 		if [ ! -f "$patched_apk" ] || [ "$REBUILD" = true ]; then
 			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
-				pr "Building '${table}' failed!"
+				epr "Building '${table}' failed!"
 				return 0
 			fi
 		fi
