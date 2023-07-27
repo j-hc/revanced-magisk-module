@@ -94,7 +94,7 @@ set_perm $MODPATH/base.apk 1000 1000 644 u:object_r:apk_data_file:s0
 
 ui_print "* Mounting __PKGNAME"
 mkdir -p $NVBASE/rvhc
-RVPATH=$NVBASE/rvhc/__PKGNAME_rv.apk
+RVPATH=$NVBASE/rvhc/${MODPATH##*/}.apk
 mv -f $MODPATH/base.apk $RVPATH
 
 if ! op=$(nsenter -t1 -m -- mount -o bind $RVPATH $BASEPATH/base.apk 2>&1); then
@@ -107,6 +107,7 @@ nohup cmd package compile --reset __PKGNAME >/dev/null 2>&1 &
 
 ui_print "* Cleanup"
 rm -rf $MODPATH/bin $MODPATH/__PKGNAME.apk
+rm -rf $NVBASE/rvhc/__PKGNAME_rv.apk # rm this later
 
 for s in "uninstall.sh" "service.sh"; do
 	sed -i "2 i\NVBASE=${NVBASE}" $MODPATH/$s
