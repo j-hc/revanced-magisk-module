@@ -40,19 +40,24 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 apkmirror-arch = "both"
 
 [Twitter]
+enabled = false
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
 
 [Twitch]
+enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
 
 [TikTok]
+enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
 
 [Reddit]
+enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 
 [Messenger]
+enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
 apkmirror-arch = "arm64-v8a"
 
