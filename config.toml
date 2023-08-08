@@ -10,13 +10,34 @@ build-mindetach-module = true
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
 rv-brand = "ReVanced Extended"
-build-mode = "both"
-version = "auto"
-included-patches = "force-premium-heading"
-excluded-patches = "change-homepage custom-branding-youtube-name custom-branding-icon-revancify-blue"
+apkmirror-arch = "arm64-v8a"
+build-mode = "module"
+included-patches = "add-splash-animation force-premium-heading materialyou"
+excluded-patches = "custom-branding-youtube-name custom-branding-icon-revancify-blue custom-package-name"
 
+[Twitch]
+apkmirror-dlurl = "https://apkmirror.com/apk/twitch-interactive-inc/twitch/"
 
+[Music]
+apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube-music/"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+apkmirror-arch = "arm64-v8a"
+build-mode = "module"
+excluded-patches = "custom-branding-music-name custom-branding-icon-revancify-blue custom-package-name"
 
+[Reddit]
+apkmirror-dlurl = "https://apkmirror.com/apk/redditinc/reddit/"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+included-patches = "disable-screenshot-popup hide-ads premium-icon-reddit sanitize-sharing-links"
+exclusive-patches = true
 
-
+[Messenger]
+apkmirror-dlurl = "https://apkmirror.com/apk/facebook-2/messenger/"
