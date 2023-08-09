@@ -65,7 +65,7 @@ enabled = false
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 
 [Citra]
-enabled = false
+enabled = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/citra-emulator/citra-emulator/"
 apkmirror-arch = "arm64-v8a"
 
@@ -82,7 +82,7 @@ enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/windy-weather-world-inc/windy-wind-weather-forecast/"
 
 [IconPackStudio]
-enabled = false
+enabled = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"
 
 [TickTick]
@@ -95,5 +95,5 @@ enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/joaomgcd/tasker/"
 
 [Photomath]
-enabled = false
+enabled = true
 apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
