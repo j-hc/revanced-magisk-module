@@ -80,7 +80,6 @@ for table_name in $(toml_get_table_names); do
 	enabled=$(toml_get "$t" enabled) && vtf "$enabled" "enabled" || enabled=true
 	if [ "$enabled" = false ]; then continue; fi
 
-	if ((idx >= PARALLEL_JOBS)); then wait -n; else idx=$((idx + 1)); fi
 	declare -A app_args
 	patches_src=$(toml_get "$t" patches-source) || patches_src=$DEF_PATCHES_SRC
 	patches_ver=$(toml_get "$t" patches-version) || patches_ver=$DEF_PATCHES_VER
@@ -139,12 +138,15 @@ for table_name in $(toml_get_table_names); do
 		app_args[table]="$table_name (arm64-v8a)"
 		app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
 		app_args[arch]="arm64-v8a"
+		if ((idx >= PARALLEL_JOBS)); then wait -n; else idx=$((idx + 1)); fi
 		build_rv_w
 		app_args[table]="$table_name (arm-v7a)"
 		app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
 		app_args[arch]="arm-v7a"
+		if ((idx >= PARALLEL_JOBS)); then wait -n; else idx=$((idx + 1)); fi
 		build_rv_w
 	else
+		if ((idx >= PARALLEL_JOBS)); then wait -n; else idx=$((idx + 1)); fi
 		build_rv_w
 	fi
 done
@@ -166,7 +168,7 @@ if [ "$youtube_mode" != module ] || [ "$music_mode" != module ]; then
 	log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) for non-root YouTube or YT Music"
 fi
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
-log "\n---\nChangelog:"
+log "---\nChangelog:"
 log "$(cat $TEMP_DIR/*-rv/changelog.md)"
 
 pr "Done"

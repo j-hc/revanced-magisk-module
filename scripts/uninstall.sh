@@ -1,8 +1,8 @@
 #!/system/bin/sh
 {
 	MODDIR=${0%/*}
-	rm $NVBASE/rvhc/${MODDIR##*/}.apk
-	rmdir $NVBASE/rvhc
+	rm "$NVBASE/rvhc/${MODDIR##*/}".apk
+	rmdir --ignore-fail-on-non-empty "$NVBASE/rvhc"
 	# if __ISBNDL; then
 	# 	until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 1; done
 	# 	sleep 15
