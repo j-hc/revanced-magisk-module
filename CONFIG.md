@@ -17,6 +17,7 @@ There exists an example below with all defaults shown and all the keys explicitl
 parallel-jobs = 1 # amount of cores to use for parallel patching, if not set nproc is used
 patches-source = "revanced/revanced-patches" # where to fetch patches bundle from. default: "revanced/revanced-patches"
 integrations-source = "revanced/revanced-integrations" # where to fetch integrations from. default: "revanced/revanced-integrations"
+cli-source = "j-hc/revanced-cli" # where to fetch cli from. default: "j-hc/revanced-cli"
 rv-brand = "ReVanced Extended" # rebrand from 'ReVanced' to something different. default: "ReVanced"
 
 patches-version = "v2.160.0" # locks the patches version. default: latest available
@@ -38,8 +39,7 @@ uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 apkmonk-dlurl = "https://www.apkmonk.com/app/com.app.app/"
 module-prop-name = "some-app-magisk" # magisk module prop name.
 merge-integrations = false # set false to never merge even when needed. default: true
-dpi = "360-480dpi" # used to select apk variant from apkmirror. default: nodpi
-arch = "arm64-v8a" # 'arm64-v8a', 'arm-v7a', 'universal', 'both'. default: universal
-# arch option is only for downloading from apkmirror. both downloads both arm64-v8a and arm-v7a.
-# and does not affect anything else
+apkmirror-dpi = "360-480dpi" # used to select apk variant from apkmirror. default: nodpi
+apkmirror-arch = "arm64-v8a" # 'arm64-v8a', 'arm-v7a', 'universal', 'both'. 'both' downloads both arm64-v8a and arm-v7a. default: universal
+# arch option is only for downloading from apkmirror and does not affect anything else.
 ```
