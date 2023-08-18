@@ -88,20 +88,14 @@ enabled = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/joaomgcd/tasker/"
 
 [Photomath]
-enabled = false
+enabled = true
 apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
 
-[Instagram-arm64]
+[Instagram]
 enabled = true
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/instagram/instagram-instagram/"
-arch = "arm64-v8a"
-
-[Instagram-arm]
-enabled = true
-version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/instagram/instagram-instagram/"
-arch = "arm-v7a"
+apkmirror-arch = "both"
 
 [Facebook-Messenger-arm64]
 enabled = true
@@ -115,20 +109,10 @@ version = "auto"
 uptodown-dlurl = "https://facebook-messenger.en.uptodown.com/android"
 arch = "arm-v7a"
 
-[InShorts-arm64]
+[InShorts]
 enabled = true
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inshorts-formerly-news-in-shorts/inshorts-news-in-60-words-2/"
-arch = "arm64-v8a"
-[Music-Extended] # unmaintained
-enabled = false
-app-name = "Music"
-patches-source = "inotia00/revanced-patches"
-integrations-source = "inotia00/revanced-integrations"
-cli-source = "inotia00/revanced-cli"
-rv-brand = "ReVanced Extended"
-build-mode = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 apkmirror-arch = "both"
 
 [Music-Extended] # unmaintained
