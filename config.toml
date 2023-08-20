@@ -116,7 +116,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/inshorts-formerly-news-in-short
 apkmirror-arch = "both"
 
 [Music-Extended] # unmaintained
-enabled = true
+enabled = false
 app-name = "Music"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
@@ -127,7 +127,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 apkmirror-arch = "both"
 
 [YouTube-Extended] # unmaintained
-enabled = true
+enabled = false
 app-name = "YouTube"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
