@@ -58,16 +58,22 @@ jobs:
           echo "${DELIM}" >> "$GITHUB_OUTPUT"
           cp -f build.md build.tmp
 
+      - name: Get Date
+        id: date
+        run: |
+          echo "DATE=$(date +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
       - name: Upload modules to release
         uses: svenstaro/upload-release-action@v2
         with:
           body: ${{ steps.get_output.outputs.BUILD_LOG }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./build/*
-          release_name: ReVanced
+          release_name: v${{ steps.date.outputs.DATE }}
           tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           file_glob: true
           overwrite: true
+          prerelease: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Update changelog and Magisk update json
         id: update_config
@@ -99,6 +105,7 @@ jobs:
           find . -name "*-update.json" | grep . || : >dummy-update.json
 
       - uses: stefanzweifel/git-auto-commit-action@v4
+        if: github.ref == 'refs/heads/main'
         with:
           branch: update
           skip_checkout: true
