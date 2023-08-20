@@ -74,7 +74,7 @@ def fetch_changelogs():
     changelogs = requests.get(
         Config.REVANCED_CHANGES_URL
         + f"/v{previous_revanced_version}...v{current_revanced_version}"
-    ).json()["commits"]
+    ).json()["commits"] or []
 
     changelogs = [
         "✴ " + ch["commit"]["message"].split("\n")[0]
