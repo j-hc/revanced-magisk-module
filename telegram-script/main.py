@@ -1,10 +1,13 @@
 from config import Config
 import re
 import requests
+from markdown_to_telegraph import MarkdownToTelegraph
 
 
 # Read release.json file
 release = requests.get(Config.REVANCED_APKS_RELEASE_URL).json()
+
+telegraph = MarkdownToTelegraph("revanced_apks_web", "ReVanced APKs", "https://t.me/revanced_apks_web")
 
 
 def revanced_version_message():
@@ -62,47 +65,24 @@ def fetch_microg():
         return {"microg_name": "", "microg_file": ""}
 
 
-def fetch_changelogs():
-    previous_version_release = requests.get(
-        Config.REVANCED_APKS_RELEASE_URL.removesuffix("/latest")
-    ).json()[1]
-
-    re_exp = r"(?<=revanced-patches-)[0-9.]+(?=.jar)"
-    previous_revanced_version = re.findall(re_exp, previous_version_release["body"])[0]
-    current_revanced_version = re.findall(re_exp, release["body"])[0]
-
-    changelogs = requests.get(
-        Config.REVANCED_CHANGES_URL
-        + f"/v{previous_revanced_version}...v{current_revanced_version}"
-    ).json()["commits"] or []
-
-    changelogs = [
-        "✴ " + ch["commit"]["message"].split("\n")[0]
-        for ch in changelogs
-        if not "chore" in ch["commit"]["message"]
-    ] if changelogs else ["✴ Same as previous version with minor source changes."]
-
-    return changelogs
+def fetch_changelogs_telegraph_url():
+    return telegraph.create_page_from_string("Changelogs", release["body"])
 
 
 def main():
     files = generate_files_message()
-    changelogs = fetch_changelogs()
+    changelogs_url = fetch_changelogs_telegraph_url()
 
     # Format release message
     release_message = Config.RELEASE_MESSAGE.format(
         release_name=release["name"],
         revanced_version_message=revanced_version_message(),
-        changelogs="\n".join(changelogs),
+        changelogs_url=changelogs_url,
         notes=Config.NOTES,
         nonroot_files="\n".join(files["nonroot_files"]),
         root_files="\n".join(files["root_files"]),
         credits_message=Config.CREDITS_MESSAGE,
     )
-
-    # remove whats new if changelogs is empty
-    if not changelogs:
-        release_message = release_message.replace("*What's new:*\n\n", "")
 
     print(release_message)
 

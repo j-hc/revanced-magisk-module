@@ -21,8 +21,7 @@ class Config:
 
 {revanced_version_message}
 
-*What's new:*
-{changelogs}
+[Release notes and changelogs (What's New)]({changelogs_url})
 
 {notes}
 
