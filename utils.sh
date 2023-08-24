@@ -186,7 +186,6 @@ dl_apkmirror() {
 	}
 	local resp node app_table dlurl=""
 	if [ "$arch" = universal ]; then apparch=(universal noarch 'arm64-v8a + armeabi-v7a');
-        elif [ "$arch" = arm64-v8a ]; then apparch=(arm64-v8a 'arm64-v8a + x86_64');
         else apparch=("$arch"); fi
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
@@ -341,6 +340,8 @@ build_rv() {
 					apkm_arch="arm64-v8a"
 				elif [ "$arch" = "arm-v7a" ]; then
 					apkm_arch="armeabi-v7a"
+                                else
+                                        apkm_arch="$arch"
 				fi
 				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_apk" APK "$apkm_arch" "${args[dpi]}"; then
 					epr "ERROR: Could not find any release of '${table}' with version '${version}', arch '${apkm_arch}' and dpi '${args[dpi]}' from APKMirror"
