@@ -185,8 +185,9 @@ dl_apkmirror() {
 		return 0
 	}
 	local resp node app_table dlurl=""
-	if [ "$arch" = universal ]; then apparch=(universal noarch 'arm64-v8a + armeabi-v7a');
-        else apparch=("$arch"); fi
+	if [ "$arch" = universal ]; then
+		apparch=(universal noarch 'arm64-v8a + armeabi-v7a')
+	else apparch=("$arch"); fi
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	for ((n = 1; n < 40; n++)); do
@@ -254,9 +255,10 @@ get_apkmonk_pkg_name() { grep -oP '.*apkmonk\.com\/app\/\K([,\w,\.]*)' <<<"$1"; 
 # --------------------------------------------------
 
 patch_apk() {
-	local stock_input=$1 patched_apk=$2 patcher_args=$3 rv_cli_jar=$4 rv_patches_jar=$5
+	local stock_input=$1 patched_apk=$2 patcher_args=$3 rv_cli_jar=$4 rv_patches_jar=$5 riplib=$6
 	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
-	local cmd="java -jar $rv_cli_jar --rip-lib x86_64 --rip-lib x86 --temp-dir=$tdir -c -a $stock_input -o $patched_apk -b $rv_patches_jar --keystore=ks.keystore $patcher_args"
+	local cmd="java -jar $rv_cli_jar --temp-dir=$tdir -c -a $stock_input -o $patched_apk -b $rv_patches_jar --keystore=ks.keystore $patcher_args"
+	if [ "$riplib" = true ]; then cmd+=" --rip-lib x86_64 --rip-lib x86"; fi
 	if [ "$OS" = Android ]; then cmd+=" --custom-aapt2-binary=${TEMP_DIR}/aapt2"; fi
 	pr "$cmd"
 	if [ "${DRYRUN:-}" = true ]; then
@@ -340,8 +342,8 @@ build_rv() {
 					apkm_arch="arm64-v8a"
 				elif [ "$arch" = "arm-v7a" ]; then
 					apkm_arch="armeabi-v7a"
-                                else
-                                        apkm_arch="$arch"
+				else
+					apkm_arch="$arch"
 				fi
 				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_apk" APK "$apkm_arch" "${args[dpi]}"; then
 					epr "ERROR: Could not find any release of '${table}' with version '${version}', arch '${apkm_arch}' and dpi '${args[dpi]}' from APKMirror"
@@ -425,14 +427,13 @@ build_rv() {
 			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch_f}.apk"
 		fi
 		if [ "$build_mode" = module ]; then
-			if [ $is_bundle = false ] || [ "${args[include_stock]}" = false ]; then
-				patcher_args+=("--unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a")
-			else
-				patcher_args+=("--unsigned")
+			patcher_args+=("--unsigned")
+			if [ "${args[riplib]}" = true ] && { [ $is_bundle = false ] || [ "${args[include_stock]}" = false ]; }; then
+				patcher_args+=("--rip-lib arm64-v8a --rip-lib armeabi-v7a")
 			fi
 		fi
 		if [ ! -f "$patched_apk" ] || [ "$REBUILD" = true ]; then
-			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
+			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}" "${args[riplib]}"; then
 				epr "Building '${table}' failed!"
 				return 0
 			fi
