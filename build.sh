@@ -94,6 +94,7 @@ for table_name in $(toml_get_table_names); do
 		app_args[ptjar]=$rv_patches_jar
 		app_args[ptjs]=$rv_patches_json
 	fi
+	if [[ $(java -jar "${app_args[cli]}" --help) == *rip-lib* ]]; then app_args[riplib]=true; else app_args[riplib]=false; fi
 	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]="$DEF_RV_BRAND"
 
 	app_args[excluded_patches]=$(toml_get "$t" excluded-patches) || app_args[excluded_patches]=""
