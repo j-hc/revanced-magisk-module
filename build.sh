@@ -57,8 +57,10 @@ set_prebuilts() {
 	local patches_dir=${patches_src%/*}
 	local integrations_dir=${integrations_src%/*}
 	local cli_dir=${cli_src%/*}
-
-	app_args[cli]=$(find "${TEMP_DIR}/${cli_dir,,}-rv" -name "revanced-cli-${cli_ver:-*}.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[cli]}" ] || return 1
+	cli_ver=${cli_ver#v}
+	integrations_ver="${integrations_ver#v}"
+	patches_ver="${patches_ver#v}"
+	app_args[cli]=$(find "${TEMP_DIR}/${cli_dir,,}-rv" -name "revanced-cli-${cli_ver:-*}-all.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[cli]}" ] || return 1
 	app_args[integ]=$(find "${TEMP_DIR}/${integrations_dir,,}-rv" -name "revanced-integrations-${integrations_ver:-*}.apk" -type f -print -quit 2>/dev/null) && [ "${app_args[integ]}" ] || return 1
 	app_args[ptjar]=$(find "${TEMP_DIR}/${patches_dir,,}-rv" -name "revanced-patches-${patches_ver:-*}.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[ptjar]}" ] || return 1
 	app_args[ptjs]=$(find "${TEMP_DIR}/${patches_dir,,}-rv" -name "patches-${patches_ver:-*}.json" -type f -print -quit 2>/dev/null) && [ "${app_args[ptjs]}" ] || return 1
@@ -89,14 +91,16 @@ for table_name in $(toml_get_table_names); do
 	cli_src=$(toml_get "$t" cli-source) || cli_src=$DEF_CLI_SRC
 	cli_ver=$(toml_get "$t" cli-version) || cli_ver=$DEF_CLI_VER
 	if ! set_prebuilts "$integrations_src" "$patches_src" "$cli_src" "$integrations_ver" "$patches_ver" "$cli_ver"; then
-		read -r rv_cli_jar rv_integrations_apk rv_patches_jar rv_patches_json \
-			<<<"$(get_rv_prebuilts "$integrations_src" "$patches_src" "$integrations_ver" "$patches_ver" "$cli_src" "$cli_ver")"
+		if ! RVP="$(get_rv_prebuilts "$integrations_src" "$patches_src" "$integrations_ver" "$patches_ver" "$cli_src" "$cli_ver")"; then
+			abort "could not download rv prebuilts"
+		fi
+		read -r rv_cli_jar rv_integrations_apk rv_patches_jar rv_patches_json <<<"$RVP"
 		app_args[cli]=$rv_cli_jar
 		app_args[integ]=$rv_integrations_apk
 		app_args[ptjar]=$rv_patches_jar
 		app_args[ptjs]=$rv_patches_json
 	fi
-	if [[ $(java -jar "${app_args[cli]}" --help) == *rip-lib* ]]; then app_args[riplib]=true; else app_args[riplib]=false; fi
+	if [[ $(java -jar "${app_args[cli]}" patch 2>&1) == *rip-lib* ]]; then app_args[riplib]=true; else app_args[riplib]=false; fi
 	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]="$DEF_RV_BRAND"
 
 	app_args[excluded_patches]=$(toml_get "$t" excluded-patches) || app_args[excluded_patches]=""
