@@ -280,7 +280,7 @@ build_rv() {
 	local table=${args[table]}
 	local dl_from=${args[dl_from]}
 	local arch=${args[arch]}
-	if [ "$arch" = 'universal' ]; then local arch_f="all"; else local arch_f="$arch"; fi
+	if [ "$arch" = 'universal' ]; then local arch_f="all"; else local arch_f="${arch// /}"; fi
 
 	local p_patcher_args=()
 	p_patcher_args+=("$(join_args "${args[excluded_patches]}" -e) $(join_args "${args[included_patches]}" -i)")
