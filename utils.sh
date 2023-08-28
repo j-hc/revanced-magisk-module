@@ -43,28 +43,30 @@ abort() {
 }
 
 get_rv_prebuilts() {
-	local integrations_src=$1 patches_src=$2 integrations_ver=$3 patches_ver=$4 cli_src=$5
+	local integrations_src=$1 patches_src=$2 integrations_ver=$3 patches_ver=$4 cli_src=$5 cli_ver=$6
 	local patches_dir=${patches_src%/*}
-	patches_dir=${TEMP_DIR}/${patches_dir//[^[:alnum:]]/}-rv
+	patches_dir=${TEMP_DIR}/${patches_dir,,}-rv
 	local integrations_dir=${integrations_src%/*}
-	integrations_dir=${TEMP_DIR}/${integrations_dir//[^[:alnum:]]/}-rv
+	integrations_dir=${TEMP_DIR}/${integrations_dir,,}-rv
 	local cli_dir=${cli_src%/*}
-	cli_dir=${TEMP_DIR}/${cli_dir//[^[:alnum:]]/}-rv
+	cli_dir=${TEMP_DIR}/${cli_dir,,}-rv
 	mkdir -p "$patches_dir" "$integrations_dir" "$cli_dir"
 
 	pr "Getting prebuilts (${patches_src%/*})" >&2
 	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url rv_patches_json
 
-	rv_cli_url=$(gh_req "https://api.github.com/repos/${cli_src}/releases/latest" - | json_get 'browser_download_url') || return 1
-	local rv_cli_jar="${cli_dir}/${rv_cli_url##*/}"
-	echo "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")  " >"$patches_dir/changelog.md"
-
+	local rv_cli_rel="https://api.github.com/repos/${cli_src}/releases/"
+	if [ "$cli_ver" ]; then rv_cli_rel+="tags/${cli_ver}"; else rv_cli_rel+="latest"; fi
 	local rv_integrations_rel="https://api.github.com/repos/${integrations_src}/releases/"
 	if [ "$integrations_ver" ]; then rv_integrations_rel+="tags/${integrations_ver}"; else rv_integrations_rel+="latest"; fi
 	local rv_patches_rel="https://api.github.com/repos/${patches_src}/releases/"
 	if [ "$patches_ver" ]; then rv_patches_rel+="tags/${patches_ver}"; else rv_patches_rel+="latest"; fi
 
-	rv_integrations_url=$(gh_req "$rv_integrations_rel" - | json_get 'browser_download_url')
+	rv_cli_url=$(gh_req "$rv_cli_rel" - | json_get 'browser_download_url') || return 1
+	local rv_cli_jar="${cli_dir}/${rv_cli_url##*/}"
+	echo "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")  " >"$patches_dir/changelog.md"
+
+	rv_integrations_url=$(gh_req "$rv_integrations_rel" - | json_get 'browser_download_url') || return 1
 	local rv_integrations_apk="${integrations_dir}/${rv_integrations_url##*/}"
 	echo "Integrations: $(cut -d/ -f4 <<<"$rv_integrations_url")/$(cut -d/ -f9 <<<"$rv_integrations_url")  " >>"$patches_dir/changelog.md"
 
@@ -427,7 +429,7 @@ build_rv() {
 			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch_f}.apk"
 		fi
 		if [ "$build_mode" = module ]; then
-			patcher_args+=("--unsigned")
+			if [ "${args[riplib]}" = true ]; then patcher_args+=("--unsigned"); fi
 			if [ "${args[riplib]}" = true ] && { [ $is_bundle = false ] || [ "${args[include_stock]}" = false ]; }; then
 				patcher_args+=("--rip-lib arm64-v8a --rip-lib armeabi-v7a")
 			fi
