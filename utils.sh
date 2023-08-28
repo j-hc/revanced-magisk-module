@@ -43,32 +43,33 @@ abort() {
 }
 
 get_rv_prebuilts() {
-	local integrations_src=$1 patches_src=$2 integrations_ver=$3 patches_ver=$4 cli_src=$5
+	local integrations_src=$1 patches_src=$2 integrations_ver=$3 patches_ver=$4 cli_src=$5 cli_ver=$6
 	local patches_dir=${patches_src%/*}
-	patches_dir=${TEMP_DIR}/${patches_dir//[^[:alnum:]]/}-rv
+	patches_dir=${TEMP_DIR}/${patches_dir,,}-rv
 	local integrations_dir=${integrations_src%/*}
-	integrations_dir=${TEMP_DIR}/${integrations_dir//[^[:alnum:]]/}-rv
+	integrations_dir=${TEMP_DIR}/${integrations_dir,,}-rv
 	local cli_dir=${cli_src%/*}
-	cli_dir=${TEMP_DIR}/${cli_dir//[^[:alnum:]]/}-rv
+	cli_dir=${TEMP_DIR}/${cli_dir,,}-rv
 	mkdir -p "$patches_dir" "$integrations_dir" "$cli_dir"
 
 	pr "Getting prebuilts (${patches_src%/*})" >&2
 	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url rv_patches_json
 
-	rv_cli_url=$(gh_req "https://api.github.com/repos/${cli_src}/releases/latest" - | json_get 'browser_download_url') || return 1
-	local rv_cli_jar="${cli_dir}/${rv_cli_url##*/}"
-	echo "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")  " >"$patches_dir/changelog.md"
-
+	local rv_cli_rel="https://api.github.com/repos/${cli_src}/releases/"
+	if [ "$cli_ver" ]; then rv_cli_rel+="tags/${cli_ver}"; else rv_cli_rel+="latest"; fi
 	local rv_integrations_rel="https://api.github.com/repos/${integrations_src}/releases/"
 	if [ "$integrations_ver" ]; then rv_integrations_rel+="tags/${integrations_ver}"; else rv_integrations_rel+="latest"; fi
 	local rv_patches_rel="https://api.github.com/repos/${patches_src}/releases/"
 	if [ "$patches_ver" ]; then rv_patches_rel+="tags/${patches_ver}"; else rv_patches_rel+="latest"; fi
+	rv_cli_url=$(gh_req "$rv_cli_rel" - | json_get 'browser_download_url') || return 1
+	local rv_cli_jar="${cli_dir}/${rv_cli_url##*/}"
+	echo "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")  " >"$patches_dir/changelog.md"
 
-	rv_integrations_url=$(gh_req "$rv_integrations_rel" - | json_get 'browser_download_url')
+	rv_integrations_url=$(gh_req "$rv_integrations_rel" - | json_get 'browser_download_url') || return 1
 	local rv_integrations_apk="${integrations_dir}/${rv_integrations_url##*/}"
 	echo "Integrations: $(cut -d/ -f4 <<<"$rv_integrations_url")/$(cut -d/ -f9 <<<"$rv_integrations_url")  " >>"$patches_dir/changelog.md"
 
-	rv_patches=$(gh_req "$rv_patches_rel" -)
+	rv_patches=$(gh_req "$rv_patches_rel" -) || return 1
 	rv_patches_changelog=$(json_get 'body' <<<"$rv_patches" | sed 's/\(\\n\)\+/\\n/g')
 	rv_patches_dl=$(json_get 'browser_download_url' <<<"$rv_patches")
 	rv_patches_json="${patches_dir}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
@@ -257,7 +258,7 @@ get_apkmonk_pkg_name() { grep -oP '.*apkmonk\.com\/app\/\K([,\w,\.]*)' <<<"$1"; 
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3 rv_cli_jar=$4 rv_patches_jar=$5 riplib=$6
 	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
-	local cmd="java -jar $rv_cli_jar --temp-dir=$tdir -c -a $stock_input -o $patched_apk -b $rv_patches_jar --keystore=ks.keystore $patcher_args"
+	local cmd="java -jar $rv_cli_jar patch $stock_input -r $tdir -p -o $patched_apk -b $rv_patches_jar --keystore=ks.keystore $patcher_args"
 	if [ "$riplib" = true ]; then cmd+=" --rip-lib x86_64 --rip-lib x86"; fi
 	if [ "$OS" = Android ]; then cmd+=" --custom-aapt2-binary=${TEMP_DIR}/aapt2"; fi
 	pr "$cmd"
@@ -279,7 +280,7 @@ build_rv() {
 	local table=${args[table]}
 	local dl_from=${args[dl_from]}
 	local arch=${args[arch]}
-	if [ "$arch" = 'universal' ]; then local arch_f="all"; else local arch_f="$arch"; fi
+	if [ "$arch" = 'universal' ]; then local arch_f="all"; else local arch_f="${arch// /}"; fi
 
 	local p_patcher_args=()
 	p_patcher_args+=("$(join_args "${args[excluded_patches]}" -e) $(join_args "${args[included_patches]}" -i)")
@@ -303,10 +304,10 @@ build_rv() {
 		) || get_latest_ver=true
 	elif isoneof "$version_mode" latest beta; then
 		get_latest_ver=true
-		p_patcher_args+=("--experimental")
+		p_patcher_args+=("-f")
 	else
 		version=$version_mode
-		p_patcher_args+=("--experimental")
+		p_patcher_args+=("-f")
 	fi
 	if [ $get_latest_ver = true ]; then
 		local apkmvers uptwodvers aav
@@ -427,7 +428,7 @@ build_rv() {
 			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch_f}.apk"
 		fi
 		if [ "$build_mode" = module ]; then
-			patcher_args+=("--unsigned")
+			if [ "${args[riplib]}" = true ]; then patcher_args+=("--unsigned"); fi
 			if [ "${args[riplib]}" = true ] && { [ $is_bundle = false ] || [ "${args[include_stock]}" = false ]; }; then
 				patcher_args+=("--rip-lib arm64-v8a --rip-lib armeabi-v7a")
 			fi
