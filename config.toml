@@ -1,35 +1,36 @@
 logging-to-file = true        # enables logging of every patch process to a seperate file
-enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
+enable-magisk-update = false   # set this to false if you do not want to receive updates for the module in magisk app
 build-mindetach-module = true
 
 # add 'enabled = false' for not patching a specific app or remove it from the config
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [YouTube]
-build-mode = "both"                                                   # 'both', 'apk' or 'module'
-excluded-patches = ""                                                 # space-seperated patches to exclude (multiline strings are not supported)
-included-patches = ""                                                 # space-seperated patches to include (non-excluded patches are included by default)
+build-mode = "apk"                                                   # 'both', 'apk' or 'module'
+included-patches = "disable-shorts-on-startup disable-auto-captions hdr-auto-brightness hide-ads hide-email-address minimized-playback playback-speed premium-heading remember-video-quality return-youtube-dislike sponsorblock vanced-microg-support video-ads"
 version = "auto"                                                      # 'auto', 'latest', 'beta' or a custom one like '17.40.41'
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music]
-build-mode = "both"
-excluded-patches = ""
+build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 apkmirror-arch = "both"                                                     # both arm64-v8a and arm-v7a
 
 [Twitter]
 build-mode = "apk"
+excluded-patches = "dynamic-color"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
 
-[Twitch]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
 
 [TikTok]
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
 
 [Reddit]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
+apkmirror-dlurl = "https://apkmirror.com/apk/redditinc/reddit/"
+excluded-patches = "disable-screenshot-popup"
+
+[Backdrops]
+uptodown-dlurl = "https://backdrops.en.uptodown.com/android"
 
 [Lightroom]
 enabled = false
@@ -41,6 +42,10 @@ enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
 apkmirror-arch = "arm64-v8a"
 
+[Twitch]
+enabled = false
+apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
+
 [Spotify]
 enabled = false
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
@@ -49,10 +54,6 @@ uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/citra-emulator/citra-emulator/"
 apkmirror-arch = "arm64-v8a"
-
-[Backdrops]
-enabled = false
-uptodown-dlurl = "https://backdrops.en.uptodown.com/android"
 
 [WarnWetter]
 enabled = false
