@@ -11,6 +11,9 @@ class MarkdownToTelegraph:
         self.telegraph.create_account(short_name=self.short_name, author_name="Tester", author_url="https://t.me/hellot343")
     
     def filter_html_tags(self, html_string: str) -> str:
+        # Replace h1 tags with h3 tags 
+        html_string = re.sub(r"<h1.*?>", "<h3>", html_string)
+        html_string = re.sub(r"</h1>", "</h3>", html_string)
         # Replace h2 tags with h3 tags 
         html_string = re.sub(r"<h2.*?>", "<h3>", html_string)
         html_string = re.sub(r"</h2>", "</h3>", html_string)
