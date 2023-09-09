@@ -12,6 +12,25 @@ included-patches = ""                                                 # space-se
 version = "auto"                                                      # 'auto', 'latest', 'beta' or a custom one like '17.40.41'
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
+[Music-Extended]
+app-name = "Music"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+build-mode = "both"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+apkmirror-arch = "both"
+
+[YouTube-Extended]
+app-name = "YouTube"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+build-mode = "both"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+
 [Music]
 build-mode = "both"
 excluded-patches = ""
@@ -78,24 +97,3 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/joaomgcd/tasker/"
 [Photomath]
 enabled = false
 apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
-
-[Music-Extended] # unmaintained
-enabled = false
-app-name = "Music"
-patches-source = "inotia00/revanced-patches"
-integrations-source = "inotia00/revanced-integrations"
-cli-source = "inotia00/revanced-cli"
-rv-brand = "ReVanced Extended"
-build-mode = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-apkmirror-arch = "both"
-
-[YouTube-Extended] # unmaintained
-enabled = false
-app-name = "YouTube"
-patches-source = "inotia00/revanced-patches"
-integrations-source = "inotia00/revanced-integrations"
-cli-source = "inotia00/revanced-cli"
-rv-brand = "ReVanced Extended"
-build-mode = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
