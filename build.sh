@@ -47,7 +47,7 @@ if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 
 #check_deps
 jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt install jq' or equivalent"
-java --version >/dev/null || abort "\`openjdk 17\` is not installed. install it with 'apt install openjdk-17-jre-headless' or equivalent"
+java --version >/dev/null || abort "\`openjdk 17\` is not installed. install it with 'apt install openjdk-17-jre' or equivalent"
 zip --version >/dev/null || abort "\`zip\` is not installed. install it with 'apt install zip' or equivalent"
 # --
 get_prebuilts
@@ -161,6 +161,7 @@ for table_name in $(toml_get_table_names); do
 		app_args[table]="$table_name (arm-v7a)"
 		app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
 		app_args[arch]="arm-v7a"
+		if ((idx >= PARALLEL_JOBS)); then wait -n; fi
 		idx=$((idx + 1))
 		build_rv_w
 	else
