@@ -127,3 +127,9 @@ enabled = true
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inshorts-formerly-news-in-shorts/inshorts-news-in-60-words-2/"
 apkmirror-arch = "both"
+
+[SyncForReddit]
+enabled = true
+version = "auto"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/red-apps-ltd/sync-for-reddit/"
+
