@@ -79,7 +79,7 @@ get_rv_prebuilts() {
 	local nm
 	nm=$(cut -d/ -f9 <<<"$rv_patches_url")
 	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$nm  " >>"$patches_dir/changelog.md"
-	echo "[Changelog](https://github.com/${patches_src}/releases/tag/v$(sed 's/.*-\(.*\)\..*/\1/' <<<$nm))" >>"$patches_dir/changelog.md"
+	echo -e "[Changelog](https://github.com/${patches_src}/releases/tag/v$(sed 's/.*-\(.*\)\..*/\1/' <<<$nm))\n" >>"$patches_dir/changelog.md"
 	# echo -e "\n${rv_patches_changelog//# [/### [}\n---" >>"$patches_dir/changelog.md"
 
 	dl_if_dne "$rv_cli_jar" "$rv_cli_url" >&2 || return 1
