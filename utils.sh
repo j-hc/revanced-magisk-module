@@ -3,7 +3,7 @@
 MODULE_TEMPLATE_DIR="revanced-magisk"
 TEMP_DIR="temp"
 BUILD_DIR="build"
-PKGS_LIST="${TEMP_DIR}/module-pkgs"
+# PKGS_LIST="${TEMP_DIR}/module-pkgs"
 
 if [ "${GITHUB_TOKEN:-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
@@ -53,7 +53,7 @@ get_rv_prebuilts() {
 	mkdir -p "$patches_dir" "$integrations_dir" "$cli_dir"
 
 	pr "Getting prebuilts (${patches_src%/*})" >&2
-	local rv_cli_url rv_integrations_url rv_patches rv_patches_changelog rv_patches_dl rv_patches_url rv_patches_json
+	local rv_cli_url rv_integrations_url rv_patches rv_patches_dl rv_patches_url rv_patches_json
 
 	local rv_cli_rel="https://api.github.com/repos/${cli_src}/releases/"
 	if [ "$cli_ver" ]; then rv_cli_rel+="tags/${cli_ver}"; else rv_cli_rel+="latest"; fi
@@ -70,19 +70,22 @@ get_rv_prebuilts() {
 	echo "Integrations: $(cut -d/ -f4 <<<"$rv_integrations_url")/$(cut -d/ -f9 <<<"$rv_integrations_url")  " >>"$patches_dir/changelog.md"
 
 	rv_patches=$(gh_req "$rv_patches_rel" -) || return 1
-	rv_patches_changelog=$(json_get 'body' <<<"$rv_patches" | sed 's/\(\\n\)\+/\\n/g')
+	# rv_patches_changelog=$(json_get 'body' <<<"$rv_patches" | sed 's/\(\\n\)\+/\\n/g')
 	rv_patches_dl=$(json_get 'browser_download_url' <<<"$rv_patches")
 	rv_patches_json="${patches_dir}/patches-$(json_get 'tag_name' <<<"$rv_patches").json"
 	rv_patches_url=$(grep 'jar' <<<"$rv_patches_dl")
 	local rv_patches_jar="${patches_dir}/${rv_patches_url##*/}"
 	[ -f "$rv_patches_jar" ] || REBUILD=true
-	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$(cut -d/ -f9 <<<"$rv_patches_url")  " >>"$patches_dir/changelog.md"
-	echo -e "\n${rv_patches_changelog//# [/### [}\n---" >>"$patches_dir/changelog.md"
+	local nm
+	nm=$(cut -d/ -f9 <<<"$rv_patches_url")
+	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$nm  " >>"$patches_dir/changelog.md"
+	echo "[Changelog](https://github.com/${patches_src}/releases/tag/v$(sed 's/.*-\(.*\)\..*/\1/' <<<$nm))" >>"$patches_dir/changelog.md"
+	# echo -e "\n${rv_patches_changelog//# [/### [}\n---" >>"$patches_dir/changelog.md"
 
-	dl_if_dne "$rv_cli_jar" "$rv_cli_url" >&2
-	dl_if_dne "$rv_integrations_apk" "$rv_integrations_url" >&2
-	dl_if_dne "$rv_patches_jar" "$rv_patches_url" >&2
-	dl_if_dne "$rv_patches_json" "$(grep 'json' <<<"$rv_patches_dl")" >&2
+	dl_if_dne "$rv_cli_jar" "$rv_cli_url" >&2 || return 1
+	dl_if_dne "$rv_integrations_apk" "$rv_integrations_url" >&2 || return 1
+	dl_if_dne "$rv_patches_jar" "$rv_patches_url" >&2 || return 1
+	dl_if_dne "$rv_patches_json" "$(grep 'json' <<<"$rv_patches_dl")" >&2 || return 1
 
 	echo "$rv_cli_jar" "$rv_integrations_apk" "$rv_patches_jar" "$rv_patches_json"
 }
@@ -203,9 +206,9 @@ dl_apkmirror() {
 		fi
 	done
 	[ -z "$dlurl" ] && return 1
-	url=$(req "$dlurl" - | $HTMLQ --base https://www.apkmirror.com --attribute href "a.btn")
+	url=$(req "$dlurl" - | $HTMLQ --base https://www.apkmirror.com --attribute href "a.btn") || return 1
 	if [ "$apkorbundle" = BUNDLE ] && [[ "$url" != *"&forcebaseapk=true" ]]; then url="${url}&forcebaseapk=true"; fi
-	url=$(req "$url" - | $HTMLQ --base https://www.apkmirror.com --attribute href "span > a[rel = nofollow]")
+	url=$(req "$url" - | $HTMLQ --base https://www.apkmirror.com --attribute href "span > a[rel = nofollow]") || return 1
 	req "$url" "$output"
 }
 get_apkmirror_vers() {

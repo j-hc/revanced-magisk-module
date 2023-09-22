@@ -1,3 +1,4 @@
+parallel-jobs = 1
 logging-to-file = true        # enables logging of every patch process to a seperate file
 enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
 
@@ -32,13 +33,12 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music]
 build-mode = "both"
-excluded-patches = ""
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-apkmirror-arch = "both"                                                     # both arm64-v8a and arm-v7a
+apkmirror-arch = "both"
 
 [Twitter]
 build-mode = "apk"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
+uptodown-dlurl = "https://twitter.uptodown.com/android"
 
 [Twitch]
 uptodown-dlurl = "https://twitch-app.uptodown.com/android"
