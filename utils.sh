@@ -448,7 +448,6 @@ build_rv() {
 		local base_template
 		base_template=$(mktemp -d -p $TEMP_DIR)
 		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
-		if [ "$BUILD_MINDETACH_MODULE" = true ] && ! grep -q "$pkg_name" $PKGS_LIST; then echo "$pkg_name" >>$PKGS_LIST; fi
 		local upj="${table,,}-update.json"
 
 		local isbndl extrct stock_apk_module

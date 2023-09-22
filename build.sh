@@ -22,11 +22,6 @@ if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY:-}" ]; then
 	pr "You are building locally. Magisk updates will not be enabled."
 	ENABLE_MAGISK_UPDATE=false
 fi
-BUILD_MINDETACH_MODULE=$(toml_get "$main_config_t" build-mindetach-module) || BUILD_MINDETACH_MODULE=false
-if [ "$BUILD_MINDETACH_MODULE" = true ] && [ ! -f "mindetach-magisk/mindetach/detach.txt" ]; then
-	pr "mindetach module was not found."
-	BUILD_MINDETACH_MODULE=false
-fi
 if ! PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs); then
 	if [ "$OS" = Android ]; then PARALLEL_JOBS=1; else PARALLEL_JOBS=$(nproc); fi
 fi
@@ -42,7 +37,6 @@ DEF_RV_BRAND=$(toml_get "$main_config_t" rv-brand) || DEF_RV_BRAND="ReVanced"
 mkdir -p $TEMP_DIR $BUILD_DIR
 
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be within 0-9"; fi
-if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
 if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 
 #check_deps
@@ -172,14 +166,6 @@ done
 wait
 rm -rf temp/tmp.*
 if [ -z "$(ls -A1 ${BUILD_DIR})" ]; then abort "All builds failed."; fi
-
-if [ "$BUILD_MINDETACH_MODULE" = true ]; then
-	pr "Building mindetach module"
-	cp -f $PKGS_LIST mindetach-magisk/mindetach/detach.txt
-	pushd mindetach-magisk/mindetach/
-	zip -qr ../../build/mindetach-"$(grep version= module.prop | cut -d= -f2)".zip .
-	popd
-fi
 
 if youtube_t=$(toml_get_table "YouTube"); then youtube_mode=$(toml_get "$youtube_t" "build-mode") || youtube_mode="apk"; else youtube_mode="module"; fi
 if music_t=$(toml_get_table "Music"); then music_mode=$(toml_get "$music_t" "build-mode") || music_mode="apk"; else music_mode="module"; fi

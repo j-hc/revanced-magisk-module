@@ -2,15 +2,13 @@
 
 # ReVanced Magisk Module
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
-[![Build Modules](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml/badge.svg)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/build.yml)
 [![CI](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml)
 
 Extensive ReVanced builder  
 
 Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases).
 
-[**mindetach module**](https://github.com/j-hc/mindetach-magisk) in the releases section detaches YouTube and YouTube Music from Play Store and blocks their forced updates.  
-[**zygisk-detach**](https://github.com/j-hc/zygisk-detach) is another detach module I made which is more powerful than mindetach. You can use it if you have zygisk enabled.
+Use [**zygisk-detach**](https://github.com/j-hc/zygisk-detach) to detach YouTube and YT Music from Play Store if you are using magisk modules. 
 
 ## Features
  * Support all present and future ReVanced and [ReVanced Extended](https://github.com/inotia00/revanced-patches) apps
