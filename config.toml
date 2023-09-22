@@ -8,3 +8,5 @@ build-mindetach-module = true
 [Tiktok]
 apkmirror-dlurl = "https://apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
 build-mode = "both"
+version = "31.1.4"
+
