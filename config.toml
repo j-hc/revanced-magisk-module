@@ -41,13 +41,13 @@ build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
 
 [Twitch]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
+uptodown-dlurl = "https://twitch-app.uptodown.com/android"
 
 [TikTok]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
+uptodown-dlurl = "https://tiktok.uptodown.com/android"
 
 [Reddit]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
+uptodown-dlurl = "https://reddit-official-app.uptodown.com/android"
 
 [Lightroom]
 enabled = false
