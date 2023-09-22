@@ -43,7 +43,7 @@ bash <(curl -sSf https://raw.githubusercontent.com/j-hc/revanced-magisk-module/m
 
 ## On Desktop
 ```console
-$ git clone --recurse https://github.com/j-hc/revanced-magisk-module
+$ git clone https://github.com/j-hc/revanced-magisk-module
 $ cd revanced-magisk-module
 $ ./build.sh
 ```
