@@ -1,6 +1,6 @@
+parallel-jobs = 1
 logging-to-file = true        # enables logging of every patch process to a seperate file
 enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
-build-mindetach-module = true
 
 # add 'enabled = false' for not patching a specific app or remove it from the config
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
@@ -33,22 +33,21 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
 [Music]
 build-mode = "both"
-excluded-patches = ""
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-apkmirror-arch = "both"                                                     # both arm64-v8a and arm-v7a
+apkmirror-arch = "both"
 
 [Twitter]
 build-mode = "apk"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitter-inc/twitter/"
+uptodown-dlurl = "https://twitter.uptodown.com/android"
 
 [Twitch]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
+uptodown-dlurl = "https://twitch-app.uptodown.com/android"
 
 [TikTok]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
+uptodown-dlurl = "https://tiktok.uptodown.com/android"
 
 [Reddit]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
+uptodown-dlurl = "https://reddit-official-app.uptodown.com/android"
 
 [Lightroom]
 enabled = false

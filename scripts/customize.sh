@@ -107,7 +107,6 @@ nohup cmd package compile --reset __PKGNAME >/dev/null 2>&1 &
 
 ui_print "* Cleanup"
 rm -rf $MODPATH/bin $MODPATH/__PKGNAME.apk
-rm -rf $NVBASE/rvhc/__PKGNAME_rv.apk # rm this later
 
 for s in "uninstall.sh" "service.sh"; do
 	sed -i "2 i\NVBASE=${NVBASE}" $MODPATH/$s
