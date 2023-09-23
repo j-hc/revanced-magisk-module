@@ -132,3 +132,8 @@ enabled = true
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/red-apps-ltd/sync-for-reddit/"
 
+[InfinityForReddit]
+enabled = true
+version = "auto"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/docile-alligator/infinity-for-reddit/"
+
