@@ -31,6 +31,27 @@ rv-brand = "ReVanced Extended"
 build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 
+[Music-Extended-ReX]
+enabled = true
+app-name = "Music"
+patches-source = "YT-Advanced/ReX-patches"
+integrations-source = "YT-Advanced/ReX-integrations"
+cli-source = "revanced/revanced-cli"
+rv-brand = "ReVanced Extended Fork ReX"
+build-mode = "both"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+apkmirror-arch = "both"
+
+[YouTube-Extended-ReX] 
+enabled = true
+app-name = "YouTube"
+patches-source = "YT-Advanced/ReX-patches"
+integrations-source = "YT-Advanced/ReX-integrations"
+cli-source = "revanced/revanced-cli"
+rv-brand = "ReVanced Extended Fork ReX"
+build-mode = "both"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+
 [Music]
 build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
