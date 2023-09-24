@@ -191,6 +191,10 @@ dl_apkmirror() {
 	local resp node app_table dlurl=""
 	if [ "$arch" = universal ]; then
 		apparch=(universal noarch 'arm64-v8a + armeabi-v7a')
+	elif [ "$arch" = "arm64-v8a" ]; then
+		apparch=(arm64-v8a universal)
+	elif [ "$arch" = "armeabi-v7a" ]; then
+		apparch=(armeabi-v7a universal)
 	else apparch=("$arch"); fi
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1

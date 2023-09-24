@@ -38,16 +38,16 @@ apkmirror-arch = "both"
 
 [Twitter]
 build-mode = "apk"
-uptodown-dlurl = "https://twitter.uptodown.com/android"
+uptodown-dlurl = "https://twitter.en.uptodown.com/android"
 
 [Twitch]
-uptodown-dlurl = "https://twitch-app.uptodown.com/android"
+uptodown-dlurl = "https://twitch-app.en.uptodown.com/android"
 
 [TikTok]
-uptodown-dlurl = "https://tiktok.uptodown.com/android"
+uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
 
 [Reddit]
-uptodown-dlurl = "https://reddit-official-app.uptodown.com/android"
+uptodown-dlurl = "https://reddit-official-app.en.uptodown.com/android"
 
 [Lightroom]
 enabled = false
