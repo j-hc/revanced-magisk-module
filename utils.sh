@@ -238,6 +238,7 @@ get_apkmirror_pkg_name() { req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_col
 
 # -------------------- uptodown --------------------
 get_uptodown_resp() { req "${1}/versions" -; }
+get_uptodown_last_ver() { $HTMLQ --text ".version" <<<"$1"; }
 get_uptodown_vers() { sed -n 's;.*version">\(.*\)</span>$;\1;p' <<<"$1"; }
 dl_uptodown() {
 	local uptwod_resp=$1 version=$2 output=$3
@@ -317,14 +318,13 @@ build_rv() {
 		p_patcher_args+=("-f")
 	fi
 	if [ $get_latest_ver = true ]; then
-		local apkmvers uptwodvers aav
 		if [ "$dl_from" = apkmirror ]; then
+			local apkmvers aav
 			if [ "$version_mode" = beta ]; then aav="true"; else aav="false"; fi
 			apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "$aav")
 			version=$(get_largest_ver <<<"$apkmvers") || version=$(head -1 <<<"$apkmvers")
 		elif [ "$dl_from" = uptodown ]; then
-			uptwodvers=$(get_uptodown_vers "$uptwod_resp")
-			version=$(get_largest_ver <<<"$uptwodvers") || version=$(head -1 <<<"$uptwodvers")
+			version=$(get_uptodown_last_ver "$uptwod_resp")
 		elif [ "$dl_from" = apkmonk ]; then
 			apkmonkvers=$(get_apkmonk_vers "$apkmonk_resp")
 			version=$(get_largest_ver <<<"$apkmonkvers") || version=$(head -1 <<<"$apkmonkvers")
