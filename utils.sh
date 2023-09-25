@@ -238,16 +238,21 @@ get_apkmirror_pkg_name() { req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_col
 
 # -------------------- uptodown --------------------
 get_uptodown_resp() { req "${1}/versions" -; }
-get_uptodown_last_ver() { $HTMLQ --text ".version" <<<"$1"; }
-get_uptodown_vers() { sed -n 's;.*version">\(.*\)</span>$;\1;p' <<<"$1"; }
-dl_uptodown() {
-	local uptwod_resp=$1 version=$2 output=$3
+get_uptodown_vers() { $HTMLQ --text ".version" <<<"$1"; }
+dl_uptodown_last() {
+	local uptwod_resp=$1 output=$2
 	local url
-	url=$(grep -F "${version}</span>" -B 2 <<<"$uptwod_resp" | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
-	url=$(req "$url" - | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
+	url=$($HTMLQ -a data-url "#detail-download-button" <<<"$uptwod_resp") || return 1
 	req "$url" "$output"
 }
-get_uptodown_pkg_name() { req "${1}/download" - | $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)"; }
+dl_uptodown() {
+	local uptwod_resp=$1 version=$2 output=$3
+	local url r
+	url=$(grep -F "${version}</span>" -B 2 <<<"$uptwod_resp" | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
+	r=$(req "$url" -) || return 1
+	dl_uptodown_last "$r" "$output"
+}
+get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)" <<<"$1"; }
 # --------------------------------------------------
 
 # -------------------- apkmonk ---------------------
@@ -297,8 +302,9 @@ build_rv() {
 	if [ "$dl_from" = apkmirror ]; then
 		pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
 	elif [ "$dl_from" = uptodown ]; then
+		uptwod_resp_dl=$(req "${args[uptodown_dlurl]}/download" -)
 		uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}")
-		pkg_name=$(get_uptodown_pkg_name "${args[uptodown_dlurl]}")
+		pkg_name=$(get_uptodown_pkg_name "$uptwod_resp_dl")
 	elif [ "$dl_from" = apkmonk ]; then
 		pkg_name=$(get_apkmonk_pkg_name "${args[apkmonk_dlurl]}")
 		apkmonk_resp=$(get_apkmonk_resp "${args[apkmonk_dlurl]}")
@@ -324,7 +330,8 @@ build_rv() {
 			apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "$aav")
 			version=$(get_largest_ver <<<"$apkmvers") || version=$(head -1 <<<"$apkmvers")
 		elif [ "$dl_from" = uptodown ]; then
-			version=$(get_uptodown_last_ver "$uptwod_resp")
+			uptwodvers=$(get_uptodown_vers "$uptwod_resp")
+			version=$(head -1 <<<"$uptwodvers")
 		elif [ "$dl_from" = apkmonk ]; then
 			apkmonkvers=$(get_apkmonk_vers "$apkmonk_resp")
 			version=$(get_largest_ver <<<"$apkmonkvers") || version=$(head -1 <<<"$apkmonkvers")
@@ -360,11 +367,18 @@ build_rv() {
 				break
 			elif [ "$dl_p" = uptodown ]; then
 				if [ -z "${args[uptodown_dlurl]}" ]; then continue; fi
-				if [ -z "${uptwod_resp:-}" ]; then uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}"); fi
 				pr "Downloading '${table}' from Uptodown"
-				if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
-					epr "ERROR: Could not download ${table} from Uptodown"
-					continue
+				if [ $get_latest_ver = true ]; then
+					if ! dl_uptodown_last "$uptwod_resp_dl" "$stock_apk"; then
+						epr "ERROR: Could not download ${table} from Uptodown (last)"
+						continue
+					fi
+				else
+					if [ -z "${uptwod_resp:-}" ]; then uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}"); fi
+					if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
+						epr "ERROR: Could not download ${table} from Uptodown"
+						continue
+					fi
 				fi
 				break
 			elif [ "$dl_p" = apkmonk ]; then
