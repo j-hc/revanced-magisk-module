@@ -1,4 +1,4 @@
-parallel-jobs = 3
+parallel-jobs = 1
 logging-to-file = true        # enables logging of every patch process to a seperate file
 enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
 
@@ -41,9 +41,10 @@ build-mode = "apk"
 uptodown-dlurl = "https://twitter.en.uptodown.com/android"
 
 [Twitch]
-uptodown-dlurl = "https://twitch-app.en.uptodown.com/android"
+uptodown-dlurl = "https://twitch.en.uptodown.com/android"
 
 [TikTok]
+enabled = false
 uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
 
 [Reddit]
