@@ -25,7 +25,7 @@ toml_get_table_names() {
 	fi
 	echo "$tn"
 }
-toml_get_table() { sed -n "/\[${1}]/,/^\[.*]$/p" <<<"$__TOML__"; }
+toml_get_table() { sed -n "/\[${1}]/,/^\[.*]$/p" <<<"$__TOML__" | sed '$ d'; }
 toml_get() {
 	local table=$1 key=$2 val
 	val=$(grep -m 1 "^${key}=" <<<"$table") && sed -e "s/^\"//; s/\"$//" <<<"${val#*=}"
@@ -94,7 +94,8 @@ get_prebuilts() {
 	if [ "$OS" = Android ]; then
 		local arch
 		if [ "$(uname -m)" = aarch64 ]; then arch=arm64; else arch=arm; fi
-		dl_if_dne ${TEMP_DIR}/aapt2 https://github.com/rendiix/termux-aapt/raw/d7d4b4a344cc52b94bcdab3500be244151261d8e/prebuilt-binary/${arch}/aapt2 && chmod +x "${TEMP_DIR}/aapt2"
+		dl_if_dne ${TEMP_DIR}/aapt2 https://github.com/rendiix/termux-aapt/raw/d7d4b4a344cc52b94bcdab3500be244151261d8e/prebuilt-binary/${arch}/aapt2
+		chmod +x "${TEMP_DIR}/aapt2"
 	fi
 	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
@@ -117,6 +118,31 @@ get_prebuilts() {
 		fi
 
 	fi
+}
+
+config_update() {
+	declare -A sources
+	for table_name in $(toml_get_table_names); do
+		if [ -z "$table_name" ]; then continue; fi
+		t=$(toml_get_table "$table_name")
+		enabled=$(toml_get "$t" enabled) || enabled=true
+		if [ "$enabled" = false ]; then continue; fi
+		PATCHES_SRC=$(toml_get "$t" patches-source) || PATCHES_SRC=$DEF_PATCHES_SRC
+		if [[ -v sources[$PATCHES_SRC] ]]; then
+			if [ "${sources[$PATCHES_SRC]}" = 1 ]; then echo "$t"; fi
+		else
+			sources[$PATCHES_SRC]=0
+			if ! last_patches_url=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - 2>&1 | json_get 'browser_download_url' | grep 'jar'); then
+				abort oops
+			fi
+			last_patches=${last_patches_url##*/}
+			cur_patches=$(sed -n "s/.*Patches: ${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
+			if [ "$cur_patches" ] && [ "$last_patches" ] && [ "${cur_patches}" != "$last_patches" ]; then
+				sources[$PATCHES_SRC]=1
+				echo "$t"
+			fi
+		fi
+	done
 }
 
 _req() {
