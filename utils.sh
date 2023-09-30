@@ -295,10 +295,9 @@ get_apkmonk_pkg_name() { grep -oP '.*apkmonk\.com\/app\/\K([,\w,\.]*)' <<<"$1"; 
 # --------------------------------------------------
 
 patch_apk() {
-	local stock_input=$1 patched_apk=$2 patcher_args=$3 rv_cli_jar=$4 rv_patches_jar=$5 riplib=$6
+	local stock_input=$1 patched_apk=$2 patcher_args=$3 rv_cli_jar=$4 rv_patches_jar=$5
 	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
 	local cmd="java -jar $rv_cli_jar patch $stock_input -r $tdir -p -o $patched_apk -b $rv_patches_jar --keystore=ks.keystore $patcher_args"
-	if [ "$riplib" = true ]; then cmd+=" --rip-lib x86_64 --rip-lib x86"; fi
 	if [ "$OS" = Android ]; then cmd+=" --custom-aapt2-binary=${TEMP_DIR}/aapt2"; fi
 	pr "$cmd"
 	if [ "${DRYRUN:-}" = true ]; then
@@ -451,6 +450,14 @@ build_rv() {
 	# 	fi
 	# fi
 
+	if [ "${args[riplib]}" = true ]; then
+		p_patcher_args+=("--rip-lib x86_64 --rip-lib x86")
+		if [ "$arch" = "arm64-v8a" ]; then
+			p_patcher_args+=("--rip-lib armeabi-v7a")
+		elif [ "$arch" = "arm-v7a" ]; then
+			p_patcher_args+=("--rip-lib arm64-v8a")
+		fi
+	fi
 	if [ "$mode_arg" = module ]; then
 		build_mode_arr=(module)
 	elif [ "$mode_arg" = apk ]; then
@@ -474,14 +481,11 @@ build_rv() {
 		else
 			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch_f}.apk"
 		fi
-		if [ "$build_mode" = module ]; then
-			if [ "${args[riplib]}" = true ]; then patcher_args+=("--unsigned"); fi
-			if [ "${args[riplib]}" = true ] && { [ $is_bundle = false ] || [ "${args[include_stock]}" = false ]; }; then
-				patcher_args+=("--rip-lib arm64-v8a --rip-lib armeabi-v7a")
-			fi
+		if [ "$build_mode" = module ] && [ "${args[riplib]}" = true ]; then
+			patcher_args+=("--unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a")
 		fi
 		if [ ! -f "$patched_apk" ] || [ "$REBUILD" = true ]; then
-			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}" "${args[riplib]}"; then
+			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
 				epr "Building '${table}' failed!"
 				return 0
 			fi
