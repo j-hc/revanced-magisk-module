@@ -1,6 +1,7 @@
+parallel-jobs = 1
 logging-to-file = true        # enables logging of every patch process to a seperate file
 enable-magisk-update = false   # set this to false if you do not want to receive updates for the module in magisk app
-build-mindetach-module = false
+
 
 # add 'enabled = false' for not patching a specific app or remove it from the config
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
@@ -14,9 +15,9 @@ excluded-patches = "custom-branding enable-debugging premium-heading return-yout
 included-patches = ""                                                 # space-seperated patches to include (non-excluded patches are included by default)
 version = "auto"                                                      # 'auto', 'latest', 'beta' or a custom one like '17.40.41'
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
-patches-version = "v2.191.0-dev.26" # locks the patches version. default: latest available
-integrations-version = "v0.118.0-dev.19" # locks the integrations version. default: latest available
-cli-version = "v4.0.0-dev.3"
+#patches-version = "v2.191.0-dev.26" 
+#integrations-version = "v0.118.0-dev.19" 
+#cli-version = "v4.0.0-dev.3"
 
 [YouTube-Extended]
 enabled = true
