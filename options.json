@@ -1,1 +1,13 @@
-[]
+        
+[
+  {
+    "patchName": "Theme",
+    "options": [
+      {
+        "key": "darkThemeBackgroundColor",
+        "value": "#292D30"
+      }
+    ]
+  }
+]
+        
