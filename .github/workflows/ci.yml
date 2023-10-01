@@ -44,6 +44,6 @@ jobs:
   build:
     permissions: write-all
     needs: check
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/buildx.yml
     if: ${{ needs.check.outputs.SHOULD_BUILD == 1 }}
     secrets: inherit
