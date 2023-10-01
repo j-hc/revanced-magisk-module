@@ -6,6 +6,9 @@ build-mindetach-module = false
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [YouTube]
+patches-source = "ReVanced/revanced-patches"
+integrations-source = "ReVanced/revanced-integrations"
+cli-source = "ReVanced/revanced-cli"
 build-mode = "apk"                                                   # 'both', 'apk' or 'module'
 excluded-patches = "custom-branding enable-debugging premium-heading return-youtube-dislike"                                                 # space-seperated patches to exclude (multiline strings are not supported)
 included-patches = ""                                                 # space-seperated patches to include (non-excluded patches are included by default)
@@ -13,6 +16,7 @@ version = "auto"                                                      # 'auto', 
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 patches-version = "v2.191.0-dev.26" # locks the patches version. default: latest available
 integrations-version = "v0.118.0-dev.19" # locks the integrations version. default: latest available
+cli-version = "v4.0.0-dev.3"
 
 [YouTube-Extended]
 enabled = true
