@@ -21,7 +21,7 @@ jobs:
           
       - name: Install aapt
         run: |
-          sudo apt install aapt js
+          sudo apt install aapt jq
       - name: Checkout
         uses: actions/checkout@v3
         with:
