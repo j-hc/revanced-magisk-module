@@ -33,7 +33,7 @@ included-patches = ""
 version="auto"
 
 [Music]
-enabled = true
+enabled = false
 apkmirror-arch = "arm64-v8a"
 build-mode = "apk"
 excluded-patches = ""
