@@ -122,7 +122,7 @@ jobs:
           cp -f build.tmp build.md
           
           echo -e "\n[revanced-magisk-module repo]($GITHUB_SERVER_URL/vuongvan/magisk-module)" >>latest_build.md
-          CHANGELOG_JSON=$(cat build.tmp | sed -e 's/([^()]*)//g' | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' | sed 's/\*\*//g' | sed 's/\*/\-/g' | sed -e 's/([^()]*\])//g' | tr -d '\`' | tr '\n' ' \n' | sed 's!http[s]\?://\S*!!g' sed 's/Install \[Vanced Microg\] for non-root YouTube or YT Music//' | sed 's/\[revanced-magisk-module\]//' | tr '\n' ' \n' | ts '%s' )
+          CHANGELOG_JSON=$(cat build.tmp | sed -e 's/([^()]*)//g' | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' | sed 's/\*\*//g' | sed 's/\*/\-/g' | sed -e 's/([^()]*\])//g' | tr -d '\`' | tr '\n' ' \n' | sed 's!http[s]\?://\S*!!g' | sed 's/Install \[Vanced Microg\] for non-root YouTube or YT Music//' | sed 's/\[revanced-magisk-module\]//' | tr '\n' ' \n' | ts '%s' )
           #echo $CHANGELOG_JSON
           
           get_update_rv_json() {
