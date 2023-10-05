@@ -7,7 +7,7 @@ enable-magisk-update = false   # set this to false if you do not want to receive
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 [YouTube]
-enabled = true
+enabled = false
 patches-source = "ReVanced/revanced-patches"
 integrations-source = "ReVanced/revanced-integrations"
 cli-source = "ReVanced/revanced-cli"
