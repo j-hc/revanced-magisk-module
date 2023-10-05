@@ -293,6 +293,19 @@ dl_apkmonk() {
 }
 get_apkmonk_pkg_name() { grep -oP '.*apkmonk\.com\/app\/\K([,\w,\.]*)' <<<"$1"; }
 # --------------------------------------------------
+dl_archive() {
+	local archive_resp=$1 version=$2 arch=$3 output=$4 url=$5
+	local path
+	path=$(grep "${version}-${arch}" <<<"$archive_resp") || return 1
+	req "${url}/${path}" "$output"
+}
+get_archive_resp() {
+	r=$(req "$1" -)
+	if [ -z "$r" ]; then return 1; else sed -n 's;^<a href="\(.*\)"[^"]*;\1;p' <<<"$r"; fi
+}
+get_archive_vers() { sed 's/^[^-]*-//;s/-\(all\|arm64-v8a\|arm-v7a\)\.apk//g' <<<"$1"; }
+get_archive_pkg_name() { head -1 <<<"$1" | cut -d- -f1; }
+# --------------------------------------------------
 
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3 rv_cli_jar=$4 rv_patches_jar=$5
@@ -324,7 +337,13 @@ build_rv() {
 	p_patcher_args+=("$(join_args "${args[excluded_patches]}" -e) $(join_args "${args[included_patches]}" -i)")
 	[ "${args[exclusive_patches]}" = true ] && p_patcher_args+=("--exclusive")
 
-	if [ "$dl_from" = apkmirror ]; then
+	if [ "$dl_from" = archive ]; then
+		if ! archive_resp=$(get_archive_resp "${args[archive_dlurl]}"); then
+			epr "Could not find ${args[archive_dlurl]}"
+			return 0
+		fi
+		pkg_name=$(get_archive_pkg_name "$archive_resp")
+	elif [ "$dl_from" = apkmirror ]; then
 		pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
 	elif [ "$dl_from" = uptodown ]; then
 		uptwod_resp_dl=$(req "${args[uptodown_dlurl]}/download" -)
@@ -349,7 +368,10 @@ build_rv() {
 		p_patcher_args+=("-f")
 	fi
 	if [ $get_latest_ver = true ]; then
-		if [ "$dl_from" = apkmirror ]; then
+		if [ "$dl_from" = archive ]; then
+			archivevers=$(get_archive_vers "$archive_resp")
+			version=$(get_largest_ver <<<"$archivevers") || version=$(head -1 <<<"$archivevers")
+		elif [ "$dl_from" = apkmirror ]; then
 			local apkmvers aav
 			if [ "$version_mode" = beta ]; then aav="true"; else aav="false"; fi
 			apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "$aav")
@@ -371,8 +393,16 @@ build_rv() {
 	version_f=${version_f#v}
 	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}.apk"
 	if [ ! -f "$stock_apk" ]; then
-		for dl_p in apkmirror uptodown apkmonk; do
-			if [ "$dl_p" = apkmirror ]; then
+		for dl_p in archive apkmirror uptodown apkmonk; do
+			if [ "$dl_p" = archive ]; then
+				if [ -z "${args[archive_dlurl]}" ]; then continue; fi
+				pr "Downloading '${table}' from j-hc archive"
+				if ! dl_archive "$archive_resp" "$version_f" "$arch_f" "$stock_apk" "${args[archive_dlurl]}"; then
+					epr "ERROR: Could not download ${table} from j-hc archive"
+					continue
+				fi
+				break
+			elif [ "$dl_p" = apkmirror ]; then
 				if [ -z "${args[apkmirror_dlurl]}" ]; then continue; fi
 				pr "Downloading '${table}' from APKMirror"
 				local apkm_arch

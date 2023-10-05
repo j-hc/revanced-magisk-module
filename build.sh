@@ -137,6 +137,10 @@ for table_name in $(toml_get_table_names); do
 		app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/}
 		app_args[dl_from]=apkmirror
 	} || app_args[apkmirror_dlurl]=""
+	app_args[archive_dlurl]=$(toml_get "$t" archive-dlurl) && {
+		app_args[archive_dlurl]=${app_args[archive_dlurl]%/}
+		app_args[dl_from]=archive
+	} || app_args[archive_dlurl]=""
 	if [ -z "${app_args[dl_from]:-}" ]; then abort "ERROR: no 'apkmirror_dlurl', 'uptodown_dlurl' or 'apkmonk_dlurl' option was set for '$table_name'."; fi
 	app_args[arch]=$(toml_get "$t" apkmirror-arch) || app_args[arch]="universal"
 	app_args[include_stock]=$(toml_get "$t" include-stock) || app_args[include_stock]=true && vtf "${app_args[include_stock]}" "include-stock"
