@@ -180,7 +180,7 @@ if music_t=$(toml_get_table "Music"); then music_mode=$(toml_get "$music_t" "bui
 if [ "$youtube_mode" != module ] || [ "$music_mode" != module ]; then
 	log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) for non-root YouTube and YT Music"
 fi
-if [ "$youtube_mode" = module ] || [ "$music_mode" = module ]; then
+if [ "$youtube_mode" != apk ] || [ "$music_mode" != apk ]; then
 	log "Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) module to detach YouTube and YT Music from Play Store"
 fi
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
