@@ -176,17 +176,16 @@ semver_validate() {
 }
 get_patch_last_supported_ver() {
 	local inc_sel exc_sel
-	inc_sel=$(list_args "$2" | sed 's/.*/\.name == "&"/' | paste -sd '~' | sed 's/~/ or /g' || :)
-	exc_sel=$(list_args "$3" | sed 's/.*/\.name != "&"/' | paste -sd '~' | sed 's/~/ and /g' || :)
+	inc_sel=$(list_args "$2" | sed 's/.*/\.name == &/' | paste -sd '~' | sed 's/~/ or /g' || :)
+	exc_sel=$(list_args "$3" | sed 's/.*/\.name != &/' | paste -sd '~' | sed 's/~/ and /g' || :)
 	inc_sel=${inc_sel:-false}
-	if [ "$4" = false ]; then inc_sel="${inc_sel} or .excluded==false"; fi
+	if [ "$4" = false ]; then inc_sel="${inc_sel} or .use==true"; fi
 	jq -r ".[]
-			| .name |= ascii_downcase | .name |= gsub(\"\\\\s\";\"-\")
-			| select(.compatiblePackages[].name==\"${1}\")
+			| select(.compatiblePackages // [] | .[] | .name==\"${1}\")
 			| select(${inc_sel})
 			| select(${exc_sel:-true})
-			| .compatiblePackages[].versions" "$5" |
-		tr -d ' ,\t[]"' | grep -v '^$' | sort | uniq -c | sort -nr | head -1 | xargs | cut -d' ' -f2 || return 1
+			| .compatiblePackages[].versions // []" "$5" |
+		tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || return 1
 }
 
 dl_if_dne() {
@@ -570,7 +569,7 @@ build_rv() {
 	done
 }
 
-list_args() { tr -d '\t\r' <<<"$1" | tr ' ' '\n' | grep -v '^$' || :; }
+list_args() { tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | grep -v '^$' || :; }
 join_args() { list_args "$1" | sed "s/^/${2} /" | paste -sd " " - || :; }
 
 uninstall_sh() {
