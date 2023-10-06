@@ -9,7 +9,6 @@ if [ "${1:-}" = "clean" ]; then
 fi
 
 source utils.sh
-: >build.md
 
 vtf() { if ! isoneof "${1}" "true" "false"; then abort "ERROR: '${1}' is not a valid option for '${2}': only true or false is allowed"; fi; }
 
@@ -17,16 +16,6 @@ toml_prep "$(cat 2>/dev/null "${1:-config.toml}")" || abort "could not find conf
 # -- Main config --
 main_config_t=$(toml_get_table "")
 COMPRESSION_LEVEL=$(toml_get "$main_config_t" compression-level) || COMPRESSION_LEVEL="9"
-ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || ENABLE_MAGISK_UPDATE=true
-if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY:-}" ]; then
-	pr "You are building locally. Magisk updates will not be enabled."
-	ENABLE_MAGISK_UPDATE=false
-fi
-BUILD_MINDETACH_MODULE=$(toml_get "$main_config_t" build-mindetach-module) || BUILD_MINDETACH_MODULE=false
-if [ "$BUILD_MINDETACH_MODULE" = true ] && [ ! -f "mindetach-magisk/mindetach/detach.txt" ]; then
-	pr "mindetach module was not found."
-	BUILD_MINDETACH_MODULE=false
-fi
 if ! PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs); then
 	if [ "$OS" = Android ]; then PARALLEL_JOBS=1; else PARALLEL_JOBS=$(nproc); fi
 fi
@@ -38,18 +27,27 @@ DEF_PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || DEF_PATCHES_SRC="
 DEF_INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || DEF_INTEGRATIONS_SRC="ReVanced/revanced-integrations"
 DEF_CLI_SRC=$(toml_get "$main_config_t" cli-source) || DEF_CLI_SRC="j-hc/revanced-cli"
 DEF_RV_BRAND=$(toml_get "$main_config_t" rv-brand) || DEF_RV_BRAND="ReVanced"
-# -- Main config --
-mkdir -p $TEMP_DIR $BUILD_DIR
+if [ "${2:-}" = "--config-update" ]; then
+	config_update
+	exit 0
+fi
+: >build.md
+ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || ENABLE_MAGISK_UPDATE=true
+if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY:-}" ]; then
+	pr "You are building locally. Magisk updates will not be enabled."
+	ENABLE_MAGISK_UPDATE=false
+fi
+# -----------------
 
+mkdir -p $TEMP_DIR $BUILD_DIR
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be within 0-9"; fi
-if [ "$BUILD_MINDETACH_MODULE" = true ]; then : >$PKGS_LIST; fi
 if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 
-#check_deps
+# -- check_deps --
 jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt install jq' or equivalent"
 java --version >/dev/null || abort "\`openjdk 17\` is not installed. install it with 'apt install openjdk-17-jre' or equivalent"
 zip --version >/dev/null || abort "\`zip\` is not installed. install it with 'apt install zip' or equivalent"
-# --
+# ----------------
 get_prebuilts
 
 set_prebuilts() {
@@ -93,11 +91,7 @@ for table_name in $(toml_get_table_names); do
 	cli_src=$(toml_get "$t" cli-source) || cli_src=$DEF_CLI_SRC
 	cli_ver=$(toml_get "$t" cli-version) || cli_ver=$DEF_CLI_VER
 
-	if [ "${SETPRE:-}" ]; then
-		if ! set_prebuilts "$integrations_src" "$patches_src" "$cli_src" "$integrations_ver" "$patches_ver" "$cli_ver"; then
-			abort "couldnt set prebuilts"
-		fi
-	else
+	if ! set_prebuilts "$integrations_src" "$patches_src" "$cli_src" "$integrations_ver" "$patches_ver" "$cli_ver"; then
 		if ! RVP="$(get_rv_prebuilts "$integrations_src" "$patches_src" "$integrations_ver" "$patches_ver" "$cli_src" "$cli_ver")"; then
 			abort "could not download rv prebuilts"
 		fi
@@ -143,8 +137,16 @@ for table_name in $(toml_get_table_names); do
 		app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/}
 		app_args[dl_from]=apkmirror
 	} || app_args[apkmirror_dlurl]=""
+	app_args[archive_dlurl]=$(toml_get "$t" archive-dlurl) && {
+		app_args[archive_dlurl]=${app_args[archive_dlurl]%/}
+		app_args[dl_from]=archive
+	} || app_args[archive_dlurl]=""
 	if [ -z "${app_args[dl_from]:-}" ]; then abort "ERROR: no 'apkmirror_dlurl', 'uptodown_dlurl' or 'apkmonk_dlurl' option was set for '$table_name'."; fi
 	app_args[arch]=$(toml_get "$t" apkmirror-arch) || app_args[arch]="universal"
+	if [ "${app_args[arch]}" != "both" ] && [ "${app_args[arch]}" != "universal" ] && [[ "${app_args[arch]}" != "arm64-v8a"* ]] && [[ "${app_args[arch]}" != "arm-v7a"* ]]; then
+		abort "wrong arch '${app_args[arch]}' for '$table_name'"
+	fi
+
 	app_args[include_stock]=$(toml_get "$t" include-stock) || app_args[include_stock]=true && vtf "${app_args[include_stock]}" "include-stock"
 	app_args[merge_integrations]=$(toml_get "$t" merge-integrations) || app_args[merge_integrations]=true && vtf "${app_args[merge_integrations]}" "merge-integrations"
 	app_args[dpi]=$(toml_get "$t" apkmirror-dpi) || app_args[dpi]="nodpi"
@@ -173,21 +175,16 @@ wait
 rm -rf temp/tmp.*
 if [ -z "$(ls -A1 ${BUILD_DIR})" ]; then abort "All builds failed."; fi
 
-if [ "$BUILD_MINDETACH_MODULE" = true ]; then
-	pr "Building mindetach module"
-	cp -f $PKGS_LIST mindetach-magisk/mindetach/detach.txt
-	pushd mindetach-magisk/mindetach/
-	zip -qr ../../build/mindetach-"$(grep version= module.prop | cut -d= -f2)".zip .
-	popd
-fi
-
 if youtube_t=$(toml_get_table "YouTube"); then youtube_mode=$(toml_get "$youtube_t" "build-mode") || youtube_mode="apk"; else youtube_mode="module"; fi
 if music_t=$(toml_get_table "Music"); then music_mode=$(toml_get "$music_t" "build-mode") || music_mode="apk"; else music_mode="module"; fi
 if [ "$youtube_mode" != module ] || [ "$music_mode" != module ]; then
-	log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) for non-root YouTube or YT Music"
+	log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) for non-root YouTube and YT Music"
+fi
+if [ "$youtube_mode" = module ] || [ "$music_mode" = module ]; then
+	log "Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) module to detach YouTube and YT Music from Play Store"
 fi
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
-log "\n---\nChangelog:"
+log "\nChangelog:"
 log "$(cat $TEMP_DIR/*-rv/changelog.md)"
 
 pr "Done"
