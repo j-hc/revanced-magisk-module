@@ -305,7 +305,7 @@ get_archive_resp() {
 	if [ -z "$r" ]; then return 1; else sed -n 's;^<a href="\(.*\)"[^"]*;\1;p' <<<"$r"; fi
 }
 get_archive_vers() { sed 's/^[^-]*-//;s/-\(all\|arm64-v8a\|arm-v7a\)\.apk//g' <<<"$1"; }
-get_archive_pkg_name() { head -1 <<<"$1" | cut -d- -f1; }
+get_archive_pkg_name() { awk -F/ '{print $NF}' <<<"$1"; }
 # --------------------------------------------------
 
 patch_apk() {
@@ -339,11 +339,7 @@ build_rv() {
 	[ "${args[exclusive_patches]}" = true ] && p_patcher_args+=("--exclusive")
 
 	if [ "$dl_from" = archive ]; then
-		if ! archive_resp=$(get_archive_resp "${args[archive_dlurl]}"); then
-			epr "Could not find ${args[archive_dlurl]}"
-			return 0
-		fi
-		pkg_name=$(get_archive_pkg_name "$archive_resp")
+		pkg_name=$(get_archive_pkg_name "${args[archive_dlurl]}")
 	elif [ "$dl_from" = apkmirror ]; then
 		pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
 	elif [ "$dl_from" = uptodown ]; then
@@ -367,6 +363,13 @@ build_rv() {
 	else
 		version=$version_mode
 		p_patcher_args+=("-f")
+	fi
+	if [ "$dl_from" = archive ]; then
+		local archive_resp
+		if ! archive_resp=$(get_archive_resp "${args[archive_dlurl]}"); then
+			epr "Could not find ${args[archive_dlurl]}"
+			return 0
+		fi
 	fi
 	if [ $get_latest_ver = true ]; then
 		if [ "$dl_from" = archive ]; then
@@ -409,9 +412,9 @@ build_rv() {
 				local apkm_arch
 				if [ "$arch" = "universal" ]; then
 					apkm_arch="universal"
-				elif [ "$arch" = "arm64-v8a" ]; then
+				elif [[ "$arch" = "arm64-v8a"* ]]; then
 					apkm_arch="arm64-v8a"
-				elif [ "$arch" = "arm-v7a" ]; then
+				elif [[ "$arch" = "arm-v7a"* ]]; then
 					apkm_arch="armeabi-v7a"
 				else
 					apkm_arch="$arch"
