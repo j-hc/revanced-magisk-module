@@ -269,6 +269,7 @@ dl_uptodown_last() {
 	local uptwod_resp=$1 output=$2
 	local url
 	url=$($HTMLQ -a data-url "#detail-download-button" <<<"$uptwod_resp") || return 1
+	url=$(req "$url" - | sed -n 's;.*class="post-download" data-url="\(.*\)".*;\1;p') || return 1
 	req "$url" "$output"
 }
 dl_uptodown() {
