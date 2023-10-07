@@ -188,6 +188,7 @@ jobs:
             echo "$UPDATE_YT_JSON" >yt-config-rv.json
             UPDATE_YT_JSON=$(get_update_rx_json "$YTRX_VER" "$YTRX_VER_CODE" "$YTRX_DLURL" "$CHANGELOG_JSON")
             echo "$UPDATE_YT_JSON" >config-rx.json
+            echo "$UPDATE_YT_JSON" >yt-config-rx.json
             
             UPDATE_YT_JSON=$(get_update_mn_json "$RM_VER_NAME" "$RM_VER_CODE")
             echo "$UPDATE_YT_JSON" >config-mn.json
@@ -196,9 +197,8 @@ jobs:
             echo "$UPDATE_YT_JSON" >config-micro.json
             
             if [ ! -f config-rv.json ]; then : >config-rv.json; fi
-            cat config-mn.json config-rv.json config-rx.json config-micro.json > yt-update.json
-            cat config-mn.json config-rv.json config-micro.json > yt-stable.json
-            cat config-mn.json config-rv.json config-micro.json > yt-old.json
+            cat config-mn.json yt-config-rv.json config-rx.json config-micro.json > yt-update.json
+            cat config-mn.json config-rx.json config-micro.json > yt-stablex.json
           fi
 
           #find . -name "*-update.json" | grep . || : >dummy-update.json
