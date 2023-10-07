@@ -166,7 +166,7 @@ jobs:
           }"
           }
       
-          if [ -n "${{ steps.get_output.outputs.YTRV_OUTPUT }}" ]; then
+          if [ -n "${{ steps.get_output.outputs.YTRX_OUTPUT }}" ]; then
             YTRV_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube:\(.*\)/\1/p' | tr -d '[:space:]')
             YTRX_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube-Extended:\(.*\)/\1/p' | tr -d '[:space:]')
             
