@@ -9,6 +9,15 @@
       }
     ]
   },
+ {
+    "patchName": "Premium heading",
+    "options": [
+      {
+        "key": "usePremiumHeading",
+        "value": "YouTube X"
+      }
+    ]
+  },
   {
     "patchName": "Theme",
     "options": [
