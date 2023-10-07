@@ -185,6 +185,7 @@ jobs:
             
             UPDATE_YT_JSON=$(get_update_rv_json "$YTRV_VER" "$YTRV_VER_CODE" "$YTRV_DLURL" "$CHANGELOG_JSON")
             echo "$UPDATE_YT_JSON" >config-rv.json
+            echo "$UPDATE_YT_JSON" >yt-config-rv.json
             UPDATE_YT_JSON=$(get_update_rx_json "$YTRX_VER" "$YTRX_VER_CODE" "$YTRX_DLURL" "$CHANGELOG_JSON")
             echo "$UPDATE_YT_JSON" >config-rx.json
             
