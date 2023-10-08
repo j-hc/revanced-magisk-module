@@ -31,7 +31,7 @@ build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 excluded-patches = "'custom-package-name' 'custom-branding-icon-revancify-blue' 'debugging' 'materialyou' 'premium-heading' 'custom-branding-icon-afn-blue' 'custom-branding-icon-revancify' 'custom-branding-icon-afn-red' 'return-youtube-dislike'"                                                 # space-seperated patches to exclude (multiline strings are not supported)
 included-patches = ""
-version="18.33.40"
+#version="18.33.40"
 
 [Music]
 enabled = false
