@@ -8,6 +8,12 @@ on:
       TELEGRAM_TO:
         description: "Telegram Chat ID"
         required: true
+    inputs:
+      from_ci:
+        type: boolean
+        required: false
+        default: true
+
   workflow_dispatch:
 
 jobs:
@@ -26,19 +32,22 @@ jobs:
           fetch-depth: 0
           submodules: true
 
-      - name: Get last tag
-        id: last_tag
-        uses: oprypin/find-latest-tag@v1
-        continue-on-error: true
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ github.repository }}
-          releases-only: true
+      - name: Update config
+        if: ${{ inputs.from_ci }}
+        run: |
+          if git checkout origin/update build.md; then
+            UPDATE_CFG=$(./build.sh config.toml --config-update)
+            if [ "$UPDATE_CFG" ]; then
+              echo "$UPDATE_CFG" > config.toml
+            fi
+          fi
 
       - name: Get next version code
         id: next_ver_code
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ steps.last_tag.outputs.tag }}"
+          TAG=$(gh release list -L 1 | awk -F '\t' '{print $3}')
           if [ -z "$TAG" ]; then TAG=0; fi
           echo "NEXT_VER_CODE=$((TAG + 1))" >> $GITHUB_OUTPUT
 

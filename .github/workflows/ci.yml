@@ -20,66 +20,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          source utils.sh
-          toml_prep "$(cat config.toml)"
-
-          is_youtube_latest() {
-            t=$(toml_get_table YouTube)
-            v=$(toml_get "$t" "version") || v=""
-            if isoneof "$v" latest beta; then
-              cur_yt=$(sed -n 's/.*YouTube: \(.*\)/\1/p' build.md | xargs)
-              [ -z "$cur_yt" ] && return 1 # empty, fail=>dont build
-              if [ "$v" = beta ]; then aav="true"; else aav="false"; fi
-              last_ver=$(get_apkmirror_vers youtube "$aav" | get_largest_ver)
-              [ -z "$last_ver" ] && return 1 # cant fetch, dont build
-              echo "current yt version: '$cur_yt'"
-              echo "latest yt version: '$last_ver'"
-              [ "$cur_yt" != "$last_ver" ] # test success=>build, fail=>dont build
-            else
-              return 1 # not experimental, dont build
-            fi
-          }
-
-          is_patches_latest() {
-            declare -A sources
-            sources["ReVanced/revanced-patches"]=1
-            for table_name in $(toml_get_table_names); do
-                if [ -z "$table_name" ]; then continue; fi
-                t=$(toml_get_table "$table_name")
-                enabled=$(toml_get "$t" enabled) || enabled=true
-                if [ "$enabled" = false ]; then continue; fi
-                PATCHES_SRC=$(toml_get "$t" patches-source)
-                if [ "$PATCHES_SRC" ]; then sources[$PATCHES_SRC]=1; fi
-            done
-            for PATCHES_SRC in "${!sources[@]}"; do
-                echo "chk: '$PATCHES_SRC'"
-                last_patches_url=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - | json_get 'browser_download_url' | grep 'jar')
-                last_patches=${last_patches_url##*/}
-                cur_patches=$(sed -n "s/.*Patches: ${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
-                echo "current patches version: $cur_patches"
-                echo "latest patches version: $last_patches"
-                if [ -z "$cur_patches" ] || [ -z "$last_patches" ]; then continue; fi
-                if [ "$cur_patches" != "$last_patches" ]; then return 0; fi
-            done
-            return 1
-          }
-
-          if ! git checkout update; then
+          if ! git checkout origin/update build.md; then
             echo "first time building!"
             echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
-          elif is_patches_latest || is_youtube_latest; then
-            echo "build!"
-            echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
           else
-            echo "dont build!"
-            echo "SHOULD_BUILD=0" >> $GITHUB_OUTPUT
+            UPDATE_CFG=$(./build.sh config.toml --config-update)
+            if [ "$UPDATE_CFG" ]; then
+              echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
+            else
+              echo "SHOULD_BUILD=0" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: Clear older runs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh run list -L400 --json databaseId -q '.[].databaseId' | tail -n+10 | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE || :
+          gh run list -L400 --json databaseId -q '.[].databaseId' | tail -n+10 | xargs -IID gh api "repos/$GITHUB_REPOSITORY/actions/runs/ID" -X DELETE || :
 
     outputs:
       SHOULD_BUILD: ${{ steps.should_build.outputs.SHOULD_BUILD }}
