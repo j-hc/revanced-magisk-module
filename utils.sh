@@ -175,17 +175,19 @@ semver_validate() {
 	[ ${#ac} = 0 ]
 }
 get_patch_last_supported_ver() {
-	local inc_sel exc_sel
+	local inc_sel exc_sel vs
 	inc_sel=$(list_args "$2" | sed 's/.*/\.name == &/' | paste -sd '~' | sed 's/~/ or /g' || :)
 	exc_sel=$(list_args "$3" | sed 's/.*/\.name != &/' | paste -sd '~' | sed 's/~/ and /g' || :)
 	inc_sel=${inc_sel:-false}
 	if [ "$4" = false ]; then inc_sel="${inc_sel} or .use==true"; fi
-	jq -r ".[]
+	if ! vs=$(jq -r ".[]
 			| select(.compatiblePackages // [] | .[] | .name==\"${1}\")
 			| select(${inc_sel})
 			| select(${exc_sel:-true})
-			| .compatiblePackages[].versions // []" "$5" |
-		tr -d ' ,\t[]"' | sort -u | grep -v '^$' | get_largest_ver || return 1
+			| .compatiblePackages[].versions // []" "$5"); then
+		abort "error in jq query"
+	fi
+	tr -d ' ,\t[]"' <<<"$vs" | sort -u | grep -v '^$' | get_largest_ver || :
 }
 
 dl_if_dne() {
@@ -352,10 +354,12 @@ build_rv() {
 
 	local get_latest_ver=false
 	if [ "$version_mode" = auto ]; then
-		version=$(
-			get_patch_last_supported_ver "$pkg_name" \
-				"${args[included_patches]}" "${args[excluded_patches]}" "${args[exclusive_patches]}" "${args[ptjs]}"
-		) || get_latest_ver=true
+		if ! version=$(get_patch_last_supported_ver "$pkg_name" \
+			"${args[included_patches]}" "${args[excluded_patches]}" "${args[exclusive_patches]}" "${args[ptjs]}"); then
+			exit 1
+		elif [ -z "$version" ]; then
+			get_latest_ver=true
+		fi
 	elif isoneof "$version_mode" latest beta; then
 		get_latest_ver=true
 		p_patcher_args+=("-f")
@@ -457,7 +461,8 @@ build_rv() {
 	if [ "${args[merge_integrations]}" = true ]; then p_patcher_args+=("-m ${args[integ]}"); fi
 	local microg_patch
 	microg_patch=$(jq -r ".[] | select(.compatiblePackages // [] | .[] | .name==\"${pkg_name}\") | .name" "${args[ptjs]}" | grep -iF microg || :)
-	if [ "$microg_patch" ]; then
+	if [ "$microg_patch" ] && [[ ${p_patcher_args[*]} =~ $microg_patch ]]; then
+		epr "You cant include/exclude microg patches as that's done by rvmm builder automatically."
 		p_patcher_args=("${p_patcher_args[@]//-[ei] ${microg_patch}/}")
 	fi
 
@@ -505,9 +510,9 @@ build_rv() {
 		if [ "$microg_patch" ]; then
 			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch_f}-${build_mode}.apk"
 			if [ "$build_mode" = apk ]; then
-				patcher_args+=("-i '${microg_patch}'")
+				patcher_args+=("-i \"${microg_patch}\"")
 			elif [ "$build_mode" = module ]; then
-				patcher_args+=("-e '${microg_patch}'")
+				patcher_args+=("-e \"${microg_patch}\"")
 			fi
 		else
 			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch_f}.apk"
