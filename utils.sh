@@ -218,11 +218,7 @@ dl_apkmirror() {
 	local resp node app_table dlurl=""
 	if [ "$arch" = universal ]; then
 		apparch=(universal noarch 'arm64-v8a + armeabi-v7a')
-	elif [ "$arch" = "arm64-v8a" ]; then
-		apparch=(arm64-v8a universal)
-	elif [ "$arch" = "armeabi-v7a" ]; then
-		apparch=(armeabi-v7a universal)
-	else apparch=("$arch"); fi
+	else apparch=("$arch" universal); fi
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	for ((n = 1; n < 40; n++)); do
@@ -413,11 +409,7 @@ build_rv() {
 				if [ -z "${args[apkmirror_dlurl]}" ]; then continue; fi
 				pr "Downloading '${table}' from APKMirror"
 				local apkm_arch
-				if [ "$arch" = "universal" ]; then
-					apkm_arch="universal"
-				elif [[ "$arch" = "arm64-v8a"* ]]; then
-					apkm_arch="arm64-v8a"
-				elif [[ "$arch" = "arm-v7a"* ]]; then
+				if [ "$arch" = "arm-v7a" ]; then
 					apkm_arch="armeabi-v7a"
 				else
 					apkm_arch="$arch"
