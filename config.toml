@@ -32,27 +32,6 @@ rv-brand = "ReVanced Extended"
 build-mode = "both"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 
-[Music-Extended-ReX]
-enabled = true
-app-name = "Music"
-patches-source = "YT-Advanced/ReX-patches"
-integrations-source = "YT-Advanced/ReX-integrations"
-cli-source = "revanced/revanced-cli"
-rv-brand = "ReVanced Extended Fork ReX"
-build-mode = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-apkmirror-arch = "both"
-
-[YouTube-Extended-ReX] 
-enabled = true
-app-name = "YouTube"
-patches-source = "YT-Advanced/ReX-patches"
-integrations-source = "YT-Advanced/ReX-integrations"
-cli-source = "revanced/revanced-cli"
-rv-brand = "ReVanced Extended Fork ReX"
-build-mode = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
-
 [Music]
 build-mode = "both"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
@@ -83,13 +62,13 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
 apkmirror-arch = "both"
 
 [Spotify]
-enabled = true
+enabled = false
 build-mode = "apk"
 version = "auto"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 
 [Spotify-Lite]
-enabled = true
+enabled = false
 build-mode = "apk"
 version = "auto"
 uptodown-dlurl = "https://spotify-lite.en.uptodown.com/android"
@@ -112,11 +91,11 @@ enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/windy-weather-world-inc/windy-wind-weather-forecast/"
 
 [MyExpenses]
-enabled = true
+enabled = false
 uptodown-dlurl = "https://my-expenses.en.uptodown.com/android"
 
 [NyxMusicPlayer]
-enabled = true
+enabled = false
 build-mode = "apk"
 version = "auto"
 uptodown-dlurl = "https://nyx-music-player.en.uptodown.com/android"
@@ -126,7 +105,7 @@ enabled = true
 apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"
 
 [TickTick]
-enabled = true
+enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/ticktick-to-do-list-with-reminder-day-planner/"
 apkmirror-arch = "both"
 
