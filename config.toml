@@ -26,7 +26,7 @@ cli-source = "j-hc/revanced-cli"
 rv-brand = "ReVanced Extended"
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-excluded-patches = "'return-youtube-dislike' 'amoled' 'custom-branding-icon-revancify-blue' 'custom-package-name'"
+excluded-patches = "'Custom branding icon MMT' 'Custom branding icon Revancify blue' 'Custom branding icon Revancify red' 'Custom package name' 'Return YouTube Dislike'"
 
 
 
