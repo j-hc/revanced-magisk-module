@@ -121,7 +121,7 @@ jobs:
         run: |
           git checkout -f update || git switch --discard-changes --orphan update
           
-          cp -f build.tmp build.md
+          cp -f build.tmp buildx.md
           
           echo -e "\n[revanced-magisk-module repo]($GITHUB_SERVER_URL/vuongvan/magisk-module)" >>latest_build.md
           #CHANGELOG_JSON=$(cat build.tmp | sed -e 's/([^()]*)//g' | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' | sed 's/\*\*//g' | sed 's/\*/\-/g' | sed -e 's/([^()]*\])//g' | tr -d '\`' | tr '\n' ' \n' | sed 's!http[s]\?://\S*!!g' | sed 's/Install \[Vanced Microg\] for non-root YouTube or YT Music//' | sed 's/\[revanced-magisk-module\]//' | tr '\n' ' \n' | ts '%s' )
@@ -205,7 +205,7 @@ jobs:
         with:
           branch: update
           skip_checkout: true
-          file_pattern: build.md yt-*.json
+          file_pattern: buildx.md yt-*.json
           commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
 
       - uses: actions/upload-artifact@v3
