@@ -194,12 +194,14 @@ jobs:
             UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE")
             echo "$UPDATE_YT_JSON" >config-micro.json
             
-            if [ ! -f config-rv.json ]; then : >config-rv.json; fi
-            cat config-mn.json config-rv.json config-ms.json config-micro.json > yt-update.json
-            cat config-mn.json config-rv.json config-micro.json > yt-stablex.json
+            if [ -n "${{ steps.get_output.outputs.YTMS_OUTPUT }}" ]; then
+                cat config-mn.json config-rv.json config-ms.json config-micro.json > yt-updatex.json
+            else
+                cat config-mn.json config-rv.json config-micro.json > yt-updatex.json
+            fi
           fi
 
-          #find . -name "*-update.json" | grep . || : >dummy-update.json
+          find . -name "*-update.json" | grep . || : >dummy-update.json
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
