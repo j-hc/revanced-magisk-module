@@ -89,20 +89,20 @@ jobs:
           cp -f build.md build.tmp
           
           cd build
-          yt_rv=$(find . -maxdepth 1 -name "youtube-revanced-*.apk" -printf '%P')
+          yt_rv=$(find . -maxdepth 1 -name "youtube-revancedx-*.apk" -printf '%P')
           ver_rv=$(aapt dump badging $yt_rv | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
-          yt_rx=$(find . -maxdepth 1 -name "youtube-revancedx-*.apk" -printf '%P')
-          ver_rx=$(aapt dump badging $yt_rx | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
+          yt_ms=$(find . -maxdepth 1 -name "music-revancedx-*.apk" -printf '%P')
+          ver_ms=$(aapt dump badging $yt_ms | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
           echo "YTRV_OUTPUT=$yt_rv"  >> $GITHUB_OUTPUT
-          echo "YTRX_OUTPUT=$yt_rx"  >> $GITHUB_OUTPUT
+          echo "YTMS_OUTPUT=$yt_ms"  >> $GITHUB_OUTPUT
           echo "VERRV_OUTPUT=$ver_rv"  >> $GITHUB_OUTPUT
           echo $ver_rv
-          echo "VERRX_OUTPUT=$ver_rx"  >> $GITHUB_OUTPUT
-          echo $ver_rx
+          echo "VERMS_OUTPUT=$ver_ms"  >> $GITHUB_OUTPUT
+          echo $ver_ms
           if [ -z "$yt_ex" ]; then
-            echo "RELEASE_NAME=ReVanced"  >> $GITHUB_OUTPUT
+            echo "RELEASE_NAME=ReVanced X"  >> $GITHUB_OUTPUT
           else
-            echo "RELEASE_NAME=ReVanced"  >> $GITHUB_OUTPUT
+            echo "RELEASE_NAME=ReVanced X"  >> $GITHUB_OUTPUT
           fi
           
       - name: Upload modules to release
@@ -136,7 +136,7 @@ jobs:
                    \"changelog\": \"$4\"
                 },"
             }
-          get_update_rx_json() {
+          get_update_ms_json() {
             echo "  \"music\": {
                    \"version\": \"$1\",
                    \"versionCode\": $2,
@@ -166,12 +166,12 @@ jobs:
           }"
           }
       
-          if [ -n "${{ steps.get_output.outputs.YTRX_OUTPUT }}" ]; then
-            YTRV_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube:\(.*\)/\1/p' | tr -d '[:space:]')
-            YTRX_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube-Extended:\(.*\)/\1/p' | tr -d '[:space:]')
+          if [ -n "${{ steps.get_output.outputs.YTRV_OUTPUT }}" ]; then
+            YTRV_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube-Extended:\(.*\)/\1/p' | tr -d '[:space:]')
+            YTMS_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music-Extended:\(.*\)/\1/p' | tr -d '[:space:]')
             
             YTRV_VER_CODE=${{ steps.get_output.outputs.VERRV_OUTPUT }}
-            YTRX_VER_CODE=${{ steps.get_output.outputs.VERRX_OUTPUT }}
+            YTMS_VER_CODE=${{ steps.get_output.outputs.VERMS_OUTPUT }}
             
             PVER_CODE=$(echo "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" | sed -e 's/\.//g')
             
@@ -181,23 +181,22 @@ jobs:
             MG_VER_CODE=${{ steps.config_mnmg.outputs.MG_VER_CODE_OUTPUT }}
             
             YTRV_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YTRV_OUTPUT }}"
-            YTRX_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YTRX_OUTPUT }}"
+            YTMS_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YTMS_OUTPUT }}"
             
             UPDATE_YT_JSON=$(get_update_rv_json "$YTRV_VER" "$YTRV_VER_CODE" "$YTRV_DLURL" "$CHANGELOG_JSON")
             echo "$UPDATE_YT_JSON" >config-rv.json
-            UPDATE_YT_JSON=$(get_update_rx_json "$YTRX_VER" "$YTRX_VER_CODE" "$YTRX_DLURL" "$CHANGELOG_JSON")
-            echo "$UPDATE_YT_JSON" >config-rx.json
-            echo "$UPDATE_YT_JSON" >yt-config-rx.json
+            UPDATE_YT_JSON=$(get_update_ms_json "$YTMS_VER" "$YTMS_VER_CODE" "$YTMS_DLURL" "$CHANGELOG_JSON")
+            echo "$UPDATE_YT_JSON" >config-ms.json
+            
             
             UPDATE_YT_JSON=$(get_update_mn_json "$RM_VER_NAME" "$RM_VER_CODE")
             echo "$UPDATE_YT_JSON" >config-mn.json
-            
             UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE")
             echo "$UPDATE_YT_JSON" >config-micro.json
             
             if [ ! -f config-rv.json ]; then : >config-rv.json; fi
-            cat config-mn.json yt-config-rv.json config-rx.json config-micro.json > yt-update.json
-            cat config-mn.json config-rx.json config-micro.json > yt-stablex.json
+            cat config-mn.json yt-config-rv.json config-ms.json config-micro.json > yt-update.json
+            cat config-mn.json config-rv.json config-micro.json > yt-stablex.json
           fi
 
           #find . -name "*-update.json" | grep . || : >dummy-update.json
