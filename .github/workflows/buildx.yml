@@ -195,7 +195,7 @@ jobs:
             echo "$UPDATE_YT_JSON" >config-micro.json
             
             if [ ! -f config-rv.json ]; then : >config-rv.json; fi
-            cat config-mn.json yt-config-rv.json config-ms.json config-micro.json > yt-update.json
+            cat config-mn.json config-rv.json config-ms.json config-micro.json > yt-update.json
             cat config-mn.json config-rv.json config-micro.json > yt-stablex.json
           fi
 
