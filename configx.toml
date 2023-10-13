@@ -1,0 +1,43 @@
+
+logging-to-file = true        # enables logging of every patch process to a seperate file
+enable-magisk-update = false   # set this to false if you do not want to receive updates for the module in magisk app
+
+[YouTube-Extended]
+enabled = true
+app-name = "YouTube"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "j-hc/revanced-cli"
+rv-brand = "RevancedX"
+build-mode = "apk"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+excluded-patches = "'Alternative thumbnails' 'Append time stamps information' 'Custom branding icon MMT' 'Custom branding icon Revancify blue' 'Custom branding icon Revancify red' 'Enable debug logging' 'Force premium heading' 'Return YouTube Dislike'"
+included-patches = ""
+#version="auto"
+
+
+[Music-Extended]
+enabled = true
+app-name = "Music"
+apkmirror-arch = "arm64-v8a"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "j-hc/revanced-cli"
+rv-brand = "RevancedX"
+build-mode = "apk"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+excluded-patches = "'Custom branding icon MMT' 'Custom branding icon Revancify blue' 'Custom branding icon Revancify red' 'Custom package name' 'Return YouTube Dislike'"
+
+
+
+[YouTube-Android7]
+enabled = false
+app-name = "YouTube"
+patches-source = "kitadai31/revanced-patches-android6-7"
+integrations-source = "kitadai31/revanced-integrations"
+cli-source = "revanced/rvcli"
+rv-brand = "RevancedOld"
+build-mode = "apk"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+excluded-patches = "custom-branding-name theme custom-package-name custom-branding-icon-revancify-blue debugging materialyou premium-heading custom-branding-icon-afn-blue custom-branding-icon-revancify custom-branding-icon-afn-red return-youtube-dislike"                                                 # space-seperated patches to exclude (multiline strings are not supported)
+included-patches = ""
