@@ -212,7 +212,7 @@ jobs:
         with:
           branch: update
           skip_checkout: true
-          file_pattern: buildx.md yt-*.json
+          file_pattern: build.md yt-*.json
           commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
 
       - uses: actions/upload-artifact@v3
