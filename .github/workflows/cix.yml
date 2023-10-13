@@ -22,39 +22,31 @@ jobs:
         run: |
           source utils.sh
           toml_prep "$(cat config.toml)"
-
           is_patches_latest() {
             PATCHES_SRC=$(toml_get "$(toml_get_table "")" patches-source) || PATCHES_SRC="inotia00/revanced-patches"
             last_patches_url=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'browser_download_url' | grep 'jar')
             last_patches=${last_patches_url##*/}
             cur_patches=$(sed -n 's/.*Patches: inotia00\/\(.*\)/\1/p' build.md | sed -e 's/([^()]*)//g'  | xargs) || cur_patches=0
-            if $cur_patches == ""; then $cur_patches=0; fi
             echo "current patches version: $cur_patches"
-            
-            rv_patches_date=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'updated_at')
-            echo $rv_patches_date
             echo "latest patches version: $last_patches"
-            if [ "$cur_patches" != "$last_patches" ]; then return 1; fi
+            if [ -z "$cur_patches" ] || [ -z "$last_patches" ]; then return 1; fi
             [ "$cur_patches" != "$last_patches" ] # test success=>build, fail=>dont build
           }
-
           if ! git checkout update; then
             echo "first time building!"
             echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
-          elif is_patches_latest  ; then
+          elif is_patches_latest ; then
             echo "build!"
             echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
           else
             echo "dont build!"
             echo "SHOULD_BUILD=0" >> $GITHUB_OUTPUT
           fi
-
       - name: Clear older runs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh run list -L400 --json databaseId -q '.[].databaseId' | tail -n+10 | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE || :
-
     outputs:
       SHOULD_BUILD: ${{ steps.should_build.outputs.SHOULD_BUILD }}
 
