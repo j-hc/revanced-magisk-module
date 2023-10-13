@@ -43,6 +43,9 @@ jobs:
         run: |
           chmod +x build.sh
           ./build.sh config.toml
+          source utils.sh
+          rv_date=$(json_get 'updated_at' <<<"$rv_patches" | sed 's/\(\\n\)\+/\\n/g')
+          cat <<< "$rv_date" > build.tmp
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
