@@ -29,7 +29,7 @@ jobs:
             last_patches=${last_patches_url##*/}
             cur_patches=$(sed -n 's/.*Patches: inotia00\/\(.*\)/\1/p' build.md | sed -e 's/([^()]*)//g'  | xargs)
             echo "current patches version: $cur_patches"
-            rv_patches_changelog=$(json_get 'updated_at' <<<"$rv_patches" | sed 's/\(\\n\)\+/\\n/g')
+            rv_patches_changelog=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'updated_at')
             echo $rv_patches_changelog
             echo "latest patches version: $last_patches"
             if [ -z "$cur_patches" ] || [ -z "$last_patches" ]; then return 1; fi
