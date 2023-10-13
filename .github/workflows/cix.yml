@@ -58,7 +58,7 @@ jobs:
     permissions: write-all
     needs: check
     uses: ./.github/workflows/buildx.yml
-    if: ${{ needs.check.outputs.SHOULD_BUILD == 2 }}
+    if: ${{ needs.check.outputs.SHOULD_BUILD == 1}}
     secrets: inherit
 
   deletele_action_log:
