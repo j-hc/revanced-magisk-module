@@ -43,12 +43,7 @@ jobs:
         run: |
           chmod +x build.sh
           ./build.sh config.toml
-          source utils.sh
-          PATCHES_SRC="inotia00/revanced-patches"
-          rv_patches_date=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'updated_at')
-          echo $rv_patches_date
-          CHANGELOG_JSON=$(cat build.tmp | sed '/\[/d' )
-          echo $CHANGELOG_JSON
+          
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: $GITHUB_REPOSITORY
@@ -128,6 +123,11 @@ jobs:
       - name: Update changelog and Magisk update json
         id: update_config
         run: |
+          source utils.sh
+          PATCHES_SRC="inotia00/revanced-patches"
+          rv_patches_date=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'updated_at')
+          echo $rv_patches_date
+          echo "$rv_patches_date" > build.tmp
           git checkout -f update || git switch --discard-changes --orphan update
           
           cp -f build.tmp build.md
