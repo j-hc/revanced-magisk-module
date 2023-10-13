@@ -32,16 +32,6 @@ jobs:
             if [ -z "$cur_patches" ] || [ -z "$last_patches" ]; then return 1; fi
             [ "$cur_patches" != "$last_patches" ] # test success=>build, fail=>dont build
           }
-          if ! git checkout update; then
-            echo "first time building!"
-            echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
-          elif is_patches_latest ; then
-            echo "build!"
-            echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
-          else
-            echo "dont build!"
-            echo "SHOULD_BUILD=0" >> $GITHUB_OUTPUT
-          fi
       - name: Clear older runs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
