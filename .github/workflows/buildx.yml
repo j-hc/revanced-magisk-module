@@ -127,7 +127,7 @@ jobs:
           PATCHES_SRC="inotia00/revanced-patches"
           rv_patches_date=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'updated_at')
           echo $rv_patches_date
-          echo "$rv_patches_date" > build.tmp
+          echo "$rv_patches_date" >> build.tmp
           git checkout -f update || git switch --discard-changes --orphan update
           
           cp -f build.tmp build.md
