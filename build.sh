@@ -31,6 +31,8 @@ if [ "${2:-}" = "--config-update" ]; then
 	config_update
 	exit 0
 fi
+PREV_BUILDMD=$(cat build.md) || PREV_BUILDMD=""
+
 : >build.md
 ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || ENABLE_MAGISK_UPDATE=true
 if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY:-}" ]; then
@@ -188,5 +190,11 @@ fi
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 log "\nChangelog:"
 log "$(cat $TEMP_DIR/*-rv/changelog.md)"
+
+SKIPPED=$(grep -F "Patches: " <<<"$PREV_BUILDMD" | grep -vE "$(grep -F "Patches: " build.md | cut -d/ -f1 | sed 's/  //g' | paste -sd '~' | sed 's;~;|;g')" || :)
+if [ -n "$SKIPPED" ]; then
+	log "\nSkipped:"
+	log "$SKIPPED"
+fi
 
 pr "Done"

@@ -18,6 +18,7 @@ parallel-jobs = 1 # amount of cores to use for parallel patching, if not set npr
 patches-source = "revanced/revanced-patches" # where to fetch patches bundle from. default: "revanced/revanced-patches"
 integrations-source = "revanced/revanced-integrations" # where to fetch integrations from. default: "revanced/revanced-integrations"
 cli-source = "j-hc/revanced-cli" # where to fetch cli from. default: "j-hc/revanced-cli"
+# options like cli-source can also set per app
 rv-brand = "ReVanced Extended" # rebrand from 'ReVanced' to something different. default: "ReVanced"
 
 patches-version = "v2.160.0" # locks the patches version. default: latest available
@@ -31,8 +32,8 @@ version = "auto" # 'auto', 'latest', 'beta' or a custom one e.g. '17.40.41'. def
 # 'latest' gets the latest stable without checking patches support. 'beta' gets the latest beta/alpha
 include-stock = true # includes stock apk in the module. default: true
 build-mode = "apk" # 'both', 'apk' or 'module'. default: apk
-excluded-patches = "some-patch some-other-patch" # whitespace seperated list of patches to exclude. default: "" (empty)
-included-patches = "patch-name" # whitespace seperated list of patches to include, all default patches are included by default. default: "" (empty)
+excluded-patches = "'Some Patch' 'Some Other Patch'" # whitespace seperated list of patches to exclude. default: "" (empty)
+included-patches = "'Patch something'" # whitespace seperated list of patches to include, all default patches are included by default. default: "" (empty)
 exclusive-patches = false # exclude all patches by default. default: false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
@@ -41,5 +42,4 @@ module-prop-name = "some-app-magisk" # magisk module prop name.
 merge-integrations = false # set false to never merge even when needed. default: true
 apkmirror-dpi = "360-480dpi" # used to select apk variant from apkmirror. default: nodpi
 apkmirror-arch = "arm64-v8a" # 'arm64-v8a', 'arm-v7a', 'universal', 'both'. 'both' downloads both arm64-v8a and arm-v7a. default: universal
-# arch option is only for downloading from apkmirror and does not affect anything else.
 ```

@@ -3,7 +3,6 @@
 MODULE_TEMPLATE_DIR="revanced-magisk"
 TEMP_DIR="temp"
 BUILD_DIR="build"
-# PKGS_LIST="${TEMP_DIR}/module-pkgs"
 
 if [ "${GITHUB_TOKEN:-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
