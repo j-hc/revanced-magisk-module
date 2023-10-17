@@ -191,7 +191,7 @@ log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 log "\nChangelog:"
 log "$(cat $TEMP_DIR/*-rv/changelog.md)"
 
-SKIPPED=$(grep -F "Patches: " <<<"$PREV_BUILDMD" | grep -vE "$(grep -F "Patches: " build.md | cut -d/ -f1 | sed 's/  //g' | paste -sd '~' | sed 's;~;|;g')" || :)
+SKIPPED=$(sed '/Skipped:/,$d' <<<"$PREV_BUILDMD" | grep -F "Patches: " | grep -vE "$(grep -F "Patches: " build.md | cut -d/ -f1 | sed 's/  //g' | paste -sd '~' | sed 's;~;|;g')" || :)
 if [ -n "$SKIPPED" ]; then
 	log "\nSkipped:"
 	log "$SKIPPED"
