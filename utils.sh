@@ -261,19 +261,14 @@ get_apkmirror_pkg_name() { req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_col
 # -------------------- uptodown --------------------
 get_uptodown_resp() { req "${1}/versions" -; }
 get_uptodown_vers() { $HTMLQ --text ".version" <<<"$1"; }
-dl_uptodown_last() {
-	local uptwod_resp=$1 output=$2
-	local url
-	url=$($HTMLQ -a data-url "#detail-download-button" <<<"$uptwod_resp") || return 1
-	url=$(req "$url" - | sed -n 's;.*class="post-download" data-url="\(.*\)".*;\1;p') || return 1
-	req "$url" "$output"
-}
 dl_uptodown() {
-	local uptwod_resp=$1 version=$2 output=$3
-	local url r
-	url=$(grep -F "${version}</span>" -B 2 <<<"$uptwod_resp" | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
-	r=$(req "$url" -) || return 1
-	dl_uptodown_last "$r" "$output"
+	local uptwod_resp=$1 version=$2 output=$3 uptodown_dlurl=$4
+	local url
+	if [ -n "$version" ]; then
+		url=$(grep -F "${version}</span>" -B 2 <<<"$uptwod_resp" | head -1 | sed -n 's;.*data-url=".*download\/\(.*\)".*;\1;p') || return 1
+	else url=""; fi
+	url="https://dw.uptodown.com/dwn/$(req "${uptodown_dlurl}/post-download/${url}" - | sed -n 's;.*class="post-download" data-url="\(.*\)".*;\1;p')" || return 1
+	req "$url" "$output"
 }
 get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)" <<<"$1"; }
 # --------------------------------------------------
@@ -421,17 +416,11 @@ build_rv() {
 			elif [ "$dl_p" = uptodown ]; then
 				if [ -z "${args[uptodown_dlurl]}" ]; then continue; fi
 				pr "Downloading '${table}' from Uptodown"
-				if [ $get_latest_ver = true ]; then
-					if ! dl_uptodown_last "$uptwod_resp_dl" "$stock_apk"; then
-						epr "ERROR: Could not download ${table} from Uptodown (last)"
-						continue
-					fi
-				else
-					if [ -z "${uptwod_resp:-}" ]; then uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}"); fi
-					if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
-						epr "ERROR: Could not download ${table} from Uptodown"
-						continue
-					fi
+				if [ -z "${uptwod_resp:-}" ]; then uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}"); fi
+				if [ "$get_latest_ver" = true ]; then upv=""; else upv=$version; fi
+				if ! dl_uptodown "$uptwod_resp" "$upv" "$stock_apk" "${args[uptodown_dlurl]}"; then
+					epr "ERROR: Could not download ${table} from Uptodown"
+					continue
 				fi
 				break
 			elif [ "$dl_p" = apkmonk ]; then
