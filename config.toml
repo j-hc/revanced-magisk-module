@@ -13,13 +13,18 @@ included-patches = ""
 version = "auto"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 
+[Music]
+build-mode = "both"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+apkmirror-arch = "both"
+
 [Music-Extended]
 app-name = "Music"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 rv-brand = "ReVanced Extended"
 build-mode = "both"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 apkmirror-arch = "both"
 
 [YouTube-Extended]
@@ -29,11 +34,6 @@ integrations-source = "inotia00/revanced-integrations"
 rv-brand = "ReVanced Extended"
 build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
-
-[Music]
-build-mode = "both"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
-apkmirror-arch = "both"
 
 [Twitter]
 build-mode = "apk"
