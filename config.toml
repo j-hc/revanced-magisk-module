@@ -9,7 +9,7 @@ enable-magisk-update = true   # set this to false if you do not want to receive 
 [YouTube-Extended]
 app-name = "YouTube"
 patches-source = "inotia00/revanced-patches"
-integration-source = "inotia00/revanced-integration"
+integrations-source = "inotia00/revanced-integrations"
 included-patches = "'Add splash animation' 'Disable landscape mode' 'Enable debug logging' 'Force hide player button background' 'Force premium heading' 'Hide double tap overlay filter' 'MaterialYou'"
 excluded-patches = "'Custom branding YouTube name' 'Custom branding icon Revancify blue' 'Custom package name' 'Theme'"
 rv-brand = "ReVanced Extended"
