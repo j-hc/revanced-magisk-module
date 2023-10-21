@@ -318,8 +318,7 @@ patch_apk() {
 	if [ "${DRYRUN:-}" = true ]; then
 		cp -f "$stock_input" "$patched_apk"
 	else
-		cp -f "$stock_input" "$patched_apk"
-		# eval "$cmd"
+		eval "$cmd"
 	fi
 	[ -f "$patched_apk" ]
 }
