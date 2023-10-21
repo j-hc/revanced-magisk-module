@@ -11,3 +11,6 @@ CLI: j-hc/revanced-cli-4.0.2-all.jar
 Integrations: inotia00/revanced-integrations-0.120.1.apk  
 Patches: inotia00/revanced-patches-2.195.1.jar  
 [Changelog](https://github.com/inotia00/revanced-patches/releases/tag/v2.195.1)  
+
+Skipped:
+Patches: ReVanced/revanced-patches-2.195.0.jar  
