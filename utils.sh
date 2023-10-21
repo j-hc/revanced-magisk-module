@@ -78,7 +78,8 @@ get_rv_prebuilts() {
 	local nm
 	nm=$(cut -d/ -f9 <<<"$rv_patches_url")
 	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$nm  " >>"$patches_dir/changelog.md"
-	echo -e "[Changelog](https://github.com/${patches_src}/releases/tag/v$(sed 's/.*-\(.*\)\..*/\1/' <<<$nm))\n" >>"$patches_dir/changelog.md"
+	# shellcheck disable=SC2001
+	echo -e "[Changelog](https://github.com/${patches_src}/releases/tag/v$(sed 's/.*-\(.*\)\..*/\1/' <<<"$nm"))\n" >>"$patches_dir/changelog.md"
 	# echo -e "\n${rv_patches_changelog//# [/### [}\n---" >>"$patches_dir/changelog.md"
 
 	dl_if_dne "$rv_cli_jar" "$rv_cli_url" >&2 || return 1
@@ -121,6 +122,12 @@ get_prebuilts() {
 
 config_update() {
 	declare -A sources
+	: >$TEMP_DIR/skipped
+	local conf=""
+	# shellcheck disable=SC2154
+	conf+=$(sed '1d' <<<"$main_config_t")
+	conf+=$'\n'
+	local prcfg=false
 	for table_name in $(toml_get_table_names); do
 		if [ -z "$table_name" ]; then continue; fi
 		t=$(toml_get_table "$table_name")
@@ -136,12 +143,19 @@ config_update() {
 			fi
 			last_patches=${last_patches_url##*/}
 			cur_patches=$(sed -n "s/.*Patches: ${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
-			if [ "$cur_patches" ] && [ "$last_patches" ] && [ "${cur_patches}" != "$last_patches" ]; then
-				sources[$PATCHES_SRC]=1
-				echo "$t"
+			if [ "$cur_patches" ] && [ "$last_patches" ]; then
+				if [ "${cur_patches}" != "$last_patches" ]; then
+					sources[$PATCHES_SRC]=1
+					prcfg=true
+					conf+="$t"
+					conf+=$'\n'
+				else
+					echo "Patches: ${PATCHES_SRC%%/*}/${cur_patches}  " >>$TEMP_DIR/skipped
+				fi
 			fi
 		fi
 	done
+	if [ "$prcfg" = true ]; then echo "$conf"; fi
 }
 
 _req() {
@@ -209,15 +223,16 @@ isoneof() {
 
 # -------------------- apkmirror --------------------
 dl_apkmirror() {
-	local url=$1 version=${2// /-} output=$3 apkorbundle=$4 arch=$5 dpi=$6
+	local url=$1 version=${2// /-} output=$3 arch=$4 dpi=$5 apkorbundle=APK
+	if [ "$arch" = "arm-v7a" ]; then arch="armeabi-v7a"; fi
 	[ "${DRYRUN:-}" ] && {
 		: >"$output"
 		return 0
 	}
-	local resp node app_table dlurl=""
-	if [ "$arch" = universal ]; then
+	local apparch resp node app_table dlurl=""
+	if [ "$arch" = all ]; then
 		apparch=(universal noarch 'arm64-v8a + armeabi-v7a')
-	else apparch=("$arch" universal); fi
+	else apparch=("$arch" universal noarch 'arm64-v8a + armeabi-v7a'); fi
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	for ((n = 1; n < 40; n++)); do
@@ -238,12 +253,10 @@ dl_apkmirror() {
 	req "$url" "$output"
 }
 get_apkmirror_vers() {
-	local apkmirror_category=$1 allow_alpha_version=$2
 	local vers apkm_resp
-	apkm_resp=$(req "https://www.apkmirror.com/uploads/?appcategory=${apkmirror_category}" -)
-	# apkm_name=$(echo "$apkm_resp" | sed -n 's;.*Latest \(.*\) Uploads.*;\1;p')
+	apkm_resp=$(req "https://www.apkmirror.com/uploads/?appcategory=${__APKMIRROR_CAT__}" -)
 	vers=$(sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p' <<<"$apkm_resp")
-	if [ "$allow_alpha_version" = false ]; then
+	if [ "$__AAV__" = false ]; then
 		local IFS=$'\n'
 		vers=$(grep -iv "\(beta\|alpha\)" <<<"$vers")
 		local v r_vers=()
@@ -255,53 +268,59 @@ get_apkmirror_vers() {
 		echo "$vers"
 	fi
 }
-get_apkmirror_pkg_name() { req "$1" - | sed -n 's;.*id=\(.*\)" class="accent_color.*;\1;p'; }
+get_apkmirror_pkg_name() { sed -n 's;.*id=\(.*\)" class="accent_color.*;\1;p' <<<"$__APKMIRROR_RESP__"; }
+get_apkmirror_resp() {
+	__APKMIRROR_RESP__=$(req "${1}" -)
+	__APKMIRROR_CAT__="${1##*/}"
+}
 # --------------------------------------------------
 
 # -------------------- uptodown --------------------
-get_uptodown_resp() { req "${1}/versions" -; }
-get_uptodown_vers() { $HTMLQ --text ".version" <<<"$1"; }
-dl_uptodown_last() {
-	local uptwod_resp=$1 output=$2
+get_uptodown_resp() {
+	__UPTODOWN_RESP__=$(req "${1}/versions" -)
+	__UPTODOWN_RESP_PKG__=$(req "${1}/download" -)
+}
+get_uptodown_vers() { $HTMLQ --text ".version" <<<"$__UPTODOWN_RESP__"; }
+dl_uptodown() {
+	local uptodown_dlurl=$1 version=$2 output=$3
 	local url
-	url=$($HTMLQ -a data-url "#detail-download-button" <<<"$uptwod_resp") || return 1
-	url=$(req "$url" - | sed -n 's;.*class="post-download" data-url="\(.*\)".*;\1;p') || return 1
+	if [ -n "$version" ]; then
+		url=$(grep -F "${version}</span>" -B 2 <<<"$__UPTODOWN_RESP__" | head -1 | sed -n 's;.*data-url=".*download\/\(.*\)".*;\1;p') || return 1
+	else url=""; fi
+	url="https://dw.uptodown.com/dwn/$(req "${uptodown_dlurl}/post-download/${url}" - | sed -n 's;.*class="post-download" data-url="\(.*\)".*;\1;p')" || return 1
 	req "$url" "$output"
 }
-dl_uptodown() {
-	local uptwod_resp=$1 version=$2 output=$3
-	local url r
-	url=$(grep -F "${version}</span>" -B 2 <<<"$uptwod_resp" | head -1 | sed -n 's;.*data-url="\(.*\)".*;\1;p') || return 1
-	r=$(req "$url" -) || return 1
-	dl_uptodown_last "$r" "$output"
-}
-get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)" <<<"$1"; }
+get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)" <<<"$__UPTODOWN_RESP_PKG__"; }
 # --------------------------------------------------
 
 # -------------------- apkmonk ---------------------
-get_apkmonk_resp() { req "${1}" -; }
-get_apkmonk_vers() { grep -oP 'download_ver.+?>\K([0-9,\.]*)' <<<"$1"; }
+get_apkmonk_resp() {
+	__APKMONK_RESP__=$(req "${1}" -)
+	__APKMONK_PKG_NAME__=$(awk -F/ '{print $NF}' <<<"$1")
+}
+get_apkmonk_vers() { grep -oP 'download_ver.+?>\K([0-9,\.]*)' <<<"$__APKMONK_RESP__"; }
 dl_apkmonk() {
-	local apkmonk_resp=$1 version=$2 output=$3
-	local url
-	url="https://www.apkmonk.com/down_file?pkg="$(grep -F "$version</a>" <<<"$apkmonk_resp" | grep -oP 'href=\"/download-app/\K.+?(?=/?\">)' | sed 's;/;\&key=;') || return 1
+	local url=$1 version=$2 output=$3
+	url="https://www.apkmonk.com/down_file?pkg="$(grep -F "$version</a>" <<<"$__APKMONK_RESP__" | grep -oP 'href=\"/download-app/\K.+?(?=/?\">)' | sed 's;/;\&key=;') || return 1
 	url=$(req "$url" - | grep -oP 'https.+?(?=\",)') || return 1
 	req "$url" "$output"
 }
-get_apkmonk_pkg_name() { grep -oP '.*apkmonk\.com\/app\/\K([,\w,\.]*)' <<<"$1"; }
+get_apkmonk_pkg_name() { echo "$__APKMONK_PKG_NAME__"; }
 # --------------------------------------------------
 dl_archive() {
-	local archive_resp=$1 version=$2 arch=$3 output=$4 url=$5
-	local path
-	path=$(grep "${version}-${arch}" <<<"$archive_resp") || return 1
+	local url=$1 version=$2 output=$3 arch=$4
+	local path version=${version// /}
+	path=$(grep "${version_f#v}-${arch// /}" <<<"$__ARCHIVE_RESP__") || return 1
 	req "${url}/${path}" "$output"
 }
 get_archive_resp() {
+	local r
 	r=$(req "$1" -)
-	if [ -z "$r" ]; then return 1; else sed -n 's;^<a href="\(.*\)"[^"]*;\1;p' <<<"$r"; fi
+	if [ -z "$r" ]; then return 1; else __ARCHIVE_RESP__=$(sed -n 's;^<a href="\(.*\)"[^"]*;\1;p' <<<"$r"); fi
+	__ARCHIVE_PKG_NAME__=$(awk -F/ '{print $NF}' <<<"$1")
 }
-get_archive_vers() { sed 's/^[^-]*-//;s/-\(all\|arm64-v8a\|arm-v7a\)\.apk//g' <<<"$1"; }
-get_archive_pkg_name() { awk -F/ '{print $NF}' <<<"$1"; }
+get_archive_vers() { sed 's/^[^-]*-//;s/-\(all\|arm64-v8a\|arm-v7a\)\.apk//g' <<<"$__ARCHIVE_RESP__"; }
+get_archive_pkg_name() { echo "$__ARCHIVE_PKG_NAME__"; }
 # --------------------------------------------------
 
 patch_apk() {
@@ -320,7 +339,7 @@ patch_apk() {
 
 build_rv() {
 	eval "declare -A args=${1#*=}"
-	local version build_mode_arr pkg_name uptwod_resp
+	local version build_mode_arr pkg_name
 	local mode_arg=${args[build_mode]} version_mode=${args[version]}
 	local app_name=${args[app_name]}
 	local app_name_l=${app_name,,}
@@ -328,33 +347,32 @@ build_rv() {
 	local table=${args[table]}
 	local dl_from=${args[dl_from]}
 	local arch=${args[arch]}
-	if [ "$arch" = 'universal' ]; then local arch_f="all"; else local arch_f="${arch// /}"; fi
+	local arch_f="${arch// /}"
 
 	local p_patcher_args=()
 	p_patcher_args+=("$(join_args "${args[excluded_patches]}" -e) $(join_args "${args[included_patches]}" -i)")
 	[ "${args[exclusive_patches]}" = true ] && p_patcher_args+=("--exclusive")
 
-	if [ "$dl_from" = archive ]; then
-		pkg_name=$(get_archive_pkg_name "${args[archive_dlurl]}")
-	elif [ "$dl_from" = apkmirror ]; then
-		pkg_name=$(get_apkmirror_pkg_name "${args[apkmirror_dlurl]}")
-	elif [ "$dl_from" = uptodown ]; then
-		uptwod_resp_dl=$(req "${args[uptodown_dlurl]}/download" -)
-		uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}")
-		pkg_name=$(get_uptodown_pkg_name "$uptwod_resp_dl")
-	elif [ "$dl_from" = apkmonk ]; then
-		pkg_name=$(get_apkmonk_pkg_name "${args[apkmonk_dlurl]}")
-		apkmonk_resp=$(get_apkmonk_resp "${args[apkmonk_dlurl]}")
+	for dl_p in archive apkmirror uptodown apkmonk; do
+		if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
+		if ! get_"${dl_p}"_resp "${args[${dl_p}_dlurl]}" || ! pkg_name=$(get_"${dl_p}"_pkg_name); then
+			args[${dl_p}_dlurl]=""
+			epr "ERROR: Could not find ${table} in ${dl_p}"
+			continue
+		fi
+		dl_from=$dl_p
+		break
+	done
+	if [ -z "$pkg_name" ]; then
+		epr "empty pkg name, not building ${table}."
+		return 0
 	fi
-
 	local get_latest_ver=false
 	if [ "$version_mode" = auto ]; then
 		if ! version=$(get_patch_last_supported_ver "$pkg_name" \
 			"${args[included_patches]}" "${args[excluded_patches]}" "${args[exclusive_patches]}" "${args[ptjs]}"); then
 			exit 1
-		elif [ -z "$version" ]; then
-			get_latest_ver=true
-		fi
+		elif [ -z "$version" ]; then get_latest_ver=true; fi
 	elif isoneof "$version_mode" latest beta; then
 		get_latest_ver=true
 		p_patcher_args+=("-f")
@@ -362,29 +380,10 @@ build_rv() {
 		version=$version_mode
 		p_patcher_args+=("-f")
 	fi
-	if [ "$dl_from" = archive ]; then
-		local archive_resp
-		if ! archive_resp=$(get_archive_resp "${args[archive_dlurl]}"); then
-			epr "Could not find ${args[archive_dlurl]}"
-			return 0
-		fi
-	fi
 	if [ $get_latest_ver = true ]; then
-		if [ "$dl_from" = archive ]; then
-			archivevers=$(get_archive_vers "$archive_resp")
-			version=$(get_largest_ver <<<"$archivevers") || version=$(head -1 <<<"$archivevers")
-		elif [ "$dl_from" = apkmirror ]; then
-			local apkmvers aav
-			if [ "$version_mode" = beta ]; then aav="true"; else aav="false"; fi
-			apkmvers=$(get_apkmirror_vers "${args[apkmirror_dlurl]##*/}" "$aav")
-			version=$(get_largest_ver <<<"$apkmvers") || version=$(head -1 <<<"$apkmvers")
-		elif [ "$dl_from" = uptodown ]; then
-			uptwodvers=$(get_uptodown_vers "$uptwod_resp")
-			version=$(head -1 <<<"$uptwodvers")
-		elif [ "$dl_from" = apkmonk ]; then
-			apkmonkvers=$(get_apkmonk_vers "$apkmonk_resp")
-			version=$(get_largest_ver <<<"$apkmonkvers") || version=$(head -1 <<<"$apkmonkvers")
-		fi
+		if [ "$version_mode" = beta ]; then __AAV__="true"; else __AAV__="false"; fi
+		pkgvers=$(get_"${dl_from}"_vers)
+		version=$(get_largest_ver <<<"$pkgvers") || version=$(head -1 <<<"$pkgvers")
 	fi
 	if [ -z "$version" ]; then
 		epr "empty version, not building ${table}."
@@ -396,54 +395,14 @@ build_rv() {
 	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		for dl_p in archive apkmirror uptodown apkmonk; do
-			if [ "$dl_p" = archive ]; then
-				if [ -z "${args[archive_dlurl]}" ]; then continue; fi
-				pr "Downloading '${table}' from j-hc archive"
-				if ! dl_archive "$archive_resp" "$version_f" "$arch_f" "$stock_apk" "${args[archive_dlurl]}"; then
-					epr "ERROR: Could not download ${table} from j-hc archive"
-					continue
-				fi
-				break
-			elif [ "$dl_p" = apkmirror ]; then
-				if [ -z "${args[apkmirror_dlurl]}" ]; then continue; fi
-				pr "Downloading '${table}' from APKMirror"
-				local apkm_arch
-				if [ "$arch" = "arm-v7a" ]; then
-					apkm_arch="armeabi-v7a"
-				else
-					apkm_arch="$arch"
-				fi
-				if ! dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_apk" APK "$apkm_arch" "${args[dpi]}"; then
-					epr "ERROR: Could not find any release of '${table}' with version '${version}', arch '${apkm_arch}' and dpi '${args[dpi]}' from APKMirror"
-					continue
-				fi
-				break
-			elif [ "$dl_p" = uptodown ]; then
-				if [ -z "${args[uptodown_dlurl]}" ]; then continue; fi
-				pr "Downloading '${table}' from Uptodown"
-				if [ $get_latest_ver = true ]; then
-					if ! dl_uptodown_last "$uptwod_resp_dl" "$stock_apk"; then
-						epr "ERROR: Could not download ${table} from Uptodown (last)"
-						continue
-					fi
-				else
-					if [ -z "${uptwod_resp:-}" ]; then uptwod_resp=$(get_uptodown_resp "${args[uptodown_dlurl]}"); fi
-					if ! dl_uptodown "$uptwod_resp" "$version" "$stock_apk"; then
-						epr "ERROR: Could not download ${table} from Uptodown"
-						continue
-					fi
-				fi
-				break
-			elif [ "$dl_p" = apkmonk ]; then
-				if [ -z "${args[apkmonk_dlurl]}" ]; then continue; fi
-				if [ -z "${apkmonk_resp:-}" ]; then apkmonk_resp=$(get_apkmonk_resp "${args[apkmonk_dlurl]}"); fi
-				pr "Downloading '${table}' from Apkmonk"
-				if ! dl_apkmonk "$apkmonk_resp" "$version" "$stock_apk"; then
-					epr "ERROR: Could not download ${table} from Apkmonk"
-					continue
-				fi
-				break
+			if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
+			pr "Downloading '${table}' from ${dl_p}"
+			if [ "$get_latest_ver" = true ] && [ $dl_p = uptodown ]; then local vver=""; else local vver=$version; fi
+			if ! dl_${dl_p} "${args[${dl_p}_dlurl]}" "$vver" "$stock_apk" "$arch" "${args[dpi]}"; then
+				epr "ERROR: Could not download '${table}' from ${dl_p} with version '${version}', arch '${arch}', dpi '${args[dpi]}'"
+				continue
 			fi
+			break
 		done
 		if [ ! -f "$stock_apk" ]; then return 0; fi
 	fi
