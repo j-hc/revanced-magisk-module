@@ -78,7 +78,8 @@ get_rv_prebuilts() {
 	local nm
 	nm=$(cut -d/ -f9 <<<"$rv_patches_url")
 	echo "Patches: $(cut -d/ -f4 <<<"$rv_patches_url")/$nm  " >>"$patches_dir/changelog.md"
-	echo -e "[Changelog](https://github.com/${patches_src}/releases/tag/v$(sed 's/.*-\(.*\)\..*/\1/' <<<$nm))\n" >>"$patches_dir/changelog.md"
+	# shellcheck disable=SC2001
+	echo -e "[Changelog](https://github.com/${patches_src}/releases/tag/v$(sed 's/.*-\(.*\)\..*/\1/' <<<"$nm"))\n" >>"$patches_dir/changelog.md"
 	# echo -e "\n${rv_patches_changelog//# [/### [}\n---" >>"$patches_dir/changelog.md"
 
 	dl_if_dne "$rv_cli_jar" "$rv_cli_url" >&2 || return 1
@@ -121,6 +122,12 @@ get_prebuilts() {
 
 config_update() {
 	declare -A sources
+	: >$TEMP_DIR/skipped
+	local conf=""
+	# shellcheck disable=SC2154
+	conf+=$(sed '1d' <<<"$main_config_t")
+	conf+=$'\n'
+	local prcfg=false
 	for table_name in $(toml_get_table_names); do
 		if [ -z "$table_name" ]; then continue; fi
 		t=$(toml_get_table "$table_name")
@@ -136,12 +143,19 @@ config_update() {
 			fi
 			last_patches=${last_patches_url##*/}
 			cur_patches=$(sed -n "s/.*Patches: ${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
-			if [ "$cur_patches" ] && [ "$last_patches" ] && [ "${cur_patches}" != "$last_patches" ]; then
-				sources[$PATCHES_SRC]=1
-				echo "$t"
+			if [ "$cur_patches" ] && [ "$last_patches" ]; then
+				if [ "${cur_patches}" != "$last_patches" ]; then
+					sources[$PATCHES_SRC]=1
+					prcfg=true
+					conf+="$t"
+					conf+=$'\n'
+				else
+					echo "Patches: ${PATCHES_SRC%%/*}/${cur_patches}  " >>$TEMP_DIR/skipped
+				fi
 			fi
 		fi
 	done
+	if [ "$prcfg" = true ]; then echo "$conf"; fi
 }
 
 _req() {
