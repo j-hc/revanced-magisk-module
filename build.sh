@@ -27,6 +27,8 @@ DEF_PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || DEF_PATCHES_SRC="
 DEF_INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || DEF_INTEGRATIONS_SRC="ReVanced/revanced-integrations"
 DEF_CLI_SRC=$(toml_get "$main_config_t" cli-source) || DEF_CLI_SRC="j-hc/revanced-cli"
 DEF_RV_BRAND=$(toml_get "$main_config_t" rv-brand) || DEF_RV_BRAND="ReVanced"
+mkdir -p $TEMP_DIR $BUILD_DIR
+
 if [ "${2:-}" = "--config-update" ]; then
 	config_update
 	exit 0
@@ -40,7 +42,6 @@ if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY:-}" ]; then
 fi
 # -----------------
 
-mkdir -p $TEMP_DIR $BUILD_DIR
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be within 0-9"; fi
 if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 
