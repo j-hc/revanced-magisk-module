@@ -7,16 +7,18 @@ enable-magisk-update = true   # set this to false if you do not want to receive 
 # you can use rvmm-config-gen to generate a config
 
 [YouTube]
+apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
+apkmirror-arch = "arm64-v8a"
 build-mode = "both"
-excluded-patches = ""
-included-patches = ""
-version = "auto"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+included-patches = "'Spoof device dimensions' 'Minimized playback' 'Remember video quality' 'HDR auto brightness' 'Playback speed' 'Video ads' 'Hide ads' 'Copy video url' 'Swipe controls' 'Disable fine scrubbing gesture' 'External downloads' 'Hide Shorts components' 'Hide filter bar' 'Hide email address' 'Tablet mini player' 'Disable Shorts on startup' 'SponsorBlock' 'Theme' 'Disable player popup panels'"
+exclusive-patches = true
 
 [Music]
+apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube-music/"
+apkmirror-arch = "arm64-v8a"
 build-mode = "both"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
-apkmirror-arch = "both"
+included-patches = "'Permanent repeat' 'Permanent shuffle'"
+excluded-patches = "'Vanced MicroG support' 'Bypass certificate checks'"
 
 [Music-Extended]
 app-name = "Music"
