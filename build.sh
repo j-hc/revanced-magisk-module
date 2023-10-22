@@ -27,11 +27,12 @@ DEF_PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || DEF_PATCHES_SRC="
 DEF_INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || DEF_INTEGRATIONS_SRC="ReVanced/revanced-integrations"
 DEF_CLI_SRC=$(toml_get "$main_config_t" cli-source) || DEF_CLI_SRC="j-hc/revanced-cli"
 DEF_RV_BRAND=$(toml_get "$main_config_t" rv-brand) || DEF_RV_BRAND="ReVanced"
+mkdir -p $TEMP_DIR $BUILD_DIR
+
 if [ "${2:-}" = "--config-update" ]; then
 	config_update
 	exit 0
 fi
-PREV_BUILDMD=$(cat build.md) || PREV_BUILDMD=""
 
 : >build.md
 ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || ENABLE_MAGISK_UPDATE=true
@@ -41,7 +42,6 @@ if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY:-}" ]; then
 fi
 # -----------------
 
-mkdir -p $TEMP_DIR $BUILD_DIR
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be within 0-9"; fi
 if [ "$LOGGING_F" = true ]; then mkdir -p logs; fi
 
@@ -146,8 +146,8 @@ for table_name in $(toml_get_table_names); do
 		app_args[dl_from]=archive
 	} || app_args[archive_dlurl]=""
 	if [ -z "${app_args[dl_from]:-}" ]; then abort "ERROR: no 'apkmirror_dlurl', 'uptodown_dlurl' or 'apkmonk_dlurl' option was set for '$table_name'."; fi
-	app_args[arch]=$(toml_get "$t" apkmirror-arch) || app_args[arch]="universal"
-	if [ "${app_args[arch]}" != "both" ] && [ "${app_args[arch]}" != "universal" ] && [[ "${app_args[arch]}" != "arm64-v8a"* ]] && [[ "${app_args[arch]}" != "arm-v7a"* ]]; then
+	app_args[arch]=$(toml_get "$t" apkmirror-arch) || app_args[arch]="all"
+	if [ "${app_args[arch]}" != "both" ] && [ "${app_args[arch]}" != "all" ] && [[ "${app_args[arch]}" != "arm64-v8a"* ]] && [[ "${app_args[arch]}" != "arm-v7a"* ]]; then
 		abort "wrong arch '${app_args[arch]}' for '$table_name'"
 	fi
 
@@ -191,7 +191,7 @@ log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 log "\nChangelog:"
 log "$(cat $TEMP_DIR/*-rv/changelog.md)"
 
-SKIPPED=$(grep -F "Patches: " <<<"$PREV_BUILDMD" | grep -vE "$(grep -F "Patches: " build.md | cut -d/ -f1 | sed 's/  //g' | paste -sd '~' | sed 's;~;|;g')" || :)
+SKIPPED=$(cat $TEMP_DIR/skipped || :)
 if [ -n "$SKIPPED" ]; then
 	log "\nSkipped:"
 	log "$SKIPPED"
