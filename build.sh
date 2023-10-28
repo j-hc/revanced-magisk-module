@@ -191,7 +191,7 @@ log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 log "\nChangelog:"
 log "$(cat $TEMP_DIR/*-rv/changelog.md)"
 
-SKIPPED=$(cat $TEMP_DIR/skipped || :)
+SKIPPED=$(cat $TEMP_DIR/skipped 2>/dev/null || :)
 if [ -n "$SKIPPED" ]; then
 	log "\nSkipped:"
 	log "$SKIPPED"
