@@ -30,6 +30,15 @@
         "value": "Music X"
       }
     ]
+  },
+  {
+    "patchName": "Premium heading",
+    "options": [
+      {
+        "key": "UsePremiumHeading",
+        "value": "YouTube X"
+      }
+    ]
   }
 ]
         
