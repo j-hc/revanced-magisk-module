@@ -11,7 +11,7 @@ cli-source = "j-hc/revanced-cli"
 rv-brand = "RevancedX"
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
-excluded-patches = "'Alternative thumbnails' 'Append time stamps information' 'Custom branding icon MMT' 'Custom branding icon Revancify blue' 'Custom branding icon Revancify red' 'Enable debug logging' 'Force premium heading' 'Return YouTube Dislike'"
+excluded-patches = "'Custom branding icon Revancify Blue' 'Custom package name' 'Return YouTube Dislike'"
 included-patches = ""
 #version="auto"
 
@@ -26,8 +26,7 @@ cli-source = "j-hc/revanced-cli"
 rv-brand = "RevancedX"
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-excluded-patches = "'Custom branding icon MMT' 'Custom branding icon Revancify blue' 'Custom branding icon Revancify red' 'Custom package name' 'Return YouTube Dislike'"
-
+excluded-patches = "'Custom branding icon Revancify Blue' 'Custom package name' 'Return YouTube Dislike'"
 
 
 [YouTube-Android7]
