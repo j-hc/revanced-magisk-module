@@ -11,7 +11,7 @@ cli-source = "inotia00/revanced-cli"
 rv-brand = "RevancedX"
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
-excluded-patches = "'Custom branding icon Revancify Blue' 'Custom package name' 'Return YouTube Dislike'"
+excluded-patches = "'Custom branding icon Revancify Blue' 'Custom package name' 'Return YouTube Dislike' 'Premium heading'"
 included-patches = ""
 #version="auto"
 
