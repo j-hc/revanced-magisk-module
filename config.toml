@@ -3,6 +3,7 @@ logging-to-file = true
 enable-magisk-update = true
 
 [YouTube]
+cli-source = "E85Addict/revanced-cli"
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
 build-mode = "module"
 excluded-patches = "'External downloads' 'Hide email address' 'Wide searchbar' 'Enable tablet layout' 'Theme' 'SponsorBlock' 'Custom branding' 'Tablet mini player' 'Alternative thumbnails'"
