@@ -31,3 +31,7 @@ To include/exclude patches or patch other apps
 [**See the list of patches**](https://j-hc.github.io/rvmm-config-gen/)
 
 Also see here [`CONFIG.md`](./CONFIG.md).
+
+## Thanks
+[j-hc](https://github.com/j-hc)  
+[inotia00](https://github.com/inotia00)  
