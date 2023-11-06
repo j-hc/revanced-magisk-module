@@ -30,7 +30,7 @@ cli-source = "j-hc/revanced-cli"
 rv-brand = "ReVanced"
 build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-apkmirror-arch = "both"
+apkmirror-arch = "arm64-v8a"
 
 [Music-inotia00]
 app-name = "Music"
@@ -40,7 +40,7 @@ cli-source = "inotia00/revanced-cli"
 rv-brand = "ReVanced Extended"
 build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-apkmirror-arch = "both"
+apkmirror-arch = "arm64-v8a"
 
 [YouTube-cvnertnc]
 patches-version = "v2.195.1"
