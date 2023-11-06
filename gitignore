@@ -1,0 +1,10 @@
+*.jar
+*.apk
+*.zip
+/revanced-cache
+/temp
+/build
+test*
+/logs
+build.md
+cmpr

@@ -27,22 +27,22 @@ fi
 
 if [ -f build.sh ]; then cd ..; fi
 if [ -d revanced-magisk-module ]; then
-	pr "Checking for revanced-magisk-module updates"
-	git -C revanced-magisk-module fetch
-	if git -C revanced-magisk-module status | grep -q 'is behind'; then
-		pr "revanced-magisk-module already is not synced with upstream."
-		pr "Cloning revanced-magisk-module. config.toml will be preserved."
-		cp -f revanced-magisk-module/config.toml .
-		rm -rf revanced-magisk-module
-		git clone https://github.com/j-hc/revanced-magisk-module --recurse --depth 1
-		mv -f config.toml revanced-magisk-module/config.toml
+	pr "Checking for rvx-app updates"
+	git -C rvx-app fetch
+	if git -C rvx-app status | grep -q 'is behind'; then
+		pr "rvx-app already is not synced with upstream."
+		pr "Cloning rvx-app. config.toml will be preserved."
+		cp -f rvx-app/config.toml .
+		rm -rf rvx-app
+		git clone https://github.com/cvnertnc/rvx-app --recurse --depth 1
+		mv -f config.toml rvx-app/config.toml
 	fi
 else
-	pr "Cloning revanced-magisk-module."
-	git clone https://github.com/j-hc/revanced-magisk-module --recurse --depth 1
-	sed -i '/^enabled.*/d; /^\[.*\]/a enabled = false' revanced-magisk-module/config.toml
+	pr "Cloning rvx-app."
+	git clone https://github.com/cvnertnc/rvx-app --recurse --depth 1
+	sed -i '/^enabled.*/d; /^\[.*\]/a enabled = false' rvx-app/config.toml
 fi
-cd revanced-magisk-module
+cd rvx-app
 chmod +x build.sh build-termux.sh
 
 if ask "Do you want to open the config.toml for customizations? [y/n]"; then
@@ -63,13 +63,13 @@ do
 done
 
 PWD=$(pwd)
-mkdir -p ~/storage/downloads/revanced-magisk-module
+mkdir -p ~/storage/downloads/rvx-app
 for op in *; do
 	[ "$op" = "*" ] && continue
-	mv -f "${PWD}/${op}" ~/storage/downloads/revanced-magisk-module/"${op}"
+	mv -f "${PWD}/${op}" ~/storage/downloads/rvx-app/"${op}"
 done
 
-pr "Outputs are available in /sdcard/Download/revanced-magisk-module folder"
-am start -a android.intent.action.VIEW -d file:///sdcard/Download/revanced-magisk-module -t resource/folder
+pr "Outputs are available in /sdcard/Download/rvx-app folder"
+am start -a android.intent.action.VIEW -d file:///sdcard/Download/rvx-app -t resource/folder
 sleep 2
-am start -a android.intent.action.VIEW -d file:///sdcard/Download/revanced-magisk-module -t resource/folder
+am start -a android.intent.action.VIEW -d file:///sdcard/Download/rvx-app -t resource/folder
