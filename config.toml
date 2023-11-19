@@ -6,7 +6,7 @@ enable-magisk-update = true   # set this to false if you do not want to receive 
 
 # you can use rvmm-config-gen to generate a config
 
-[Extended-Youtube]
+[Youtube]
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
@@ -17,7 +17,7 @@ included-patches = "'Disable landscape mode' 'Enable music search' 'Hide animate
 excluded-patches = "'Custom branding icon Revancify Blue' 'Custom branding name YouTube' 'Theme'"
 cli-source = "inotia00/revanced-cli"
 
-[Extended-Youtube-Music]
+[Youtube-Music]
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube-music/"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
