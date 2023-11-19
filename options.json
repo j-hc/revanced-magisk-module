@@ -1,1 +1,57 @@
-[]
+[]        
+[
+  {
+    "patchName": "Custom double tap length",
+    "options": [
+      {
+        "key": "DoubleTapLengthArrays",
+        "value": "3, 5, 10, 15, 20, 30, 60, 120"
+      }
+    ]
+  },
+  {
+    "patchName": "Custom package name",
+    "options": [
+      {
+        "key": "PackageNameYouTube",
+        "value": "app.rvx.android.youtube"
+      },
+      {
+        "key": "PackageNameYouTubeMusic",
+        "value": "app.rvx.android.youtubemusic"
+      }
+    ]
+  },
+  {
+    "patchName": "Premium heading",
+    "options": [
+      {
+        "key": "UsePremiumHeading",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "patchName": "SponsorBlock",
+    "options": [
+      {
+        "key": "OutlineIcon",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "patchName": "Custom package name",
+    "options": [
+      {
+        "key": "PackageNameYouTubeMusic",
+        "value": "app.rvx.android.youtubemusic"
+      },
+      {
+        "key": "PackageNameYouTube",
+        "value": "app.rvx.android.youtube"
+      }
+    ]
+  }
+]
+        
