@@ -28,44 +28,44 @@ included-patches = ""
 excluded-patches = "'Custom branding icon Revancify Blue' 'Custom branding name YouTube Music'"
 cli-source = "inotia00/revanced-cli"
 
-[Photomath-mod]
-apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
+# [Photomath-mod]
+# apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
 
-[Spotify-mod]
-apkmonk-dlurl = "https://www.apkmonk.com/app/com.spotify.music/"
+# [Spotify-mod]
+# apkmonk-dlurl = "https://www.apkmonk.com/app/com.spotify.music/"
 
-[Messenger-mod]
-apkmirror-dlurl = "https://apkmirror.com/apk/facebook-2/messenger/"
-apkmirror-arch = "arm64-v8a"
-build-mode = "both"
+# [Messenger-mod]
+# apkmirror-dlurl = "https://apkmirror.com/apk/facebook-2/messenger/"
+# apkmirror-arch = "arm64-v8a"
+# build-mode = "both"
 
-[Tiktok-mod]
-apkmirror-dlurl = "https://apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
-apkmirror-arch = "arm64-v8a + armeabi-v7a"
-build-mode = "both"
-included-patches = "'SIM spoof'"
+# [Tiktok-mod]
+# apkmirror-dlurl = "https://apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
+# apkmirror-arch = "arm64-v8a + armeabi-v7a"
+# build-mode = "both"
+# included-patches = "'SIM spoof'"
 
-[Adobe-Lightroom-mod]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/adobe/lightroom/"
-apkmirror-arch = "arm64-v8a + x86_64"
-build-mode = "both"
+# [Adobe-Lightroom-mod]
+# apkmirror-dlurl = "https://www.apkmirror.com/apk/adobe/lightroom/"
+# apkmirror-arch = "arm64-v8a + x86_64"
+# build-mode = "both"
 
-[Meme-Generator-mod]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/zombodroid/meme-generator-free/"
-apkmirror-arch = "arm64-v8a"
-build-mode = "both"
+# [Meme-Generator-mod]
+# apkmirror-dlurl = "https://www.apkmirror.com/apk/zombodroid/meme-generator-free/"
+# apkmirror-arch = "arm64-v8a"
+# build-mode = "both"
 
-[Facebook-mod]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/facebook/"
-apkmirror-arch = "arm64-v8a"
-build-mode = "both"
+# [Facebook-mod]
+# apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/facebook/"
+# apkmirror-arch = "arm64-v8a"
+# build-mode = "both"
 
-[Windy.com-mod]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/windyty-se/windy-wind-waves-and-hurricanes-forecast/"
-apkmirror-arch = "arm64-v8a"
-build-mode = "both"
+# [Windy.com-mod]
+# apkmirror-dlurl = "https://www.apkmirror.com/apk/windyty-se/windy-wind-waves-and-hurricanes-forecast/"
+# apkmirror-arch = "arm64-v8a"
+# build-mode = "both"
 
-[YukaFood-mod]
-apkmirror-dlurl = "https://www.apkmirror.com/apk/yuka-apps/yuka-food-cosmetic-scan"
-apkmirror-arch = "arm64-v8a + x86 + x86_64"
-build-mode = "both"
+# [YukaFood-mod]
+# apkmirror-dlurl = "https://www.apkmirror.com/apk/yuka-apps/yuka-food-cosmetic-scan"
+# apkmirror-arch = "arm64-v8a + x86 + x86_64"
+# build-mode = "both"
