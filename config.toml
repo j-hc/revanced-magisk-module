@@ -17,7 +17,6 @@ rv-brand = "mod"
 apkmirror-arch = "arm64-v8a"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 build-mode = "both"
-enabled = false
 
 [Youtube]
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
@@ -29,7 +28,6 @@ build-mode = "both"
 included-patches = "'Disable landscape mode' 'Enable music search' 'MaterialYou' 'Premium heading' 'Shorts outline button'"
 excluded-patches = "'Custom branding icon Revancify Blue' 'Custom branding name YouTube'"
 cli-source = "inotia00/revanced-cli"
-enabled = false
 
 [Youtube-Music]
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube-music/"
@@ -41,14 +39,12 @@ build-mode = "both"
 included-patches = ""
 excluded-patches = "'Custom branding icon Revancify Blue' 'Custom branding name YouTube Music'"
 cli-source = "inotia00/revanced-cli"
-enabled = false
 
 [Messenger]
 rv-brand = "mod"
 apkmirror-dlurl = "https://apkmirror.com/apk/facebook-2/messenger/"
 apkmirror-arch = "arm64-v8a"
 build-mode = "both"
-enabled = false
 
 [Tiktok]
 rv-brand = "mod"
@@ -56,25 +52,22 @@ apkmirror-dlurl = "https://apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-mu
 apkmirror-arch = "arm64-v8a + armeabi-v7a"
 build-mode = "both"
 included-patches = "'SIM spoof'"
-enabled = false
 
 [Adobe-Lightroom]
 rv-brand = "mod"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/adobe/lightroom/"
 apkmirror-arch = "arm64-v8a + x86_64"
 build-mode = "both"
-enabled = false
 
 [Meme-Generator]
 rv-brand = "mod"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/zombodroid/meme-generator-free/"
 apkmirror-arch = "arm64-v8a"
 build-mode = "both"
-enabled = false
 
 [Facebook]
 rv-brand = "mod"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/facebook/"
+uptodown-dlurl = "https://facebook.en.uptodown.com/android"
 apkmirror-arch = "arm64-v8a"
 build-mode = "both"
 
@@ -83,11 +76,9 @@ rv-brand = "mod"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/windyty-se/windy-wind-waves-and-hurricanes-forecast/"
 apkmirror-arch = "arm64-v8a"
 build-mode = "both"
-enabled = false
 
 [YukaFood]
 rv-brand = "mod"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/yuka-apps/yuka-food-cosmetic-scan"
-apkmirror-arch = "arm64-v8a + x86 + x86_64"
-apkmirror-dpi = "320-640dpi"
+uptodown-dlurl = "https://yuka.en.uptodown.com/android"
+apkmirror-arch = "arm64-v8a"
 build-mode = "both"
