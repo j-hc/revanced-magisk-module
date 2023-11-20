@@ -9,7 +9,7 @@ parallel-jobs = 2
 
 [Photomath]
 rv-brand = "mod"
-apkmirror-arch = "arm64-v8a"
+version = "auto"
 archive-dlurl = "https://lukemech.github.io/apks-for-revanced/archive/com.microblink.photomath/com.microblink.photomath.html"
 
 [Spotify]
