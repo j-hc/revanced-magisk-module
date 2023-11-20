@@ -41,13 +41,13 @@ cli-source = "inotia00/revanced-cli"
 
 [Messenger]
 rv-brand = "mod"
-apkmirror-dlurl = "https://apkmirror.com/apk/facebook-2/messenger/"
+uptodown-dlurl = "https://facebook-messenger.en.uptodown.com/android"
 apkmirror-arch = "arm64-v8a"
 build-mode = "both"
 
 [Tiktok]
 rv-brand = "mod"
-uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
+apkmirror-dlurl = ""
 apkmirror-arch = "arm64-v8a"
 build-mode = "both"
 included-patches = "'SIM spoof'"
