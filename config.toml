@@ -9,11 +9,13 @@ parallel-jobs = 2
 
 [Photomath]
 rv-brand = "mod"
-apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath"
+apkmirror-arch = "arm64-v8a"
+archive-dlurl = "https://archive.org/download/com.microblink.photomath-8.23.0-all/"
 
 [Spotify]
 rv-brand = "mod"
-apkmonk-dlurl = "https://www.apkmonk.com/app/com.spotify.music"
+apkmirror-arch = "arm64-v8a"
+uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 
 [Youtube]
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
