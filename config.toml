@@ -17,6 +17,7 @@ rv-brand = "mod"
 apkmirror-arch = "arm64-v8a"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 build-mode = "both"
+enabled = false
 
 [Youtube]
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
@@ -69,6 +70,7 @@ rv-brand = "mod"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/zombodroid/meme-generator-free/"
 apkmirror-arch = "arm64-v8a"
 build-mode = "both"
+enabled = false
 
 [Facebook]
 rv-brand = "mod"
@@ -81,9 +83,11 @@ rv-brand = "mod"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/windyty-se/windy-wind-waves-and-hurricanes-forecast/"
 apkmirror-arch = "arm64-v8a"
 build-mode = "both"
+enabled = false
 
 [YukaFood]
 rv-brand = "mod"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/yuka-apps/yuka-food-cosmetic-scan"
 apkmirror-arch = "arm64-v8a + x86 + x86_64"
+apkmirror-dpi = "320-640dpi"
 build-mode = "both"
