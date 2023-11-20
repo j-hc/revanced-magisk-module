@@ -6,11 +6,6 @@ enable-magisk-update = true   # set this to false if you do not want to receive 
 
 # you can use rvmm-config-gen to generate a config
 
-[Photomath]
-rv-brand = "mod"
-archive-dlurl = "https://lukemech.github.io/apksForRevanced/archive/com.microblink.photomath/com.microblink.photomath.html"
-enabled = false
-
 [Spotify]
 rv-brand = "mod"
 apkmirror-arch = "arm64-v8a"
@@ -39,12 +34,6 @@ included-patches = ""
 excluded-patches = "'Custom branding icon Revancify Blue' 'Custom branding name YouTube Music'"
 cli-source = "inotia00/revanced-cli"
 
-[Messenger]
-rv-brand = "mod"
-uptodown-dlurl = "https://facebook-messenger.en.uptodown.com/android"
-apkmirror-arch = "arm64-v8a"
-build-mode = "both"
-
 [Tiktok]
 rv-brand = "mod"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
@@ -61,12 +50,6 @@ build-mode = "both"
 [Meme-Generator]
 rv-brand = "mod"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/zombodroid/meme-generator-free/"
-apkmirror-arch = "arm64-v8a"
-build-mode = "both"
-
-[Facebook]
-rv-brand = "mod"
-uptodown-dlurl = "https://facebook.en.uptodown.com/android"
 apkmirror-arch = "arm64-v8a"
 build-mode = "both"
 
