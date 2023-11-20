@@ -11,7 +11,7 @@ apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 rv-brand = "mod"
-apkmirror-arch = "universal"
+apkmirror-arch = "arm64-v8a"
 build-mode = "both"
 included-patches = "'Disable landscape mode' 'Enable music search' 'MaterialYou' 'Premium heading' 'Shorts outline button'"
 excluded-patches = "'Custom branding icon Revancify Blue' 'Custom branding name YouTube'"
@@ -52,7 +52,7 @@ build-mode = "both"
 
 [Meme-Generator-mod]
 apkmirror-dlurl = "https://www.apkmirror.com/apk/zombodroid/meme-generator-free/"
-apkmirror-arch = "universal"
+apkmirror-arch = "arm64-v8a"
 build-mode = "both"
 
 [Facebook-mod]
@@ -62,7 +62,7 @@ build-mode = "both"
 
 [Windy.com-mod]
 apkmirror-dlurl = "https://www.apkmirror.com/apk/windyty-se/windy-wind-waves-and-hurricanes-forecast/"
-apkmirror-arch = "universal"
+apkmirror-arch = "arm64-v8a"
 build-mode = "both"
 
 [YukaFood-mod]
