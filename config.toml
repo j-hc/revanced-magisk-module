@@ -1,6 +1,5 @@
 logging-to-file = true        # enables logging of every patch process to a seperate file
 enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
-parallel-jobs = 1
 
 # add 'enabled = false' for not patching a specific app or remove it from the config
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
@@ -48,8 +47,8 @@ build-mode = "both"
 
 [Tiktok]
 rv-brand = "mod"
-apkmirror-dlurl = "https://apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly/"
-apkmirror-arch = "arm64-v8a + armeabi-v7a"
+uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
+apkmirror-arch = "arm64-v8a"
 build-mode = "both"
 included-patches = "'SIM spoof'"
 
@@ -74,11 +73,5 @@ build-mode = "both"
 [Windy.com]
 rv-brand = "mod"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/windyty-se/windy-wind-waves-and-hurricanes-forecast/"
-apkmirror-arch = "arm64-v8a"
-build-mode = "both"
-
-[YukaFood]
-rv-brand = "mod"
-uptodown-dlurl = "https://yuka.en.uptodown.com/android"
 apkmirror-arch = "arm64-v8a"
 build-mode = "both"
