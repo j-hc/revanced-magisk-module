@@ -339,7 +339,7 @@ dl_aptoide() {
 	url=$(grep -oE '"path":\s*"[^"]+.apk"' <<<"$resp" | head -1 | awk -F'"' '{print $4}') || return 1
 	req "$url" "$output"
 }
-get_aptoide_pkg_name() { grep -oE '"h1":\s*"([^"]*)"' <<<"$__APTOIDE_RESP_PKG__" | head -1 | awk -F'"' '{print $4}'; }
+get_aptoide_pkg_name() { grep -oE '"h1":\s*"([^"]*)"' <<<"$__APTOIDE_RESP_PKG__" | head -1 | awk -F'"' '{print $4}' | sed -e 's/[^A-Za-z0-9._-]/_/g'; }
 # --------------------------------------------------
 
 patch_apk() {
