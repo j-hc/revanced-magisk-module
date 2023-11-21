@@ -328,13 +328,11 @@ get_aptoide_resp() {
 	__APTOIDE_RESP__=$(req "${1}/versions" -)
 	__APTOIDE_RESP_PKG__=$(req "${1}/app" -)
 }
-get_aptoide_vers() { $HTMLQ --text ".hDRsrO" <<<"$__APTOIDE_RESP__"; }
+get_aptoide_vers() { grep -oE '"vername":"[^"]+"' <<<"$__APTOIDE_RESP__" | awk -F'"' '{print $4}'; }
 dl_aptoide() {
 	local url=$1 version=$2 output=$3
-
-	if [ -n "$version" ]; then
-		url=$(grep -F -A 16 "${version}</span>" <<<"$__APTOIDE_RESP__" | tail -1 | sed -n 's;.*<a href="\([^"]*\)".*;\1p') || return 1
-	else url=$(sed -n 's;.*<a href="\([^"]*\)".*;\1p' <<<"$__APTOIDE_RESP__" | head -1) || return 1; fi
+ 	local id=$(grep -oE "\"vername\":\"$version\",\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $3}')
+	url="https://en.aptoide.com/download?app_id=${id}&store_name=aptoide-web"
 	req "$url" "$output"
 }
 get_aptoide_pkg_name() { $HTMLQ --text ".iTrGxH" <<<"$__APTOIDE_RESP_PKG__"; }
@@ -416,7 +414,7 @@ build_rv() {
 		for dl_p in archive apkmirror uptodown apkmonk; do
 			if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
 			pr "Downloading '${table}' from ${dl_p}"
-			if [ "$get_latest_ver" = true ] && [ $dl_p = uptodown ]; then local vver=""; else local vver=$version; fi
+			if [ "$get_latest_ver" = true ] && [ $dl_p = uptodown || $dl_p = aptoide] ; then local vver=""; else local vver=$version; fi
 			if ! dl_${dl_p} "${args[${dl_p}_dlurl]}" "$vver" "$stock_apk" "$arch" "${args[dpi]}"; then
 				epr "ERROR: Could not download '${table}' from ${dl_p} with version '${version}', arch '${arch}', dpi '${args[dpi]}'"
 				continue
