@@ -6,6 +6,12 @@ enable-magisk-update = true   # set this to false if you do not want to receive 
 
 # you can use rvmm-config-gen to generate a config
 
+[Photomath]
+rv-brand = "mod"
+apkmirror-arch = "arm64-v8a"
+aptoide-dlurl = "https://photomath-camera-calculator.en.aptoide.com/"
+build-mode = "both"
+
 [Spotify]
 rv-brand = "mod"
 apkmirror-arch = "arm64-v8a"
