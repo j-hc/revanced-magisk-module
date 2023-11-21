@@ -333,17 +333,15 @@ dl_aptoide() {
 	local url=$1 version=$2 output=$3
  	local response id
   	if [ -n "$version" ]; then
-     		id=$(grep -oE "\"vername\":\s*\"$version\",\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $3}' | head -1) || return 1
-       		pr 'X D'
+     		id=$(grep -oE "\"vername\":\"$version\",\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $3}' | head -1) || return 1
        		response=$(req "https://en.aptoide.com/download?app_id=${id}&store_name=aptoide-web" -) || return 1
-	 	pr 'blabla'
-		url=$(grep -oE '"path":\s*"https[^"]*"' <<<"$response" | awk -F'"' '{print $3}' | head -1) || return 1;
+		url=$(grep -oE '"path":"[^"]+.apk"' <<<"$response" | awk -F'"' '{print $3}' | head -1) || return 1;
 	else url=""; fi
-	url=$(grep -oE '"path":\s*"https[^"]*"' <<<"$__APTOIDE_RESP_PKG__" | head -1 | awk -F'"' '{print $3}') || return 1
+	url=$(grep -oE '"path":"[^"]+.apk"' <<<"$__APTOIDE_RESP_PKG__" | head -1 | awk -F'"' '{print $3}') || return 1
  	pr $url
 	req "$url" "$output"
 }
-get_aptoide_pkg_name() { grep -oE '"h1":\s*"([^"]*)"' <<<"$__APTOIDE_RESP_PKG__" | head -1 | awk -F'"' '{print $3}'; }
+get_aptoide_pkg_name() { grep -oE '"h1":"([^"]*)"' <<<"$__APTOIDE_RESP_PKG__" | head -1 | awk -F'"' '{print $3}'; }
 # --------------------------------------------------
 
 patch_apk() {
