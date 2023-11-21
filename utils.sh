@@ -332,7 +332,6 @@ get_aptoide_vers() { grep -oE '"vername":"[^"]+"' <<<"$__APTOIDE_RESP__" | awk -
 dl_aptoide() {
 	local url=$1 version=$2 output=$3
  	local response id
-  	pr 'hey'
   	if [ -n "$version" ]; then
      		id=$(grep -oE "\"vername\":\s*\"$version\",\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $3}' | head -1) || return 1
        		pr 'X D'
@@ -340,8 +339,8 @@ dl_aptoide() {
 	 	pr 'blabla'
 		url=$(grep -oE '"path":\s*"https[^"]*"' <<<"$response" | awk -F'"' '{print $3}' | head -1) || return 1;
 	else url=""; fi
- 	pr 'tf'
-	url=$(grep -oE '"path":\s*"https[^"]*"' <<<"$__APTOIDE_RESP_PKG__" | awk -F'"' '{print $3}' | head -1) || return 1
+	url=$(grep -oE '"path":\s*"https[^"]*"' <<<"$__APTOIDE_RESP_PKG__" | head -1 | awk -F'"' '{print $3}') || return 1
+ 	pr $url
 	req "$url" "$output"
 }
 get_aptoide_pkg_name() { grep -oE '"h1":\s*"([^"]*)"' <<<"$__APTOIDE_RESP_PKG__" | head -1 | awk -F'"' '{print $3}'; }
