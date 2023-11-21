@@ -333,7 +333,7 @@ dl_aptoide() {
 	local aptoide-dlurl=$1 version=$2 output=$3
  	local url id
   	if [ -n "$version" ]; then
-     		id=$(grep -oE "\"vername\":\"$version\",\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $3}') || return 1
+     		id=$(grep -oE "\"vername\":\"$version\",\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $3}' | head -1) || return 1
 		url="https://en.aptoide.com/download?app_id=${id}&store_name=aptoide-web" || return 1
 	else url=""; fi
 	url="https://en.aptoide.com/download?app_id=$(grep -oE "\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $2}' | head -1)&store_name=aptoide-web" || return 1
