@@ -334,8 +334,7 @@ dl_aptoide() {
 
 	if [ -n "$version" ]; then
 		url=$(grep -F -A 16 "${version}</span>" <<<"$__APTOIDE_RESP__" | tail -1 | sed -n 's;.*<a href="\([^"]*\)".*;\1p') || return 1
-	else url=$(sed -n 's;.*<a href="\([^"]*\)".*;\1p' <<<"$__APTOIDE_RESP__" | head -1) || return 1
- 	; fi
+	else url=$(sed -n 's;.*<a href="\([^"]*\)".*;\1p' <<<"$__APTOIDE_RESP__" | head -1) || return 1; fi
 	req "$url" "$output"
 }
 get_aptoide_pkg_name() { $HTMLQ --text ".iTrGxH" <<<"$__APTOIDE_RESP_PKG__"; }
