@@ -323,6 +323,24 @@ get_archive_vers() { sed 's/^[^-]*-//;s/-\(all\|arm64-v8a\|arm-v7a\)\.apk//g' <<
 get_archive_pkg_name() { echo "$__ARCHIVE_PKG_NAME__"; }
 # --------------------------------------------------
 
+# -------------------- aptoide ---------------------
+get_aptoide_resp() {
+	__APTOIDE_RESP__=$(req "${1}/versions" -)
+	__APTOIDE_RESP_PKG__=$(req "${1}/app" -)
+}
+get_aptoide_vers() { $HTMLQ --text ".hDRsrO" <<<"$__APTOIDE_RESP__"; }
+dl_aptoide() {
+	local url=$1 version=$2 output=$3
+
+	if [ -n "$version" ]; then
+		url=$(grep -F -A 16 "${version}</span>" <<<"$__APTOIDE_RESP__" | tail -1 | sed -n 's;.*<a href="\([^"]*\)".*;\1p') || return 1
+	else url=$(sed -n 's;.*<a href="\([^"]*\)".*;\1p' <<<"$__APTOIDE_RESP__" | head -1) || return 1
+ 	; fi
+	req "$url" "$output"
+}
+get_aptoide_pkg_name() { $HTMLQ --text ".iTrGxH" <<<"$__APTOIDE_RESP_PKG__"; }
+# --------------------------------------------------
+
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3 rv_cli_jar=$4 rv_patches_jar=$5
 	declare -r tdir=$(mktemp -d -p $TEMP_DIR)
@@ -337,6 +355,7 @@ patch_apk() {
 	fi
 	[ -f "$patched_apk" ]
 }
+# --------------------------------------------------
 
 build_rv() {
 	eval "declare -A args=${1#*=}"
@@ -354,7 +373,7 @@ build_rv() {
 	p_patcher_args+=("$(join_args "${args[excluded_patches]}" -e) $(join_args "${args[included_patches]}" -i)")
 	[ "${args[exclusive_patches]}" = true ] && p_patcher_args+=("--exclusive")
 
-	for dl_p in archive apkmirror uptodown apkmonk; do
+	for dl_p in archive apkmirror uptodown apkmonk aptoide; do
 		if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
 		if ! get_"${dl_p}"_resp "${args[${dl_p}_dlurl]}" || ! pkg_name=$(get_"${dl_p}"_pkg_name); then
 			args[${dl_p}_dlurl]=""
