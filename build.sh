@@ -145,7 +145,7 @@ for table_name in $(toml_get_table_names); do
 		app_args[archive_dlurl]=${app_args[archive_dlurl]%/}
 		app_args[dl_from]=archive
 	} || app_args[archive_dlurl]=""
- 	app_args[aptoide_dlurl]=$(toml_get "$t" apkmirror-dlurl) && {
+ 	app_args[aptoide_dlurl]=$(toml_get "$t" aptoide-dlurl) && {
 		app_args[aptoide_dlurl]=${app_args[aptoide_dlurl]%/}
 		app_args[dl_from]=aptoide
 	} || app_args[aptoide_dlurl]=""
