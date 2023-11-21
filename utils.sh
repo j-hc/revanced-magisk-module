@@ -334,7 +334,7 @@ dl_aptoide() {
  	local response id
   	if [ -n "$version" ]; then
      		id=$(grep -oE "\"vername\":\s*\"$version\",\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $3}' | head -1) || return 1
-       		response=$(curl -s "https://en.aptoide.com/download?app_id=${id}&store_name=aptoide-web") || return 1
+       		response=$(req "https://en.aptoide.com/download?app_id=${id}&store_name=aptoide-web" -) || return 1
 		url=$(grep -oE '"path":\s*"https[^"]*"' <<<"$response" | head -1 | awk -F'"' '{print $3}') || return 1
 	else url=""; fi
 	url=$(grep -oE '"path":"([^"]*)"' <<<"$__APTOIDE_RESP_PKG__" | awk -F'"' '{print $3}' | head -1) || return 1
