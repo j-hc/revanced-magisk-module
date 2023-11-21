@@ -336,7 +336,7 @@ dl_aptoide() {
      		id=$(grep -oE "\"vername\":\"$version\",\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $3}') || return 1
 		url="https://en.aptoide.com/download?app_id=${id}&store_name=aptoide-web" || return 1
 	else url=""; fi
-	url="https://en.aptoide.com/download?app_id=$(grep -oE "\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $2}')&store_name=aptoide-web" || return 1
+	url="https://en.aptoide.com/download?app_id=$(grep -oE "\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $2}' | head -1)&store_name=aptoide-web" || return 1
 	req "$url" "$output"
 }
 get_aptoide_pkg_name() { $HTMLQ --text ".iTrGxH" <<<"$__APTOIDE_RESP_PKG__"; }
