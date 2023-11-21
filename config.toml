@@ -12,11 +12,12 @@ rv-brand = "mod"
 apkmirror-arch = "arm64-v8a"
 aptoide-dlurl = "https://photomath-camera-calculator.de.aptoide.com/"
 build-mode = "both"
+enabled = false
 
 [Spotify]
 rv-brand = "mod"
 apkmirror-arch = "arm64-v8a"
-uptodown-dlurl = "https://spotify.en.uptodown.com/android"
+aptoide-dlurl = "https://spotify-muzik-dan-podcast.pl.aptoide.com/"
 build-mode = "both"
 
 [Youtube]
