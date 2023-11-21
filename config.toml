@@ -9,7 +9,7 @@ enable-magisk-update = true   # set this to false if you do not want to receive 
 [Photomath]
 rv-brand = "mod"
 apkmirror-arch = "arm64-v8a"
-aptoide-dlurl = "https://photomath-camera-calculator.en.aptoide.com/"
+aptoide-dlurl = "https://photomath-camera-calculator.de.aptoide.com/"
 build-mode = "both"
 
 [Spotify]
