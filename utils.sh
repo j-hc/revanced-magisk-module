@@ -339,7 +339,7 @@ dl_aptoide() {
 	url="https://en.aptoide.com/download?app_id=$(grep -oE "\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $2}' | head -1)&store_name=aptoide-web" || return 1
 	req "$url" "$output"
 }
-get_aptoide_pkg_name() {grep -oE '"h1":\s*"([^"]*)"' <<<"$__APTOIDE_RESP_PKG__" | awk -F'"' '{print $4}'; }
+get_aptoide_pkg_name() { grep -oE '"h1":\s*"([^"]*)"' <<<"$__APTOIDE_RESP_PKG__" | awk -F'"' '{print $4}'; }
 # --------------------------------------------------
 
 patch_apk() {
