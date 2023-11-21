@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -149,7 +150,7 @@ for table_name in $(toml_get_table_names); do
 		app_args[aptoide_dlurl]=${app_args[aptoide_dlurl]%/}
 		app_args[dl_from]=aptoide
 	} || app_args[aptoide_dlurl]=""
-	if [ -z "${app_args[dl_from]:-}" ]; then abort "ERROR: no 'apkmirror_dlurl', 'uptodown_dlurl' or 'apkmonk_dlurl' option was set for '$table_name'."; fi
+	if [ -z "${app_args[dl_from]:-}" ]; then abort "ERROR: no 'apkmirror-dlurl', 'uptodown-dlurl', 'aptoide-dlurl' or 'apkmonk-dlurl' option was set for '$table_name'."; fi
 	app_args[arch]=$(toml_get "$t" apkmirror-arch) || app_args[arch]="all"
 	if [ "${app_args[arch]}" != "both" ] && [ "${app_args[arch]}" != "all" ] && [[ "${app_args[arch]}" != "arm64-v8a"* ]] && [[ "${app_args[arch]}" != "arm-v7a"* ]]; then
 		abort "wrong arch '${app_args[arch]}' for '$table_name'"
