@@ -332,8 +332,8 @@ get_aptoide_vers() { grep -oE '"vername":"[^"]+"' <<<"$__APTOIDE_RESP__" | awk -
 dl_aptoide() {
 	local url=$1 version=$2 output=$3
  	local id
-  	id=$(grep -oE "\"vername\":\"$version\",\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $3}') || || return 1
-	url="https://en.aptoide.com/download?app_id=${id}&store_name=aptoide-web" || || return 1
+  	id=$(grep -oE "\"vername\":\"$version\",\"id\":[0-9]+" <<<"$__APTOIDE_RESP__" | awk -F':' '{print $3}') || return 1
+	url="https://en.aptoide.com/download?app_id=${id}&store_name=aptoide-web" || return 1
 	req "$url" "$output"
 }
 get_aptoide_pkg_name() { $HTMLQ --text ".iTrGxH" <<<"$__APTOIDE_RESP_PKG__"; }
