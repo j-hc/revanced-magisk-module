@@ -1,4 +1,5 @@
         
+        
 [
   {
     "patchName": "Custom branding name YouTube",
@@ -17,7 +18,7 @@
         "value": "#1f1f1f"
       }
     ]
-  },
+  },    
   {
     "patchName": "Custom branding name YouTube Music",
     "options": [
