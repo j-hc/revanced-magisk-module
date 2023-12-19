@@ -19,7 +19,7 @@ included-patches = ""
 [Music-Extended]
 enabled = true
 app-name = "Music"
-apkmirror-arch = "arm64-v8a"
+arch = "arm64-v8a"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 cli-source = "inotia00/revanced-cli"
