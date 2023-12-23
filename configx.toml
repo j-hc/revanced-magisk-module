@@ -13,7 +13,7 @@ build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 excluded-patches = "'Custom branding name YouTube' 'Custom branding icon Revancify Blue' 'Custom package name' 'Return YouTube Dislike' 'Premium heading' 'Custom branding icon YouTube'"
 included-patches = ""
-version="18.45.43"
+#version="18.45.43"
 
 
 [Music-Extended]
