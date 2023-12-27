@@ -14,7 +14,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 excluded-patches = "'Custom package name' 'Return YouTube Dislike' 'Premium heading' 'Custom branding icon YouTube'"
 included-patches = "'Theme'"
 version="18.46.43"
-cli-version = "4.1.1"
+cli-version = "v4.1.1"
 
 
 [Music-Extended]
