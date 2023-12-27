@@ -12,7 +12,7 @@ rv-brand = "RevancedX"
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 excluded-patches = "'Custom package name' 'Return YouTube Dislike' 'Premium heading' 'Custom branding icon YouTube'"
-included-patches = "'Theme'"
+included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
 version="18.46.43"
 cli-version = "v4.1.1"
 
@@ -20,15 +20,14 @@ cli-version = "v4.1.1"
 [Music-Extended]
 enabled = true
 app-name = "Music"
-arch = "arm64-v8a"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 cli-source = "inotia00/revanced-cli"
 rv-brand = "RevancedX"
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-excluded-patches = "'Amoled' 'Custom branding icon Revancify Blue' 'Custom package name' 'Return YouTube Dislike' 'Premium heading' 'Custom branding name YouTube Music' 'Custom branding icon YouTube Music'"
-
+arch = "arm64-v8a"
+excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube Music' 'Custom package name' 'Return YouTube Dislike'"
 
 [YouTube-Android7]
 enabled = false
