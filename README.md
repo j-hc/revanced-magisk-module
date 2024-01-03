@@ -32,7 +32,7 @@ Note that the <a href="../../actions/workflows/ci.yml">CI workflow</a> is schedu
 [**See the list of patches**](https://j-hc.github.io/rvmm-config-gen/)
 
  * Star the repo :eyes:
- * [Fork the repo](https://github.com/j-hc/revanced-magisk-module/fork) or use it as a template
+ * Use the repo as a [template](https://github.com/new?template_name=revanced-magisk-module&template_owner=j-hc)
  * Customize [`config.toml`](./config.toml) using [rvmm-config-gen](https://j-hc.github.io/rvmm-config-gen/)
  * Run the build [workflow](../../actions/workflows/build.yml)
  * Grab your modules and APKs from [releases](../../releases)
