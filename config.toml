@@ -10,7 +10,7 @@ enable-magisk-update = true   # set this to false if you do not want to receive 
 build-mode = "both"
 excluded-patches = "'Custom branding'"
 included-patches = ""
-version = "18.46.43"
+version = "latest"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 
 [Music]
