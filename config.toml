@@ -96,7 +96,7 @@ version = "auto"
 uptodown-dlurl = "https://nyx-music-player.en.uptodown.com/android"
 
 [IconPackStudio]
-enabled = true
+enabled = false
 apkmonk-dlurl = "https://www.apkmonk.com/app/ginlemon.iconpackstudio/"
 arch = "both"
 
@@ -135,4 +135,3 @@ uptodown-dlurl = "https://sync-for-reddit.en.uptodown.com/android"
 enabled = true
 version = "auto"
 apkmonk-dlurl = "https://www.apkmonk.com/app/ml.docilealligator.infinityforreddit/"
-
