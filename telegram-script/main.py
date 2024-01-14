@@ -76,7 +76,6 @@ def main():
     # Format release message
     release_message = Config.RELEASE_MESSAGE.format(
         release_name=release["name"],
-        revanced_version_message=revanced_version_message(),
         changelogs_url=changelogs_url,
         notes=Config.NOTES,
         nonroot_files="\n".join(files["nonroot_files"]),

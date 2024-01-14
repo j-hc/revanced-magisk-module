@@ -19,8 +19,6 @@ class Config:
 
     RELEASE_MESSAGE = """📑 *RELEASE* {release_name}
 
-{revanced_version_message}
-
 [Release notes and changelogs (What's New)]({changelogs_url})
 
 {notes}
