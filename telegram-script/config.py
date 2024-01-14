@@ -11,17 +11,12 @@ class Config:
     REVANCED_EXTENDED_CHANGES_URL = (
         "https://api.github.com/repos/inotia00/revanced-patches/compare"
     )
-
-    NOTES = """*≣ Note:*
- ➜ `j-hc/zygisk-detach` (on GitHub) is used to detach play store updates for YT and YT Music for rooted users.
- ➜ `microg.apk` is used for google services and must be installed for non root YT and YT Music."""
+    
     CREDITS_MESSAGE = "Credits to our upstream repository [j-hc/revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
 
     RELEASE_MESSAGE = """📑 *RELEASE* {release_name}
 
 [Release notes and changelogs (What's New)]({changelogs_url})
-
-{notes}
 
 📦 *Downloads* 
 

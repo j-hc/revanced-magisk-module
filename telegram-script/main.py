@@ -77,7 +77,6 @@ def main():
     release_message = Config.RELEASE_MESSAGE.format(
         release_name=release["name"],
         changelogs_url=changelogs_url,
-        notes=Config.NOTES,
         nonroot_files="\n".join(files["nonroot_files"]),
         root_files="\n".join(files["root_files"]),
         credits_message=Config.CREDITS_MESSAGE,
