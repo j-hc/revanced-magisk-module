@@ -74,6 +74,7 @@ apkmirror-arch = "arm64-v8a"
 
 [Backdrops]
 enabled = true
+version = "latest"
 uptodown-dlurl = "https://backdrops.en.uptodown.com/android"
 
 [WarnWetter]
@@ -85,7 +86,7 @@ enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/windy-weather-world-inc/windy-wind-weather-forecast/"
 
 [MyExpenses]
-enabled = false
+enabled = true
 uptodown-dlurl = "https://my-expenses.en.uptodown.com/android"
 
 [NyxMusicPlayer]
@@ -114,8 +115,7 @@ apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
 [Instagram]
 enabled = true
 version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/instagram/instagram-instagram/"
-apkmirror-arch = "both"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
 
 [InShorts]
 enabled = true
@@ -126,10 +126,10 @@ apkmirror-arch = "both"
 [SyncForReddit]
 enabled = true
 version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/red-apps-ltd/sync-for-reddit/"
+uptodown-dlurl = "https://sync-for-reddit.en.uptodown.com/android"
 
 [InfinityForReddit]
 enabled = true
 version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/docile-alligator/infinity-for-reddit/"
+uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
 
