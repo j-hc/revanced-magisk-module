@@ -98,6 +98,7 @@ uptodown-dlurl = "https://nyx-music-player.en.uptodown.com/android"
 [IconPackStudio]
 enabled = true
 apkmonk-dlurl = "https://www.apkmonk.com/app/ginlemon.iconpackstudio/"
+apkmonk-arch = "both"
 
 [TickTick]
 enabled = true
