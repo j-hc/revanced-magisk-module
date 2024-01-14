@@ -70,7 +70,7 @@ uptodown-dlurl = "https://spotify-lite.en.uptodown.com/android"
 [Citra]
 enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/citra-emulator/citra-emulator/"
-apkmirror-arch = "arm64-v8a"
+arch = "arm64-v8a"
 
 [Backdrops]
 enabled = true
@@ -98,13 +98,13 @@ uptodown-dlurl = "https://nyx-music-player.en.uptodown.com/android"
 [IconPackStudio]
 enabled = true
 apkmonk-dlurl = "https://www.apkmonk.com/app/ginlemon.iconpackstudio/"
-apkmonk-arch = "both"
+arch = "both"
 
 [TickTick]
 enabled = true
 version = "latest"
 apkmonk-dlurl = "https://www.apkmonk.com/app/com.ticktick.task/"
-apkmonk-arch = "both"
+arch = "both"
 
 [Tasker]
 enabled = true
@@ -118,12 +118,13 @@ apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
 enabled = true
 version = "auto"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
+arch = "arm64-v8a"
 
 [InShorts]
 enabled = true
 version = "auto"
 apkmonk-dlurl = "https://www.apkmonk.com/app/com.nis.app/"
-apkmonk-arch = "both"
+arch = "both"
 
 [SyncForReddit]
 enabled = true
