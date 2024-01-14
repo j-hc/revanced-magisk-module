@@ -97,12 +97,13 @@ uptodown-dlurl = "https://nyx-music-player.en.uptodown.com/android"
 
 [IconPackStudio]
 enabled = true
-apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"
+apkmonk-dlurl = "https://www.apkmonk.com/app/ginlemon.iconpackstudio/"
 
 [TickTick]
 enabled = true
-apkmirror-dlurl = "https://www.apkmirror.com/apk/appest-inc/ticktick-to-do-list-with-reminder-day-planner/"
-apkmirror-arch = "both"
+version = "latest"
+apkmonk-dlurl = "https://www.apkmonk.com/app/com.ticktick.task/"
+apkmonk-arch = "both"
 
 [Tasker]
 enabled = true
@@ -120,8 +121,8 @@ archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.androi
 [InShorts]
 enabled = true
 version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/inshorts-formerly-news-in-shorts/inshorts-news-in-60-words-2/"
-apkmirror-arch = "both"
+apkmonk-dlurl = "https://www.apkmonk.com/app/com.nis.app/"
+apkmonk-arch = "both"
 
 [SyncForReddit]
 enabled = true
@@ -131,5 +132,5 @@ uptodown-dlurl = "https://sync-for-reddit.en.uptodown.com/android"
 [InfinityForReddit]
 enabled = true
 version = "auto"
-uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
+apkmonk-dlurl = "https://www.apkmonk.com/app/ml.docilealligator.infinityforreddit/"
 
