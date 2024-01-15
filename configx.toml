@@ -2,6 +2,13 @@
 logging-to-file = true        # enables logging of every patch process to a seperate file
 enable-magisk-update = false   # set this to false if you do not want to receive updates for the module in magisk app
 
+[YouTube]
+build-mode = "apk"
+excluded-patches = ""
+included-patches = ""
+version = "auto"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+
 [YouTube-Extended]
 enabled = true
 app-name = "YouTube"
