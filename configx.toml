@@ -2,7 +2,7 @@
 logging-to-file = true        # enables logging of every patch process to a seperate file
 enable-magisk-update = false   # set this to false if you do not want to receive updates for the module in magisk app
 
-[YouTube]
+[YouTube-Extended]
 enabled = true
 app-name = "YouTube"
 build-mode = "apk"
@@ -12,7 +12,18 @@ version = "auto"
 rv-brand = "RevancedX"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 
-[YouTube-Extended]
+
+[Music-Extended]
+enabled = true
+app-name = "Music"
+rv-brand = "RevancedX"
+build-mode = "apk"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+arch = "arm64-v8a"
+excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube Music' 'Custom package name' 'Return YouTube Dislike'"
+
+
+[YouTube-REx]
 enabled = true
 app-name = "YouTube"
 patches-source = "inotia00/revanced-patches"
@@ -27,7 +38,7 @@ version="18.46.43"
 cli-version = "v4.1.1"
 
 
-[Music-Extended]
+[Music-REx]
 enabled = true
 app-name = "Music"
 patches-source = "inotia00/revanced-patches"
