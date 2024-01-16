@@ -22,17 +22,20 @@ jobs:
       - name: Install aapt
         run: |
           sudo apt install aapt jq
-          
+        
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           submodules: true
-
+          
+      - name: Rename config
+        run: |
+          cp -f configx.toml config.toml
+          
       - name: Update config
         if: ${{ inputs.from_ci }}
         run: |
-          cp -f configx.toml config.toml
           if git checkout origin/update build.md; then
             UPDATE_CFG=$(./build.sh config.toml --config-update)
             if [ "$UPDATE_CFG" ]; then
@@ -53,7 +56,6 @@ jobs:
         
       - name: Build modules/APKs
         run: |
-          cp -f configx.toml config.toml
           chmod +x build.sh
           ./build.sh config.toml
           
