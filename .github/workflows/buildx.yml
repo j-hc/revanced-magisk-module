@@ -41,7 +41,7 @@ jobs:
           fi
 
       - name: Get next version code
-        id: next_ver_code_or
+        id: next_ver_code
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -63,7 +63,7 @@ jobs:
           NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           
       - name: Get next version code
-        id: next_ver_code
+        id: next_ver_code_1
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -129,7 +129,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./build/*
           release_name: ReVanced X
-          tag: ${{ steps.next_ver_code_or.outputs.NEXT_VER_CODE }}
+          tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           file_glob: true
           overwrite: true
 
@@ -230,7 +230,7 @@ jobs:
           branch: update
           skip_checkout: true
           file_pattern: build.md yt-*.json
-          commit_message: Bump version ${{ steps.next_ver_code_or.outputs.NEXT_VER_CODE }}
+          commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
 
       - uses: actions/upload-artifact@v3
         with:
