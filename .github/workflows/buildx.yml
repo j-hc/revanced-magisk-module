@@ -53,6 +53,7 @@ jobs:
         
       - name: Build modules/APKs
         run: |
+          cp -f configx.toml config.toml
           chmod +x build.sh
           ./build.sh config.toml
           
