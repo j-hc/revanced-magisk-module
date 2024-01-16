@@ -127,7 +127,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./build/*
           release_name: ReVanced X
-          tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+          tag: ${{ steps.next_ver_code_or.outputs.NEXT_VER_CODE }}
           file_glob: true
           overwrite: true
 
