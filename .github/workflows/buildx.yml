@@ -21,7 +21,9 @@ jobs:
           
       - name: Install aapt
         run: |
+          cp -f configx.toml config.toml
           sudo apt install aapt jq
+          
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -52,7 +54,6 @@ jobs:
       - name: Build modules/APKs
         run: |
           chmod +x build.sh
-          cp -f configx.toml config.toml
           ./build.sh config.toml
           
         env:
