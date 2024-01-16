@@ -21,7 +21,6 @@ jobs:
           
       - name: Install aapt
         run: |
-          cp -f configx.toml config.toml
           sudo apt install aapt jq
           
       - name: Checkout
@@ -33,6 +32,7 @@ jobs:
       - name: Update config
         if: ${{ inputs.from_ci }}
         run: |
+          cp -f configx.toml config.toml
           if git checkout origin/update build.md; then
             UPDATE_CFG=$(./build.sh config.toml --config-update)
             if [ "$UPDATE_CFG" ]; then
