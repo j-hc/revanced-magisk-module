@@ -32,10 +32,10 @@ cli-source = "inotia00/revanced-cli"
 rv-brand = "RX"
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
-excluded-patches = "'Custom package name' 'Return YouTube Dislike' 'Premium heading' 'Custom branding icon YouTube'"
+excluded-patches = "'Custom package name' 'Return YouTube Dislike' 'Premium heading' 'Custom branding icon YouTube' 'Custom branding name YouTube'"
 included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
-version="18.46.43"
-cli-version = "v4.1.1"
+#version="18.46.43"
+#cli-version = "v4.1.1"
 
 
 [Music-REx]
@@ -48,7 +48,7 @@ rv-brand = "RX"
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 arch = "arm64-v8a"
-excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube Music' 'Custom package name' 'Return YouTube Dislike'"
+excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube Music' 'Custom package name' 'Return YouTube Dislike' 'Custom branding name YouTube Music'"
 
 [YouTube-Android7]
 enabled = false
