@@ -38,6 +38,16 @@ jobs:
             fi
           fi
 
+      - name: Get next version code
+        id: next_ver_code_or
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=$(gh release list -L 1 | awk -F '\t' '{print $3}')
+          if [ -z "$TAG" ]; then TAG=0; fi
+          echo "NEXT_VER_CODE=$((TAG + 1))" >> $GITHUB_OUTPUT
+          
+
         
       - name: Build modules/APKs
         run: |
@@ -218,7 +228,7 @@ jobs:
           branch: update
           skip_checkout: true
           file_pattern: build.md yt-*.json
-          commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+          commit_message: Bump version ${{ steps.next_ver_code_or.outputs.NEXT_VER_CODE }}
 
       - uses: actions/upload-artifact@v3
         with:
