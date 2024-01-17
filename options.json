@@ -16,7 +16,17 @@
         "value": "#1f1f1f"
       }
     ]
-  },    
+  }, 
+  {
+  {
+    "patchName": "Custom branding",
+    "options": [
+      {
+        "key": "appName",
+        "value": "YouTube X"
+      }
+    ]
+  },
   {
     "patchName": "Custom branding name YouTube Music",
     "options": [
