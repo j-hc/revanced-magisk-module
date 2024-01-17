@@ -251,8 +251,8 @@ jobs:
             MG_VER_NAME=${{ steps.config_mnmg.outputs.MG_VER_NAME_OUTPUT }}
             MG_VER_CODE=${{ steps.config_mnmg.outputs.MG_VER_CODE_OUTPUT }}
             
-            YTRX_DLURL="$GITHUB_SERXER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YTRX_OUTPUT }}"
-            MSRX_DLURL="$GITHUB_SERXER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MSRX_OUTPUT }}"
+            YTRX_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YTRX_OUTPUT }}"
+            MSRX_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MSRX_OUTPUT }}"
             
             UPDATE_YT_JSON=$(get_update_yt_json "$YTRX_VER" "$YTRX_VER_CODE" "$YTRX_DLURL" "$CHANGELOG_JSON")
             echo "$UPDATE_YT_JSON" >config-ytrx.json
