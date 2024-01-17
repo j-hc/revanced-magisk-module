@@ -227,9 +227,9 @@ jobs:
             UPDATE_YT_JSON=$(get_update_ms_json "$MSRV_VER" "$MSRV_VER_CODE" "$MSRV_DLURL" "$CHANGELOG_JSON")
             echo "$UPDATE_YT_JSON" >config-msrv.json
      
-            UPDATE_YT_JSON=$(get_update_mn_json "$RM_VER_NAME" "$RM_VER_CODE")
+            UPDATE_YT_JSON=$(get_update_mn_json "$RMRV_VER_NAME" "$RMRV_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmnrv.apk")
             echo "$UPDATE_YT_JSON" >config-mn.json
-            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmnrv.apk")
+            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE")
             echo "$UPDATE_YT_JSON" >config-micro.json
             
             if [ -n "${{ steps.get_output.outputs.MSRV_OUTPUT }}" ]; then
@@ -259,9 +259,9 @@ jobs:
             UPDATE_YT_JSON=$(get_update_ms_json "$MSRX_VER" "$MSRX_VER_CODE" "$MSRX_DLURL" "$CHANGELOG_JSON")
             echo "$UPDATE_YT_JSON" >config-msrx.json
      
-            UPDATE_YT_JSON=$(get_update_mn_json "$RM_VER_NAME" "$RM_VER_CODE")
+            UPDATE_YT_JSON=$(get_update_mn_json "$RMRX_VER_NAME" "$RMRX_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmnrx.apk")
             echo "$UPDATE_YT_JSON" >config-mn.json
-            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmnrx.apk")
+            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE")
             echo "$UPDATE_YT_JSON" >config-micro.json
             
             if [ -n "${{ steps.get_output.outputs.MSRX_OUTPUT }}" ]; then
