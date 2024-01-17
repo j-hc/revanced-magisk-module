@@ -2,29 +2,29 @@
 logging-to-file = true        # enables logging of every patch process to a seperate file
 enable-magisk-update = false   # set this to false if you do not want to receive updates for the module in magisk app
 
-[YouTube-Extended]
+[YouTube-RV]
 enabled = true
 app-name = "YouTube"
 build-mode = "apk"
 excluded-patches = "'Return YouTube Dislike' 'Premium heading'"
 included-patches = ""
 version = "auto"
-rv-brand = "RevancedX"
+rv-brand = "RV"
 #cli-version = "v4.1.0"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 
 
-[Music-Extended]
+[Music-RV]
 enabled = true
 app-name = "Music"
-rv-brand = "RevancedX"
+rv-brand = "RV"
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 arch = "arm64-v8a"
 excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube Music' 'Custom package name' 'Return YouTube Dislike'"
 
 
-[YouTube-REx]
+[YouTube-RX]
 enabled = true
 app-name = "YouTube"
 patches-source = "inotia00/revanced-patches"
@@ -39,7 +39,7 @@ included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
 #cli-version = "v4.1.1"
 
 
-[Music-REx]
+[Music-RX]
 enabled = true
 app-name = "Music"
 patches-source = "inotia00/revanced-patches"

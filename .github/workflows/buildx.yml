@@ -80,15 +80,20 @@ jobs:
       - name: Download Manager and MicroG
         id: config_mnmg
         run: |
-          wget -q https://vuongvan.github.io/VancedManager/rvmn.apk -O rvmn.apk
-          rm_op=$(find . -maxdepth 1 -name "rvmn.apk" -printf '%P')
+          wget -q https://vuongvan.github.io/VancedManager/rvmnrv.apk -O rvmnrv.apk
+          rm_op=$(find . -maxdepth 1 -name "rvmnrv.apk" -printf '%P')
           ver_code=$(aapt dump badging $rm_op | sed -n "s/.*versionName='\([^']*\).*/\1/p")
-          echo "RM_VER_NAME_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
-          echo $ver_code
+          echo "RMRV_VER_NAME_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
           ver_code=$(aapt dump badging $rm_op | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
-          echo "RM_VER_CODE_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
-          echo $ver_code
+          echo "RMRV_VER_CODE_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
           
+          wget -q https://vuongvan.github.io/VancedManager/rvmnrx.apk -O rvmnrx.apk
+          rm_op=$(find . -maxdepth 1 -name "rvmnrx.apk" -printf '%P')
+          ver_code=$(aapt dump badging $rm_op | sed -n "s/.*versionName='\([^']*\).*/\1/p")
+          echo "RMRX_VER_NAME_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
+          ver_code=$(aapt dump badging $rm_op | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
+          echo "RMRX_VER_CODE_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
+
           wget -q https://github.com/inotia00/VancedMicroG/releases/latest/download/microg.apk -O microg.apk
           mg_op=$(find . -maxdepth 1 -name "microg.apk" -printf '%P')
           ver_code=$(aapt dump badging $mg_op | sed -n "s/.*versionName='\([^']*\).*/\1/p")
@@ -108,16 +113,28 @@ jobs:
           cp -f build.md build.tmp
           
           cd build
-          yt_rv=$(find . -maxdepth 1 -name "youtube-revancedx-*.apk" -printf '%P')
-          ver_rv=$(aapt dump badging $yt_rv | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
-          yt_ms=$(find . -maxdepth 1 -name "music-revancedx-*.apk" -printf '%P')
-          ver_ms=$(aapt dump badging $yt_ms | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
+          yt_rv=$(find . -maxdepth 1 -name "youtube-rv-*.apk" -printf '%P')
+          ver_ytrv=$(aapt dump badging $yt_rv | sed -n "s/.*versionCode='\([^']*\).*/\1/p")  
+          ms_rv=$(find . -maxdepth 1 -name "music-rv-*.apk" -printf '%P')
+          ver_msrv=$(aapt dump badging $ms_rv | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
+          
+          yt_rx=$(find . -maxdepth 1 -name "youtube-rx-*.apk" -printf '%P')
+          ver_ytrx=$(aapt dump badging $yt_rx | sed -n "s/.*versionCode='\([^']*\).*/\1/p")        
+          ms_rx=$(find . -maxdepth 1 -name "music-rx-*.apk" -printf '%P')
+          ver_msrx=$(aapt dump badging $ms_rx | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
+          
           echo "YTRV_OUTPUT=$yt_rv"  >> $GITHUB_OUTPUT
-          echo "YTMS_OUTPUT=$yt_ms"  >> $GITHUB_OUTPUT
-          echo "VERRV_OUTPUT=$ver_rv"  >> $GITHUB_OUTPUT
-          echo $ver_rv
-          echo "VERMS_OUTPUT=$ver_ms"  >> $GITHUB_OUTPUT
-          echo $ver_ms
+          echo "MSRV_OUTPUT=$ms_rv"  >> $GITHUB_OUTPUT
+          
+          echo "YTRX_OUTPUT=$yt_rx"  >> $GITHUB_OUTPUT
+          echo "MSRX_OUTPUT=$ms_rx"  >> $GITHUB_OUTPUT
+          
+          echo "VER_YTRV_OUTPUT=$ver_ytrv"  >> $GITHUB_OUTPUT
+          echo "VER_MSRV_OUTPUT=$ver_msrv"  >> $GITHUB_OUTPUT
+
+          echo "VER_YTRX_OUTPUT=$ver_ytrx"  >> $GITHUB_OUTPUT
+          echo "VER_MSRX_OUTPUT=$ver_msrx"  >> $GITHUB_OUTPUT
+          
           if [ -z "$yt_ex" ]; then
             echo "RELEASE_NAME=ReVanced X"  >> $GITHUB_OUTPUT
           else
@@ -152,7 +169,7 @@ jobs:
           #echo $CHANGELOG_JSON
           CHANGELOG_JSON=$(cat build.tmp | sed '/\[/d' )
           
-          get_update_rv_json() {
+          get_update_yt_json() {
             echo "  \"vanced\": {
                    \"version\": \"$1\",
                    \"versionCode\": $2,
@@ -175,7 +192,7 @@ jobs:
             \"manager\": {
                    \"version\": \"$1\",
                    \"versionCode\": $2,
-                   \"url\": \"https://vuongvan.github.io/VancedManager/rvmn.apk\",
+                   \"url\": \"$3\",
                    \"changelog\": \"Custom Build APK\"
                 },"
             }
@@ -191,41 +208,70 @@ jobs:
           }
       
           if [ -n "${{ steps.get_output.outputs.YTRV_OUTPUT }}" ]; then
-            YTRV_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube-Extended:\(.*\)/\1/p' | tr -d '[:space:]')
-            YTMS_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music-Extended:\(.*\)/\1/p' | tr -d '[:space:]')
+            YTRV_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube-RV:\(.*\)/\1/p' | tr -d '[:space:]')
+            MSRV_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music-RV:\(.*\)/\1/p' | tr -d '[:space:]')
+            YTRV_VER_CODE=${{ steps.get_output.outputs.VER_YTRV_OUTPUT }}
+            MSRV_VER_CODE=${{ steps.get_output.outputs.VER_MSRV_OUTPUT }}
             
-            YTRV_VER_CODE=${{ steps.get_output.outputs.VERRV_OUTPUT }}
-            YTMS_VER_CODE=${{ steps.get_output.outputs.VERMS_OUTPUT }}
-            
-            PVER_CODE=$(echo "${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" | sed -e 's/\.//g')
-            
-            RM_VER_NAME=${{ steps.config_mnmg.outputs.RM_VER_NAME_OUTPUT }}
-            RM_VER_CODE=${{ steps.config_mnmg.outputs.RM_VER_CODE_OUTPUT }}
+            RMRV_VER_NAME=${{ steps.config_mnmg.outputs.RMRV_VER_NAME_OUTPUT }}
+            RMRV_VER_CODE=${{ steps.config_mnmg.outputs.RMRV_VER_CODE_OUTPUT }}
+ 
             MG_VER_NAME=${{ steps.config_mnmg.outputs.MG_VER_NAME_OUTPUT }}
             MG_VER_CODE=${{ steps.config_mnmg.outputs.MG_VER_CODE_OUTPUT }}
             
             YTRV_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YTRV_OUTPUT }}"
-            YTMS_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YTMS_OUTPUT }}"
+            MSRV_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MSRV_OUTPUT }}"
             
-            UPDATE_YT_JSON=$(get_update_rv_json "$YTRV_VER" "$YTRV_VER_CODE" "$YTRV_DLURL" "$CHANGELOG_JSON")
-            echo "$UPDATE_YT_JSON" >config-rv.json
-            UPDATE_YT_JSON=$(get_update_ms_json "$YTMS_VER" "$YTMS_VER_CODE" "$YTMS_DLURL" "$CHANGELOG_JSON")
-            echo "$UPDATE_YT_JSON" >config-ms.json
-            
-            
+            UPDATE_YT_JSON=$(get_update_yt_json "$YTRV_VER" "$YTRV_VER_CODE" "$YTRV_DLURL" "$CHANGELOG_JSON")
+            echo "$UPDATE_YT_JSON" >config-ytrv.json
+            UPDATE_YT_JSON=$(get_update_ms_json "$MSRV_VER" "$MSRV_VER_CODE" "$MSRV_DLURL" "$CHANGELOG_JSON")
+            echo "$UPDATE_YT_JSON" >config-msrv.json
+     
             UPDATE_YT_JSON=$(get_update_mn_json "$RM_VER_NAME" "$RM_VER_CODE")
             echo "$UPDATE_YT_JSON" >config-mn.json
-            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE")
+            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmnrv.apk")
             echo "$UPDATE_YT_JSON" >config-micro.json
             
-            if [ -n "${{ steps.get_output.outputs.YTMS_OUTPUT }}" ]; then
-                cat config-mn.json config-rv.json config-ms.json config-micro.json > yt-updatex.json
+            if [ -n "${{ steps.get_output.outputs.MSRV_OUTPUT }}" ]; then
+                cat config-mn.json config-ytrv.json config-msrv.json config-micro.json > yt-updaterv.json
             else
-                cat config-mn.json config-rv.json config-micro.json > yt-updatex.json
+                cat config-mn.json config-ytrv.json config-micro.json > yt-updaterv.json
+            fi
+          fi
+          
+          if [ -n "${{ steps.get_output.outputs.YTRX_OUTPUT }}" ]; then
+            YTRX_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*YouTube-RX:\(.*\)/\1/p' | tr -d '[:space:]')
+            MSRX_VER=$(echo "${{ steps.get_output.outputs.BUILD_LOG }}" | sed -n 's/.*Music-RX:\(.*\)/\1/p' | tr -d '[:space:]')
+            YTRX_VER_CODE=${{ steps.get_output.outputs.VER_YTRX_OUTPUT }}
+            MSRX_VER_CODE=${{ steps.get_output.outputs.VER_MSRX_OUTPUT }}
+            
+            RMRX_VER_NAME=${{ steps.config_mnmg.outputs.RMRX_VER_NAME_OUTPUT }}
+            RMRX_VER_CODE=${{ steps.config_mnmg.outputs.RMRX_VER_CODE_OUTPUT }}
+ 
+            MG_VER_NAME=${{ steps.config_mnmg.outputs.MG_VER_NAME_OUTPUT }}
+            MG_VER_CODE=${{ steps.config_mnmg.outputs.MG_VER_CODE_OUTPUT }}
+            
+            YTRX_DLURL="$GITHUB_SERXER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YTRX_OUTPUT }}"
+            MSRX_DLURL="$GITHUB_SERXER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MSRX_OUTPUT }}"
+            
+            UPDATE_YT_JSON=$(get_update_yt_json "$YTRX_VER" "$YTRX_VER_CODE" "$YTRX_DLURL" "$CHANGELOG_JSON")
+            echo "$UPDATE_YT_JSON" >config-ytrx.json
+            UPDATE_YT_JSON=$(get_update_ms_json "$MSRX_VER" "$MSRX_VER_CODE" "$MSRX_DLURL" "$CHANGELOG_JSON")
+            echo "$UPDATE_YT_JSON" >config-msrx.json
+     
+            UPDATE_YT_JSON=$(get_update_mn_json "$RM_VER_NAME" "$RM_VER_CODE")
+            echo "$UPDATE_YT_JSON" >config-mn.json
+            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmnrx.apk")
+            echo "$UPDATE_YT_JSON" >config-micro.json
+            
+            if [ -n "${{ steps.get_output.outputs.MSRX_OUTPUT }}" ]; then
+                cat config-mn.json config-ytrx.json config-msrx.json config-micro.json > yt-updaterx.json
+            else
+                cat config-mn.json config-ytrx.json config-micro.json > yt-updaterx.json
             fi
           fi
 
-          find . -name "*-update.json" | grep . || : >dummy-update.json
+          find . -name "*-update*.json" | grep . || : >dummy-update.json
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
