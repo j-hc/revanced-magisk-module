@@ -10,7 +10,7 @@ excluded-patches = "'Return YouTube Dislike' 'Premium heading'"
 included-patches = ""
 version = "auto"
 rv-brand = "RevancedX"
-cli-version = "v4.1.1"
+cli-version = "v4.1.0"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 
 
