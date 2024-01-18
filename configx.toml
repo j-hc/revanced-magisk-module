@@ -36,11 +36,11 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
 excluded-patches = "'Custom package name' 'Return YouTube Dislike' 'Premium heading' 'Custom branding icon YouTube'"
 included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
 #version="18.46.43"
-cli-version = "v4.1.1"
+#cli-version = "v4.1.1"
 
 
 [Music-RX]
-enabled = true
+enabled = false
 app-name = "Music"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
