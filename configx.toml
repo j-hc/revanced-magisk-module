@@ -15,11 +15,11 @@ archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.y
 
 
 [Music-RV]
-enabled = false
+enabled = true
 app-name = "Music"
 rv-brand = "RV"
 build-mode = "apk"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music/"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 arch = "arm64-v8a"
 excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube Music' 'Custom package name' 'Return YouTube Dislike'"
 
@@ -40,14 +40,14 @@ included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
 
 
 [Music-RX]
-enabled = false
+enabled = true
 app-name = "Music"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 cli-source = "inotia00/revanced-cli"
 rv-brand = "RX"
 build-mode = "apk"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music/"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 arch = "arm64-v8a"
 excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube Music' 'Custom package name' 'Return YouTube Dislike' 'Custom branding name YouTube Music'"
 
