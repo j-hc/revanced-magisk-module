@@ -14,6 +14,10 @@
       {
         "key": "DarkThemeBackgroundColor",
         "value": "#1f1f1f"
+      },
+      {
+        "key": "darkThemeBackgroundColor",
+        "value": "#1f1f1f"
       }
     ]
   }, 
