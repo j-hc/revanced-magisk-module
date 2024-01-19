@@ -39,7 +39,6 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 apkmonk-dlurl = "https://www.apkmonk.com/app/com.app.app/"
 module-prop-name = "some-app-magisk" # magisk module prop name.
-merge-integrations = false # set false to never merge even when needed. default: true
 apkmirror-dpi = "360-480dpi" # used to select apk variant from apkmirror. default: nodpi
 arch = "arm64-v8a" # 'arm64-v8a', 'arm-v7a', 'all', 'both'. 'both' downloads both arm64-v8a and arm-v7a. default: all
 ```
