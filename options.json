@@ -26,7 +26,11 @@
     "options": [
       {
         "key": "appName",
-        "value": "YouTube X"
+        "value": "Youtube X"
+      },
+      {
+        "key": "iconPath",
+        "value": "logo"
       }
     ]
   },
