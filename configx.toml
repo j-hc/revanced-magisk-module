@@ -38,7 +38,7 @@ build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 excluded-patches = "'Custom package name' 'Return YouTube Dislike' 'Premium heading' 'Custom branding icon YouTube'"
 included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
-#version="18.46.43"
+version="18.45.43"
 #cli-version = "v4.1.1"
 
 
@@ -53,6 +53,7 @@ build-mode = "apk"
 #archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
 arch = "arm64-v8a"
+version="6.33.52"
 excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube Music' 'Custom package name' 'Return YouTube Dislike' 'Custom branding name YouTube Music'"
 
 [YouTube-Android7]
