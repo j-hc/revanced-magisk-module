@@ -409,7 +409,7 @@ build_rv() {
 	fi
 	log "${table}: ${version}"
 
-	if [ "${args[merge_integrations]}" = true ]; then p_patcher_args+=("-m ${args[integ]}"); fi
+	p_patcher_args+=("-m ${args[integ]}")
 	local microg_patch
 	microg_patch=$(jq -r ".[] | select(.compatiblePackages // [] | .[] | .name==\"${pkg_name}\") | .name" "${args[ptjs]}" | grep -i "gmscore\|microg" || :)
 	if [ -n "$microg_patch" ] && [[ ${p_patcher_args[*]} =~ $microg_patch ]]; then
