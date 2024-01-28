@@ -79,13 +79,13 @@ uptodown-dlurl = "https://nyx-music-player.en.uptodown.com/android"
 
 [IconPackStudio]
 enabled = false
-apkmonk-dlurl = "https://www.apkmonk.com/app/ginlemon.iconpackstudio/"
+apkmonk-dlurl = "https://icon-pack-studio.en.uptodown.com/android"
 arch = "both"
 
 [TickTick]
 enabled = true
 version = "latest"
-apkmonk-dlurl = "https://www.apkmonk.com/app/com.ticktick.task/"
+uptodown-dlurl = "https://ticktick.en.uptodown.com/android"
 arch = "both"
 
 [Tasker]
@@ -105,7 +105,7 @@ arch = "arm64-v8a"
 [InShorts]
 enabled = true
 version = "auto"
-apkmonk-dlurl = "https://www.apkmonk.com/app/com.nis.app/"
+uptodown-dlurl = "https://inshorts.en.uptodown.com/android"
 arch = "both"
 
 [SyncForReddit]
@@ -116,7 +116,7 @@ uptodown-dlurl = "https://sync-for-reddit.en.uptodown.com/android"
 [InfinityForReddit]
 enabled = true
 version = "auto"
-apkmonk-dlurl = "https://www.apkmonk.com/app/ml.docilealligator.infinityforreddit/"
+uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
 
 [Music-Extended]
 enabled = false
