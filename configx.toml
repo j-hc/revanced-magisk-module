@@ -27,7 +27,7 @@ excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube M
 
 
 [YouTube-RX]
-enabled = true
+enabled = false
 app-name = "YouTube"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
@@ -43,7 +43,7 @@ included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
 
 
 [Music-RX]
-enabled = true
+enabled = false
 app-name = "Music"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
