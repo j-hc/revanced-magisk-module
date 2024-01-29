@@ -63,9 +63,9 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/citra-emulator/citra-emulator/"
 arch = "arm64-v8a"
 
 [Backdrops]
-enabled = true
+enabled = false
 version = "latest"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/backdrops/backdrops-wallpapers/"
+uptodown-dlurl = "https://backdrops.en.uptodown.com/android"
 
 
 [WarnWetter]
