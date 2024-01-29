@@ -9,8 +9,9 @@ enable-magisk-update = true   # set this to false if you do not want to receive 
 build-mode = "both"
 excluded-patches = ""
 included-patches = ""
-version = "auto"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+version = "latest"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 
 [Music]
 build-mode = "both"
@@ -64,7 +65,7 @@ arch = "arm64-v8a"
 [Backdrops]
 enabled = true
 version = "latest"
-uptodown-dlurl = "https://backdrops.en.uptodown.com/android"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/backdrops/backdrops-wallpapers/"
 
 
 [WarnWetter]
@@ -107,8 +108,9 @@ apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
 
 [Instagram]
 enabled = true
-version = "auto"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
+version = "latest"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
+uptodown-dlurl = "https://instagram.en.uptodown.com/android"
 arch = "arm64-v8a"
 
 [InShorts]
