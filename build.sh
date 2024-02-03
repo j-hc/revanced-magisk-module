@@ -135,9 +135,9 @@ for table_name in $(toml_get_table_names); do
 	} || app_args[archive_dlurl]=""
 	if [ -z "${app_args[dl_from]:-}" ]; then abort "ERROR: no 'apkmirror_dlurl', 'uptodown_dlurl' or 'apkmonk_dlurl' option was set for '$table_name'."; fi
 	app_args[arch]=$(toml_get "$t" arch) || app_args[arch]="all"
-	if [ "${app_args[arch]}" != "both" ] && [ "${app_args[arch]}" != "all" ] && [[ "${app_args[arch]}" != "arm64-v8a"* ]] && [[ "${app_args[arch]}" != "arm-v7a"* ]]; then
-		abort "wrong arch '${app_args[arch]}' for '$table_name'"
-	fi
+	# if [ "${app_args[arch]}" != "both" ] && [ "${app_args[arch]}" != "all" ] && [[ "${app_args[arch]}" != "arm64-v8a"* ]] && [[ "${app_args[arch]}" != "arm-v7a"* ]]; then
+	# 	abort "wrong arch '${app_args[arch]}' for '$table_name'"
+	# fi
 
 	app_args[include_stock]=$(toml_get "$t" include-stock) || app_args[include_stock]=true && vtf "${app_args[include_stock]}" "include-stock"
 	app_args[dpi]=$(toml_get "$t" apkmirror-dpi) || app_args[dpi]="nodpi"
