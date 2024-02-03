@@ -31,8 +31,7 @@ jobs:
 
       - name: Prepare version
         id: version
-        run: 
-            echo "versionr=$(date +v%Y.%m.%d-%H%M)" >> $GITHUB_OUTPUT
+        run: echo "versionr=$(date +v%Y.%m.%d-%H%M)" >> $GITHUB_OUTPUT
 
       - name: Generate release
         run: |
@@ -47,8 +46,38 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - id: "YouTube"
-          - id: "Music"
+            - id: 'YouTube'
+            - id: 'Music'
+            - id: 'Twitter'
+            - id: 'Twitch'
+            - id: 'TikTok'
+            - id: 'Reddit'
+            - id: 'Messenger'
+            - id: 'Facebook'
+            - id: 'Spotify'
+            - id: 'Spotify-Lite'
+            - id: 'Citra'
+            - id: 'Backdrops'
+            - id: 'WarnWetter'
+            - id: 'Windyapp'
+            - id: 'MyExpenses'
+            - id: 'NyxMusicPlayer'
+            - id: 'IconPackStudio'
+            - id: 'TickTick'
+            - id: 'Tasker'
+            - id: 'Photomath'
+            - id: 'Instagram-armeabi-v7a'
+            - id: 'Instagram'
+            - id: 'InShorts'
+            - id: 'SyncForReddit'
+            - id: 'InfinityForReddit'
+            - id: 'VSCO'
+            - id: 'Pixiv'
+            - id: 'Trakt'
+            - id: 'MemeGenerator'
+            - id: 'Lightroom'
+            - id: 'Tumblr'
+            
 
     env:
       RELEASE_VERSION: ${{ needs.generate-release.outputs.version }}
@@ -76,7 +105,7 @@ jobs:
 
       - name: Generate ${{ matrix.id }} config
         run: ./gen_sep_config.sh config.toml ${{ matrix.id }} sep_config.toml
-      
+
       - name: Build modules/APKs
         run: ./build.sh sep_config.toml
         env:
@@ -104,49 +133,48 @@ jobs:
           overwrite: true
           prerelease: ${{ github.ref != 'refs/heads/main' }}
 
-    #   - name: Update changelog and Magisk update json
-    #     id: update_config
-    #     run: |
-    #       git checkout -f update || git switch --discard-changes --orphan update
-    #       cp -f build.tmp build.md
-    #       get_update_json() {
-    #         echo "{
-    #         \"version\": \"$1\",
-    #         \"versionCode\": ${{ needs.generate-release.outputs.version }},
-    #         \"zipUrl\": \"$2\",
-    #         \"changelog\": \"https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/build.md\"
-    #       }"
-    #       }
+      #   - name: Update changelog and Magisk update json
+      #     id: update_config
+      #     run: |
+      #       git checkout -f update || git switch --discard-changes --orphan update
+      #       cp -f build.tmp build.md
+      #       get_update_json() {
+      #         echo "{
+      #         \"version\": \"$1\",
+      #         \"versionCode\": ${{ needs.generate-release.outputs.version }},
+      #         \"zipUrl\": \"$2\",
+      #         \"changelog\": \"https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/build.md\"
+      #       }"
+      #       }
 
-    #       cd build || { echo "build folder not found"; exit 1; }
-    #       for OUTPUT in *magisk*.zip; do
-    #         [ "$OUTPUT" = "*magisk*.zip" ] && continue
-    #         ZIP_S=$(unzip -p "$OUTPUT" module.prop)
-    #         if ! UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson); then continue; fi
-    #         UPDATE_JSON="${UPDATE_JSON##*/}"
-    #         VER=$(echo "$ZIP_S" | grep version=)
-    #         VER="${VER##*=}"
-    #         DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ needs.generate-release.outputs.version }}/${OUTPUT}"
-    #         get_update_json "$VER" "$DLURL" >"../$UPDATE_JSON"
-    #       done
-    #       cd ..
+      #       cd build || { echo "build folder not found"; exit 1; }
+      #       for OUTPUT in *magisk*.zip; do
+      #         [ "$OUTPUT" = "*magisk*.zip" ] && continue
+      #         ZIP_S=$(unzip -p "$OUTPUT" module.prop)
+      #         if ! UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson); then continue; fi
+      #         UPDATE_JSON="${UPDATE_JSON##*/}"
+      #         VER=$(echo "$ZIP_S" | grep version=)
+      #         VER="${VER##*=}"
+      #         DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ needs.generate-release.outputs.version }}/${OUTPUT}"
+      #         get_update_json "$VER" "$DLURL" >"../$UPDATE_JSON"
+      #       done
+      #       cd ..
 
-    #       find . -name "*-update.json" | grep . || : >dummy-update.json
+      #       find . -name "*-update.json" | grep . || : >dummy-update.json
 
-    #   - uses: stefanzweifel/git-auto-commit-action@v5
-    #     if: github.ref == 'refs/heads/main'
-    #     with:
-    #       branch: update
-    #       skip_checkout: true
-    #       file_pattern: build.md *-update.json
-    #       commit_message: Bump version ${{ needs.generate-release.outputs.version }}
+      #   - uses: stefanzweifel/git-auto-commit-action@v5
+      #     if: github.ref == 'refs/heads/main'
+      #     with:
+      #       branch: update
+      #       skip_checkout: true
+      #       file_pattern: build.md *-update.json
+      #       commit_message: Bump version ${{ needs.generate-release.outputs.version }}
 
       - uses: actions/upload-artifact@v3
         with:
           name: logs
           path: logs
           if-no-files-found: ignore
-
 #   notify:
 #     needs: run
 #     uses: ./.github/workflows/notify.yml
