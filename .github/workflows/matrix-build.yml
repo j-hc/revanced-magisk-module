@@ -74,7 +74,7 @@ jobs:
           - id: "VSCO"
           - id: "Pixiv"
           #   - id: "Trakt"
-          - id: "MemeGenerator"
+        #   - id: "MemeGenerator"
           - id: "Lightroom"
           - id: "Tumblr"
 
