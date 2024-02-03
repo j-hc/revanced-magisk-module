@@ -122,7 +122,7 @@ enabled = true
 version = "auto"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
 uptodown-dlurl = "https://instagram.en.uptodown.com/android"
-arch = "armeabi-v7a"
+arch = "arm-v7a"
 
 [Instagram]
 enabled = true
@@ -192,6 +192,7 @@ version = "auto"
 enabled = true
 version = "auto"
 uptodown-dlurl = "https://meme-generator-free.en.uptodown.com/android"
+arch = "all"
 
 [Lightroom]
 enabled = true
