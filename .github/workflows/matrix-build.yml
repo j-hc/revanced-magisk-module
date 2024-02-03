@@ -34,6 +34,8 @@ jobs:
         run: |
           version=${{ steps.version.outputs.version }}
           gh release create "$version" -t "$version" -p
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   run:
     runs-on: ubuntu-latest
     needs: generate-release
