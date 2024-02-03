@@ -10,7 +10,8 @@ build-mode = "apk"
 excluded-patches = ""
 included-patches = ""
 version = "auto"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 
 [Music]
 build-mode = "apk"
