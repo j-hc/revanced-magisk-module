@@ -32,8 +32,7 @@ jobs:
       - name: Prepare version
         id: version
         run: 
-            version="$(date +v%Y.%m.%d-%H%M)"
-            echo "versionr=$version" >> $GITHUB_OUTPUT
+            echo "versionr=$(date +v%Y.%m.%d-%H%M)" >> $GITHUB_OUTPUT
 
       - name: Generate release
         run: |
