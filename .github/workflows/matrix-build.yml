@@ -1,4 +1,4 @@
-name: Build Modules
+name: Matrix Build Modules
 on:
   workflow_call:
     secrets:
