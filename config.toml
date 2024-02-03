@@ -24,7 +24,7 @@ build-mode = "apk"
 version = "latest"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
 uptodown-dlurl = "https://twitter.en.uptodown.com/android"
-arch = "armeabi-v7a, x86, arm64-v8a, x86_64"
+arch = "all"
 
 [Twitch]
 enabled = true
