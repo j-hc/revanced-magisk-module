@@ -25,22 +25,18 @@ def generate_files_message():
 
     # Collect browser_download_url from assets in release
     nonroot_files = []
-    root_files = []
 
     for asset in release["assets"][::-1]:
         file_name = asset["name"]
         file_url = asset["browser_download_url"]
-        if ".zip" in file_name:
-            root_files.append(generate_file_bullet(file_name, file_url))
-        else:
-            nonroot_files.append(generate_file_bullet(file_name, file_url))
+        nonroot_files.append(generate_file_bullet(file_name, file_url))
 
     microg = fetch_microg()
     nonroot_files.append(
         generate_file_bullet(microg["microg_name"], microg["microg_file"])
     )
 
-    return {"nonroot_files": nonroot_files, "root_files": root_files}
+    return {"nonroot_files": nonroot_files}
 
 
 def fetch_microg():
@@ -78,7 +74,6 @@ def main():
         release_name=release["name"],
         changelogs_url=changelogs_url,
         nonroot_files="\n".join(files["nonroot_files"]),
-        root_files="\n".join(files["root_files"]),
         credits_message=Config.CREDITS_MESSAGE,
     )
 

@@ -23,8 +23,8 @@ jobs:
     steps:
       - uses: actions/setup-java@v4
         with:
-          distribution: "zulu"
-          java-version: "17"
+          distribution: "adopt"
+          java-version: "20"
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -132,6 +132,8 @@ jobs:
     needs: run
     uses: ./.github/workflows/notify.yml
     if: github.ref == 'refs/heads/main'
+    with:
+      telegram_notification: true
     secrets:
       TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}

@@ -20,11 +20,7 @@ class Config:
 
 📦 *Downloads* 
 
-Non-Root:
 {nonroot_files}
-
-Magisk (Root):
-{root_files}
 
 {credits_message}
     

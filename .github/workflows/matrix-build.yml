@@ -1,11 +1,155 @@
 name: Matrix Build Modules
 on:
-    workflow_dispatch:
+  workflow_call:
+    secrets:
+      TELEGRAM_TOKEN:
+        description: "Telegram Bot Token"
+        required: true
+      TELEGRAM_TO:
+        description: "Telegram Chat ID"
+        required: true
+    inputs:
+      from_ci:
+        type: boolean
+        required: false
+        default: true
 
+  workflow_dispatch:
+
+permissions: write-all
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Print hello world
-              run: echo "Hello, world!"
+  generate-release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.versionr }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare version
+        id: version
+        run: echo "versionr=$(date +v%Y.%m.%d-%H%M)" >> $GITHUB_OUTPUT
+
+      - name: Generate release
+        run: |
+          version=${{ steps.version.outputs.versionr }}
+          # get release notes from repository revanced/revanced-patches latest release using gh api and save it to a file
+          gh release view --json body -q .body --repo revanced/revanced-patches > release_notes.md
+          echo -e "\nUse microg for YouTube and Music" >> release_notes.md
+          sed -i "1s/^/Release $version\n\n/" release_notes.md
+          if [[ ${{ github.ref_name }} == 'main' ]]; then
+            gh release create "$version" -t "$version" -F release_notes.md
+          else
+            gh release create "$version" -t "$version" -p -F release_notes.md
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  run:
+    runs-on: ubuntu-latest
+    needs: generate-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: "YouTube"
+          - id: "Music"
+          - id: "Twitter"
+          - id: "Twitch"
+          - id: "TikTok"
+          - id: "Reddit"
+          - id: "Messenger"
+          - id: "Facebook"
+          # - id: 'Spotify'
+          - id: "Spotify-Lite"
+          #   - id: "Citra"
+          #   - id: "Backdrops"
+          #   - id: "WarnWetter"
+          #   - id: "Windyapp"
+          - id: "MyExpenses"
+          - id: "NyxMusicPlayer"
+        #   - id: "IconPackStudio"
+          - id: "TickTick"
+          - id: "Tasker"
+          #   - id: "Photomath"
+        #   - id: "Instagram-armeabi-v7a"
+          - id: "Instagram"
+          - id: "InShorts"
+          #   - id: "SyncForReddit"
+          - id: "InfinityForReddit"
+          - id: "VSCO"
+          - id: "Pixiv"
+          #   - id: "Trakt"
+        #   - id: "MemeGenerator"
+          - id: "Lightroom"
+          - id: "Tumblr"
+
+    env:
+      RELEASE_VERSION: ${{ needs.generate-release.outputs.version }}
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "adopt"
+          java-version: "20"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - name: Update config
+        if: ${{ inputs.from_ci }}
+        run: |
+          if git checkout origin/update build.md; then
+            UPDATE_CFG=$(./build.sh config.toml --config-update)
+            if [ "$UPDATE_CFG" ]; then
+              echo "$UPDATE_CFG" > config.toml
+            fi
+          fi
+
+      - name: Generate ${{ matrix.id }} config
+        run: ./gen_sep_config.sh config.toml ${{ matrix.id }} sep_config.toml
+
+      - name: Build modules/APKs
+        run: ./build.sh sep_config.toml
+        env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #   GITHUB_REPOSITORY: $GITHUB_REPOSITORY
+          NEXT_VER_CODE: ${{ env.RELEASE_VERSION }}
+
+      - name: Get output
+        id: get_output
+        run: |
+          DELIM="$(openssl rand -hex 8)"
+          echo "BUILD_LOG<<${DELIM}" >> "$GITHUB_OUTPUT"
+          cat build.md >> "$GITHUB_OUTPUT"
+          echo "${DELIM}" >> "$GITHUB_OUTPUT"
+          cp -f build.md build.tmp
+
+      - name: Upload modules to release
+        run: |
+            # get all apk files in ./build/* directory, for each run gh release upload
+            for file in $(find build -type f -name "*.apk"); do
+              gh release upload ${{ env.RELEASE_VERSION }} $file
+            done
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: logs-${{ matrix.id }}
+          path: logs
+          if-no-files-found: ignore
+          
+  notify:
+    needs: [generate-release, run]
+    uses: ./.github/workflows/notify.yml
+    with:
+        telegram_notification: ${{ github.ref_name == 'main' }}
+    secrets:
+      TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
