@@ -26,6 +26,7 @@ DEF_PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || DEF_PATCHES_SRC="
 DEF_INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || DEF_INTEGRATIONS_SRC="ReVanced/revanced-integrations"
 DEF_CLI_SRC=$(toml_get "$main_config_t" cli-source) || DEF_CLI_SRC="j-hc/revanced-cli"
 DEF_RV_BRAND=$(toml_get "$main_config_t" rv-brand) || DEF_RV_BRAND="ReVanced"
+DEF_OPTIONS_JSON=$(toml_get "$main_config_t" options-json) || DEF_OPTIONS_JSON="options.json"
 mkdir -p $TEMP_DIR $BUILD_DIR
 
 if [ "${2:-}" = "--config-update" ]; then
@@ -102,6 +103,7 @@ for table_name in $(toml_get_table_names); do
 	fi
 	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]="$DEF_RV_BRAND"
 
+        app_args[options_json]=$(toml_get "$t" options-json) || app_args[options_json]="$DEF_OPTIONS_JSON"
 	app_args[excluded_patches]=$(toml_get "$t" excluded-patches) || app_args[excluded_patches]=""
 	if [ -n "${app_args[excluded_patches]}" ] && [[ "${app_args[excluded_patches]}" != *'"'* ]]; then abort "patch names inside excluded-patches must be quoted"; fi
 	app_args[included_patches]=$(toml_get "$t" included-patches) || app_args[included_patches]=""
