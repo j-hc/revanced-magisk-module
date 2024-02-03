@@ -46,38 +46,37 @@ jobs:
       fail-fast: false
       matrix:
         include:
-            - id: 'YouTube'
-            - id: 'Music'
-            - id: 'Twitter'
-            - id: 'Twitch'
-            - id: 'TikTok'
-            - id: 'Reddit'
-            - id: 'Messenger'
-            - id: 'Facebook'
-            - id: 'Spotify'
-            - id: 'Spotify-Lite'
-            - id: 'Citra'
-            - id: 'Backdrops'
-            - id: 'WarnWetter'
-            - id: 'Windyapp'
-            - id: 'MyExpenses'
-            - id: 'NyxMusicPlayer'
-            - id: 'IconPackStudio'
-            - id: 'TickTick'
-            - id: 'Tasker'
-            - id: 'Photomath'
-            - id: 'Instagram-armeabi-v7a'
-            - id: 'Instagram'
-            - id: 'InShorts'
-            - id: 'SyncForReddit'
-            - id: 'InfinityForReddit'
-            - id: 'VSCO'
-            - id: 'Pixiv'
-            - id: 'Trakt'
-            - id: 'MemeGenerator'
-            - id: 'Lightroom'
-            - id: 'Tumblr'
-            
+          - id: "YouTube"
+          - id: "Music"
+          - id: "Twitter"
+          - id: "Twitch"
+          - id: "TikTok"
+          - id: "Reddit"
+          - id: "Messenger"
+          - id: "Facebook"
+          # - id: 'Spotify'
+          - id: "Spotify-Lite"
+          #   - id: "Citra"
+          #   - id: "Backdrops"
+          #   - id: "WarnWetter"
+          #   - id: "Windyapp"
+          - id: "MyExpenses"
+          - id: "NyxMusicPlayer"
+          - id: "IconPackStudio"
+          - id: "TickTick"
+          - id: "Tasker"
+          #   - id: "Photomath"
+          - id: "Instagram-armeabi-v7a"
+          - id: "Instagram"
+          - id: "InShorts"
+          #   - id: "SyncForReddit"
+          - id: "InfinityForReddit"
+          - id: "VSCO"
+          - id: "Pixiv"
+          #   - id: "Trakt"
+          - id: "MemeGenerator"
+          - id: "Lightroom"
+          - id: "Tumblr"
 
     env:
       RELEASE_VERSION: ${{ needs.generate-release.outputs.version }}

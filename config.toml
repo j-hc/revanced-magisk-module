@@ -101,7 +101,7 @@ arch = "both"
 [IconPackStudio]
 enabled = true
 version = "auto"
-apkmonk-dlurl = "https://icon-pack-studio.en.uptodown.com/android"
+uptodown-dlurl = "https://icon-pack-studio.en.uptodown.com/android"
 
 [TickTick]
 enabled = true
