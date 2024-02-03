@@ -39,7 +39,7 @@ jobs:
           if [[ ${{ github.ref_name }} == 'main' ]]; then
             gh release create "$version" -t "$version" -n "Release $version"
           else
-            gh release create "$version" -t "$version" -p -n "Preview Release $version\n\nThis is a preview release and bugs are expected."
+            gh release create "$version" -t "$version" -p -n "Preview Release $version. This is a preview release and bugs are expected."
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
