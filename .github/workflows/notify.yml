@@ -7,7 +7,27 @@ on:
         required: true
       TELEGRAM_TOKEN:
         required: true
+    inputs:
+      telegram_notification: 
+        description: 'Notify on telegram'
+        type: boolean
+        required: false
+        default: false
+      release_tag:
+        description: 'Release tag'
+        type: string
+        default: ""
   workflow_dispatch:
+    inputs:
+      telegram_notification: 
+        description: 'Notify on telegram'
+        type: boolean
+        required: false
+        default: false
+      release_tag:
+        description: 'Release tag'
+        type: string
+        default: ""
       
 
 jobs:
@@ -34,14 +54,16 @@ jobs:
       - name: Run telegram notification script
         run: python3 telegram-script
 
-#     - name: Commit release description changes
-#        uses: stefanzweifel/git-auto-commit-action@v4
-#        with:
-#          commit_message: Update telegram release message ${{ github.run_id }}
-#          branch: update
-#          file_pattern: '*.md'
+
+      - name: Edit Release Body
+        if: ${{ github.event.inputs.release_tag }}
+        run: |
+          gh release edit ${{ github.event.inputs.release_tag }} --notes-file release_notification.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Telegram Channel Update
+        if: ${{ github.event.inputs.telegram_notification }}
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}

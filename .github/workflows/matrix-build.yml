@@ -142,9 +142,11 @@ jobs:
           if-no-files-found: ignore
           
   notify:
-    needs: run
+    needs: [generate-release, run]
     uses: ./.github/workflows/notify.yml
-    if: github.ref_name == 'main'
+    with:
+        telegram_notification: ${{ github.ref_name == 'main' }}
+        release_tag: ${{ needs.generate-release.outputs.version }}
     secrets:
       TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
