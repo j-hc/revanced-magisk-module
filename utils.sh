@@ -403,8 +403,9 @@ build_rv() {
 		done
 		if [ ! -f "$stock_apk" ]; then return 0; fi
 	fi
-	echo "md5sum: $(md5sum $stock_apk | cut -c -32)"
-	log "${table}: ${version}"
+	local MD5SUM=$(md5sum ${stock_apk} | cut -c -32)
+	echo "md5sum: ${MD5SUM}"
+	log "${table}: ${version} - md5sum: ${MD5SUM}"
 
 	p_patcher_args+=("-m ${args[integ]}")
 	local microg_patch
