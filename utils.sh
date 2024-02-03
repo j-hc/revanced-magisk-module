@@ -403,6 +403,7 @@ build_rv() {
 		done
 		if [ ! -f "$stock_apk" ]; then return 0; fi
 	fi
+	echo "md5sum: $(md5sum $stock_apk | cut -c -32)"
 	log "${table}: ${version}"
 
 	p_patcher_args+=("-m ${args[integ]}")
