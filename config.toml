@@ -24,6 +24,7 @@ build-mode = "apk"
 version = "auto"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
 uptodown-dlurl = "https://twitter.en.uptodown.com/android"
+arch = "both"
 
 [Twitch]
 enabled = true
@@ -34,6 +35,7 @@ uptodown-dlurl = "https://twitch.en.uptodown.com/android"
 version = "auto"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
 uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
+arch = "both"
 
 [Reddit]
 version = "auto"
@@ -105,10 +107,17 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/joaomgcd/tasker/"
 enabled = false
 apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
 
-[Instagram]
+[Instagram-armeabi-v7a]
 enabled = true
 version = "auto"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
+uptodown-dlurl = "https://instagram.en.uptodown.com/android"
+arch = "armeabi-v7a"
+
+[Instagram]
+enabled = true
+version = "auto"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
 uptodown-dlurl = "https://instagram.en.uptodown.com/android"
 arch = "arm64-v8a"
 
