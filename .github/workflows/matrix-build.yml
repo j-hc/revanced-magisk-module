@@ -147,9 +147,8 @@ jobs:
           
   notify:
     needs: [generate-release, run]
+    if: ${{ github.ref_name == 'main' }}
     uses: ./.github/workflows/notify.yml
-    with:
-        telegram_notification: ${{ github.ref_name == 'main' }}
     secrets:
       TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
