@@ -22,8 +22,8 @@ arch = "both"
 [Twitter]
 build-mode = "apk"
 version = "latest"
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
-uptodown-dlurl = "https://twitter.en.uptodown.com/android"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
+# uptodown-dlurl = "https://twitter.en.uptodown.com/android"
 arch = "all"
 
 [Twitch]
