@@ -36,7 +36,6 @@ arch = "both"
 version = "auto"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
 # uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
-arch = "both"
 # arch = "armeabi-v7a, arm64-v8a"
 
 [Reddit]
