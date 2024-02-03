@@ -9,19 +9,19 @@ enable-magisk-update = true # set this to false if you do not want to receive up
 build-mode = "both"
 excluded-patches = ""
 included-patches = ""
-version = "latest"
+version = "auto"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 
 [Music]
 build-mode = "both"
-version = "latest"
+version = "auto"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
 arch = "both"
 
 [Twitter]
 build-mode = "apk"
-version = "latest"
+version = "auto"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
 # uptodown-dlurl = "https://twitter.en.uptodown.com/android"
 arch = "all"
@@ -33,14 +33,14 @@ uptodown-dlurl = "https://twitch.en.uptodown.com/android"
 arch = "both"
 
 [TikTok]
-version = "latest"
+version = "auto"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
 uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
 arch = "both"
 # arch = "armeabi-v7a, arm64-v8a"
 
 [Reddit]
-version = "latest"
+version = "auto"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
 uptodown-dlurl = "https://reddit-official-app.en.uptodown.com/android"
 
@@ -59,13 +59,13 @@ uptodown-dlurl = "https://facebook.en.uptodown.com/android"
 [Spotify]
 enabled = false
 build-mode = "apk"
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 
 [Spotify-Lite]
 enabled = true
 build-mode = "apk"
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://spotify-lite.en.uptodown.com/android"
 
 [Citra]
@@ -75,7 +75,7 @@ arch = "arm64-v8a"
 
 [Backdrops]
 enabled = false
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://backdrops.en.uptodown.com/android"
 
 [WarnWetter]
@@ -88,24 +88,24 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/windy-weather-world-inc/windy-w
 
 [MyExpenses]
 enabled = true
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://my-expenses.en.uptodown.com/android"
 
 [NyxMusicPlayer]
 enabled = true
 build-mode = "apk"
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://nyx-music-player.en.uptodown.com/android"
 arch = "both"
 
 [IconPackStudio]
 enabled = true
-version = "latest"
+version = "auto"
 apkmonk-dlurl = "https://icon-pack-studio.en.uptodown.com/android"
 
 [TickTick]
 enabled = true
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://ticktick.en.uptodown.com/android"
 arch = "both"
 
@@ -119,38 +119,38 @@ apkmonk-dlurl = "https://www.apkmonk.com/app/com.microblink.photomath/"
 
 [Instagram-armeabi-v7a]
 enabled = true
-version = "latest"
+version = "auto"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
 uptodown-dlurl = "https://instagram.en.uptodown.com/android"
 arch = "armeabi-v7a"
 
 [Instagram]
 enabled = true
-version = "latest"
+version = "auto"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
 uptodown-dlurl = "https://instagram.en.uptodown.com/android"
 arch = "arm64-v8a"
 
 [InShorts]
 enabled = true
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://inshorts.en.uptodown.com/android"
 arch = "both"
 
 [SyncForReddit]
 enabled = false
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://sync-for-reddit.en.uptodown.com/android"
 
 [InfinityForReddit]
 enabled = true
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
 
 # [Music-Extended]
 # enabled = true
 # app-name = "Music"
-# version = "latest"
+# version = "auto"
 # patches-source = "inotia00/revanced-patches"
 # integrations-source = "inotia00/revanced-integrations"
 # cli-source = "inotia00/revanced-cli"
@@ -163,7 +163,7 @@ uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
 # [YouTube-Extended]
 # enabled = true
 # app-name = "YouTube"
-# version = "latest"
+# version = "auto"
 # patches-source = "inotia00/revanced-patches"
 # integrations-source = "inotia00/revanced-integrations"
 # cli-source = "inotia00/revanced-cli"
@@ -174,32 +174,32 @@ uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
 
 [VSCO]
 enabled = true
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://vsco-cam.en.uptodown.com/android"
 arch = "both"
 
 [Pixiv]
 enabled = true
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://pixiv.en.uptodown.com/android"
 
 [Trakt]
 enabled = false
-version = "latest"
+version = "auto"
 # uptodown-dlurl = "https://trakt.en.uptodown.com/android"
 
 [MemeGenerator]
 enabled = true
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://meme-generator-free.en.uptodown.com/android"
 
 [Lightroom]
 enabled = true
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://adobe-lightroom-mobile.en.uptodown.com/android"
 arch = "both"
 
 [Tumblr]
 enabled = true
-version = "latest"
+version = "auto"
 uptodown-dlurl = "https://tumblr.en.uptodown.com/android"
