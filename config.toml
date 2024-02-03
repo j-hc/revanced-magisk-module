@@ -127,7 +127,7 @@ enabled = true
 version = "auto"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
 # uptodown-dlurl = "https://instagram.en.uptodown.com/android"
-# arch = "arm64-v8a"
+arch = "arm64-v8a"
 
 [InShorts]
 enabled = true
