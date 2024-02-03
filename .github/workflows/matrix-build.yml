@@ -22,22 +22,22 @@ jobs:
   generate-release:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
+      version: ${{ steps.version.outputs.versionr }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+
       - name: Prepare version
         id: version
         run: 
             version="$(date +v%Y.%m.%d-%H%M)"
-            echo "version=$version" >> $GITHUB_OUTPUT
+            echo "versionr=$version" >> $GITHUB_OUTPUT
 
       - name: Generate release
         run: |
-          version=${{ steps.version.outputs.version }}
+          version=${{ steps.version.outputs.versionr }}
           gh release create "$version" -t "$version" -p
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
