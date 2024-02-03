@@ -122,12 +122,21 @@ jobs:
 
       - name: Get output
         id: get_output
+        if: ${{ matrix.id == 'YouTube' }}
         run: |
           DELIM="$(openssl rand -hex 8)"
           echo "BUILD_LOG<<${DELIM}" >> "$GITHUB_OUTPUT"
           cat build.md >> "$GITHUB_OUTPUT"
           echo "${DELIM}" >> "$GITHUB_OUTPUT"
           cp -f build.md build.tmp
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: matrix.id == 'YouTube' && github.ref_name == 'main'
+        with:
+          branch: update
+          skip_checkout: true
+          file_pattern: build.md
+          commit_message: Bump version ${{ env.RELEASE_VERSION }}
 
       - name: Upload modules to release
         run: |
