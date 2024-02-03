@@ -27,8 +27,9 @@ version = "latest"
 uptodown-dlurl = "https://twitter.en.uptodown.com/android"
 
 [Twitch]
-enabled = false
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/tv.twitch.android.app"
+enabled = true
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/tv.twitch.android.app"
+uptodown-dlurl = "https://twitch.en.uptodown.com/android"
 
 [TikTok]
 version = "latest"
@@ -66,7 +67,6 @@ arch = "arm64-v8a"
 enabled = false
 version = "latest"
 uptodown-dlurl = "https://backdrops.en.uptodown.com/android"
-
 
 [WarnWetter]
 enabled = false
