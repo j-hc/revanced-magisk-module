@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/setup-java@v4
         with:
-          distribution: "zulu"
+          distribution: "adopt"
           java-version: "20"
 
       - name: Checkout
