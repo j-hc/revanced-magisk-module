@@ -36,10 +36,14 @@ jobs:
       - name: Generate release
         run: |
           version=${{ steps.version.outputs.versionr }}
+          # get release notes from repository revanced/revanced-patches latest release using gh api and save it to a file
+          gh release view --json body -q .body --repo revanced/revanced-patches > release_notes.md
+          echo -e "\nUse microg for YouTube and Music" >> release_notes.md
+          sed -i "1s/^/Release $version\n\n/" release_notes.md
           if [[ ${{ github.ref_name }} == 'main' ]]; then
-            gh release create "$version" -t "$version" -n "Release $version"
+            gh release create "$version" -t "$version" -F release_notes.md
           else
-            gh release create "$version" -t "$version" -p -n "Preview Release $version. This is a preview release and bugs are expected."
+            gh release create "$version" -t "$version" -p -F release_notes.md
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -146,7 +150,6 @@ jobs:
     uses: ./.github/workflows/notify.yml
     with:
         telegram_notification: ${{ github.ref_name == 'main' }}
-        release_tag: ${{ needs.generate-release.outputs.version }}
     secrets:
       TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}

@@ -13,10 +13,7 @@ on:
         type: boolean
         required: false
         default: false
-      release_tag:
-        description: 'Release tag'
-        type: string
-        default: ""
+      
   workflow_dispatch:
     inputs:
       telegram_notification: 
@@ -24,10 +21,6 @@ on:
         type: boolean
         required: false
         default: false
-      release_tag:
-        description: 'Release tag'
-        type: string
-        default: ""
       
 
 jobs:
@@ -53,14 +46,6 @@ jobs:
      
       - name: Run telegram notification script
         run: python3 telegram-script
-
-
-      - name: Edit Release Body
-        if: ${{ github.event.inputs.release_tag }}
-        run: |
-          gh release edit ${{ github.event.inputs.release_tag }} --notes-file release_notification.md
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Telegram Channel Update
         if: ${{ github.event.inputs.telegram_notification }}
