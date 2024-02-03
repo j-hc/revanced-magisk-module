@@ -191,7 +191,6 @@ version = "auto"
 enabled = true
 version = "auto"
 uptodown-dlurl = "https://meme-generator-free.en.uptodown.com/android"
-arch = "all"
 
 [Lightroom]
 enabled = true
