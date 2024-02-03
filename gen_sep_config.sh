@@ -36,4 +36,4 @@ extract_content() {
 # Main script
 extract_tables | extract_content
 
-echo "Separate TOML files created for each table with matching keys."
+echo "Separate TOML file created from $config_file for the key $key_to_match"
