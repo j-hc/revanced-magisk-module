@@ -20,6 +20,7 @@ integrations-source = "revanced/revanced-integrations" # where to fetch integrat
 cli-source = "j-hc/revanced-cli" # where to fetch cli from. default: "j-hc/revanced-cli"
 # options like cli-source can also set per app
 rv-brand = "ReVanced Extended" # rebrand from 'ReVanced' to something different. default: "ReVanced"
+options-json = "SomeName.json" # if need different options.json per app. create new file with name different from options.json
 
 patches-version = "v2.160.0" # locks the patches version. default: latest available
 integrations-version = "v0.95.0" # locks the integrations version. default: latest available
