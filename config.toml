@@ -146,30 +146,28 @@ enabled = true
 version = "auto"
 uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
 
-# [Music-Extended]
-# enabled = true
-# app-name = "Music"
-# version = "auto"
-# patches-source = "inotia00/revanced-patches"
-# integrations-source = "inotia00/revanced-integrations"
-# cli-source = "inotia00/revanced-cli"
-# rv-brand = "ReVanced Extended"
-# build-mode = "both"
-# # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
-# uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
-# arch = "both"
+[Music-ReX]
+enabled = true
+app-name = "Music"
+version = "auto"
+patches-source = "YT-Advanced/ReX-patches"
+integrations-source = "YT-Advanced/ReX-integrations"
+rv-brand = "ReVanced Extended"
+build-mode = "apk"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
+arch = "both"
 
-# [YouTube-Extended]
-# enabled = true
-# app-name = "YouTube"
-# version = "auto"
-# patches-source = "inotia00/revanced-patches"
-# integrations-source = "inotia00/revanced-integrations"
-# cli-source = "inotia00/revanced-cli"
-# rv-brand = "ReVanced Extended"
-# build-mode = "both"
-# # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
-# uptodown-dlurl = "https://youtube.en.uptodown.com/android"
+[YouTube-ReX]
+enabled = true
+app-name = "YouTube"
+version = "auto"
+patches-source = "YT-Advanced/ReX-patches"
+integrations-source = "YT-Advanced/ReX-integrations"
+rv-brand = "ReVanced Extended"
+build-mode = "apk"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 
 [VSCO]
 enabled = true
