@@ -146,13 +146,6 @@ jobs:
             done
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: logs-${{ matrix.id }}
-          path: logs
-          if-no-files-found: ignore
           
   notify:
     needs: [generate-release, run]
