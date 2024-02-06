@@ -111,12 +111,10 @@ jobs:
 
       - name: Build modules/APKs
         run: |
-          # on error retry 3 times
-          # ./build.sh sep_config.toml
           count=0
           if ! ./build.sh sep_config.toml; then
             count=$((count+1))
-            if [ $count -lt 3 ]; then
+            if [ $count -lt 2 ]; then
               ./build.sh sep_config.toml
             else
               echo "Failed to build ${{ matrix.id }} after 3 attempts"
