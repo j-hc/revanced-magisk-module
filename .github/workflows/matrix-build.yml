@@ -119,6 +119,7 @@ jobs:
             if [ $count -lt 3 ]; then
               ./build.sh sep_config.toml
             else
+              echo "Failed to build ${{ matrix.id }} after 3 attempts"
               exit 1
             fi
           fi
