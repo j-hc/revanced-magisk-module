@@ -36,8 +36,17 @@ jobs:
       - name: Generate release
         run: |
           version=${{ steps.version.outputs.versionr }}
-          gh release view --json body -q .body --repo revanced/revanced-patches > release_notes.md
-          echo -e "\nUse microg for YouTube and Music" >> release_notes.md
+          echo -e "# ReVanced Patches\n" > release_notes.md
+          dateRevanced=$(gh release view --json publishedAt -q .publishedAt --repo revanced/revanced-patches | date)
+          echo -e "\n Release published on $dateRevanced\n" >> release_notes.md
+          gh release view --json body -q .body --repo revanced/revanced-patches >> release_notes.md
+          echo -e "\n---\n" >> release_notes.md
+          echo -e "# ReX Patches\n" >> release_notes.md
+          dateReX=$(gh release view --json publishedAt -q .publishedAt --repo YT-Advanced/ReX-patches | date)
+          echo -e "\n Release published on $dateReX\n" >> release_notes.md
+          gh release view --json body -q .body --repo YT-Advanced/ReX-patches >> release_notes.md
+          echo -e "\n---\n" >> release_notes.md
+          echo -e "\nUse [MicroG](https://github.com/inotia00/VancedMicroG/releases) for YouTube and Music" >> release_notes.md
           sed -i "1s/^/Release $version\n\n/" release_notes.md
           gh release create "$version" --draft -t "$version" -F release_notes.md
         env:
@@ -117,14 +126,6 @@ jobs:
           echo "${DELIM}" >> "$GITHUB_OUTPUT"
           cp -f build.md build.tmp
 
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        if: matrix.id == 'YouTube' && github.ref_name == 'main'
-        with:
-          branch: update
-          skip_checkout: true
-          file_pattern: build.md
-          commit_message: Bump version ${{ env.RELEASE_VERSION }}
-
       - name: Upload modules to release
         run: |
           # get all apk files in ./build/* directory, for each run gh release upload
@@ -133,6 +134,25 @@ jobs:
           done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-metadata:
+    needs: [generate-release, run]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare build.md
+        run: |
+          git checkout -b update
+          filename="build.md"
+          ./extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
+          echo -e "\n\n" >> $filename
+          ./extras.sh "YT-Advanced/ReX-integrations" "YT-Advanced/ReX-patches" "revanced/revanced-cli" >> $filename
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: update
+          skip_checkout: true
+          file_pattern: build.md
+          commit_message: Bump version ${{ needs.generate-release.outputs.version }}
 
   release:
     needs: [generate-release, run]
@@ -147,7 +167,7 @@ jobs:
           fi
 
   notify:
-    needs: [generate-release, run]
+    needs: release
     if: ${{ github.ref_name == 'main' }}
     uses: ./.github/workflows/notify.yml
     secrets:
