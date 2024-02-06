@@ -64,7 +64,7 @@ jobs:
           - id: "Music"
           - id: "Twitter"
           - id: "Twitch"
-          - id: "TikTok"
+          # - id: "TikTok"
           - id: "Reddit"
           - id: "Messenger"
           - id: "Facebook"
