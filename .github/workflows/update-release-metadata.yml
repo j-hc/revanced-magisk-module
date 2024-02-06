@@ -1,0 +1,26 @@
+name: Update release metadata
+
+on:
+    workflow_dispatch:
+
+jobs:
+  release-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+
+      - name: Prepare build.md
+        run: |
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git config --global user.name "github-actions[bot]"
+            git checkout origin/update
+            filename="build.md"
+            ./extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
+            echo -e "\n\n" >> $filename
+            ./extras.sh "YT-Advanced/ReX-integrations" "YT-Advanced/ReX-patches" "revanced/revanced-cli" >> $filename
+            git add $filename
+            git commit -m "Bump version"
+            git push origin update
