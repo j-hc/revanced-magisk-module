@@ -137,6 +137,11 @@ jobs:
     needs: [generate-release, run]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
       - name: Prepare build.md
         run: |
           git checkout -b update
@@ -163,6 +168,8 @@ jobs:
           else
             gh release edit ${{ needs.generate-release.outputs.version }} --draft=false --prerelease
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   notify:
     needs: release
