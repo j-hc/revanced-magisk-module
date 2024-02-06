@@ -154,7 +154,6 @@ jobs:
           
       - name: Prepare build.md
         run: |
-          git checkout -b update
           filename="build.md"
           ./extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
           echo -e "\n\n" >> $filename
