@@ -36,15 +36,10 @@ jobs:
       - name: Generate release
         run: |
           version=${{ steps.version.outputs.versionr }}
-          # get release notes from repository revanced/revanced-patches latest release using gh api and save it to a file
           gh release view --json body -q .body --repo revanced/revanced-patches > release_notes.md
           echo -e "\nUse microg for YouTube and Music" >> release_notes.md
           sed -i "1s/^/Release $version\n\n/" release_notes.md
-          if [[ ${{ github.ref_name }} == 'main' ]]; then
-            gh release create "$version" -t "$version" -F release_notes.md
-          else
-            gh release create "$version" -t "$version" -p -F release_notes.md
-          fi
+          gh release create "$version" --draft -t "$version" -F release_notes.md
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   run:
@@ -72,11 +67,11 @@ jobs:
           #   - id: "Windyapp"
           - id: "MyExpenses"
           - id: "NyxMusicPlayer"
-        #   - id: "IconPackStudio"
+          #   - id: "IconPackStudio"
           - id: "TickTick"
           - id: "Tasker"
           #   - id: "Photomath"
-        #   - id: "Instagram-armeabi-v7a"
+          #   - id: "Instagram-armeabi-v7a"
           - id: "Instagram"
           - id: "InShorts"
           #   - id: "SyncForReddit"
@@ -84,7 +79,7 @@ jobs:
           - id: "VSCO"
           - id: "Pixiv"
           #   - id: "Trakt"
-        #   - id: "MemeGenerator"
+          #   - id: "MemeGenerator"
           - id: "Lightroom"
           - id: "Tumblr"
 
@@ -108,8 +103,8 @@ jobs:
       - name: Build modules/APKs
         run: ./build.sh sep_config.toml
         env:
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   GITHUB_REPOSITORY: $GITHUB_REPOSITORY
+          #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #   GITHUB_REPOSITORY: $GITHUB_REPOSITORY
           NEXT_VER_CODE: ${{ env.RELEASE_VERSION }}
 
       - name: Get output
@@ -132,13 +127,25 @@ jobs:
 
       - name: Upload modules to release
         run: |
-            # get all apk files in ./build/* directory, for each run gh release upload
-            for file in $(find build -type f -name "*.apk"); do
-              gh release upload ${{ env.RELEASE_VERSION }} $file
-            done
+          # get all apk files in ./build/* directory, for each run gh release upload
+          for file in $(find build -type f -name "*.apk"); do
+            gh release upload ${{ env.RELEASE_VERSION }} $file
+          done
         env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    needs: [generate-release, run]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark release non-draft
+        run: |
+          if [[ ${{ github.ref_name }} == 'main' ]]; then
+            gh release edit ${{ needs.generate-release.outputs.version }} --draft=false --latest
+          else
+            gh release edit ${{ needs.generate-release.outputs.version }} --draft=false --prerelease
+          fi
+
   notify:
     needs: [generate-release, run]
     if: ${{ github.ref_name == 'main' }}
