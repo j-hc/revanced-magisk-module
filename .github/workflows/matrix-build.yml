@@ -110,7 +110,18 @@ jobs:
         run: ./gen_sep_config.sh config.toml ${{ matrix.id }} sep_config.toml
 
       - name: Build modules/APKs
-        run: ./build.sh sep_config.toml
+        run: |
+          # on error retry 3 times
+          # ./build.sh sep_config.toml
+          count=0
+          if ! ./build.sh sep_config.toml; then
+            count=$((count+1))
+            if [ $count -lt 3 ]; then
+              ./build.sh sep_config.toml
+            else
+              exit 1
+            fi
+          fi
         env:
           NEXT_VER_CODE: ${{ env.RELEASE_VERSION }}
 
