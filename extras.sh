@@ -1,18 +1,7 @@
 #!/bin/bash
 
 _req() {
-    if [ "$2" = - ]; then
-        wget -nv -q -O "$2" --header="$3" "$1"
-    else
-        local dlp
-        dlp="$(dirname "$2")/tmp.$(basename "$2")"
-        if [ -f "$dlp" ]; then
-            while [ -f "$dlp" ]; do sleep 1; done
-            return
-        fi
-        wget -nv -q -O "$dlp" --header="$3" "$1" || return 1
-        mv -f "$dlp" "$2"
-    fi
+    wget -nv -q -O "$2" --header="$3" "$1"
 }
 
 gh_req() { _req "$1" "$2" "$GH_HEADER"; }
