@@ -81,7 +81,7 @@ jobs:
           - id: "Tasker"
           #   - id: "Photomath"
           #   - id: "Instagram-armeabi-v7a"
-          - id: "Instagram"
+          # - id: "Instagram"
           - id: "InShorts"
           #   - id: "SyncForReddit"
           - id: "InfinityForReddit"
