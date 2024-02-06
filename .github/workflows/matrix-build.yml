@@ -112,8 +112,6 @@ jobs:
       - name: Build modules/APKs
         run: ./build.sh sep_config.toml
         env:
-          #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          #   GITHUB_REPOSITORY: $GITHUB_REPOSITORY
           NEXT_VER_CODE: ${{ env.RELEASE_VERSION }}
 
       - name: Get output
