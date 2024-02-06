@@ -64,7 +64,7 @@ jobs:
           - id: "Music"
           - id: "Twitter"
           - id: "Twitch"
-          # - id: "TikTok"
+          - id: "TikTok"
           - id: "Reddit"
           - id: "Messenger"
           - id: "Facebook"
@@ -81,7 +81,7 @@ jobs:
           - id: "Tasker"
           #   - id: "Photomath"
           #   - id: "Instagram-armeabi-v7a"
-          # - id: "Instagram"
+          - id: "Instagram"
           - id: "InShorts"
           #   - id: "SyncForReddit"
           - id: "InfinityForReddit"
@@ -155,10 +155,12 @@ jobs:
           
       - name: Prepare build.md
         run: |
-          filename="build.md"
-          ./extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
-          echo -e "\n\n" >> $filename
-          ./extras.sh "YT-Advanced/ReX-integrations" "YT-Advanced/ReX-patches" "revanced/revanced-cli" >> $filename
+          if git checkout origin/update build.md; then
+            filename="build.md"
+            ./extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
+            echo -e "\n\n" >> $filename
+            ./extras.sh "YT-Advanced/ReX-integrations" "YT-Advanced/ReX-patches" "revanced/revanced-cli" >> $filename
+          fi
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
