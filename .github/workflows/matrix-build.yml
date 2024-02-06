@@ -102,16 +102,6 @@ jobs:
           fetch-depth: 0
           submodules: true
 
-      - name: Update config
-        if: ${{ inputs.from_ci }}
-        run: |
-          if git checkout origin/update build.md; then
-            UPDATE_CFG=$(./build.sh config.toml --config-update)
-            if [ "$UPDATE_CFG" ]; then
-              echo "$UPDATE_CFG" > config.toml
-            fi
-          fi
-
       - name: Generate ${{ matrix.id }} config
         run: ./gen_sep_config.sh config.toml ${{ matrix.id }} sep_config.toml
 
