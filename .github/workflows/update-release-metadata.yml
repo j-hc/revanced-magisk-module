@@ -14,17 +14,14 @@ jobs:
 
       - name: Prepare build.md
         run: |
-          if git checkout origin/update build.md; then
-              filename="build.md"
-              ./extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
-              echo -e "\n\n" >> $filename
-              ./extras.sh "YT-Advanced/ReX-integrations" "YT-Advanced/ReX-patches" "revanced/revanced-cli" >> $filename
-          fi
-
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          branch: update
-          skip_checkout: true
-          file_pattern: build.md
-          commit_message: Bump version
-          add_options: "--force"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git config --global user.name "github-actions[bot]"
+            git fetch --prune --unshallow
+            git checkout origin/update && git pull
+            filename="build.md"
+            ./extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
+            echo -e "\n\n" >> $filename
+            ./extras.sh "YT-Advanced/ReX-integrations" "YT-Advanced/ReX-patches" "revanced/revanced-cli" >> $filename
+            git add $filename
+            git commit -m "Bump version"
+            git push
