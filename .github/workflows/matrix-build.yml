@@ -37,13 +37,13 @@ jobs:
         run: |
           version=${{ steps.version.outputs.versionr }}
           echo -e "# ReVanced Patches\n" > release_notes.md
-          dateRevanced=$(gh release view --json publishedAt -q .publishedAt --repo revanced/revanced-patches | date)
-          echo -e "\n Release published on $dateRevanced\n" >> release_notes.md
+          dateRevanced=$(date -u -d $(gh release view --json publishedAt -q .publishedAt --repo revanced/revanced-patches))
+          echo -e "\n Published on $dateRevanced\n" >> release_notes.md
           gh release view --json body -q .body --repo revanced/revanced-patches >> release_notes.md
           echo -e "\n---\n" >> release_notes.md
           echo -e "# ReX Patches\n" >> release_notes.md
-          dateReX=$(gh release view --json publishedAt -q .publishedAt --repo YT-Advanced/ReX-patches | date)
-          echo -e "\n Release published on $dateReX\n" >> release_notes.md
+          dateReX=$(date -u -d $(gh release view --json publishedAt -q .publishedAt --repo YT-Advanced/ReX-patches))
+          echo -e "\n Published on $dateReX\n" >> release_notes.md
           gh release view --json body -q .body --repo YT-Advanced/ReX-patches >> release_notes.md
           echo -e "\n---\n" >> release_notes.md
           echo -e "\nUse [MicroG](https://github.com/inotia00/VancedMicroG/releases) for YouTube and Music" >> release_notes.md
@@ -152,21 +152,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+
       - name: Prepare build.md
         run: |
-            cp extras.sh /tmp/extras.sh
-            git config --global user.email "github-actions[bot]@users.noreply.github.com"
-            git config --global user.name "github-actions[bot]"
-            git fetch
-            git checkout update
-            filename="build.md"
-            /tmp/extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
-            echo -e "\n\n" >> $filename
-            /tmp/extras.sh "YT-Advanced/ReX-integrations" "YT-Advanced/ReX-patches" "revanced/revanced-cli" >> $filename
-            git add $filename
-            git commit -m "Bump version ${{ needs.generate-release.outputs.version }}"
-            git push
+          cp extras.sh /tmp/extras.sh
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git fetch
+          git checkout update
+          filename="build.md"
+          /tmp/extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
+          echo -e "\n\n" >> $filename
+          /tmp/extras.sh "YT-Advanced/ReX-integrations" "YT-Advanced/ReX-patches" "revanced/revanced-cli" >> $filename
+          git add $filename
+          git commit -m "Bump version ${{ needs.generate-release.outputs.version }}"
+          git push
 
   release:
     needs: [generate-release, run]
