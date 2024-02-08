@@ -7,7 +7,17 @@ on:
         required: true
       TELEGRAM_TOKEN:
         required: true
+    inputs:
+      release_tag:
+        type: string
+        description: 'The tag of the release'
+        required: true
   workflow_dispatch:
+    inputs:
+      release_tag:
+        type: string
+        description: 'The tag of the release'
+        required: true
       
 
 jobs:
@@ -41,3 +51,33 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message_file: release_notification.md
+  
+  push_notification:
+    name: Push Notification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11' # The python version to use.
+          cache: 'pip'
+          cache-dependency-path: 'push-notify/requirements.txt'
+
+      - name: Install dependencies
+        run: pip install -r push-notify/requirements.txt
+
+      - name: Create google-auth json
+        run: echo ${{ secrets.GOOGLE_AUTH_JSON }} > google-services.json
+
+      - name: Run push notification script
+        run: |
+          release_tag=${{ github.event.inputs.release_tag }}
+          release_body=$(gh release view $release_tag --json body -q .body)
+          python3 push-notify/push_notification.py --title "New Release $release_tag" --body "$release_body" --api_url ${{ secrets.NOTIF_API_URL }} --bearer ${{ secrets.NOTIF_API_BEARER }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      

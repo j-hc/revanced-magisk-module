@@ -183,9 +183,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   notify:
-    needs: release
+    needs: [generate-release, run]
     if: ${{ github.ref_name == 'main' }}
     uses: ./.github/workflows/notify.yml
+    with:
+      release_tag: ${{ needs.generate-release.outputs.version }}
     secrets:
       TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
