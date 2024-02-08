@@ -71,7 +71,7 @@ jobs:
         run: pip install -r push-notify/requirements.txt
 
       - name: Create google-auth json
-        run: echo "${{ secrets.GOOGLE_AUTH_JSON }}" > google-services.json
+        run: echo "${{ secrets.GOOGLE_AUTH_JSON }}" | base64 -d > google-services.json
 
       - name: Run push notification script
         run: |
