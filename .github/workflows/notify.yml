@@ -77,7 +77,7 @@ jobs:
         run: |
           release_tag=${{ github.event.inputs.release_tag }}
           release_body=$(gh release view $release_tag --json body -q .body)
-          python3 push-notify/push_notification.py --title "New Release $release_tag" --body "$release_body" --api_url ${{ secrets.NOTIF_API_URL }} --bearer ${{ secrets.NOTIF_API_BEARER }}
+          python3 push-notify --title "New Release $release_tag" --body "$release_body" --api_url ${{ secrets.NOTIF_API_URL }} --bearer ${{ secrets.NOTIF_API_BEARER }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
