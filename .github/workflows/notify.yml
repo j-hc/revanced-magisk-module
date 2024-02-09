@@ -71,13 +71,13 @@ jobs:
         run: pip install -r push-notify/requirements.txt
 
       - name: Create google-auth json
-        run: echo "${{ secrets.GOOGLE_AUTH_JSON }}" > google-services.json
+        run: echo "${{ secrets.GOOGLE_AUTH_JSON }}" | base64 -d > google-services.json
 
       - name: Run push notification script
         run: |
           release_tag="${{ inputs.release_tag }}"
           release_body=$(gh release view $release_tag --json body -q .body)
-          python3 push-notify/push_notification.py --title "New Release $release_tag" --body "$release_body" --api_url ${{ secrets.NOTIF_API_URL }} --bearer ${{ secrets.NOTIF_API_BEARER }}
+          python3 push-notify --title "New Release $release_tag" --body "$release_body" --api_url ${{ secrets.NOTIF_API_URL }} --bearer ${{ secrets.NOTIF_API_BEARER }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
