@@ -111,7 +111,7 @@ arch = "both"
 
 [Tasker]
 enabled = true
-apkmirror-dlurl = "https://www.apkmirror.com/apk/joaomgcd/tasker/"
+uptodown-dlurl = "https://tasker.en.uptodown.com/android"
 
 [Photomath]
 enabled = false
