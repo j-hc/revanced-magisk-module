@@ -1,5 +1,4 @@
 from config import Config
-import re
 import requests
 from markdown_to_telegraph import MarkdownToTelegraph
 
