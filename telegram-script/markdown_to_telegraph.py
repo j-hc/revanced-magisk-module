@@ -3,12 +3,12 @@ from gh_md_to_html import core_converter
 import re
 
 class MarkdownToTelegraph:
-    def __init__(self, short_name: str, author_name: str | None, author_url: str | None) -> None:
+    def __init__(self, short_name: str, author_name: str, author_url: str) -> None:
         self.short_name = short_name
         self.author_name = author_name
         self.author_url = author_url
         self.telegraph = Telegraph()
-        self.telegraph.create_account(short_name=self.short_name, author_name="Tester", author_url="https://t.me/hellot343")
+        self.telegraph.create_account(short_name=self.short_name, author_name=self.author_name, author_url=self.author_url)
     
     def filter_html_tags(self, html_string: str) -> str:
         # Replace h1 tags with h3 tags 

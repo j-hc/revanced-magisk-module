@@ -10,13 +10,6 @@ release = requests.get(Config.REVANCED_APKS_RELEASE_URL).json()
 telegraph = MarkdownToTelegraph("revanced_apks_web", "ReVanced APKs", "https://t.me/revanced_apks_web")
 
 
-def revanced_version_message():
-    version_message = "\n".join(re.findall(r"CLI:\s[a-zA-Z-.\s0-9:\/]+.jar", release["body"])) or ""
-    # Remove duplicate version message
-    version_message = "\n".join(list(dict.fromkeys(version_message.split("\n"))))
-    return version_message
-
-
 def generate_file_bullet(file_name, file_url):
     return f"🔗 [{file_name}]({file_url})"
 
