@@ -105,7 +105,9 @@ jobs:
           submodules: true
 
       - name: Generate ${{ matrix.id }} config
-        run: ./gen_sep_config.sh config.toml ${{ matrix.id }} sep_config.toml
+        run: |
+           ./gen_sep_config.sh config.toml ${{ matrix.id }} sep_config.toml
+           cat sep_config.toml
 
       - name: Build modules/APKs
         run: |
