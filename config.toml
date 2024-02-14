@@ -149,7 +149,7 @@ uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
 [Music-ReX]
 enabled = true
 app-name = "Music"
-version = "auto"
+version = "latest"
 patches-source = "YT-Advanced/ReX-patches"
 integrations-source = "YT-Advanced/ReX-integrations"
 rv-brand = "ReX"
@@ -160,7 +160,7 @@ arch = "both"
 [YouTube-ReX]
 enabled = true
 app-name = "YouTube"
-version = "auto"
+version = "latest"
 patches-source = "YT-Advanced/ReX-patches"
 integrations-source = "YT-Advanced/ReX-integrations"
 rv-brand = "ReX"
