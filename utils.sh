@@ -97,9 +97,10 @@ get_prebuilts() {
 		dl_if_dne ${TEMP_DIR}/aapt2 https://github.com/rendiix/termux-aapt/raw/d7d4b4a344cc52b94bcdab3500be244151261d8e/prebuilt-binary/${arch}/aapt2
 		chmod +x "${TEMP_DIR}/aapt2"
 	fi
-	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm
+	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/x86
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
+	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/x86/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-x86"
 
 	HTMLQ="${TEMP_DIR}/htmlq"
 	if [ ! -f "$HTMLQ" ]; then
@@ -432,15 +433,6 @@ build_rv() {
 	# 		fi
 	# 	fi
 	# fi
-
-	if [ "${args[riplib]}" = true ]; then
-		p_patcher_args+=("--rip-lib x86_64 --rip-lib x86")
-		if [ "$arch" = "arm64-v8a" ]; then
-			p_patcher_args+=("--rip-lib armeabi-v7a")
-		elif [ "$arch" = "arm-v7a" ]; then
-			p_patcher_args+=("--rip-lib arm64-v8a")
-		fi
-	fi
 	if [ "$mode_arg" = module ]; then
 		build_mode_arr=(module)
 	elif [ "$mode_arg" = apk ]; then
@@ -464,8 +456,18 @@ build_rv() {
 		else
 			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch_f}.apk"
 		fi
-		if [ "$build_mode" = module ] && [ "${args[riplib]}" = true ]; then
-			patcher_args+=("--unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a")
+		if [ "${args[riplib]}" = true ]; then
+			if [ "$build_mode" = module ]; then
+				patcher_args+=("--unsigned --rip-lib arm64-v8a --rip-lib armeabi-v7a")
+			else
+				patcher_args+=("--rip-lib x86_64 --rip-lib x86")
+				if [ "$arch" = "arm64-v8a" ]; then
+					patcher_args+=("--rip-lib armeabi-v7a")
+				elif [ "$arch" = "arm-v7a" ]; then
+					patcher_args+=("--rip-lib arm64-v8a")
+				fi
+
+			fi
 		fi
 		if [ ! -f "$patched_apk" ] || [ "$REBUILD" = true ]; then
 			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
