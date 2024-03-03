@@ -12,6 +12,9 @@ elif [ $ARCH = "arm64" ]; then
 elif [ $ARCH = "x86" ]; then
 	ARCH_LIB=x86
 	alias cmpr='$MODPATH/bin/x86/cmpr'
+elif [ $ARCH = "x64" ]; then
+	ARCH_LIB=x86_64
+	alias cmpr='$MODPATH/bin/x64/cmpr'
 else
 	abort "ERROR: unsupported arch: ${ARCH}"
 fi
