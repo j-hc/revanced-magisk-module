@@ -160,7 +160,7 @@ arch = "both"
 [YouTube-ReX]
 enabled = true
 app-name = "YouTube"
-version = "latest"
+version = "19.07.40"
 patches-source = "YT-Advanced/ReX-patches"
 integrations-source = "YT-Advanced/ReX-integrations"
 rv-brand = "ReX"
