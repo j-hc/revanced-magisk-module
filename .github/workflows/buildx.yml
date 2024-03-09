@@ -156,7 +156,7 @@ jobs:
         id: update_config
         run: |
           source utils.sh
-          PATCHES_SRC="YT-Advanced/ReX-patches"
+          PATCHES_SRC="revanced/revanced-patches"
           rv_patches_date=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'updated_at')
           rv_patches_date=$(sed '$d' <<< "$rv_patches_date")
           echo -e "\n$rv_patches_date" >> build.tmp
