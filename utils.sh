@@ -137,10 +137,13 @@ config_update() {
 		if [ "$enabled" = false ]; then continue; fi
 		PATCHES_SRC=$(toml_get "$t" patches-source) || PATCHES_SRC=$DEF_PATCHES_SRC
 		if [[ -v sources[$PATCHES_SRC] ]]; then
-			if [ "${sources[$PATCHES_SRC]}" = 1 ]; then echo "$t"; fi
+			if [ "${sources[$PATCHES_SRC]}" = 1 ]; then
+				conf+="$t"
+				conf+=$'\n'
+			fi
 		else
 			sources[$PATCHES_SRC]=0
-			if ! last_patches_url=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - 2>&1 | json_get 'browser_download_url' | grep 'jar'); then
+			if ! last_patches_url=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - 2>&1 | json_get 'browser_download_url' | grep -E '\.jar$'); then
 				abort oops
 			fi
 			last_patches=${last_patches_url##*/}
