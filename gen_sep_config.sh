@@ -1,39 +1,35 @@
 #!/bin/bash
 
-# Parse the TOML file
+# Check for correct number of arguments
+if [[ $# -ne 3 ]]; then
+    echo "Usage: $0 <config_file> <key_to_match> <output_file>"
+    exit 1
+fi
+
 config_file=$1
 key_to_match=$2
 output_file=$3
 
-# Function to extract table names
-extract_tables() {
-    awk -F '[][]' '/\[.*\]/{print $2}' "$config_file"
+# Function to extract the section based on the key
+extract_section() {
+    awk -v key="$key_to_match" '
+        BEGIN { print "[" key "]" }  # Print the key at the beginning
+        /^\[/ && tolower($1) == "[" tolower(key) "]" { in_section = 1; next }
+        /^\[/ { in_section = 0 }
+        in_section == 1
+    ' "$config_file"
 }
 
-# Function to extract content for each table and create separate files
-extract_content() {
-    while IFS= read -r table; do
-        # Remove leading/trailing whitespace and quotes
-        table=$(echo "$table" | sed 's/^ *//;s/ *$//;s/^"\|"$//g')
-        # if the table name is not equal to the key to match, skip
-        if [ "$table" != "$key_to_match" ]; then
-            continue
-        fi
-        # Create a file with the table name and write the content
-        awk -v table="$table" -v in_table=0 '/^\['"$table"'\]/{in_table=1; next} /^\[.*\]/{in_table=0} in_table && NF {print $1" = "$3}' "$config_file" > "$output_file"
-        # append [$table] to the first line of the file
-        sed -i "1s/^/[${table}]\n/" "$output_file"
+# Extract the desired section
+section_content=$(extract_section)
 
-        # add file prefix string to the file
-        sed -i "1s/^/# This file is generated from $config_file\n/" "$output_file"
-        # if file is generated, exit the loop
-        if [ -f "$output_file" ]; then
-            break
-        fi
-    done
-}
+# Check if the section was found
+if [[ -z "$section_content" ]]; then
+    echo "Key '$key_to_match' not found in the config file."
+    exit 1
+fi
 
-# Main script
-extract_tables | extract_content
+# Write the extracted section to the output file
+echo "$section_content" > "$output_file"
 
-echo "Separate TOML file created from $config_file for the key $key_to_match"
+echo "Section for '$key_to_match' written to $output_file"
