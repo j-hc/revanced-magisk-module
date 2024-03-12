@@ -47,7 +47,7 @@ uptodown-dlurl = "https://reddit-official-app.en.uptodown.com/android"
 [Messenger]
 enabled = true
 # apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
-uptodown-dlurl = "https://messenger.en.uptodown.com/android"
+uptodown-dlurl = "https://facebook-messenger.en.uptodown.com/android"
 # arch = "armeabi-v7a"
 
 [Facebook]
