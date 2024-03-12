@@ -38,6 +38,7 @@ version = "auto"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
 # uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
 # arch = "armeabi-v7a, arm64-v8a"
+included-patches = "'SIM spoof'"
 
 [Reddit]
 version = "auto"
