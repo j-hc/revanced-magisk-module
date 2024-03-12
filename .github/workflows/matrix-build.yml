@@ -40,9 +40,9 @@ jobs:
           gh release view --json body -q .body --repo revanced/revanced-patches >> release_notes.md
           echo -e "\n---\n" >> release_notes.md
           echo -e "# ReX Patches\n" >> release_notes.md
-          dateReX=$(date -u -d $(gh release view --json publishedAt -q .publishedAt --repo YT-Advanced/ReX-patches))
+          dateReX=$(date -u -d $(gh release view --json publishedAt -q .publishedAt --repo anddea/revanced-patches))
           echo -e "\n Published on $dateReX\n" >> release_notes.md
-          gh release view --json body -q .body --repo YT-Advanced/ReX-patches >> release_notes.md
+          gh release view --json body -q .body --repo anddea/revanced-patches >> release_notes.md
           echo -e "\n---\n" >> release_notes.md
           echo -e "\nUse [MicroG](https://github.com/inotia00/VancedMicroG/releases) for YouTube and Music" >> release_notes.md
           sed -i "1s/^/Release $version\n\n/" release_notes.md
@@ -56,8 +56,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          #- id: "YouTube-ReX"
-          #- id: "Music-ReX"
+          - id: "YouTube-ReX"
+          - id: "Music-ReX"
           - id: "YouTube"
           - id: "Music"
           - id: "Twitter"
