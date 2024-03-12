@@ -22,7 +22,7 @@ jobs:
             filename="build.md"
             /tmp/extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
             echo -e "\n\n" >> $filename
-            /tmp/extras.sh "YT-Advanced/ReX-integrations" "YT-Advanced/ReX-patches" "revanced/revanced-cli" >> $filename
+            /tmp/extras.sh "anddea/revanced-integrations" "anddea/revanced-patches" "revanced/revanced-cli" >> $filename
             git add $filename
             git commit -m "Bump version"
             git push
