@@ -1,4 +1,3 @@
-logging-to-file = true        # enables logging of every patch process to a seperate file
 enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
 
 # add 'enabled = false' for not patching a specific app or remove it from the config
@@ -18,25 +17,6 @@ build-mode = "both"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 arch = "both"
 
-[Music-Extended]
-app-name = "Music"
-patches-source = "inotia00/revanced-patches"
-integrations-source = "inotia00/revanced-integrations"
-cli-source = "inotia00/revanced-cli"
-rv-brand = "ReVanced Extended"
-build-mode = "both"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
-arch = "both"
-
-[YouTube-Extended]
-app-name = "YouTube"
-patches-source = "inotia00/revanced-patches"
-integrations-source = "inotia00/revanced-integrations"
-cli-source = "inotia00/revanced-cli"
-rv-brand = "ReVanced Extended"
-build-mode = "both"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
-
 [Twitter]
 build-mode = "apk"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
@@ -46,6 +26,7 @@ archive-dlurl = "https://archive.org/download/jhc-apks/apks/tv.twitch.android.ap
 
 [TikTok]
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
+included-patches = "'SIM spoof'"
 
 [Reddit]
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
@@ -62,3 +43,24 @@ uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 [IconPackStudio]
 enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"
+
+[Music-Extended]
+enabled = false
+app-name = "Music"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+build-mode = "both"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+arch = "both"
+
+[YouTube-Extended]
+enabled = false
+app-name = "YouTube"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+build-mode = "both"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
