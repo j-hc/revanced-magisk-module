@@ -1,0 +1,64 @@
+logging-to-file = true        # enables logging of every patch process to a seperate file
+enable-magisk-update = true   # set this to false if you do not want to receive updates for the module in magisk app
+
+# add 'enabled = false' for not patching a specific app or remove it from the config
+# see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
+
+# you can use rvmm-config-gen to generate a config
+
+[YouTube]
+build-mode = "both"
+excluded-patches = ""
+included-patches = ""
+version = "auto"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+
+[Music]
+build-mode = "both"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+arch = "both"
+
+[Music-Extended]
+app-name = "Music"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+build-mode = "both"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+arch = "both"
+
+[YouTube-Extended]
+app-name = "YouTube"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+build-mode = "both"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+
+[Twitter]
+build-mode = "apk"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
+
+[Twitch]
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/tv.twitch.android.app"
+
+[TikTok]
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
+
+[Reddit]
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
+
+[Messenger]
+enabled = false
+apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
+arch = "arm64-v8a"
+
+[Spotify]
+enabled = false
+uptodown-dlurl = "https://spotify.en.uptodown.com/android"
+
+[IconPackStudio]
+enabled = false
+apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"
