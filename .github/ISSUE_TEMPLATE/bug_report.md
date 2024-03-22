@@ -7,5 +7,6 @@ assignees: ''
 
 ---
 
-**DO NOT REPORT REVANCED BUGS IN THIS REPO**
+**DO NOT REPORT REVANCED STUFF IN THIS REPO**
+
 **Describe the bug of the rvmm builder or the modules**
