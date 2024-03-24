@@ -14,7 +14,7 @@ sleep 5
 
 err() {
 	[ ! -f $MODDIR/err ] && cp $MODDIR/module.prop $MODDIR/err
-	sed -i "s/^des.*/description=⚠️ Module is inactive: '${1}'/g" $MODDIR/module.prop
+	sed -i "s/^des.*/description=⚠️ Needs reflash: '${1}'/g" $MODDIR/module.prop
 }
 
 if [ $svcl = 0 ]; then
@@ -40,7 +40,7 @@ if [ $svcl = 0 ]; then
 			err "version mismatch (installed:${VERSION}, module:__PKGVER)"
 		fi
 	else
-		err "invalid installation"
+		err "zygote crashed"
 	fi
 else
 	err "app not installed"
