@@ -44,7 +44,7 @@ jobs:
           echo -e "\n Published on $dateReX\n" >> release_notes.md
           gh release view --json body -q .body --repo anddea/revanced-patches >> release_notes.md
           echo -e "\n---\n" >> release_notes.md
-          echo -e "\nUse [MicroG](https://github.com/inotia00/VancedMicroG/releases) for YouTube and Music" >> release_notes.md
+          echo -e "\nUse [MicroG](https://github.com/WSTxda/MicroG-RE/releases/latest) for YouTube and Music" >> release_notes.md
           sed -i "1s/^/Release $version\n\n/" release_notes.md
           gh release create "$version" --draft -t "$version" -F release_notes.md
         env:
