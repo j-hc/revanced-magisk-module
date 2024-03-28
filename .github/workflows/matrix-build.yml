@@ -56,8 +56,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - id: "YouTube-ReX"
-          - id: "Music-ReX"
+          - id: "YouTube-anddea"
+          - id: "Music-anddea"
           - id: "YouTube"
           - id: "Music"
           - id: "Twitter"
