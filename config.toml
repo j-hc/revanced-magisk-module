@@ -147,24 +147,24 @@ enabled = true
 version = "auto"
 uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
 
-[Music-ReX]
+[Music-anddea]
 enabled = true
 app-name = "Music"
 version = "latest"
 patches-source = "anddea/revanced-patches"
 integrations-source = "anddea/revanced-integrations"
-rv-brand = "ReX"
+rv-brand = "anddea"
 build-mode = "apk"
 uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
 arch = "both"
 
-[YouTube-ReX]
+[YouTube-anddea]
 enabled = true
 app-name = "YouTube"
 version = "latest"
 patches-source = "anddea/revanced-patches"
 integrations-source = "anddea/revanced-integrations"
-rv-brand = "ReX"
+rv-brand = "anddea"
 build-mode = "apk"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 
