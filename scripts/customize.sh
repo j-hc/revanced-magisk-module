@@ -1,5 +1,6 @@
 # shellcheck disable=SC2148,SC2086
 ui_print ""
+${MODPATH:?}
 
 if [ $ARCH = "arm" ]; then
 	#arm
@@ -20,11 +21,17 @@ else
 fi
 set_perm_recursive $MODPATH/bin 0 0 0755 0777
 
-su -M -c "grep __PKGNAME /proc/mounts" | while read -r line; do
+if su -M -c true >/dev/null 2>/dev/null; then
+	alias mm='su -M -c'
+else
+	alias mm='nsenter -t1 -m'
+fi
+
+mm grep __PKGNAME /proc/mounts | while read -r line; do
 	ui_print "* Un-mount"
 	mp=${line#* }
 	mp=${mp%% *}
-	su -M -c "umount -l ${mp%%\\*}"
+	mm umount -l ${mp%%\\*}
 done
 am force-stop __PKGNAME
 
@@ -55,7 +62,8 @@ if BASEPATH=$(pm path __PKGNAME); then
 		INS=false
 	fi
 fi
-if [ $INS = true ]; then
+
+install() {
 	if [ ! -f $MODPATH/__PKGNAME.apk ]; then
 		abort "ERROR: Stock __PKGNAME apk was not found"
 	fi
@@ -74,6 +82,11 @@ if [ $INS = true ]; then
 		abort "$op"
 	fi
 	if ! op=$(pm install-commit "$SES" 2>&1); then
+		if echo "$op" | grep INSTALL_FAILED_VERSION_DOWNGRADE; then
+			ui_print "* INSTALL_FAILED_VERSION_DOWNGRADE. Uninstalling..."
+			pm uninstall -k --user 0 __PKGNAME
+			return 1
+		fi
 		ui_print "ERROR: install-commit failed"
 		abort "$op"
 	fi
@@ -84,7 +97,15 @@ if [ $INS = true ]; then
 	else
 		abort "ERROR: install __PKGNAME manually and reflash the module"
 	fi
+}
+if [ $INS = true ]; then
+	if ! install; then
+		if ! install; then
+			abort
+		fi
+	fi
 fi
+
 BASEPATHLIB=${BASEPATH}/lib/${ARCH}
 if [ -z "$(ls -A1 ${BASEPATHLIB})" ]; then
 	ui_print "* Extracting native libs"
@@ -103,7 +124,7 @@ mkdir -p $NVBASE/rvhc
 RVPATH=$NVBASE/rvhc/${MODPATH##*/}.apk
 mv -f $MODPATH/base.apk $RVPATH
 
-if ! op=$(su -M -c "mount -o bind $RVPATH $BASEPATH/base.apk" 2>&1); then
+if ! op=$(mm mount -o bind $RVPATH $BASEPATH/base.apk 2>&1); then
 	ui_print "ERROR: Mount failed!"
 	ui_print "$op"
 fi
