@@ -59,14 +59,19 @@ jobs:
           cat build.md >> "$GITHUB_OUTPUT"
           echo "${DELIM}" >> "$GITHUB_OUTPUT"
           cp -f build.md build.tmp
-
+      
+      - name: Get Date
+        id: date
+        run: |
+          echo "DATE=$(date +%Y-%m-%d)" >> "$GITHUB_OUTPUT"    
+          
       - name: Upload modules to release
         uses: svenstaro/upload-release-action@v2
         with:
           body: ${{ steps.get_output.outputs.BUILD_LOG }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./build/*
-          release_name: ReVanced
+          release_name: v${{ steps.date.outputs.DATE }}
           tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           file_glob: true
           overwrite: true
