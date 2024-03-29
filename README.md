@@ -1,6 +1,8 @@
 #### ⚠️ Do not download modules from 3rd party sources like random websites you found on Google. There are many that uses my modules and impersonates ReVanced.
 
 # ReVanced Magisk Module
+[![CI](https://github.com/sarf2k4/revanced-magisk-module/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/sarf2k4/revanced-magisk-module/actions/workflows/ci.yml)
+
 Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases).
 
 Use [**zygisk-detach**](https://github.com/j-hc/zygisk-detach) to detach YouTube and YT Music from Play Store if you are using magisk modules. 
