@@ -5,34 +5,42 @@ enable-magisk-update = true   # set this to false if you do not want to receive 
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
 
 # you can use rvmm-config-gen to generate a config
-
-[YouTube]
+[YouTube-Extended]
+enabled = true
+app-name = "YouTube"
 build-mode = "both"
-excluded-patches = ""
-included-patches = ""
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+excluded-patches = "'Custom branding name YouTube' 'Custom branding icon YouTube'"
+included-patches = "'Add splash animation' 'Disable landscape mode' 'Enable music search'" 
 version = "auto"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
-
-[Music]
-build-mode = "both"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
-arch = "both"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube/"
+module-prop-name = "ytrvx-magisk"
 
 [Music-Extended]
-app-name = "Music"
+enabled = true
+app-name = "YT-Music"
+build-mode = "both"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 cli-source = "inotia00/revanced-cli"
 rv-brand = "ReVanced Extended"
-build-mode = "both"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+excluded-patches = "'Custom branding name YouTube Music' 'Custom branding icon YouTube Music'"
+included-patches = ""
+version = "auto"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+module-prop-name = "ytmusicrvx-magisk"
 arch = "both"
 
-[YouTube-Extended]
-app-name = "YouTube"
-patches-source = "inotia00/revanced-patches"
-integrations-source = "inotia00/revanced-integrations"
-cli-source = "inotia00/revanced-cli"
-rv-brand = "ReVanced Extended"
-build-mode = "both"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+[Twitter]
+enabled = false
+build-mode = "apk"
+merge-integrations = true
+apkmirror-dlurl = "https://www.apkmirror.com/apk/x-corp/twitter/"
+
+[Twitch]
+enabled = false
+build-mode = "apk"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
