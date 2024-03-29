@@ -201,7 +201,7 @@ jobs:
             echo "  \"microg\": {
                    \"version\": \"$1\",
                    \"versionCode\": $2,
-                   \"url\": \"https://github.com/inotia00/VancedMicroG/releases/latest/download/microg.apk\",
+                   \"url\": \"https://github.com/ReVanced/GmsCore/releases/download/v0.3.1.3.240913/app.revanced.android.gms-240913006-signed.apk\",
                    \"changelog\": \"- Updated libs and upstream to 2022/08/22\n- Removed some unused resources\n- App signature changed\"
                 }
           }"
@@ -227,7 +227,7 @@ jobs:
             UPDATE_YT_JSON=$(get_update_ms_json "$MSRV_VER" "$MSRV_VER_CODE" "$MSRV_DLURL" "$CHANGELOG_JSON")
             echo "$UPDATE_YT_JSON" >config-msrv.json
      
-            UPDATE_YT_JSON=$(get_update_mn_json "$RMRV_VER_NAME" "$RMRV_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmnrv.apk")
+            UPDATE_YT_JSON=$(get_update_mn_json "$RMRV_VER_NAME" "$RMRV_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmn.apk")
             echo "$UPDATE_YT_JSON" >config-mn.json
             UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE")
             echo "$UPDATE_YT_JSON" >config-micro.json
@@ -259,7 +259,7 @@ jobs:
             UPDATE_YT_JSON=$(get_update_ms_json "$MSRX_VER" "$MSRX_VER_CODE" "$MSRX_DLURL" "$CHANGELOG_JSON")
             echo "$UPDATE_YT_JSON" >config-msrx.json
      
-            UPDATE_YT_JSON=$(get_update_mn_json "$RMRX_VER_NAME" "$RMRX_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmnrx.apk")
+            UPDATE_YT_JSON=$(get_update_mn_json "$RMRX_VER_NAME" "$RMRX_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmn.apk")
             echo "$UPDATE_YT_JSON" >config-mn.json
             UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE")
             echo "$UPDATE_YT_JSON" >config-micro.json
