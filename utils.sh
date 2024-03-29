@@ -60,7 +60,7 @@ get_rv_prebuilts() {
 	if [ "$integrations_ver" ]; then rv_integrations_rel+="tags/${integrations_ver}"; else rv_integrations_rel+="latest"; fi
 	local rv_patches_rel="https://api.github.com/repos/${patches_src}/releases/"
 	if [ "$patches_ver" ]; then rv_patches_rel+="tags/${patches_ver}"; else rv_patches_rel+="latest"; fi
-	rv_cli_url=$(gh_req "$rv_cli_rel" - | json_get 'browser_download_url') || return 1
+	rv_cli_url=$(gh_req "$rv_cli_rel" - | json_get 'browser_download_url' | grep -E '\.jar$') || return 1
 	local rv_cli_jar="${cli_dir}/${rv_cli_url##*/}"
 	echo "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")  " >"$patches_dir/changelog.md"
 
