@@ -19,7 +19,7 @@ patches-source = "revanced/revanced-patches" # where to fetch patches bundle fro
 integrations-source = "revanced/revanced-integrations" # where to fetch integrations from. default: "revanced/revanced-integrations"
 cli-source = "j-hc/revanced-cli" # where to fetch cli from. default: "j-hc/revanced-cli"
 # options like cli-source can also set per app
-rv-brand = "ReVanced Extended" # rebrand from 'ReVanced' to something different. default: "ReVanced"
+rv-brand = "ReVanced" # rebrand from 'ReVanced' to something different. default: "ReVanced"
 
 patches-version = "v2.160.0" # locks the patches version. default: latest available
 integrations-version = "v0.95.0" # locks the integrations version. default: latest available
