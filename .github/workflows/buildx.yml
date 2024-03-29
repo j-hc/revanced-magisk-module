@@ -80,7 +80,7 @@ jobs:
       - name: Download Manager and MicroG
         id: config_mnmg
         run: |
-          wget -q https://vuongvan.github.io/VancedManager/rvmnrv.apk -O rvmnrv.apk
+          wget -q https://vuongvan.github.io/VancedManager/rvmn.apk -O rvmnrv.apk
           rm_op=$(find . -maxdepth 1 -name "rvmnrv.apk" -printf '%P')
           ver_code=$(aapt dump badging $rm_op | sed -n "s/.*versionName='\([^']*\).*/\1/p")
           echo "RMRV_VER_NAME_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
