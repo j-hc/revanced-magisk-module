@@ -12,7 +12,6 @@ OS=$(uname -o)
 
 SERVICE_SH=$(cat scripts/service.sh)
 CUSTOMIZE_SH=$(cat scripts/customize.sh)
-UNINSTALL_SH=$(cat scripts/uninstall.sh)
 
 # -------------------- json/toml --------------------
 json_get() { grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/'; }
@@ -404,25 +403,6 @@ build_rv() {
 		p_patcher_args=("${p_patcher_args[@]//-[ei] ${microg_patch}/}")
 	fi
 
-	local stock_bundle_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}-bundle.apk"
-	local is_bundle=false
-	# if [ "$mode_arg" = module ] || [ "$mode_arg" = both ]; then
-	# 	if [ -f "$stock_bundle_apk" ]; then
-	# 		is_bundle=true
-	# 	elif [ "$dl_from" = apkmirror ]; then
-	# 		pr "Downloading '${table}' bundle from APKMirror"
-	# 		if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_bundle_apk" BUNDLE "" ""; then
-	# 			if (($(stat -c%s "$stock_apk") - $(stat -c%s "$stock_bundle_apk") > 10000000)); then
-	# 				pr "'${table}' bundle was downloaded successfully and will be used for the module"
-	# 				is_bundle=true
-	# 			else
-	# 				pr "'${table}' bundle was downloaded but will not be used"
-	# 			fi
-	# 		else
-	# 			pr "'${table}' bundle was not found"
-	# 		fi
-	# 	fi
-	# fi
 	if [ "$mode_arg" = module ]; then
 		build_mode_arr=(module)
 	elif [ "$mode_arg" = apk ]; then
@@ -476,20 +456,8 @@ build_rv() {
 		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
 		local upj="${table,,}-update.json"
 
-		local isbndl extrct stock_apk_module
-		if [ $is_bundle = true ]; then
-			isbndl=":"
-			extrct="base.apk"
-			stock_apk_module=$stock_bundle_apk
-		else
-			isbndl="! :"
-			extrct="${pkg_name}.apk"
-			stock_apk_module=$stock_apk
-		fi
-
-		uninstall_sh "$pkg_name" "$isbndl" "$base_template"
 		service_sh "$pkg_name" "$version" "$base_template"
-		customize_sh "$pkg_name" "$version" "$arch" "$extrct" "$base_template"
+		customize_sh "$pkg_name" "$version" "$arch" "$base_template"
 		module_prop \
 			"${args[module_prop_name]}" \
 			"${app_name} ${args[rv_brand]}" \
@@ -502,7 +470,7 @@ build_rv() {
 		if [ ! -f "$module_output" ] || [ "$REBUILD" = true ]; then
 			pr "Packing module ${table}"
 			cp -f "$patched_apk" "${base_template}/base.apk"
-			if [ "${args[include_stock]}" = true ]; then cp -f "$stock_apk_module" "${base_template}/${pkg_name}.apk"; fi
+			if [ "${args[include_stock]}" = true ]; then cp -f "$stock_apk" "${base_template}/${pkg_name}.apk"; fi
 			pushd >/dev/null "$base_template" || abort "Module template dir not found"
 			zip -"$COMPRESSION_LEVEL" -FSqr "../../${BUILD_DIR}/${module_output}" .
 			popd >/dev/null || :
@@ -514,10 +482,6 @@ build_rv() {
 list_args() { tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/\([^"]\)"\([^"]\)/\1'\''\2/g' | grep -v '^$' || :; }
 join_args() { list_args "$1" | sed "s/^/${2} /" | paste -sd " " - || :; }
 
-uninstall_sh() {
-	local s="${UNINSTALL_SH//__PKGNAME/$1}"
-	echo "${s//__ISBNDL/$2}" >"${3}/uninstall.sh"
-}
 customize_sh() {
 	local s="${CUSTOMIZE_SH//__PKGNAME/$1}"
 	s="${s//__EXTRCT/$4}"
