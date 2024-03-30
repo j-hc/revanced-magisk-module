@@ -10,9 +10,6 @@ NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 REBUILD=${REBUILD:-false}
 OS=$(uname -o)
 
-SERVICE_SH=$(cat scripts/service.sh)
-CUSTOMIZE_SH=$(cat scripts/customize.sh)
-
 # -------------------- json/toml --------------------
 json_get() { grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/'; }
 toml_prep() { __TOML__=$(tr -d '\t\r' <<<"$1" | tr "'" '"' | grep -o '^[^#]*' | grep -v '^$' | sed -r 's/(\".*\")|\s*/\1/g; 1i []'); }
@@ -468,8 +465,7 @@ build_rv() {
 		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
 		local upj="${table,,}-update.json"
 
-		service_sh "$pkg_name" "$version" "$base_template"
-		customize_sh "$pkg_name" "$version" "$arch" "$base_template"
+		module_config "$base_template" "$pkg_name" "$version" "$arch"
 		module_prop \
 			"${args[module_prop_name]}" \
 			"${app_name} ${args[rv_brand]}" \
@@ -494,20 +490,16 @@ build_rv() {
 list_args() { tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/\([^"]\)"\([^"]\)/\1'\''\2/g' | grep -v '^$' || :; }
 join_args() { list_args "$1" | sed "s/^/${2} /" | paste -sd " " - || :; }
 
-customize_sh() {
-	local s="${CUSTOMIZE_SH//__PKGNAME/$1}"
-	s="${s//__EXTRCT/$4}"
-	# shellcheck disable=SC2001
-	if [ "$3" = "arm64-v8a" ]; then
-		s=$(sed 's/#arm$/abort "ERROR: Wrong arch\nYour device: arm\nModule: arm64"/g' <<<"$s")
-	elif [ "$3" = "arm-v7a" ]; then
-		s=$(sed 's/#arm64$/abort "ERROR: Wrong arch\nYour device: arm64\nModule: arm"/g' <<<"$s")
+module_config() {
+	local ma=""
+	if [ "$4" = "arm64-v8a" ]; then
+		ma="arm64"
+	elif [ "$4" = "arm-v7a" ]; then
+		ma="arm"
 	fi
-	echo "${s//__PKGVER/$2}" >"${5}/customize.sh"
-}
-service_sh() {
-	local s="${SERVICE_SH//__PKGNAME/$1}"
-	echo "${s//__PKGVER/$2}" >"${3}/service.sh"
+	echo "PKG_NAME=$2
+PKG_VER=$3
+MODULE_ARCH=$ma" >"$1/config"
 }
 module_prop() {
 	echo "id=${1}
