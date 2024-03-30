@@ -325,6 +325,15 @@ patch_apk() {
 	[ -f "$patched_apk" ]
 }
 
+check_sig() {
+	local file=$1 pkg_name=$2
+	local sig
+	if grep -q "$pkg_name" sig.txt; then
+		sig=$(java -jar "$APKSIGNER" verify --print-certs "$file" | grep ^Signer | grep SHA-256 | tail -1 | awk '{print $NF}')
+		grep -qFx "$sig $pkg_name" sig.txt
+	fi
+}
+
 build_rv() {
 	eval "declare -A args=${1#*=}"
 	local version build_mode_arr pkg_name
@@ -392,6 +401,9 @@ build_rv() {
 			break
 		done
 		if [ ! -f "$stock_apk" ]; then return 0; fi
+	fi
+	if ! check_sig "$stock_apk" "$pkg_name"; then
+		abort "apk signature mismatch '$stock_apk'"
 	fi
 	log "${table}: ${version}"
 
