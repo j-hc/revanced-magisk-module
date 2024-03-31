@@ -92,10 +92,10 @@ get_prebuilts() {
 	if [ "$OS" = Android ]; then
 		local arch
 		if [ "$(uname -m)" = aarch64 ]; then arch=arm64; else arch=arm; fi
-		HTMLQ="${BIN_DIR}/htmlq-${arch}"
-		AAPT2="${BIN_DIR}/aapt2-${arch}"
+		HTMLQ="${BIN_DIR}/htmlq/htmlq-${arch}"
+		AAPT2="${BIN_DIR}/aapt2/aapt2-${arch}"
 	else
-		HTMLQ="${BIN_DIR}/htmlq-x86_64"
+		HTMLQ="${BIN_DIR}/htmlq/htmlq-x86_64"
 	fi
 	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/x86 ${MODULE_TEMPLATE_DIR}/bin/x64
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
