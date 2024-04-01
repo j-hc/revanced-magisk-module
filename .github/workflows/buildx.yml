@@ -80,6 +80,9 @@ jobs:
       - name: Download Manager and MicroG
         id: config_mnmg
         run: |
+          source utils.sh
+          rv_gms_rel="https://api.github.com/repos/ReVanced/GmsCore/releases/latest"
+          rv_gms_url=$(gh_req "$rv_gms_rel" - | json_get 'browser_download_url' | grep -E '\.apk$') || return 1
           wget -q https://vuongvan.github.io/VancedManager/rvmn.apk -O rvmnrv.apk
           rm_op=$(find . -maxdepth 1 -name "rvmnrv.apk" -printf '%P')
           ver_code=$(aapt dump badging $rm_op | sed -n "s/.*versionName='\([^']*\).*/\1/p")
@@ -94,7 +97,9 @@ jobs:
           ver_code=$(aapt dump badging $rm_op | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
           echo "RMRX_VER_CODE_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
 
-          wget -q https://github.com/ReVanced/GmsCore/releases/download/v0.3.1.3.240913/app.revanced.android.gms-240913006-signed.apk -O microg.apk
+          wget -q $rv_gms_url -O microg.apk
+          echo "MG_URL_OUTPUT=$rv_gms_url" >> $GITHUB_OUTPUT
+          echo $rv_gms_url
           mg_op=$(find . -maxdepth 1 -name "microg.apk" -printf '%P')
           ver_code=$(aapt dump badging $mg_op | sed -n "s/.*versionName='\([^']*\).*/\1/p")
           echo $ver_code
