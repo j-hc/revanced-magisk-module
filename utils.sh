@@ -2,16 +2,13 @@
 
 MODULE_TEMPLATE_DIR="revanced-magisk"
 TEMP_DIR="temp"
+BIN_DIR="bin"
 BUILD_DIR="build"
 
 if [ "${GITHUB_TOKEN:-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 REBUILD=${REBUILD:-false}
 OS=$(uname -o)
-
-SERVICE_SH=$(cat scripts/service.sh)
-CUSTOMIZE_SH=$(cat scripts/customize.sh)
-UNINSTALL_SH=$(cat scripts/uninstall.sh)
 
 # -------------------- json/toml --------------------
 json_get() { grep -o "\"${1}\":[^\"]*\"[^\"]*\"" | sed -E 's/".*".*"(.*)"/\1/'; }
@@ -60,7 +57,7 @@ get_rv_prebuilts() {
 	if [ "$integrations_ver" ]; then rv_integrations_rel+="tags/${integrations_ver}"; else rv_integrations_rel+="latest"; fi
 	local rv_patches_rel="https://api.github.com/repos/${patches_src}/releases/"
 	if [ "$patches_ver" ]; then rv_patches_rel+="tags/${patches_ver}"; else rv_patches_rel+="latest"; fi
-	rv_cli_url=$(gh_req "$rv_cli_rel" - | json_get 'browser_download_url') || return 1
+	rv_cli_url=$(gh_req "$rv_cli_rel" - | json_get 'browser_download_url' | grep -E '\.jar$') || return 1
 	local rv_cli_jar="${cli_dir}/${rv_cli_url##*/}"
 	echo "CLI: $(cut -d/ -f4 <<<"$rv_cli_url")/$(cut -d/ -f9 <<<"$rv_cli_url")  " >"$patches_dir/changelog.md"
 
@@ -91,35 +88,20 @@ get_rv_prebuilts() {
 }
 
 get_prebuilts() {
+	APKSIGNER="${BIN_DIR}/apksigner.jar"
 	if [ "$OS" = Android ]; then
 		local arch
 		if [ "$(uname -m)" = aarch64 ]; then arch=arm64; else arch=arm; fi
-		dl_if_dne ${TEMP_DIR}/aapt2 https://github.com/rendiix/termux-aapt/raw/d7d4b4a344cc52b94bcdab3500be244151261d8e/prebuilt-binary/${arch}/aapt2
-		chmod +x "${TEMP_DIR}/aapt2"
+		HTMLQ="${BIN_DIR}/htmlq/htmlq-${arch}"
+		AAPT2="${BIN_DIR}/aapt2/aapt2-${arch}"
+	else
+		HTMLQ="${BIN_DIR}/htmlq/htmlq-x86_64"
 	fi
 	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/x86 ${MODULE_TEMPLATE_DIR}/bin/x64
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/x86/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-x86"
 	dl_if_dne "${MODULE_TEMPLATE_DIR}/bin/x64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-x86_64"
-
-	HTMLQ="${TEMP_DIR}/htmlq"
-	if [ ! -f "$HTMLQ" ]; then
-		if [ "$OS" = Android ]; then
-			if [ "$arch" = arm64 ]; then arch=arm64-v8a; else arch=armeabi-v7a; fi
-			dl_if_dne ${TEMP_DIR}/htmlq https://github.com/j-hc/htmlq-ndk/releases/latest/download/htmlq-${arch}
-			chmod +x $HTMLQ
-		else
-			if [ "${DRYRUN:-}" ]; then
-				: >"$HTMLQ"
-			else
-				req "https://github.com/mgdm/htmlq/releases/latest/download/htmlq-x86_64-linux.tar.gz" "${TEMP_DIR}/htmlq.tar.gz"
-				tar -xf "${TEMP_DIR}/htmlq.tar.gz" -C "$TEMP_DIR"
-				rm "${TEMP_DIR}/htmlq.tar.gz"
-			fi
-		fi
-
-	fi
 }
 
 config_update() {
@@ -330,7 +312,7 @@ patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3 rv_cli_jar=$4 rv_patches_jar=$5
 	local cmd="java -jar $rv_cli_jar patch $stock_input -p -o $patched_apk -b $rv_patches_jar \
 --keystore=ks.keystore --keystore-entry-password=123456789 --keystore-password=123456789 --signer=jhc --alias=jhc $patcher_args --options=options.json"
-	if [ "$OS" = Android ]; then cmd+=" --custom-aapt2-binary=${TEMP_DIR}/aapt2"; fi
+	if [ "$OS" = Android ]; then cmd+=" --custom-aapt2-binary=${AAPT2}"; fi
 	pr "$cmd"
 	if [ "${DRYRUN:-}" = true ]; then
 		cp -f "$stock_input" "$patched_apk"
@@ -338,6 +320,15 @@ patch_apk() {
 		eval "$cmd"
 	fi
 	[ -f "$patched_apk" ]
+}
+
+check_sig() {
+	local file=$1 pkg_name=$2
+	local sig
+	if grep -q "$pkg_name" sig.txt; then
+		sig=$(java -jar "$APKSIGNER" verify --print-certs "$file" | grep ^Signer | grep SHA-256 | tail -1 | awk '{print $NF}')
+		grep -qFx "$sig $pkg_name" sig.txt
+	fi
 }
 
 build_rv() {
@@ -408,6 +399,9 @@ build_rv() {
 		done
 		if [ ! -f "$stock_apk" ]; then return 0; fi
 	fi
+	if ! check_sig "$stock_apk" "$pkg_name"; then
+		abort "apk signature mismatch '$stock_apk'"
+	fi
 	log "${table}: ${version}"
 
 	p_patcher_args+=("-m ${args[integ]}")
@@ -418,25 +412,6 @@ build_rv() {
 		p_patcher_args=("${p_patcher_args[@]//-[ei] ${microg_patch}/}")
 	fi
 
-	local stock_bundle_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}-bundle.apk"
-	local is_bundle=false
-	# if [ "$mode_arg" = module ] || [ "$mode_arg" = both ]; then
-	# 	if [ -f "$stock_bundle_apk" ]; then
-	# 		is_bundle=true
-	# 	elif [ "$dl_from" = apkmirror ]; then
-	# 		pr "Downloading '${table}' bundle from APKMirror"
-	# 		if dl_apkmirror "${args[apkmirror_dlurl]}" "$version" "$stock_bundle_apk" BUNDLE "" ""; then
-	# 			if (($(stat -c%s "$stock_apk") - $(stat -c%s "$stock_bundle_apk") > 10000000)); then
-	# 				pr "'${table}' bundle was downloaded successfully and will be used for the module"
-	# 				is_bundle=true
-	# 			else
-	# 				pr "'${table}' bundle was downloaded but will not be used"
-	# 			fi
-	# 		else
-	# 			pr "'${table}' bundle was not found"
-	# 		fi
-	# 	fi
-	# fi
 	if [ "$mode_arg" = module ]; then
 		build_mode_arr=(module)
 	elif [ "$mode_arg" = apk ]; then
@@ -490,20 +465,7 @@ build_rv() {
 		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
 		local upj="${table,,}-update.json"
 
-		local isbndl extrct stock_apk_module
-		if [ $is_bundle = true ]; then
-			isbndl=":"
-			extrct="base.apk"
-			stock_apk_module=$stock_bundle_apk
-		else
-			isbndl="! :"
-			extrct="${pkg_name}.apk"
-			stock_apk_module=$stock_apk
-		fi
-
-		uninstall_sh "$pkg_name" "$isbndl" "$base_template"
-		service_sh "$pkg_name" "$version" "$base_template"
-		customize_sh "$pkg_name" "$version" "$arch" "$extrct" "$base_template"
+		module_config "$base_template" "$pkg_name" "$version" "$arch"
 		module_prop \
 			"${args[module_prop_name]}" \
 			"${app_name} ${args[rv_brand]}" \
@@ -516,7 +478,7 @@ build_rv() {
 		if [ ! -f "$module_output" ] || [ "$REBUILD" = true ]; then
 			pr "Packing module ${table}"
 			cp -f "$patched_apk" "${base_template}/base.apk"
-			if [ "${args[include_stock]}" = true ]; then cp -f "$stock_apk_module" "${base_template}/${pkg_name}.apk"; fi
+			if [ "${args[include_stock]}" = true ]; then cp -f "$stock_apk" "${base_template}/${pkg_name}.apk"; fi
 			pushd >/dev/null "$base_template" || abort "Module template dir not found"
 			zip -"$COMPRESSION_LEVEL" -FSqr "../../${BUILD_DIR}/${module_output}" .
 			popd >/dev/null || :
@@ -528,24 +490,16 @@ build_rv() {
 list_args() { tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/\([^"]\)"\([^"]\)/\1'\''\2/g' | grep -v '^$' || :; }
 join_args() { list_args "$1" | sed "s/^/${2} /" | paste -sd " " - || :; }
 
-uninstall_sh() {
-	local s="${UNINSTALL_SH//__PKGNAME/$1}"
-	echo "${s//__ISBNDL/$2}" >"${3}/uninstall.sh"
-}
-customize_sh() {
-	local s="${CUSTOMIZE_SH//__PKGNAME/$1}"
-	s="${s//__EXTRCT/$4}"
-	# shellcheck disable=SC2001
-	if [ "$3" = "arm64-v8a" ]; then
-		s=$(sed 's/#arm$/abort "ERROR: Wrong arch\nYour device: arm\nModule: arm64"/g' <<<"$s")
-	elif [ "$3" = "arm-v7a" ]; then
-		s=$(sed 's/#arm64$/abort "ERROR: Wrong arch\nYour device: arm64\nModule: arm"/g' <<<"$s")
+module_config() {
+	local ma=""
+	if [ "$4" = "arm64-v8a" ]; then
+		ma="arm64"
+	elif [ "$4" = "arm-v7a" ]; then
+		ma="arm"
 	fi
-	echo "${s//__PKGVER/$2}" >"${5}/customize.sh"
-}
-service_sh() {
-	local s="${SERVICE_SH//__PKGNAME/$1}"
-	echo "${s//__PKGVER/$2}" >"${3}/service.sh"
+	echo "PKG_NAME=$2
+PKG_VER=$3
+MODULE_ARCH=$ma" >"$1/config"
 }
 module_prop() {
 	echo "id=${1}
