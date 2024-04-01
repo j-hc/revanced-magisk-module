@@ -163,6 +163,7 @@ enabled = true
 app-name = "YouTube"
 version = "auto"
 patches-source = "anddea/revanced-patches"
+patches-version = "v2.223.0-dev.21"
 integrations-source = "anddea/revanced-integrations"
 rv-brand = "anddea"
 build-mode = "apk"
