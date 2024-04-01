@@ -96,7 +96,7 @@ jobs:
           echo "RMRX_VER_NAME_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
           ver_code=$(aapt dump badging $rm_op | sed -n "s/.*versionCode='\([^']*\).*/\1/p")
           echo "RMRX_VER_CODE_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
-
+         
           wget -q $rv_gms_url -O microg.apk
           echo "MG_URL_OUTPUT=$rv_gms_url" >> $GITHUB_OUTPUT
           echo $rv_gms_url
@@ -206,7 +206,7 @@ jobs:
             echo "  \"microg\": {
                    \"version\": \"$1\",
                    \"versionCode\": $2,
-                   \"url\": \"https://github.com/ReVanced/GmsCore/releases/download/v0.3.1.3.240913/app.revanced.android.gms-240913006-signed.apk\",
+                   \"url\": \"$3\",
                    \"changelog\": \"- Updated libs and upstream to 2022/08/22\n- Removed some unused resources\n- App signature changed\"
                 }
           }"
@@ -223,6 +223,7 @@ jobs:
  
             MG_VER_NAME=${{ steps.config_mnmg.outputs.MG_VER_NAME_OUTPUT }}
             MG_VER_CODE=${{ steps.config_mnmg.outputs.MG_VER_CODE_OUTPUT }}
+            MG_URL=${{ steps.config_mnmg.outputs.MG_URL_OUTPUT }}
             
             YTRV_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.YTRV_OUTPUT }}"
             MSRV_DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE}}/${{ steps.get_output.outputs.MSRV_OUTPUT }}"
@@ -266,7 +267,7 @@ jobs:
      
             UPDATE_YT_JSON=$(get_update_mn_json "$RMRX_VER_NAME" "$RMRX_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmn.apk")
             echo "$UPDATE_YT_JSON" >config-mn.json
-            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE")
+            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE" "MG_URL")
             echo "$UPDATE_YT_JSON" >config-micro.json
             
             if [ -n "${{ steps.get_output.outputs.MSRX_OUTPUT }}" ]; then
