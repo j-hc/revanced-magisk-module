@@ -46,7 +46,7 @@ def fetch_microg():
     )
     microg_file = microg_file["browser_download_url"] or ""
 
-    if "microg" in microg_file:
+    if "http" in microg_file:
         return {"microg_name": microg_name, "microg_file": microg_file}
     else:
         # to avoid error returning empty string
