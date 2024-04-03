@@ -1,9 +1,43 @@
-- uses: dev-drprasad/delete-older-releases@v0.3.3
-  with:
-    repo: <owner>/<repoName> # defaults to current repo
-    keep_latest: 3
-    keep_min_download_counts: 1 # Optional parameters
-    delete_expired_data: 10 # Optional parameters
-    delete_tag_pattern: beta # defaults to ""
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+name: 'Delete Old Releases'
+description: 'Delete old releases automatically'
+branding:
+  icon: 'trash-2'
+  color: 'red'
+inputs:
+  token:
+    description: 'Github token'
+    required: true
+  keep-count:
+    description: 'Number of releases to keep'
+    required: false
+    default: 3
+  keep-old-minor-releases:
+    description: 'Keep the latest release of each older minor versions.'
+    required: true
+  keep-old-minor-releases-by:
+    description: 'Which semver level should we use to keep old release? Can be: major, minor, patch'
+    required: false
+    default: 'minor'
+  keep-old-minor-releases-count:
+    description: 'Number of old releases in one minor version to keep.'
+    required: false
+    default: 1
+  include-prerelease:
+    description: 'Always include prerelease versions'
+    required: false
+    default: false
+  semver-loose:
+    description: 'Interpret versions and ranges loosely'
+    required: false
+    default: false
+  remove-tags:
+    description: 'Also remove the tags associated with the removed releases.'
+    required: false
+    default: false
+  dry-run:
+    description: "Doesn't delete anything. Only a test run."
+    required: false
+    default: false
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
