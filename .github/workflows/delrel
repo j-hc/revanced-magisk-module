@@ -1,0 +1,9 @@
+- uses: dev-drprasad/delete-older-releases@v0.3.3
+  with:
+    repo: <owner>/<repoName> # defaults to current repo
+    keep_latest: 3
+    keep_min_download_counts: 1 # Optional parameters
+    delete_expired_data: 10 # Optional parameters
+    delete_tag_pattern: beta # defaults to ""
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
