@@ -29,11 +29,11 @@ excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube M
 #cli-source = "Revanced/revanced-cli"
 
 [YouTube-RX]
-enabled = false
+enabled = true
 app-name = "YouTube"
 patches-source = "YT-Advanced/ReX-patches"
 integrations-source = "YT-Advanced/ReX-integrations"
-cli-source = "inotia00/revanced-cli"
+#cli-source = "inotia00/revanced-cli"
 rv-brand = "RX"
 build-mode = "apk"
 #archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
@@ -45,11 +45,11 @@ version="19.02.39"
 
 
 [Music-RX]
-enabled = false
+enabled = true
 app-name = "Music"
 patches-source = "YT-Advanced/ReX-patches"
 integrations-source = "YT-Advanced/ReX-integrations"
-cli-source = "inotia00/revanced-cli"
+#cli-source = "inotia00/revanced-cli"
 rv-brand = "RX"
 build-mode = "apk"
 #archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
