@@ -99,7 +99,7 @@ jobs:
          
           wget $rv_gms_url -O microg.apk
           echo "MG_URL_OUTPUT=$rv_gms_url" >> $GITHUB_OUTPUT
-          echo $rv_gms_url
+          #echo $rv_gms_url
           mg_op=$(find . -maxdepth 1 -name "microg.apk" -printf '%P')
           ver_code=$(aapt dump badging $mg_op | sed -n "s/.*versionName='\([^']*\).*/\1/p")
           echo $ver_code
