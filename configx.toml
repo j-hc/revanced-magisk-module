@@ -17,7 +17,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 
 
 [Music-RV]
-enabled = false
+enabled = true
 app-name = "Music"
 rv-brand = "RV"
 build-mode = "apk"
@@ -45,7 +45,7 @@ version="19.02.39"
 
 
 [Music-RX]
-enabled = true
+enabled = false
 app-name = "Music"
 patches-source = "YT-Advanced/ReX-patches"
 integrations-source = "YT-Advanced/ReX-integrations"
