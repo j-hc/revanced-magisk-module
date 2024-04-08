@@ -98,10 +98,11 @@ jobs:
           echo "RMRX_VER_CODE_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
           
           #rv_gms_url="https://github.com/ReVanced/GmsCore/releases/download/v0.3.1.4.240913/app.revanced.android.gms-240913008-signed.apk"
+          rv_gms_url=$(echo "$rv_gms_url" | sed '$d')
           wget $rv_gms_url -O microg.apk
           #curl -o microg.apk $rv_gms_url
           echo "MG_URL_OUTPUT=$rv_gms_url" >> $GITHUB_OUTPUT
-          #echo $rv_gms_url
+          echo $rv_gms_url
           mg_op=$(find . -maxdepth 1 -name "microg.apk" -printf '%P')
           ver_code=$(aapt dump badging $mg_op | sed -n "s/.*versionName='\([^']*\).*/\1/p")
           echo $ver_code
