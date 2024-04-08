@@ -98,7 +98,7 @@ jobs:
           echo "RMRX_VER_CODE_OUTPUT=$ver_code"  >> $GITHUB_OUTPUT
           
           #rv_gms_url="https://github.com/ReVanced/GmsCore/releases/download/v0.3.1.4.240913/app.revanced.android.gms-240913008-signed.apk"
-          rv_gms_url=$(echo "$rv_gms_url" | sed '$d')
+          rv_gms_url=$(echo "$rv_gms_url" | sed '1d')
           wget $rv_gms_url -O microg.apk
           #curl -o microg.apk $rv_gms_url
           echo "MG_URL_OUTPUT=$rv_gms_url" >> $GITHUB_OUTPUT
@@ -166,7 +166,7 @@ jobs:
           source utils.sh
           PATCHES_SRC="revanced/revanced-patches"
           rv_patches_date=$(gh_req https://api.github.com/repos/${PATCHES_SRC}/releases/latest - | json_get 'updated_at')
-          rv_patches_date=$(sed '$d' <<< "$rv_patches_date")
+          rv_patches_date=$(echo "$rv_patches_date" | sed '1d')
           echo -e "\n$rv_patches_date" >> build.tmp
           git checkout -f update || git switch --discard-changes --orphan update
           
