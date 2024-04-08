@@ -40,7 +40,7 @@ build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 excluded-patches = "'Custom package name' 'Return YouTube Dislike' 'Custom branding heading' 'Custom branding icon YouTube'"
 included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
-version="19.02.39"
+#version="19.02.39"
 #cli-version = "v4.1.1"
 
 
@@ -55,7 +55,7 @@ build-mode = "apk"
 #archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
 arch = "arm64-v8a"
-version="6.33.52"
+#version="6.33.52"
 excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube Music' 'Custom package name' 'Return YouTube Dislike'"
 
 [YouTube-RVX]
