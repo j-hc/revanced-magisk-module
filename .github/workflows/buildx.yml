@@ -82,7 +82,7 @@ jobs:
         run: |
           source utils.sh
           rv_gms_rel="https://api.github.com/repos/ReVanced/GmsCore/releases/latest"
-          rv_gms_url=$(gh_req "$rv_gms_rel" - | json_get 'browser_download_url' | grep -E '\.apk$' | ls -l | head -1) || return 1
+          rv_gms_url=$(gh_req "$rv_gms_rel" - | json_get 'browser_download_url' | grep -E '\.apk$') || return 1
           wget -q https://vuongvan.github.io/VancedManager/rvmn.apk -O rvmnrv.apk
           rm_op=$(find . -maxdepth 1 -name "rvmnrv.apk" -printf '%P')
           ver_code=$(aapt dump badging $rm_op | sed -n "s/.*versionName='\([^']*\).*/\1/p")
