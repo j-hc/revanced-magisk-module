@@ -105,7 +105,7 @@ jobs:
           cp -f microg.apk ./build/microg.apk
           #curl -o microg.apk $rv_gms_url
           rv_gms_url="https://github.com/vuongvan/revanced-magisk-module/releases/latest/download/microg.apk" 
-          echo "MG_URL_OUTPUT=$rv_gms_url" >> $GITHUB_OUTPUT
+          #echo "MG_URL_OUTPUT=$rv_gms_url" >> $GITHUB_OUTPUT
           echo $rv_gms_url
           mg_op=$(find . -maxdepth 1 -name "microg.apk" -printf '%P')
           ver_code=$(aapt dump badging $mg_op | sed -n "s/.*versionName='\([^']*\).*/\1/p")
@@ -274,7 +274,7 @@ jobs:
      
             UPDATE_YT_JSON=$(get_update_mn_json "$RMRX_VER_NAME" "$RMRX_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmn.apk")
             echo "$UPDATE_YT_JSON" >config-mn.json
-            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE" "MG_URL")
+            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE" "$MG_URL")
             echo "$UPDATE_YT_JSON" >config-micro.json
             
             if [ -n "${{ steps.get_output.outputs.MSRX_OUTPUT }}" ]; then
