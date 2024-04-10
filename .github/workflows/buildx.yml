@@ -1,5 +1,7 @@
 name: Build Modules X
 on:
+  push:
+  
   workflow_call:
     inputs:
       from_ci:
