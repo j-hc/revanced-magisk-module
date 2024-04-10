@@ -242,7 +242,7 @@ jobs:
      
             UPDATE_YT_JSON=$(get_update_mn_json "$RMRV_VER_NAME" "$RMRV_VER_CODE" "https://github.com/vuongvan/VancedManager/raw/update/rvmn.apk")
             echo "$UPDATE_YT_JSON" >config-mn.json
-            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE")
+            UPDATE_YT_JSON=$(get_update_micro_json "$MG_VER_NAME" "$MG_VER_CODE" "$MG_URL" )
             echo "$UPDATE_YT_JSON" >config-micro.json
             
             if [ -n "${{ steps.get_output.outputs.MSRV_OUTPUT }}" ]; then
