@@ -104,6 +104,7 @@ jobs:
           wget -q $rv_gms_url -O microg.apk
           cp -f microg.apk ./build/microg.apk
           #curl -o microg.apk $rv_gms_url
+          rv_gms_url="https://github.com/vuongvan/revanced-magisk-module/releases/latest/download/microg.apk" 
           echo "MG_URL_OUTPUT=$rv_gms_url" >> $GITHUB_OUTPUT
           echo $rv_gms_url
           mg_op=$(find . -maxdepth 1 -name "microg.apk" -printf '%P')
