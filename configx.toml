@@ -31,8 +31,8 @@ excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube M
 [YouTube-RX]
 enabled = true
 app-name = "YouTube"
-patches-source = "anddea/revanced-patches"
-integrations-source = "anddea/revanced-integrations"
+patches-source = "rufusin/revanced-patches"
+integrations-source = "rufusin/revanced-integrations"
 #cli-source = "inotia00/revanced-cli"
 rv-brand = "RX"
 build-mode = "apk"
@@ -47,8 +47,8 @@ included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
 [Music-RX]
 enabled = true
 app-name = "Music"
-patches-source = "anddea/revanced-patches"
-integrations-source = "anddea/revanced-integrations"
+patches-source = "rufusin/revanced-patches"
+integrations-source = "rufusin/revanced-integrations"
 #cli-source = "inotia00/revanced-cli"
 rv-brand = "RX"
 build-mode = "apk"
