@@ -76,7 +76,7 @@ jobs:
           - id: "NyxMusicPlayer"
           #   - id: "IconPackStudio"
           - id: "TickTick"
-          - id: "Tasker"
+          # - id: "Tasker"
           #   - id: "Photomath"
           #   - id: "Instagram-armeabi-v7a"
           - id: "Instagram"
