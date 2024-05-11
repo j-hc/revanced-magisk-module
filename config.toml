@@ -27,6 +27,7 @@ rv-brand = "ReVanced Extended"
 build-mode = "both"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 arch = "both"
+excluded-patches = "'Custom branding icon YouTube Music'"
 
 [YouTube-Extended]
 app-name = "YouTube"
@@ -36,6 +37,7 @@ cli-source = "inotia00/revanced-cli"
 rv-brand = "ReVanced Extended"
 build-mode = "both"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+excluded-patches = "'Custom branding icon YouTube'"
 
 [Twitter]
 build-mode = "apk"
