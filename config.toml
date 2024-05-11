@@ -6,17 +6,14 @@ enable-magisk-update = true   # set this to false if you do not want to receive 
 # you can use rvmm-config-gen to generate a config
 
 [YouTube]
-build-mode = "both"
 excluded-patches = ""
 included-patches = "'Remove player controls background'"
-
 version = "auto"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 
 [Music]
-build-mode = "both"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
-arch = "both"
+arch = "arm64-v8a"
 
 [Music-Extended]
 app-name = "Music"
@@ -24,9 +21,8 @@ patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 cli-source = "inotia00/revanced-cli"
 rv-brand = "ReVanced Extended"
-build-mode = "both"
+arch = "arm64-v8a"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
-arch = "both"
 excluded-patches = "'Custom branding icon YouTube Music'"
 
 [YouTube-Extended]
@@ -35,7 +31,6 @@ patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 cli-source = "inotia00/revanced-cli"
 rv-brand = "ReVanced Extended"
-build-mode = "both"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 excluded-patches = "'Custom branding icon YouTube'"
 
