@@ -28,7 +28,7 @@ archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.a
 arch = "both"
 
 [YouTube-Extended]
-app-name = "YouTube"
+app-name = "YouTube-Extended"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
 cli-source = "inotia00/revanced-cli"
@@ -49,11 +49,6 @@ included-patches = "'SIM spoof'"
 
 [Reddit]
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
-
-[Messenger]
-enabled = false
-apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
-arch = "arm64-v8a"
 
 [Spotify]
 enabled = false
