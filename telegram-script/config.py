@@ -3,7 +3,7 @@ class Config:
         "https://api.github.com/repos/revanced-apks/build-apps/releases/latest"
     )
     MICROG_RELEASE_URL = (
-        "https://api.github.com/repos/ReVanced/GmsCore/releases/latest"
+        "https://github.com/ReVanced/GmsCore/releases/latest"
     )
     REVANCED_CHANGES_URL = (
         "https://api.github.com/repos/revanced/revanced-patches/compare"
