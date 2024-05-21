@@ -99,6 +99,7 @@ get_prebuilts() {
 }
 
 config_update() {
+	if [ ! -f build.md ]; then abort "build.md not available"; fi
 	declare -A sources
 	: >$TEMP_DIR/skipped
 	local conf=""
@@ -119,11 +120,10 @@ config_update() {
 			fi
 		else
 			sources[$PATCHES_SRC]=0
-			if ! last_patches_url=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - \
+			if ! last_patches=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - \
 				| jq -e -r '.assets[] | select(.name | endswith("jar")) | .name'); then
 				abort oops
 			fi
-			last_patches=${last_patches_url##*/}
 			cur_patches=$(sed -n "s/.*Patches: ${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
 			if [ "$cur_patches" ] && [ "$last_patches" ]; then
 				if [ "${cur_patches}" != "$last_patches" ]; then
