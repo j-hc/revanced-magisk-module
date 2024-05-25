@@ -150,7 +150,7 @@ uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
 [Music-anddea]
 enabled = true
 app-name = "Music"
-version = "latest"
+version = "v2.225.0-dev.21"
 patches-source = "anddea/revanced-patches"
 integrations-source = "anddea/revanced-integrations"
 rv-brand = "anddea"
@@ -161,7 +161,7 @@ arch = "both"
 [YouTube-anddea]
 enabled = true
 app-name = "YouTube"
-version = "auto"
+version = "v2.225.0-dev.21"
 patches-source = "anddea/revanced-patches"
 integrations-source = "anddea/revanced-integrations"
 rv-brand = "anddea"
