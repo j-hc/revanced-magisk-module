@@ -20,6 +20,25 @@ version = "auto"
 uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
 arch = "both"
 
+[Music-Extended]
+app-name = "Music"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+build-mode = "both"
+uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
+arch = "both"
+
+[YouTube-Extended]
+app-name = "YouTube"
+patches-source = "inotia00/revanced-patches"
+integrations-source = "inotia00/revanced-integrations"
+cli-source = "inotia00/revanced-cli"
+rv-brand = "ReVanced Extended"
+build-mode = "both"
+uptodown-dlurl = "https://youtube.en.uptodown.com/android"
+
 [Twitter]
 build-mode = "apk"
 version = "latest"
