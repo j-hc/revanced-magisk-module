@@ -39,6 +39,31 @@ rv-brand = "ReVanced Extended"
 build-mode = "both"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 
+[Music-anddea]
+enabled = true
+app-name = "Music"
+version = "auto"
+patches-source = "anddea/revanced-patches"
+patches-version = "v2.225.0-dev.21"
+integrations-source = "anddea/revanced-integrations"
+integrations-version = "v0.152.0-dev.12"
+rv-brand = "anddea"
+build-mode = "apk"
+uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
+arch = "both"
+
+[YouTube-anddea]
+enabled = true
+app-name = "YouTube"
+version = "auto"
+patches-source = "anddea/revanced-patches"
+patches-version = "v2.225.0-dev.21"
+integrations-source = "anddea/revanced-integrations"
+integrations-version = "v0.152.0-dev.12"
+rv-brand = "anddea"
+build-mode = "apk"
+uptodown-dlurl = "https://youtube.en.uptodown.com/android"
+
 [Twitter]
 build-mode = "apk"
 version = "latest"
@@ -165,31 +190,6 @@ uptodown-dlurl = "https://sync-for-reddit.en.uptodown.com/android"
 enabled = true
 version = "auto"
 uptodown-dlurl = "https://infinity-for-reddit.en.uptodown.com/android"
-
-[Music-anddea]
-enabled = true
-app-name = "Music"
-version = "auto"
-patches-source = "anddea/revanced-patches"
-patches-version = "v2.225.0-dev.21"
-integrations-source = "anddea/revanced-integrations"
-integrations-version = "v0.152.0-dev.12"
-rv-brand = "anddea"
-build-mode = "apk"
-uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
-arch = "both"
-
-[YouTube-anddea]
-enabled = true
-app-name = "YouTube"
-version = "auto"
-patches-source = "anddea/revanced-patches"
-patches-version = "v2.225.0-dev.21"
-integrations-source = "anddea/revanced-integrations"
-integrations-version = "v0.152.0-dev.12"
-rv-brand = "anddea"
-build-mode = "apk"
-uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 
 [VSCO]
 enabled = true
