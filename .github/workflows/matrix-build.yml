@@ -61,6 +61,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - id: "YouTube-Extended"
+          - id: "Music-Extended"
           - id: "YouTube-anddea"
           - id: "Music-anddea"
           - id: "YouTube"
