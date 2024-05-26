@@ -40,9 +40,14 @@ jobs:
           gh release view --json body -q .body --repo revanced/revanced-patches >> release_notes.md
           echo -e "\n---\n" >> release_notes.md
           echo -e "# ReX Patches\n" >> release_notes.md
-          dateReX=$(date -u -d $(gh release view --json publishedAt -q .publishedAt --repo anddea/revanced-patches))
-          echo -e "\n Published on $dateReX\n" >> release_notes.md
-          gh release view --json body -q .body --repo anddea/revanced-patches >> release_notes.md
+          dateRex=$(date -u -d $(gh release view --json publishedAt -q .publishedAt --repo inotia00/revanced-patches))
+          echo -e "\n Published on $dateRex\n" >> release_notes.md
+          gh release view --json body -q .body --repo inotia00/revanced-patches >> release_notes.md
+          echo -e "\n---\n" >> release_notes.md
+          echo -e "# Anddea Patches\n" >> release_notes.md
+          dateAnddea=$(date -u -d $(gh release view --json publishedAt -q .publishedAt --repo anddea/revanced-patches))
+          echo -e "\n Published on $dateAnddea\n" >> release_notes.md
+          gh release view v2.225.0-dev.21 --json body -q .body --repo anddea/revanced-patches >> release_notes.md
           echo -e "\n---\n" >> release_notes.md
           echo -e "\nUse [MicroG](https://github.com/ReVanced/GmsCore/releases/latest) for YouTube and Music" >> release_notes.md
           sed -i "1s/^/Release $version\n\n/" release_notes.md
@@ -63,10 +68,10 @@ jobs:
           - id: "Twitter"
           - id: "Twitch"
           - id: "TikTok"
-          # - id: "Reddit"
+          - id: "Reddit"
           - id: "Messenger"
           - id: "Facebook"
-          # - id: 'Spotify'
+          - id: 'Spotify'
           - id: "Spotify-Lite"
           #   - id: "Citra"
           #   - id: "Backdrops"
@@ -110,6 +115,7 @@ jobs:
            cat sep_config.toml
 
       - name: Build modules/APKs
+        continue-on-error: true
         run: |
           count=0
           if ! ./build.sh sep_config.toml; then
@@ -127,7 +133,7 @@ jobs:
 
       - name: Get output
         id: get_output
-        if: ${{ matrix.id == 'YouTube' }}
+        if: ${{ matrix.id == 'YouTube' }} && success()
         run: |
           DELIM="$(openssl rand -hex 8)"
           echo "BUILD_LOG<<${DELIM}" >> "$GITHUB_OUTPUT"
@@ -136,6 +142,7 @@ jobs:
           cp -f build.md build.tmp
 
       - name: Upload modules to release
+        if: success()
         run: |
           # get all apk files in ./build/* directory, for each run gh release upload
           for file in $(find build -type f -name "*.apk"); do
@@ -162,6 +169,8 @@ jobs:
           git checkout update
           filename="build.md"
           /tmp/extras.sh "revanced/revanced-integrations" "revanced/revanced-patches" "revanced/revanced-cli" > $filename
+          echo -e "\n\n" >> $filename
+          /tmp/extras.sh "inotia00/revanced-integrations" "inotia00/revanced-patches" "inotia00/revanced-cli" >> $filename
           echo -e "\n\n" >> $filename
           /tmp/extras.sh "anddea/revanced-integrations" "anddea/revanced-patches" "revanced/revanced-cli" >> $filename
           git add $filename
