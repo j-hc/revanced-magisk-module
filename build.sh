@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+shopt -s nullglob
 trap "rm -rf temp/*tmp.* temp/*/*tmp.*; exit 130" INT
 
-if [ "${1:-}" = "clean" ]; then
+if [ "${1-}" = "clean" ]; then
 	rm -rf temp build logs build.md
 	exit 0
 fi
@@ -28,14 +29,14 @@ DEF_CLI_SRC=$(toml_get "$main_config_t" cli-source) || DEF_CLI_SRC="j-hc/revance
 DEF_RV_BRAND=$(toml_get "$main_config_t" rv-brand) || DEF_RV_BRAND="ReVanced"
 mkdir -p $TEMP_DIR $BUILD_DIR
 
-if [ "${2:-}" = "--config-update" ]; then
+if [ "${2-}" = "--config-update" ]; then
 	config_update
 	exit 0
 fi
 
 : >build.md
 ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || ENABLE_MAGISK_UPDATE=true
-if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY:-}" ]; then
+if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY-}" ]; then
 	pr "You are building locally. Magisk updates will not be enabled."
 	ENABLE_MAGISK_UPDATE=false
 fi
@@ -82,7 +83,7 @@ for table_name in $(toml_get_table_names); do
 	cli_ver=$(toml_get "$t" cli-version) || cli_ver=$DEF_CLI_VER
 
 	if ! set_prebuilts "$integrations_src" "$patches_src" "$cli_src" "$integrations_ver" "$patches_ver" "$cli_ver"; then
-		if ! RVP="$(get_rv_prebuilts "$integrations_src" "$patches_src" "$integrations_ver" "$patches_ver" "$cli_src" "$cli_ver")"; then
+		if ! RVP="$(get_rv_prebuilts "$cli_src" "$cli_ver" "$integrations_src" "$integrations_ver" "$patches_src" "$patches_ver")"; then
 			abort "could not download rv prebuilts"
 		fi
 		read -r rv_cli_jar rv_integrations_apk rv_patches_jar rv_patches_json <<<"$RVP"
@@ -104,9 +105,9 @@ for table_name in $(toml_get_table_names); do
 	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]="$DEF_RV_BRAND"
 
 	app_args[excluded_patches]=$(toml_get "$t" excluded-patches) || app_args[excluded_patches]=""
-	if [ -n "${app_args[excluded_patches]}" ] && [[ "${app_args[excluded_patches]}" != *'"'* ]]; then abort "patch names inside excluded-patches must be quoted"; fi
+	if [ -n "${app_args[excluded_patches]}" ] && [[ ${app_args[excluded_patches]} != *'"'* ]]; then abort "patch names inside excluded-patches must be quoted"; fi
 	app_args[included_patches]=$(toml_get "$t" included-patches) || app_args[included_patches]=""
-	if [ -n "${app_args[included_patches]}" ] && [[ "${app_args[included_patches]}" != *'"'* ]]; then abort "patch names inside included-patches must be quoted"; fi
+	if [ -n "${app_args[included_patches]}" ] && [[ ${app_args[included_patches]} != *'"'* ]]; then abort "patch names inside included-patches must be quoted"; fi
 	app_args[exclusive_patches]=$(toml_get "$t" exclusive-patches) && vtf "${app_args[exclusive_patches]}" "exclusive-patches" || app_args[exclusive_patches]=false
 	app_args[version]=$(toml_get "$t" version) || app_args[version]="auto"
 	app_args[app_name]=$(toml_get "$t" app-name) || app_args[app_name]=$table_name
@@ -134,9 +135,9 @@ for table_name in $(toml_get_table_names); do
 		app_args[archive_dlurl]=${app_args[archive_dlurl]%/}
 		app_args[dl_from]=archive
 	} || app_args[archive_dlurl]=""
-	if [ -z "${app_args[dl_from]:-}" ]; then abort "ERROR: no 'apkmirror_dlurl', 'uptodown_dlurl' or 'apkmonk_dlurl' option was set for '$table_name'."; fi
+	if [ -z "${app_args[dl_from]-}" ]; then abort "ERROR: no 'apkmirror_dlurl', 'uptodown_dlurl' or 'apkmonk_dlurl' option was set for '$table_name'."; fi
 	app_args[arch]=$(toml_get "$t" arch) || app_args[arch]="all"
-	if [ "${app_args[arch]}" != "both" ] && [ "${app_args[arch]}" != "all" ] && [[ "${app_args[arch]}" != "arm64-v8a"* ]] && [[ "${app_args[arch]}" != "arm-v7a"* ]]; then
+	if [ "${app_args[arch]}" != "both" ] && [ "${app_args[arch]}" != "all" ] && [[ ${app_args[arch]} != "arm64-v8a"* ]] && [[ ${app_args[arch]} != "arm-v7a"* ]]; then
 		abort "wrong arch '${app_args[arch]}' for '$table_name'"
 	fi
 
@@ -167,10 +168,9 @@ wait
 rm -rf temp/tmp.*
 if [ -z "$(ls -A1 ${BUILD_DIR})" ]; then abort "All builds failed."; fi
 
-log "\nInstall [Vanced Microg](https://github.com/TeamVanced/VancedMicroG/releases) for non-root YouTube and YT Music"
-log "Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) module to detach YouTube and YT Music from Play Store"
-log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)"
-log "\nChangelog:"
+log "\nInstall [Microg](https://github.com/ReVanced/GmsCore/releases) for non-root YouTube and YT Music APKs"
+log "Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach root ReVanced YouTube and YT Music from Play Store"
+log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)\n"
 log "$(cat $TEMP_DIR/*-rv/changelog.md)"
 
 SKIPPED=$(cat $TEMP_DIR/skipped 2>/dev/null || :)
