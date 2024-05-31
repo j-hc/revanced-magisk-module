@@ -35,6 +35,15 @@
     ]
   },
   {
+    "patchName": "Spoof client",
+    "options": [
+      {
+        "key": "client-id",
+        "value": "e1toDqv8Jgg9wIqwcS71Eg"
+      }
+    ]
+  },
+  {
     "patchName": "Custom branding name YouTube Music",
     "options": [
       {
