@@ -30,6 +30,16 @@ version="6.51.53"
 excluded-patches = "'Amoled' 'Change start page' 'Custom branding icon YouTube Music' 'Custom package name' 'Return YouTube Dislike'"
 #cli-source = "Revanced/revanced-cli"
 
+[Boost-RV]
+enabled = true
+app-name = "Boost"
+build-mode = "apk"
+version = "auto"
+rv-brand = "RV"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/ruben-mayayo/boost-for-reddit/"
+
+
+
 [YouTube-RX]
 enabled = true
 app-name = "YouTube"
