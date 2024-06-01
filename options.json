@@ -64,5 +64,18 @@
         "value": "YouTube X"
       }
     ]
+  },
+  {
+    "patchName": "Custom package name",
+    "options": [
+      {
+        "key": "PackageNameYouTube",
+        "value": "app.rvx.android.youtube"
+      },
+      {
+        "key": "PackageNameYouTubeMusic",
+        "value": "app.rvx.android.apps.youtube.music"
+      }
+    ]
   }
 ]
