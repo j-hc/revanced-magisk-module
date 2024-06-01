@@ -17,7 +17,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 
 
 [Music-RV]
-enabled = true
+enabled = false
 app-name = "Music"
 rv-brand = "RV"
 build-mode = "apk"
@@ -41,7 +41,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/ruben-mayayo/boost-for-reddit/"
 
 
 [YouTube-RX]
-enabled = true
+enabled = false
 app-name = "YouTube"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
@@ -57,7 +57,7 @@ included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
 
 
 [Music-RX]
-enabled = true
+enabled = false
 app-name = "Music"
 patches-source = "inotia00/revanced-patches"
 integrations-source = "inotia00/revanced-integrations"
@@ -86,13 +86,13 @@ included-patches = "'Enable song search' 'MaterialYou' 'Theme' "
 #version="19.05.36"
 #cli-version = "v4.1.1"
 
-[Music-RX]
+[Music-anddea]
 enabled = true
 app-name = "Music"
 patches-source = "anddea/revanced-patches"
 integrations-source = "anddea/revanced-integrations"
 cli-source = "inotia00/revanced-cli"
-rv-brand = "RX"
+rv-brand = "anddea"
 build-mode = "apk"
 #archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
