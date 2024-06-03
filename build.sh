@@ -73,7 +73,10 @@ for table_name in $(toml_get_table_names); do
 	t=$(toml_get_table "$table_name")
 	enabled=$(toml_get "$t" enabled) && vtf "$enabled" "enabled" || enabled=true
 	if [ "$enabled" = false ]; then continue; fi
-	if ((idx >= PARALLEL_JOBS)); then wait -n; fi
+	if ((idx >= PARALLEL_JOBS)); then
+		wait -n
+		idx=$((idx - 1))
+	fi
 
 	declare -A app_args
 	patches_src=$(toml_get "$t" patches-source) || patches_src=$DEF_PATCHES_SRC
@@ -164,7 +167,10 @@ for table_name in $(toml_get_table_names); do
 		app_args[table]="$table_name (arm-v7a)"
 		app_args[arch]="arm-v7a"
 		app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
-		if ((idx >= PARALLEL_JOBS)); then wait -n; fi
+		if ((idx >= PARALLEL_JOBS)); then
+			wait -n
+			idx=$((idx - 1))
+		fi
 		idx=$((idx + 1))
 		build_rv "$(declare -p app_args)" &
 	else
