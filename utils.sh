@@ -435,7 +435,6 @@ build_rv() {
 				elif [ "$arch" = "arm-v7a" ]; then
 					patcher_args+=("--rip-lib arm64-v8a")
 				fi
-
 			fi
 		fi
 		if [ ! -f "$patched_apk" ] || [ "$REBUILD" = true ]; then

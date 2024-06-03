@@ -1,4 +1,3 @@
-#!/system/bin/sh
 . "$MODPATH/config"
 
 ui_print ""
@@ -106,10 +105,10 @@ if [ $INS = true ]; then
 fi
 
 BASEPATHLIB=${BASEPATH}/lib/${ARCH}
-if [ -z "$(ls -A1 "${BASEPATHLIB}")" ]; then
+if [ -z "$(ls -A1 "$BASEPATHLIB")" ]; then
 	ui_print "* Extracting native libs"
 	mkdir -p "$BASEPATHLIB"
-	if ! op=$(unzip -j "$MODPATH/$PKG_NAME.apk lib/${ARCH_LIB}/"* -d "$BASEPATHLIB" 2>&1); then
+	if ! op=$(unzip -j "$MODPATH"/"$PKG_NAME".apk lib/"${ARCH_LIB}"/* -d "$BASEPATHLIB" 2>&1); then
 		ui_print "ERROR: extracting native libs failed"
 		abort "$op"
 	fi

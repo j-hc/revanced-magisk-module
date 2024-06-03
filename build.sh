@@ -146,17 +146,24 @@ for table_name in $(toml_get_table_names); do
 	app_args[dpi]=$(toml_get "$t" apkmirror-dpi) || app_args[dpi]="nodpi"
 	table_name_f=${table_name,,}
 	table_name_f=${table_name_f// /-}
-	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || app_args[module_prop_name]="${table_name_f}-jhc"
+	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || {
+		app_args[module_prop_name]="${table_name_f}-jhc"
+		if [ "${app_args[arch]}" = "arm64-v8a" ]; then
+			app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
+		elif [ "${app_args[arch]}" = "arm-v7a" ]; then
+			app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
+		fi
+	}
 
 	if [ "${app_args[arch]}" = both ]; then
 		app_args[table]="$table_name (arm64-v8a)"
-		app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
 		app_args[arch]="arm64-v8a"
+		app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
 		idx=$((idx + 1))
 		build_rv "$(declare -p app_args)" &
 		app_args[table]="$table_name (arm-v7a)"
-		app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
 		app_args[arch]="arm-v7a"
+		app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
 		if ((idx >= PARALLEL_JOBS)); then wait -n; fi
 		idx=$((idx + 1))
 		build_rv "$(declare -p app_args)" &
