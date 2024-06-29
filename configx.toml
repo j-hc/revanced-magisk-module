@@ -7,7 +7,7 @@ enabled = true
 app-name = "YouTube"
 build-mode = "apk"
 excluded-patches = "'Return YouTube Dislike' 'Premium heading' 'Alternative thumbnails'"
-included-patches = "'Enable slide to seek'"
+included-patches = "'Enable slide to seek' 'Custom branding'"
 version = "auto"
 rv-brand = "RV"
 #cli-version = "v4.4.1"
@@ -17,7 +17,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 
 
 [Music-RV]
-enabled = false
+enabled = true
 app-name = "Music"
 rv-brand = "RV"
 build-mode = "apk"
@@ -80,7 +80,7 @@ build-mode = "apk"
 #archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 excluded-patches = "'Custom package name' 'Return YouTube Dislike' 'Custom branding heading' 'Custom branding icon YouTube' 'Alternative thumbnails'"
-included-patches = "'Enable song search' 'MaterialYou' 'Theme'"
+included-patches = "'Enable song search' 'MaterialYou' 'Theme' 'Custom branding name YouTube'"
 #version="19.05.36"
 #cli-version = "v4.1"
 
