@@ -260,7 +260,7 @@ get_uptodown_resp() {
 }
 get_uptodown_vers() { $HTMLQ --text ".version" <<<"$__UPTODOWN_RESP__"; }
 dl_uptodown() {
-	local uptodown_dlurl=$1 version=$2 output=$3 arch=$4 is_latest=$6
+	local uptodown_dlurl=$1 version=$2 output=$3 arch=$4 _dpi=$5 is_latest=$6
 	local url
 	if [ "$is_latest" = false ]; then
 		url=$(grep -F "${version}</span>" -B 2 <<<"$__UPTODOWN_RESP__" | head -1 | sed -n 's;.*data-url=".*download\/\(.*\)".*;\1;p') || return 1
