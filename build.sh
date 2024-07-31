@@ -49,6 +49,7 @@ jq --version >/dev/null || abort "\`jq\` is not installed. install it with 'apt 
 java --version >/dev/null || abort "\`openjdk 17\` is not installed. install it with 'apt install openjdk-17-jre' or equivalent"
 zip --version >/dev/null || abort "\`zip\` is not installed. install it with 'apt install zip' or equivalent"
 # ----------------
+rm -rf revanced-magisk/bin/*/tmp.*
 get_prebuilts
 
 set_prebuilts() {
@@ -72,7 +73,10 @@ for table_name in $(toml_get_table_names); do
 	t=$(toml_get_table "$table_name")
 	enabled=$(toml_get "$t" enabled) && vtf "$enabled" "enabled" || enabled=true
 	if [ "$enabled" = false ]; then continue; fi
-	if ((idx >= PARALLEL_JOBS)); then wait -n; fi
+	if ((idx >= PARALLEL_JOBS)); then
+		wait -n
+		idx=$((idx - 1))
+	fi
 
 	declare -A app_args
 	patches_src=$(toml_get "$t" patches-source) || patches_src=$DEF_PATCHES_SRC
@@ -123,10 +127,6 @@ for table_name in $(toml_get_table_names); do
 		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/}
 		app_args[dl_from]=uptodown
 	} || app_args[uptodown_dlurl]=""
-	app_args[apkmonk_dlurl]=$(toml_get "$t" apkmonk-dlurl) && {
-		app_args[apkmonk_dlurl]=${app_args[apkmonk_dlurl]%/}
-		app_args[dl_from]=apkmonk
-	} || app_args[apkmonk_dlurl]=""
 	app_args[apkmirror_dlurl]=$(toml_get "$t" apkmirror-dlurl) && {
 		app_args[apkmirror_dlurl]=${app_args[apkmirror_dlurl]%/}
 		app_args[dl_from]=apkmirror
@@ -135,7 +135,7 @@ for table_name in $(toml_get_table_names); do
 		app_args[archive_dlurl]=${app_args[archive_dlurl]%/}
 		app_args[dl_from]=archive
 	} || app_args[archive_dlurl]=""
-	if [ -z "${app_args[dl_from]-}" ]; then abort "ERROR: no 'apkmirror_dlurl', 'uptodown_dlurl' or 'apkmonk_dlurl' option was set for '$table_name'."; fi
+	if [ -z "${app_args[dl_from]-}" ]; then abort "ERROR: no 'apkmirror_dlurl', 'uptodown_dlurl' or 'archive_dlurl' option was set for '$table_name'."; fi
 	app_args[arch]=$(toml_get "$t" arch) || app_args[arch]="all"
 	if [ "${app_args[arch]}" != "both" ] && [ "${app_args[arch]}" != "all" ] && [[ ${app_args[arch]} != "arm64-v8a"* ]] && [[ ${app_args[arch]} != "arm-v7a"* ]]; then
 		abort "wrong arch '${app_args[arch]}' for '$table_name'"
@@ -145,18 +145,28 @@ for table_name in $(toml_get_table_names); do
 	app_args[dpi]=$(toml_get "$t" apkmirror-dpi) || app_args[dpi]="nodpi"
 	table_name_f=${table_name,,}
 	table_name_f=${table_name_f// /-}
-	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || app_args[module_prop_name]="${table_name_f}-jhc"
+	app_args[module_prop_name]=$(toml_get "$t" module-prop-name) || {
+		app_args[module_prop_name]="${table_name_f}-jhc"
+		if [ "${app_args[arch]}" = "arm64-v8a" ]; then
+			app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
+		elif [ "${app_args[arch]}" = "arm-v7a" ]; then
+			app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
+		fi
+	}
 
 	if [ "${app_args[arch]}" = both ]; then
 		app_args[table]="$table_name (arm64-v8a)"
-		app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
 		app_args[arch]="arm64-v8a"
+		app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
 		idx=$((idx + 1))
 		build_rv "$(declare -p app_args)" &
 		app_args[table]="$table_name (arm-v7a)"
-		app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
 		app_args[arch]="arm-v7a"
-		if ((idx >= PARALLEL_JOBS)); then wait -n; fi
+		app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
+		if ((idx >= PARALLEL_JOBS)); then
+			wait -n
+			idx=$((idx - 1))
+		fi
 		idx=$((idx + 1))
 		build_rv "$(declare -p app_args)" &
 	else
