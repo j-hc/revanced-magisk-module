@@ -98,7 +98,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 
 
 [SyncForReddit]
-enabled = false
+enabled = true
 version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/red-apps-ltd/sync-for-reddit/"
 
