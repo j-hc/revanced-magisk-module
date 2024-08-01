@@ -25,6 +25,9 @@ jobs:
           fetch-depth: 0
           submodules: true
 
+      - name: Store options.json
+        run: echo "${{ secrets.OPTIONS_JSON }}" > options.json
+
       - name: Update config
         if: ${{ inputs.from_ci }}
         run: |
