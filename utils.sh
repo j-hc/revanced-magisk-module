@@ -120,8 +120,8 @@ config_update() {
 			fi
 		else
 			sources[$PATCHES_SRC]=0
-			if ! last_patches=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - \
-				| jq -e -r '.assets[] | select(.name | endswith("jar")) | .name'); then
+			if ! last_patches=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - |
+				jq -e -r '.assets[] | select(.name | endswith("jar")) | .name'); then
 				abort oops
 			fi
 			cur_patches=$(sed -n "s/.*Patches: ${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
@@ -216,9 +216,9 @@ dl_apkmirror() {
 			node=$($HTMLQ "div.table-row.headerFont:nth-last-child($n)" -r "span:nth-child(n+3)" <<<"$resp")
 			if [ -z "$node" ]; then break; fi
 			app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
-			if [ "$(sed -n 3p <<<"$app_table")" = "$apkorbundle" ] && { [ "$apkorbundle" = BUNDLE ] \
-				|| { [ "$apkorbundle" = APK ] && [ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] \
-					&& isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; }; }; then
+			if [ "$(sed -n 3p <<<"$app_table")" = "$apkorbundle" ] && { [ "$apkorbundle" = BUNDLE ] ||
+				{ [ "$apkorbundle" = APK ] && [ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] &&
+					isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; }; }; then
 				dlurl=$($HTMLQ --base https://www.apkmirror.com --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
 				break
 			fi
