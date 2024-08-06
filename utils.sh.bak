@@ -10,6 +10,7 @@ NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 REBUILD=${REBUILD:-false}
 OS=$(uname -o)
 
+# -------------------- json/toml --------------------
 toml_prep() { __TOML__=$(tr -d '\t\r' <<<"$1" | tr "'" '"' | grep -o '^[^#]*' | grep -v '^$' | sed -r 's/(\".*\")|\s*/\1/g; 1i []'); }
 toml_get_table_names() {
 	local tn
@@ -24,6 +25,7 @@ toml_get() {
 	local table=$1 key=$2 val
 	val=$(grep -m 1 "^${key}=" <<<"$table") && sed -e "s/^\"//; s/\"$//" <<<"${val#*=}"
 }
+# ---------------------------------------------------
 
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
 epr() {
@@ -38,9 +40,7 @@ abort() {
 get_rv_prebuilts() {
 	local cli_src=$1 cli_ver=$2 integrations_src=$3 integrations_ver=$4 patches_src=$5 patches_ver=$6
 	pr "Getting prebuilts (${patches_src%/*})" >&2
-	local cl_dir=${patches_src%/*}
-	cl_dir=${TEMP_DIR}/${cl_dir,,}-rv
-	[ -d "$cl_dir" ] || mkdir "$cl_dir"
+	for f in "${TEMP_DIR}"/*-rv; do : >"${f}/changelog.md"; done
 	for src_ver in "$cli_src CLI $cli_ver" "$integrations_src Integrations $integrations_ver" "$patches_src Patches $patches_ver"; do
 		set -- $src_ver
 		local src=$1 tag=$2 ver=${3-} ext
@@ -64,7 +64,7 @@ get_rv_prebuilts() {
 		file="${dir}/${name}"
 		[ -f "$file" ] || REBUILD=true
 
-		echo "$tag: $(cut -d/ -f5 <<<"$url")/${name}  " >>"${cl_dir}/changelog.md"
+		echo "$tag: $(cut -d/ -f5 <<<"$url")/${name}  " >>"$dir/changelog.md"
 		gh_dl "$file" "$url" >&2 || return 1
 		echo -n "$file "
 		if [ "$tag" = "Patches" ]; then
@@ -75,7 +75,7 @@ get_rv_prebuilts() {
 			url=$(jq -e -r '.assets[] | select(.name | endswith("json")) | .url' <<<"$resp") || return 1
 			gh_dl "$file" "$url" >&2 || return 1
 			echo -n "$file "
-			echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"
+			echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"$dir/changelog.md"
 		fi
 	done
 	echo
@@ -99,7 +99,6 @@ get_prebuilts() {
 }
 
 config_update() {
-	if [ ! -f build.md ]; then abort "build.md not available"; fi
 	declare -A sources
 	: >$TEMP_DIR/skipped
 	local conf=""
@@ -120,10 +119,11 @@ config_update() {
 			fi
 		else
 			sources[$PATCHES_SRC]=0
-			if ! last_patches=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - |
-				jq -e -r '.assets[] | select(.name | endswith("jar")) | .name'); then
+			if ! last_patches_url=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - \
+				| jq -e -r '.assets[] | select(.name | endswith("jar")) | .name'); then
 				abort oops
 			fi
+			last_patches=${last_patches_url##*/}
 			cur_patches=$(sed -n "s/.*Patches: ${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
 			if [ "$cur_patches" ] && [ "$last_patches" ]; then
 				if [ "${cur_patches}" != "$last_patches" ]; then
@@ -216,9 +216,9 @@ dl_apkmirror() {
 			node=$($HTMLQ "div.table-row.headerFont:nth-last-child($n)" -r "span:nth-child(n+3)" <<<"$resp")
 			if [ -z "$node" ]; then break; fi
 			app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
-			if [ "$(sed -n 3p <<<"$app_table")" = "$apkorbundle" ] && { [ "$apkorbundle" = BUNDLE ] ||
-				{ [ "$apkorbundle" = APK ] && [ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] &&
-					isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; }; }; then
+			if [ "$(sed -n 3p <<<"$app_table")" = "$apkorbundle" ] && { [ "$apkorbundle" = BUNDLE ] \
+				|| { [ "$apkorbundle" = APK ] && [ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] \
+					&& isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; }; }; then
 				dlurl=$($HTMLQ --base https://www.apkmirror.com --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
 				break
 			fi
@@ -252,6 +252,7 @@ get_apkmirror_resp() {
 	__APKMIRROR_RESP__=$(req "${1}" -)
 	__APKMIRROR_CAT__="${1##*/}"
 }
+# --------------------------------------------------
 
 # -------------------- uptodown --------------------
 get_uptodown_resp() {
@@ -260,36 +261,29 @@ get_uptodown_resp() {
 }
 get_uptodown_vers() { $HTMLQ --text ".version" <<<"$__UPTODOWN_RESP__"; }
 dl_uptodown() {
-	local uptodown_dlurl=$1 version=$2 output=$3 arch=$4 _dpi=$5 is_latest=$6
+	local uptodown_dlurl=$1 version=$2 output=$3
 	local url
-	if [ "$is_latest" = false ]; then
-		url=$(grep -F "${version}</span>" -B 2 <<<"$__UPTODOWN_RESP__" | head -1 | sed -n 's;.*data-url=".*download\/\(.*\)".*;\1;p') || return 1
-		url="/$url"
-	else url=""; fi
-	if [ "$arch" != all ]; then
-		local app_code data_version files node_arch content resp
-		if [ "$is_latest" = false ]; then
-			resp=$(req "${1}/download${url}" -)
-		else resp="$__UPTODOWN_RESP_PKG__"; fi
-		app_code=$($HTMLQ "#detail-app-name" --attribute code <<<"$resp")
-		data_version=$($HTMLQ "button.button:nth-child(2)" --attribute data-version <<<"$resp")
-		files=$(req "${uptodown_dlurl%/*}/app/${app_code}/version/${data_version}/files" - | jq -r .content)
-		for ((n = 1; n < 40; n++)); do
-			node_arch=$($HTMLQ ".content > p:nth-child($n)" --text <<<"$files" | xargs) || return 1
-			if [ -z "$node_arch" ]; then return 1; fi
-			if [ "$node_arch" != "$arch" ]; then continue; fi
-			content=$($HTMLQ "div.variant:nth-child($((n + 1)))" <<<"$files")
-			url=$(sed -n "s;.*'.*android\/post-download\/\(.*\)'.*;\1;p" <<<"$content" | head -1)
-			url="/$url"
-			break
-		done
-	fi
-	url="https://dw.uptodown.com/dwn/$(req "${uptodown_dlurl}/post-download${url}" - | sed -n 's;.*class="post-download" data-url="\(.*\)".*;\1;p')" || return 1
+	url=$(grep -F "${version}</span>" -B 2 <<<"$__UPTODOWN_RESP__" | head -1 | sed -n 's;.*data-url=".*download\/\(.*\)".*;\1;p') || return 1
+	url="https://dw.uptodown.com/dwn/$(req "${uptodown_dlurl}/post-download/${url}" - | sed -n 's;.*class="post-download" data-url="\(.*\)".*;\1;p')" || return 1
 	req "$url" "$output"
 }
 get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)" <<<"$__UPTODOWN_RESP_PKG__"; }
+# --------------------------------------------------
 
-# -------------------- archive --------------------
+# -------------------- apkmonk ---------------------
+get_apkmonk_resp() {
+	__APKMONK_RESP__=$(req "${1}" -)
+	__APKMONK_PKG_NAME__=$(awk -F/ '{print $NF}' <<<"$1")
+}
+get_apkmonk_vers() { grep -oP 'download_ver.+?>\K([0-9,\.]*)' <<<"$__APKMONK_RESP__"; }
+dl_apkmonk() {
+	local url=$1 version=$2 output=$3
+	url="https://www.apkmonk.com/down_file?pkg="$(grep -F "$version</a>" <<<"$__APKMONK_RESP__" | grep -oP 'href=\"/download-app/\K.+?(?=/?\">)' | sed 's;/;\&key=;') || return 1
+	url=$(req "$url" - | grep -oP 'https.+?(?=\",)') || return 1
+	req "$url" "$output"
+}
+get_apkmonk_pkg_name() { echo "$__APKMONK_PKG_NAME__"; }
+# --------------------------------------------------
 dl_archive() {
 	local url=$1 version=$2 output=$3 arch=$4
 	local path version=${version// /}
@@ -341,7 +335,7 @@ build_rv() {
 	p_patcher_args+=("$(join_args "${args[excluded_patches]}" -e) $(join_args "${args[included_patches]}" -i)")
 	[ "${args[exclusive_patches]}" = true ] && p_patcher_args+=("--exclusive")
 
-	for dl_p in archive apkmirror uptodown; do
+	for dl_p in archive apkmirror uptodown apkmonk; do
 		if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
 		if ! get_"${dl_p}"_resp "${args[${dl_p}_dlurl]}" || ! pkg_name=$(get_"${dl_p}"_pkg_name); then
 			args[${dl_p}_dlurl]=""
@@ -382,10 +376,10 @@ build_rv() {
 	version_f=${version_f#v}
 	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}.apk"
 	if [ ! -f "$stock_apk" ]; then
-		for dl_p in archive apkmirror uptodown; do
+		for dl_p in archive apkmirror uptodown apkmonk; do
 			if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
 			pr "Downloading '${table}' from ${dl_p}"
-			if ! dl_${dl_p} "${args[${dl_p}_dlurl]}" "$version" "$stock_apk" "$arch" "${args[dpi]}" "$get_latest_ver"; then
+			if ! dl_${dl_p} "${args[${dl_p}_dlurl]}" "$version" "$stock_apk" "$arch" "${args[dpi]}"; then
 				epr "ERROR: Could not download '${table}' from ${dl_p} with version '${version}', arch '${arch}', dpi '${args[dpi]}'"
 				continue
 			fi
@@ -439,6 +433,7 @@ build_rv() {
 				elif [ "$arch" = "arm-v7a" ]; then
 					patcher_args+=("--rip-lib arm64-v8a")
 				fi
+
 			fi
 		fi
 		if [ ! -f "$patched_apk" ] || [ "$REBUILD" = true ]; then
