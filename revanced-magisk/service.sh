@@ -5,11 +5,18 @@ RVPATH=/data/adb/rvhc/${MODDIR##*/}.apk
 
 until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 1; done
 until [ -d "/sdcard/Android" ]; do sleep 1; done
-while
-	BASEPATH=$(pm path "$PKG_NAME")
+while true; do
+	BASEPATH=$(pm path "$PKG_NAME" 2>/dev/null)
 	svcl=$?
-	[ $svcl = 20 ]
-do sleep 2; done
+
+	if [ $svcl -eq 0 ]; then
+		break
+	elif [ $svcl -eq 20 ]; then
+		sleep 2
+	else
+		sleep 2
+	fi
+done
 sleep 5
 
 err() {
