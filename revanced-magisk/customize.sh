@@ -96,13 +96,7 @@ install() {
 		abort "ERROR: install $PKG_NAME manually and reflash the module"
 	fi
 }
-if [ $INS = true ]; then
-	if ! install; then
-		if ! install; then
-			abort
-		fi
-	fi
-fi
+if [ $INS = true ] && ! install; then abort; fi
 
 BASEPATHLIB=${BASEPATH}/lib/${ARCH}
 if [ -z "$(ls -A1 "$BASEPATHLIB")" ]; then

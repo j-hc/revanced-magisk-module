@@ -146,6 +146,7 @@ _req() {
 	if [ "$op" = - ]; then
 		wget -nv -O "$op" "$@" "$ip"
 	else
+		if [ -f "$op" ]; then return; fi
 		local dlp
 		dlp="$(dirname "$op")/tmp.$(basename "$op")"
 		if [ -f "$dlp" ]; then
@@ -201,35 +202,56 @@ isoneof() {
 }
 
 # -------------------- apkmirror --------------------
-dl_apkmirror() {
-	local url=$1 version=${2// /-} output=$3 arch=$4 dpi=$5 apkorbundle=APK
-	if [ "$arch" = "arm-v7a" ]; then arch="armeabi-v7a"; fi
-	local apparch resp node app_table dlurl=""
+apk_mirror_search() {
+	local resp="$1" dpi="$2" arch="$3" apk_bundle="$4"
+	local apparch dlurl node app_table
 	if [ "$arch" = all ]; then
 		apparch=(universal noarch 'arm64-v8a + armeabi-v7a')
 	else apparch=("$arch" universal noarch 'arm64-v8a + armeabi-v7a'); fi
+	for ((n = 1; n < 40; n++)); do
+		node=$($HTMLQ "div.table-row.headerFont:nth-last-child($n)" -r "span:nth-child(n+3)" <<<"$resp")
+		if [ -z "$node" ]; then break; fi
+		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
+		if [ "$(sed -n 3p <<<"$app_table")" = "$apk_bundle" ] && [ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] &&
+			isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; then
+			dlurl=$($HTMLQ --base https://www.apkmirror.com --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
+			echo "$dlurl"
+			return 0
+		fi
+	done
+	return 1
+}
+dl_apkmirror() {
+	local url=$1 version=${2// /-} output=$3 arch=$4 dpi=$5 is_bundle=false
+	if [ "$arch" = "arm-v7a" ]; then arch="armeabi-v7a"; fi
+	local resp node app_table dlurl=""
 	url="${url}/${url##*/}-${version//./-}-release/"
 	resp=$(req "$url" -) || return 1
 	node=$($HTMLQ "div.table-row.headerFont:nth-last-child(1)" -r "span:nth-child(n+3)" <<<"$resp")
 	if [ "$node" ]; then
-		for ((n = 1; n < 40; n++)); do
-			node=$($HTMLQ "div.table-row.headerFont:nth-last-child($n)" -r "span:nth-child(n+3)" <<<"$resp")
-			if [ -z "$node" ]; then break; fi
-			app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
-			if [ "$(sed -n 3p <<<"$app_table")" = "$apkorbundle" ] && { [ "$apkorbundle" = BUNDLE ] ||
-				{ [ "$apkorbundle" = APK ] && [ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] &&
-					isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; }; }; then
-				dlurl=$($HTMLQ --base https://www.apkmirror.com --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
-				break
-			fi
-		done
+		if ! dlurl=$(apk_mirror_search "$resp" "$dpi" "${arch}" "APK"); then
+			if ! dlurl=$(apk_mirror_search "$resp" "$dpi" "${arch}" "BUNDLE"); then
+				return 1
+			else is_bundle=true; fi
+		fi
 		[ -z "$dlurl" ] && return 1
 		resp=$(req "$dlurl" -)
 	fi
 	url=$(echo "$resp" | $HTMLQ --base https://www.apkmirror.com --attribute href "a.btn") || return 1
-	if [ "$apkorbundle" = BUNDLE ] && [[ $url != *"&forcebaseapk=true" ]]; then url="${url}&forcebaseapk=true"; fi
 	url=$(req "$url" - | $HTMLQ --base https://www.apkmirror.com --attribute href "span > a[rel = nofollow]") || return 1
-	req "$url" "$output"
+	if [ "$is_bundle" = true ]; then
+		gh_dl "$TEMP_DIR/apkeditor.jar" "https://github.com/REAndroid/APKEditor/releases/latest/download/APKEditor-1.3.9.jar" >/dev/null || return 1
+		req "$url" "${output}.apkm"
+		java -jar "$TEMP_DIR/apkeditor.jar" merge -i "${output}.apkm" -o "${output}.zip" -clean-meta -f || return 1
+		mkdir "${output}-zip" || :
+		unzip -qo "${output}.zip" -d "${output}-zip"
+		cd "${output}-zip" || abort
+		zip -FS0rq "../../${output}" .
+		cd ../.. || abort
+		rm -r "${output}-zip" "${output}.apkm" "${output}.zip"
+	else
+		req "$url" "${output}"
+	fi
 }
 get_apkmirror_vers() {
 	local vers apkm_resp
