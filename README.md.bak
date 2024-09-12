@@ -31,6 +31,7 @@ Note that the <a href="../../actions/workflows/ci.yml">CI workflow</a> is schedu
 </details>
 
 ## To include/exclude patches or patch other apps
+[**See the list of patches**](https://j-hc.github.io/rvmm-config-gen/)
 
  * Star the repo :eyes:
  * Use the repo as a [template](https://github.com/new?template_name=revanced-magisk-module&template_owner=j-hc)
