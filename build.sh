@@ -2,7 +2,7 @@
 
 set -euo pipefail
 shopt -s nullglob
-trap "rm -rf temp/*tmp.* temp/*/*tmp.*; exit 130" INT
+trap "rm -rf temp/*tmp.* temp/*/*tmp.* temp/*-temporary-files; exit 130" INT
 
 if [ "${1-}" = "clean" ]; then
 	rm -rf temp build logs build.md

@@ -38,7 +38,7 @@ done
 am force-stop "$PKG_NAME"
 
 INS=true
-if BASEPATH=$(pm path "$PKG_NAME"); then
+if BASEPATH=$(pm path "$PKG_NAME" 2>&1 </dev/null); then
 	BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 	if [ "${BASEPATH:1:6}" = system ]; then
 		ui_print "* $PKG_NAME is a system app"
@@ -90,19 +90,13 @@ install() {
 		abort "$op"
 	fi
 	settings put global verifier_verify_adb_installs 1
-	if BASEPATH=$(pm path "$PKG_NAME"); then
+	if BASEPATH=$(pm path "$PKG_NAME" 2>&1 </dev/null); then
 		BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 	else
 		abort "ERROR: install $PKG_NAME manually and reflash the module"
 	fi
 }
-if [ $INS = true ]; then
-	if ! install; then
-		if ! install; then
-			abort
-		fi
-	fi
-fi
+if [ $INS = true ] && ! install; then abort; fi
 
 BASEPATHLIB=${BASEPATH}/lib/${ARCH}
 if [ -z "$(ls -A1 "$BASEPATHLIB")" ]; then
