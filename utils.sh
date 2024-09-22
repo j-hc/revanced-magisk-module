@@ -54,27 +54,51 @@ get_rv_prebuilts() {
 		dir=${TEMP_DIR}/${dir,,}-rv
 		[ -d "$dir" ] || mkdir "$dir"
 
-		local rv_rel="https://api.github.com/repos/${src}/releases/"
-		if [ "$ver" ]; then rv_rel+="tags/${ver}"; else rv_rel+="latest"; fi
+		local rv_rel="https://api.github.com/repos/${src}/releases" name_ver
+		if [ "$ver" = "dev" ]; then
+			rv_rel+="/tags/$(gh_req "$rv_rel" - | jq -r '.[0] | .tag_name')"
+			name_ver="*-dev*"
+		elif [ "$ver" = "latest" ]; then
+			rv_rel+="/latest"
+			name_ver="*"
+		else
+			rv_rel+="/tags/${ver}"
+			name_ver="$ver"
+		fi
 
-		local resp asset url name file
-		resp=$(gh_req "$rv_rel" -) || return 1
-		asset=$(jq -e -r ".assets[] | select(.name | endswith(\"$ext\"))" <<<"$resp") || return 1
-		url=$(jq -r .url <<<"$asset")
-		name=$(jq -r .name <<<"$asset")
-		file="${dir}/${name}"
+		local url file tag_name name
+		file=$(find "$dir" -name "revanced-${tag,,}-${name_ver#v}.${ext}" -type f 2>/dev/null)
+		if [ "$ver" = "latest" ]; then
+			file=$(grep -v dev <<<"$file" | head -1)
+		else file=$(grep "$ver" <<<"$file" | head -1); fi
+
+		if [ -z "$file" ]; then
+			local resp asset name
+			resp=$(gh_req "$rv_rel" -) || return 1
+			tag_name=$(jq -r '.tag_name' <<<"$resp")
+			asset=$(jq -e -r ".assets[] | select(.name | endswith(\"$ext\"))" <<<"$resp") || return 1
+			url=$(jq -r .url <<<"$asset")
+			name=$(jq -r .name <<<"$asset")
+			file="${dir}/${name}"
+			gh_dl "$file" "$url" >&2 || return 1
+		else
+			name=$(basename "$file")
+			tag_name=$(cut -d'-' -f3- <<<"$name")
+			tag_name=v${tag_name%.*}
+			if [ "$tag_name" = "v" ]; then abort; fi
+		fi
 		if [ "$tag" = "Integrations" ] && [ ! -f "$file" ]; then integs_file=$file; fi
 
-		echo "$tag: $(cut -d/ -f5 <<<"$url")/${name}  " >>"${cl_dir}/changelog.md"
-		gh_dl "$file" "$url" >&2 || return 1
+		echo "$tag: $(cut -d/ -f1 <<<"$src")/${name}  " >>"${cl_dir}/changelog.md"
 		echo -n "$file "
 		if [ "$tag" = "Patches" ]; then
-			local tag_name
-			tag_name=$(jq -r '.tag_name' <<<"$resp")
 			name="patches-${tag_name}.json"
 			file="${dir}/${name}"
-			url=$(jq -e -r '.assets[] | select(.name | endswith("json")) | .url' <<<"$resp") || return 1
-			gh_dl "$file" "$url" >&2 || return 1
+			if [ ! -f "$file" ]; then
+				resp=$(gh_req "$rv_rel" -) || return 1
+				url=$(jq -e -r '.assets[] | select(.name | endswith("json")) | .url' <<<"$resp") || return 1
+				gh_dl "$file" "$url" >&2 || return 1
+			fi
 			echo -n "$file "
 			echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"
 		fi
@@ -406,13 +430,15 @@ build_rv() {
 	p_patcher_args+=("$(join_args "${args[excluded_patches]}" -e) $(join_args "${args[included_patches]}" -i)")
 	[ "${args[exclusive_patches]}" = true ] && p_patcher_args+=("--exclusive")
 
+	local tried_dl=()
 	for dl_p in archive apkmirror uptodown; do
 		if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
-		if ! get_"${dl_p}"_resp "${args[${dl_p}_dlurl]}" || ! pkg_name=$(get_"${dl_p}"_pkg_name); then
+		if ! get_${dl_p}_resp "${args[${dl_p}_dlurl]}" || ! pkg_name=$(get_"${dl_p}"_pkg_name); then
 			args[${dl_p}_dlurl]=""
 			epr "ERROR: Could not find ${table} in ${dl_p}"
 			continue
 		fi
+		tried_dl+=("$dl_p")
 		dl_from=$dl_p
 		break
 	done
@@ -459,6 +485,7 @@ build_rv() {
 		for dl_p in archive apkmirror uptodown; do
 			if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
 			pr "Downloading '${table}' from ${dl_p}"
+			if ! isoneof $dl_p "${tried_dl[@]}"; then get_${dl_p}_resp "${args[${dl_p}_dlurl]}"; fi
 			if ! dl_${dl_p} "${args[${dl_p}_dlurl]}" "$version" "$stock_apk" "$arch" "${args[dpi]}" "$get_latest_ver"; then
 				epr "ERROR: Could not download '${table}' from ${dl_p} with version '${version}', arch '${arch}', dpi '${args[dpi]}'"
 				continue
