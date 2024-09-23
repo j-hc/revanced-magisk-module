@@ -107,7 +107,7 @@ get_rv_prebuilts() {
 	echo
 
 	if [ "$integs_file" ]; then
-		{
+		(
 			mkdir -p "${integs_file}-zip" || return 1
 			unzip -qo "${integs_file}" -d "${integs_file}-zip" || return 1
 			rm "${integs_file}" || return 1
@@ -116,7 +116,7 @@ get_rv_prebuilts() {
 			mv -f "${integs_file}-zip/classes-patched.dex" "${integs_file}-zip/classes.dex" || return 1
 			zip -0rq "${integs_file}" . || return 1
 			rm -r "${integs_file}-zip"
-		} >&2 || epr "Patching revanced-integrations failed"
+		) >&2 || epr "Patching revanced-integrations failed"
 	fi
 }
 
