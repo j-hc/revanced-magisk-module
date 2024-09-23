@@ -20,9 +20,9 @@ COMPRESSION_LEVEL=$(toml_get "$main_config_t" compression-level) || COMPRESSION_
 if ! PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs); then
 	if [ "$OS" = Android ]; then PARALLEL_JOBS=1; else PARALLEL_JOBS=$(nproc); fi
 fi
-DEF_PATCHES_VER=$(toml_get "$main_config_t" patches-version) || DEF_PATCHES_VER=""
-DEF_INTEGRATIONS_VER=$(toml_get "$main_config_t" integrations-version) || DEF_INTEGRATIONS_VER=""
-DEF_CLI_VER=$(toml_get "$main_config_t" cli-version) || DEF_CLI_VER=""
+DEF_PATCHES_VER=$(toml_get "$main_config_t" patches-version) || DEF_PATCHES_VER="latest"
+DEF_INTEGRATIONS_VER=$(toml_get "$main_config_t" integrations-version) || DEF_INTEGRATIONS_VER="latest"
+DEF_CLI_VER=$(toml_get "$main_config_t" cli-version) || DEF_CLI_VER="latest"
 DEF_PATCHES_SRC=$(toml_get "$main_config_t" patches-source) || DEF_PATCHES_SRC="ReVanced/revanced-patches"
 DEF_INTEGRATIONS_SRC=$(toml_get "$main_config_t" integrations-source) || DEF_INTEGRATIONS_SRC="ReVanced/revanced-integrations"
 DEF_CLI_SRC=$(toml_get "$main_config_t" cli-source) || DEF_CLI_SRC="j-hc/revanced-cli"
@@ -52,20 +52,6 @@ zip --version >/dev/null || abort "\`zip\` is not installed. install it with 'ap
 rm -rf revanced-magisk/bin/*/tmp.*
 get_prebuilts
 
-set_prebuilts() {
-	local integrations_src=$1 patches_src=$2 cli_src=$3 integrations_ver=$4 patches_ver=$5 cli_ver=$6
-	local patches_dir=${patches_src%/*}
-	local integrations_dir=${integrations_src%/*}
-	local cli_dir=${cli_src%/*}
-	cli_ver=${cli_ver#v}
-	integrations_ver="${integrations_ver#v}"
-	patches_ver="${patches_ver#v}"
-	app_args[cli]=$(find "${TEMP_DIR}/${cli_dir,,}-rv" -name "revanced-cli-${cli_ver:-*}-all.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[cli]}" ] || return 1
-	app_args[integ]=$(find "${TEMP_DIR}/${integrations_dir,,}-rv" -name "revanced-integrations-${integrations_ver:-*}.apk" -type f -print -quit 2>/dev/null) && [ "${app_args[integ]}" ] || return 1
-	app_args[ptjar]=$(find "${TEMP_DIR}/${patches_dir,,}-rv" -name "revanced-patches-${patches_ver:-*}.jar" -type f -print -quit 2>/dev/null) && [ "${app_args[ptjar]}" ] || return 1
-	app_args[ptjs]=$(find "${TEMP_DIR}/${patches_dir,,}-rv" -name "patches-${patches_ver:-*}.json" -type f -print -quit 2>/dev/null) && [ "${app_args[ptjs]}" ] || return 1
-}
-
 declare -A cliriplib
 idx=0
 for table_name in $(toml_get_table_names); do
@@ -86,16 +72,14 @@ for table_name in $(toml_get_table_names); do
 	cli_src=$(toml_get "$t" cli-source) || cli_src=$DEF_CLI_SRC
 	cli_ver=$(toml_get "$t" cli-version) || cli_ver=$DEF_CLI_VER
 
-	if ! set_prebuilts "$integrations_src" "$patches_src" "$cli_src" "$integrations_ver" "$patches_ver" "$cli_ver"; then
-		if ! RVP="$(get_rv_prebuilts "$cli_src" "$cli_ver" "$integrations_src" "$integrations_ver" "$patches_src" "$patches_ver")"; then
-			abort "could not download rv prebuilts"
-		fi
-		read -r rv_cli_jar rv_integrations_apk rv_patches_jar rv_patches_json <<<"$RVP"
-		app_args[cli]=$rv_cli_jar
-		app_args[integ]=$rv_integrations_apk
-		app_args[ptjar]=$rv_patches_jar
-		app_args[ptjs]=$rv_patches_json
+	if ! RVP="$(get_rv_prebuilts "$cli_src" "$cli_ver" "$integrations_src" "$integrations_ver" "$patches_src" "$patches_ver")"; then
+		abort "could not download rv prebuilts"
 	fi
+	read -r rv_cli_jar rv_integrations_apk rv_patches_jar rv_patches_json <<<"$RVP"
+	app_args[cli]=$rv_cli_jar
+	app_args[integ]=$rv_integrations_apk
+	app_args[ptjar]=$rv_patches_jar
+	app_args[ptjs]=$rv_patches_json
 	if [[ -v cliriplib[${app_args[cli]}] ]]; then app_args[riplib]=${cliriplib[${app_args[cli]}]}; else
 		if [[ $(java -jar "${app_args[cli]}" patch 2>&1) == *rip-lib* ]]; then
 			cliriplib[${app_args[cli]}]=true
@@ -106,7 +90,7 @@ for table_name in $(toml_get_table_names); do
 		fi
 	fi
 	if [ "${app_args[riplib]}" = "true" ] && [ "$(toml_get "$t" riplib)" = "false" ]; then app_args[riplib]=false; fi
-	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]="$DEF_RV_BRAND"
+	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]=$DEF_RV_BRAND
 
 	app_args[excluded_patches]=$(toml_get "$t" excluded-patches) || app_args[excluded_patches]=""
 	if [ -n "${app_args[excluded_patches]}" ] && [[ ${app_args[excluded_patches]} != *'"'* ]]; then abort "patch names inside excluded-patches must be quoted"; fi
