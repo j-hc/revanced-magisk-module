@@ -107,16 +107,19 @@ get_rv_prebuilts() {
 	echo
 
 	if [ "$integs_file" ]; then
-		(
+		if ! (
 			mkdir -p "${integs_file}-zip" || return 1
 			unzip -qo "${integs_file}" -d "${integs_file}-zip" || return 1
-			rm "${integs_file}" || return 1
 			cd "${integs_file}-zip" || return 1
 			java -cp "${BIN_DIR}/paccer.jar:${BIN_DIR}/dexlib2.jar" com.jhc.Main "${integs_file}-zip/classes.dex" "${integs_file}-zip/classes-patched.dex" || return 1
 			mv -f "${integs_file}-zip/classes-patched.dex" "${integs_file}-zip/classes.dex" || return 1
+			rm "${integs_file}" || return 1
 			zip -0rq "${integs_file}" . || return 1
-			rm -r "${integs_file}-zip"
-		) >&2 || epr "Patching revanced-integrations failed"
+		) >&2; then
+			epr "Patching revanced-integrations failed"
+		fi
+		rm -r "${integs_file}-zip" || :
+
 	fi
 }
 
