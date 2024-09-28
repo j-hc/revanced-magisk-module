@@ -42,7 +42,6 @@ get_rv_prebuilts() {
 	local cl_dir=${patches_src%/*}
 	cl_dir=${TEMP_DIR}/${cl_dir,,}-rv
 	[ -d "$cl_dir" ] || mkdir "$cl_dir"
-	: >"${cl_dir}/changelog.md"
 	for src_ver in "$cli_src CLI $cli_ver" "$integrations_src Integrations $integrations_ver" "$patches_src Patches $patches_ver"; do
 		set -- $src_ver
 		local src=$1 tag=$2 ver=${3-} ext
@@ -57,7 +56,6 @@ get_rv_prebuilts() {
 
 		local rv_rel="https://api.github.com/repos/${src}/releases" name_ver
 		if [ "$ver" = "dev" ]; then
-			rv_rel+="/tags/$(gh_req "$rv_rel" - | jq -r '.[0] | .tag_name')"
 			name_ver="*-dev*"
 		elif [ "$ver" = "latest" ]; then
 			rv_rel+="/latest"
@@ -76,6 +74,7 @@ get_rv_prebuilts() {
 		if [ -z "$file" ]; then
 			local resp asset name
 			resp=$(gh_req "$rv_rel" -) || return 1
+			if [ "$ver" = "dev" ]; then resp=$(jq -r '.[0]' <<<"$resp"); fi
 			tag_name=$(jq -r '.tag_name' <<<"$resp")
 			asset=$(jq -e -r ".assets[] | select(.name | endswith(\"$ext\"))" <<<"$resp") || return 1
 			url=$(jq -r .url <<<"$asset")
@@ -83,6 +82,7 @@ get_rv_prebuilts() {
 			file="${dir}/${name}"
 			gh_dl "$file" "$url" >&2 || return 1
 			if [ "$tag" = "Integrations" ]; then integs_file=$file; fi
+			echo "$tag: $(cut -d/ -f1 <<<"$src")/${name}  " >>"${cl_dir}/changelog.md"
 		else
 			name=$(basename "$file")
 			tag_name=$(cut -d'-' -f3- <<<"$name")
@@ -90,18 +90,18 @@ get_rv_prebuilts() {
 			if [ "$tag_name" = "v" ]; then abort; fi
 		fi
 
-		echo "$tag: $(cut -d/ -f1 <<<"$src")/${name}  " >>"${cl_dir}/changelog.md"
 		echo -n "$file "
 		if [ "$tag" = "Patches" ]; then
 			name="patches-${tag_name}.json"
 			file="${dir}/${name}"
 			if [ ! -f "$file" ]; then
 				resp=$(gh_req "$rv_rel" -) || return 1
+				if [ "$ver" = "dev" ]; then resp=$(jq -r '.[0]' <<<"$resp"); fi
 				url=$(jq -e -r '.assets[] | select(.name | endswith("json")) | .url' <<<"$resp") || return 1
 				gh_dl "$file" "$url" >&2 || return 1
+				echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"
 			fi
 			echo -n "$file "
-			echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"
 		fi
 	done
 	echo
@@ -116,7 +116,7 @@ get_rv_prebuilts() {
 			rm "${integs_file}" || return 1
 			zip -0rq "${integs_file}" . || return 1
 		) >&2; then
-			epr "Patching revanced-integrations failed"
+			echo >&2 "Patching revanced-integrations failed"
 		fi
 		rm -r "${integs_file}-zip" || :
 
@@ -155,26 +155,34 @@ config_update() {
 		enabled=$(toml_get "$t" enabled) || enabled=true
 		if [ "$enabled" = false ]; then continue; fi
 		PATCHES_SRC=$(toml_get "$t" patches-source) || PATCHES_SRC=$DEF_PATCHES_SRC
-		if [[ -v sources[$PATCHES_SRC] ]]; then
-			if [ "${sources[$PATCHES_SRC]}" = 1 ]; then
+		PATCHES_VER=$(toml_get "$t" patches-version) || PATCHES_VER=$DEF_PATCHES_VER
+		if [[ -v sources["$PATCHES_SRC/$PATCHES_VER"] ]]; then
+			if [ "${sources["$PATCHES_SRC/$PATCHES_VER"]}" = 1 ]; then
 				conf+="$t"
 				conf+=$'\n'
 			fi
 		else
-			sources[$PATCHES_SRC]=0
-			if ! last_patches=$(gh_req "https://api.github.com/repos/${PATCHES_SRC}/releases/latest" - |
-				jq -e -r '.assets[] | select(.name | endswith("jar")) | .name'); then
+			sources["$PATCHES_SRC/$PATCHES_VER"]=0
+			local rv_rel="https://api.github.com/repos/${PATCHES_SRC}/releases"
+			if [ "$PATCHES_VER" = "dev" ]; then
+				last_patches=$(gh_req "$rv_rel" - | jq -e -r '.[0]')
+			elif [ "$PATCHES_VER" = "latest" ]; then
+				last_patches=$(gh_req "$rv_rel/latest" -)
+			else
+				last_patches=$(gh_req "$rv_rel/tags/${ver}" -)
+			fi
+
+			if ! last_patches=$(jq -e -r '.assets[] | select(.name | endswith("jar")) | .name' <<<"$last_patches"); then
 				abort oops
 			fi
-			cur_patches=$(sed -n "s/.*Patches: ${PATCHES_SRC%%/*}\/\(.*\)/\1/p" build.md | xargs)
-			if [ "$cur_patches" ] && [ "$last_patches" ]; then
-				if [ "${cur_patches}" != "$last_patches" ]; then
-					sources[$PATCHES_SRC]=1
+			if [ "$last_patches" ]; then
+				if ! OP=$(grep "^Patches: ${PATCHES_SRC%%/*}/" build.md | grep "$last_patches"); then
+					sources["$PATCHES_SRC/$PATCHES_VER"]=1
 					prcfg=true
 					conf+="$t"
 					conf+=$'\n'
 				else
-					echo "Patches: ${PATCHES_SRC%%/*}/${cur_patches}  " >>"$TEMP_DIR"/skipped
+					echo "$OP" >>"$TEMP_DIR"/skipped
 				fi
 			fi
 		fi
