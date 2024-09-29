@@ -50,6 +50,8 @@ java --version >/dev/null || abort "\`openjdk 17\` is not installed. install it 
 zip --version >/dev/null || abort "\`zip\` is not installed. install it with 'apt install zip' or equivalent"
 # ----------------
 rm -rf revanced-magisk/bin/*/tmp.*
+: >"$TEMP_DIR"/*-rv/changelog.md || :
+
 get_prebuilts
 
 declare -A cliriplib
@@ -160,14 +162,14 @@ for table_name in $(toml_get_table_names); do
 done
 wait
 rm -rf temp/tmp.*
-if [ -z "$(ls -A1 ${BUILD_DIR})" ]; then abort "All builds failed."; fi
+if [ -z "$(ls -A1 "${BUILD_DIR}")" ]; then abort "All builds failed."; fi
 
 log "\nInstall [Microg](https://github.com/ReVanced/GmsCore/releases) for non-root YouTube and YT Music APKs"
 log "Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach root ReVanced YouTube and YT Music from Play Store"
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)\n"
-log "$(cat $TEMP_DIR/*-rv/changelog.md)"
+log "$(cat "$TEMP_DIR"/*-rv/changelog.md)"
 
-SKIPPED=$(cat $TEMP_DIR/skipped 2>/dev/null || :)
+SKIPPED=$(cat "$TEMP_DIR"/skipped 2>/dev/null || :)
 if [ -n "$SKIPPED" ]; then
 	log "\nSkipped:"
 	log "$SKIPPED"
