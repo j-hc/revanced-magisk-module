@@ -50,7 +50,9 @@ java --version >/dev/null || abort "\`openjdk 17\` is not installed. install it 
 zip --version >/dev/null || abort "\`zip\` is not installed. install it with 'apt install zip' or equivalent"
 # ----------------
 rm -rf revanced-magisk/bin/*/tmp.*
-: >"$TEMP_DIR"/*-rv/changelog.md || :
+if [ "$(echo "$TEMP_DIR"/*-rv/changelog.md)" ]; then
+	: >"$TEMP_DIR"/*-rv/changelog.md || :
+fi
 
 get_prebuilts
 

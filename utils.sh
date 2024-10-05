@@ -80,13 +80,14 @@ get_rv_prebuilts() {
 			if [ "$tag" = "Integrations" ]; then integs_file=$file; fi
 			echo "$tag: $(cut -d/ -f1 <<<"$src")/${name}  " >>"${cl_dir}/changelog.md"
 		else
+			local for_err=$file
 			if [ "$ver" = "latest" ]; then
 				file=$(grep -v dev <<<"$file" | head -1)
 			else file=$(grep "${ver#v}" <<<"$file" | head -1); fi
+			if [ -z "$file" ]; then abort "filter fail: '$for_err' with '$ver'"; fi
 			name=$(basename "$file")
 			tag_name=$(cut -d'-' -f3- <<<"$name")
 			tag_name=v${tag_name%.*}
-			if [ "$tag_name" = "v" ]; then abort "wrong ver"; fi
 		fi
 
 		echo -n "$file "
@@ -543,9 +544,11 @@ build_rv() {
 				fi
 			fi
 		fi
-		if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
-			epr "Building '${table}' failed!"
-			return 0
+		if [ "${NORB:-}" != true ] || [ ! -f "$patched_apk" ]; then
+			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
+				epr "Building '${table}' failed!"
+				return 0
+			fi
 		fi
 		if [ "$build_mode" = apk ]; then
 			local apk_output="${BUILD_DIR}/${app_name_l}-${rv_brand_f}-v${version_f}-${arch_f}.apk"
