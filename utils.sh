@@ -82,8 +82,8 @@ get_rv_prebuilts() {
 		else
 			local for_err=$file
 			if [ "$ver" = "latest" ]; then
-				file=$(grep -v dev <<<"$file" | head -1)
-			else file=$(grep "${ver#v}" <<<"$file" | head -1); fi
+				file=$(grep -v '/[^/]*dev[^/]*$' <<<"$file" | head -1)
+			else file=$(grep "/[^/]*${ver#v}[^/]*\$" <<<"$file" | head -1); fi
 			if [ -z "$file" ]; then abort "filter fail: '$for_err' with '$ver'"; fi
 			name=$(basename "$file")
 			tag_name=$(cut -d'-' -f3- <<<"$name")
