@@ -138,6 +138,7 @@ if [ -z "$(ls -A1 "$BASEPATHLIB")" ]; then
 	fi
 	set_perm_recursive "${BASEPATH}/lib" 1000 1000 755 755 u:object_r:apk_data_file:s0
 fi
+if [ "$IS_SYS" = false ]; then mkdir -p "/data/adb/rvhc"; fi
 mv -f "$MODPATH/base.apk" "$RVPATH"
 
 ui_print "* Setting Permissions"
@@ -145,7 +146,6 @@ set_perm "$RVPATH" 1000 1000 644 u:object_r:apk_data_file:s0
 
 if [ "$IS_SYS" = false ]; then
 	ui_print "* Mounting $PKG_NAME"
-	mkdir -p "/data/adb/rvhc"
 	if ! op=$(mm mount -o bind "$RVPATH" "$BASEPATH/base.apk" 2>&1); then
 		ui_print "ERROR: Mount failed!"
 		ui_print "$op"
