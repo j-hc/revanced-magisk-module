@@ -6,8 +6,6 @@ if [ -n "$MODULE_ARCH" ] && [ "$MODULE_ARCH" != "$ARCH" ]; then
 Your device: $ARCH
 Module: $MODULE_ARCH"
 fi
-
-alias cmpr="$MODPATH/bin/$ARCH/cmpr"
 if [ "$ARCH" = "arm" ]; then
 	ARCH_LIB=armeabi-v7a
 elif [ "$ARCH" = "arm64" ]; then
@@ -23,9 +21,7 @@ set_perm_recursive "$MODPATH/bin" 0 0 0755 0777
 
 if su -M -c true >/dev/null 2>/dev/null; then
 	alias mm='su -M -c'
-else
-	alias mm='nsenter -t1 -m'
-fi
+else alias mm='nsenter -t1 -m'; fi
 
 mm grep -F "$PKG_NAME" /proc/mounts | while read -r line; do
 	ui_print "* Un-mount"
@@ -34,27 +30,27 @@ mm grep -F "$PKG_NAME" /proc/mounts | while read -r line; do
 done
 am force-stop "$PKG_NAME"
 
-if ! (pm path "$PKG_NAME" >/dev/null 2>&1 </dev/null); then
-	if ! op=$(pm install-existing "$PKG_NAME" 2>&1 </dev/null) && echo "$op" | grep -qv NameNotFoundException; then
-		ui_print "ERROR: install-existing failed"
-		abort "$op"
+pmex() {
+	OP=$(pm "$@" 2>&1 </dev/null)
+	RET=$?
+	echo "$OP"
+	return $RET
+}
+
+if ! pmex path "$PKG_NAME" >/dev/null; then
+	if pmex install-existing "$PKG_NAME" >/dev/null; then
+		ui_print "* Installed existing $PKG_NAME"
 	fi
-	ui_print "* Installed existing $PKG_NAME"
 fi
 
-INS=true
 IS_SYS=false
-if BASEPATH=$(pm path "$PKG_NAME" 2>&1 </dev/null); then
+INS=true
+if BASEPATH=$(pmex path "$PKG_NAME"); then
+	echo >&2 "'$BASEPATH'"
 	BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 	if echo "$BASEPATH" | grep -qF -e '/system/' -e '/product/'; then
-		ui_print "* $PKG_NAME is a system app"
-		if [ "${BASEPATH:1:6}" != system ]; then BASEPATH=/system${BASEPATH}; fi
+		ui_print "* $PKG_NAME is a system app."
 		IS_SYS=true
-	elif [ ! -d "${BASEPATH}/lib" ]; then
-		ui_print "* Invalid installation found. Uninstalling..."
-		if ! op=$(pm uninstall -k --user 0 "$PKG_NAME" 2>&1 </dev/null); then
-			abort "$op"
-		fi
 	elif [ ! -f "$MODPATH/$PKG_NAME.apk" ]; then
 		ui_print "* Stock $PKG_NAME APK was not found"
 		VERSION=$(dumpsys package "$PKG_NAME" | grep -m1 versionName) VERSION="${VERSION#*=}"
@@ -67,7 +63,7 @@ if BASEPATH=$(pm path "$PKG_NAME" 2>&1 </dev/null); then
 			module:    $PKG_VER
 			"
 		fi
-	elif cmpr "$BASEPATH/base.apk" "$MODPATH/$PKG_NAME.apk"; then
+	elif "${MODPATH:?}/bin/$ARCH/cmpr" "$BASEPATH/base.apk" "$MODPATH/$PKG_NAME.apk"; then
 		ui_print "* $PKG_NAME is up-to-date"
 		INS=false
 	fi
@@ -81,33 +77,34 @@ install() {
 	VERIF_ADB=$(settings get global verifier_verify_adb_installs)
 	settings put global verifier_verify_adb_installs 0
 	SZ=$(stat -c "%s" "$MODPATH/$PKG_NAME.apk")
-
-	while true; do
-		if ! SES=$(pm install-create --user 0 -i com.android.vending -r -d -S "$SZ" 2>&1 </dev/null); then
+	for _ in 1 2; do
+		if ! SES=$(pmex install-create --user 0 -i com.android.vending -r -d -S "$SZ"); then
 			ui_print "ERROR: install-create failed"
 			settings put global verifier_verify_adb_installs "$VERIF_ADB"
 			abort "$SES"
 		fi
 		SES=${SES#*[} SES=${SES%]*}
 		set_perm "$MODPATH/$PKG_NAME.apk" 1000 1000 644 u:object_r:apk_data_file:s0
-		if ! op=$(pm install-write -S "$SZ" "$SES" "$PKG_NAME.apk" "$MODPATH/$PKG_NAME.apk" 2>&1 </dev/null); then
+		if ! op=$(pmex install-write -S "$SZ" "$SES" "$PKG_NAME.apk" "$MODPATH/$PKG_NAME.apk"); then
 			ui_print "ERROR: install-write failed"
 			settings put global verifier_verify_adb_installs "$VERIF_ADB"
 			abort "$op"
 		fi
-		if ! op=$(pm install-commit "$SES" 2>&1 </dev/null); then
+		if ! op=$(pmex install-commit "$SES"); then
 			if echo "$op" | grep -q INSTALL_FAILED_VERSION_DOWNGRADE; then
-				ui_print "* ERROR: INSTALL_FAILED_VERSION_DOWNGRADE"
+				ui_print "* Handling INSTALL_FAILED_VERSION_DOWNGRADE.."
 				if [ "$IS_SYS" = true ]; then
-					ui_print "* Use system mount mode"
-					BASEPATH=${MODPATH}${BASEPATH}
-					set_perm "$BASEPATH" 1000 1000 755 u:object_r:system_file:s0
-					RVPATH=$BASEPATH/${BASEPATH##*/}.apk
-					rm "$MODPATH/service.sh" "$MODPATH/uninstall.sh"
-					break
+					mkdir -p /data/adb/rvhc/empty /data/adb/post-fs-data.d
+					SCNM="/data/adb/post-fs-data.d/$PKG_NAME-uninstall.sh"
+					echo "mount -o bind /data/adb/rvhc/empty $BASEPATH" >"$SCNM"
+					chmod +x "$SCNM"
+					ui_print "* Created the uninstall script."
+					ui_print ""
+					ui_print "* Reboot and reflash the module!"
+					abort
 				else
 					ui_print "* Uninstalling..."
-					if ! op=$(pm uninstall -k --user 0 "$PKG_NAME" 2>&1 </dev/null); then
+					if ! op=$(pmex uninstall -k --user 0 "$PKG_NAME"); then
 						ui_print "$op"
 					fi
 					continue
@@ -117,9 +114,10 @@ install() {
 			settings put global verifier_verify_adb_installs "$VERIF_ADB"
 			abort "$op"
 		fi
-		if BASEPATH=$(pm path "$PKG_NAME" 2>&1 </dev/null); then
+		if BASEPATH=$(pmex path "$PKG_NAME"); then
 			BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 		else
+			settings put global verifier_verify_adb_installs "$VERIF_ADB"
 			abort "ERROR: install $PKG_NAME manually and reflash the module"
 		fi
 		break
@@ -138,28 +136,26 @@ if [ -z "$(ls -A1 "$BASEPATHLIB")" ]; then
 	fi
 	set_perm_recursive "${BASEPATH}/lib" 1000 1000 755 755 u:object_r:apk_data_file:s0
 fi
-if [ "$IS_SYS" = false ]; then mkdir -p "/data/adb/rvhc"; fi
+ui_print "* Setting Permissions"
+set_perm "$MODPATH/base.apk" 1000 1000 644 u:object_r:apk_data_file:s0
+
+ui_print "* Mounting $PKG_NAME"
+mkdir -p "/data/adb/rvhc"
+RVPATH=/data/adb/rvhc/${MODPATH##*/}.apk
 mv -f "$MODPATH/base.apk" "$RVPATH"
 
-ui_print "* Setting Permissions"
-set_perm "$RVPATH" 1000 1000 644 u:object_r:apk_data_file:s0
-
-if [ "$IS_SYS" = false ]; then
-	ui_print "* Mounting $PKG_NAME"
-	if ! op=$(mm mount -o bind "$RVPATH" "$BASEPATH/base.apk" 2>&1); then
-		ui_print "ERROR: Mount failed!"
-		ui_print "$op"
-	fi
-	am force-stop "$PKG_NAME"
-
-	ui_print "* Optimizing $PKG_NAME"
-	nohup cmd package compile --reset "$PKG_NAME" >/dev/null 2>&1 &
+if ! op=$(mm mount -o bind "$RVPATH" "$BASEPATH/base.apk" 2>&1); then
+	ui_print "ERROR: Mount failed!"
+	ui_print "$op"
 fi
+am force-stop "$PKG_NAME"
+ui_print "* Optimizing $PKG_NAME"
+nohup cmd package compile --reset "$PKG_NAME" >/dev/null 2>&1 &
 
 ui_print "* Cleanup"
 rm -rf "${MODPATH:?}/bin" "$MODPATH/$PKG_NAME.apk"
 
-if [ -d "/data/adb/modules/zygisk-assistant" ]; then
+if [ "$KSU" ] && [ -d "/data/adb/modules/zygisk-assistant" ]; then
 	ui_print "* If you are using zygisk-assistant, you need to"
 	ui_print "  give root permissions to $PKG_NAME"
 fi
