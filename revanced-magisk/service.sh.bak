@@ -23,7 +23,7 @@ if [ $svcl != 0 ]; then
 fi
 BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 if [ ! -d "$BASEPATH/lib" ]; then
-	err "zygote crashed (fix your ROM)"
+	err "system force-rebooted (fix your ROM)"
 	exit
 fi
 VERSION=$(dumpsys package "$PKG_NAME" | grep -m1 versionName) VERSION="${VERSION#*=}"

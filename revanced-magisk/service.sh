@@ -11,21 +11,21 @@ while
 	[ $svcl = 20 ]
 do sleep 2; done
 sleep 5
+if [ $svcl != 0 ]; then
+	err "app not installed"
+	exit
+fi
+BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 
 err() {
 	[ ! -f "$MODDIR/err" ] && cp "$MODDIR/module.prop" "$MODDIR/err"
 	sed -i "s/^des.*/description=⚠️ Needs reflash: '${1}'/g" "$MODDIR/module.prop"
 }
 
-if [ $svcl != 0 ]; then
-	err "app not installed"
-	exit
-fi
-BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 if [ ! -d "$BASEPATH/lib" ]; then
-	err "system force-rebooted (fix your ROM)"
-	exit
-fi
+	ls -Zla "$BASEPATH" >"$MODDIR/log.txt"
+	ls -Zla "$BASEPATH/lib" >>"$MODDIR/log.txt"
+else rm "$MODDIR/log.txt"; fi
 VERSION=$(dumpsys package "$PKG_NAME" | grep -m1 versionName) VERSION="${VERSION#*=}"
 if [ "$VERSION" != "$PKG_VER" ] && [ "$VERSION" ]; then
 	err "version mismatch (installed:${VERSION}, module:$PKG_VER)"

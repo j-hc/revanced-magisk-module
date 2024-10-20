@@ -6,4 +6,4 @@ test*
 /logs
 build.md
 cmpr
-.bak
+*.bak
