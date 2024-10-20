@@ -1,6 +1,6 @@
 {
-  "version": "v7.21.50",
-  "versionCode": 20220965,
-  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20220965/music-revanced-magisk-v7.21.50-arm64-v8a.zip",
+  "version": "v7.23.51",
+  "versionCode": 20220967,
+  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20220967/music-revanced-magisk-v7.23.51-arm64-v8a.zip",
   "changelog": "https://raw.githubusercontent.com/j-hc/revanced-magisk-module/update/build.md"
 }
