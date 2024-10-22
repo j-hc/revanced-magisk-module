@@ -106,7 +106,7 @@ get_rv_prebuilts() {
 	done
 	echo
 
-	if [ "$integs_file" ]; then
+	if [ "$integs_file" ] && [ "$REMOVE_RV_INTEGRATIONS_CHECKS" = true ]; then
 		if ! (
 			mkdir -p "${integs_file}-zip" || return 1
 			unzip -qo "${integs_file}" -d "${integs_file}-zip" || return 1
@@ -119,7 +119,6 @@ get_rv_prebuilts() {
 			echo >&2 "Patching revanced-integrations failed"
 		fi
 		rm -r "${integs_file}-zip" || :
-
 	fi
 }
 

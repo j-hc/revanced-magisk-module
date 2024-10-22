@@ -14,6 +14,9 @@ There exists an example below with all defaults shown and all the keys explicitl
 
 ```toml
 parallel-jobs = 1 # amount of cores to use for parallel patching, if not set nproc is used
+compression-level = 9 # module zip compression level
+remove-rv-integrations-checks = true # remove checks from the revanced integrations
+
 patches-source = "revanced/revanced-patches" # where to fetch patches bundle from. default: "revanced/revanced-patches"
 integrations-source = "revanced/revanced-integrations" # where to fetch integrations from. default: "revanced/revanced-integrations"
 cli-source = "j-hc/revanced-cli" # where to fetch cli from. default: "j-hc/revanced-cli"
