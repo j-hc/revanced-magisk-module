@@ -78,7 +78,7 @@ jobs:
           cp -f build.tmp build.md
           get_update_json() {
             echo "{
-            \"version\": \"$1 (${{ steps.next_ver_code.outputs.NEXT_VER_CODE }})\",
+            \"version\": \"$1\",
             \"versionCode\": ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }},
             \"zipUrl\": \"$2\",
             \"changelog\": \"https://raw.githubusercontent.com/$GITHUB_REPOSITORY/update/build.md\"
