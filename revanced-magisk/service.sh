@@ -42,6 +42,10 @@ run() {
 		return
 	fi
 	mount -o bind "$RVPATH" "$BASEPATH/base.apk"
+	# simonpunk's susfs support
+	if [ -f /data/adb/ksu/bin/ksu_susfs ] ; then
+		/data/adb/ksu/bin/ksu_susfs add_sus_mount "$BASEPATH/base.apk"
+	fi
 	am force-stop "$PKG_NAME"
 	[ -f "$MODDIR/err" ] && mv -f "$MODDIR/err" "$MODDIR/module.prop"
 }
