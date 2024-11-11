@@ -37,9 +37,16 @@ pmex() {
 	return $RET
 }
 
-if ! pmex path "$PKG_NAME" >/dev/null; then
-	if pmex install-existing "$PKG_NAME" >/dev/null; then
-		ui_print "* Installed existing $PKG_NAME"
+if ! pmex path "$PKG_NAME" >&2; then
+	if pmex install-existing "$PKG_NAME" >&2; then
+		BASEPATH=$(pmex path "$PKG_NAME") || abort "ERROR: pm path failed $BASEPATH"
+		echo >&2 "'$BASEPATH'"
+		BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
+		if [ "${BASEPATH:1:4}" = data ]; then
+			if pmex uninstall -k --user 0 "$PKG_NAME" >&2; then
+				ui_print "* Cleared existing $PKG_NAME package"
+			else abort "ERROR: pm uninstall failed"; fi
+		else ui_print "* Installed stock $PKG_NAME package"; fi
 	fi
 fi
 
@@ -48,7 +55,7 @@ INS=true
 if BASEPATH=$(pmex path "$PKG_NAME"); then
 	echo >&2 "'$BASEPATH'"
 	BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
-	if echo "$BASEPATH" | grep -qF -e '/system/' -e '/product/'; then
+	if [ "${BASEPATH:1:4}" != data ]; then
 		ui_print "* $PKG_NAME is a system app."
 		IS_SYS=true
 	elif [ ! -f "$MODPATH/$PKG_NAME.apk" ]; then
@@ -77,7 +84,7 @@ install() {
 	VERIF_ADB=$(settings get global verifier_verify_adb_installs)
 	settings put global verifier_verify_adb_installs 0
 	SZ=$(stat -c "%s" "$MODPATH/$PKG_NAME.apk")
-	for _ in 1 2; do
+	for IT in 1 2; do
 		if ! SES=$(pmex install-create --user 0 -i com.android.vending -r -d -S "$SZ"); then
 			ui_print "ERROR: install-create failed"
 			settings put global verifier_verify_adb_installs "$VERIF_ADB"
@@ -106,6 +113,7 @@ install() {
 					ui_print "* Uninstalling..."
 					if ! op=$(pmex uninstall -k --user 0 "$PKG_NAME"); then
 						ui_print "$op"
+						if [ $IT = 2 ]; then abort "ERROR: pm uninstall failed."; fi
 					fi
 					continue
 				fi
