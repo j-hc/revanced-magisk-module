@@ -44,7 +44,10 @@ if ! pmex path "$PKG_NAME" >&2; then
 		BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 		if [ "${BASEPATH:1:4}" = data ]; then
 			if pmex uninstall -k --user 0 "$PKG_NAME" >&2; then
+				rm -rf "$BASEPATH" 2>&1
 				ui_print "* Cleared existing $PKG_NAME package"
+				ui_print "* Reboot and reflash"
+				abort
 			else abort "ERROR: pm uninstall failed"; fi
 		else ui_print "* Installed stock $PKG_NAME package"; fi
 	fi
