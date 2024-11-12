@@ -228,7 +228,7 @@ get_patch_last_supported_ver() {
 			ver=$(sed -n "/^Name: $line\$/,/^\$/p" <<<"$op" | sed -n "/^Compatible versions:\$/,/^\$/p" | tail -n +2)
 			vers=${ver}${NL}
 		done <<<"$(list_args "$inc_sel")"
-		vers=$(xargs <<<"$vers")
+		vers=$(awk '{$1=$1}1' <<<"$vers")
 		if [ "$vers" ]; then
 			get_highest_ver <<<"$vers"
 			return
