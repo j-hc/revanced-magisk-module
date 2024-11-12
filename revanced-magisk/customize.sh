@@ -139,7 +139,7 @@ if [ $INS = true ]; then
 	if ! install; then abort; fi
 	ui_print "* Extracting native libs"
 	BASEPATHLIB=${BASEPATH}/lib/${ARCH}
-	if [ ! -d "$BASEPATHLIB" ]; then mkdir -p "$BASEPATHLIB"; else rm -f "$BASEPATHLIB/*" >/dev/null 2>&1 || :; fi
+	if [ ! -d "$BASEPATHLIB" ]; then mkdir -p "$BASEPATHLIB"; else rm -f "$BASEPATHLIB"/* >/dev/null 2>&1 || :; fi
 	if ! op=$(unzip -j "$MODPATH/$PKG_NAME.apk" "lib/${ARCH_LIB}/*" -d "$BASEPATHLIB" 2>&1); then
 		ui_print "ERROR: extracting native libs failed"
 		abort "$op"
