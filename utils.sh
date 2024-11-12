@@ -228,8 +228,11 @@ get_patch_last_supported_ver() {
 			ver=$(sed -n "/^Name: $line\$/,/^\$/p" <<<"$op" | sed -n "/^Compatible versions:\$/,/^\$/p" | tail -n +2)
 			vers=${ver}${NL}
 		done <<<"$(list_args "$inc_sel")"
-		get_highest_ver <<<"$vers"
-		return
+		vers=$(xargs <<<"$vers")
+		if [ "$vers" ]; then
+			get_highest_ver <<<"$vers"
+			return
+		fi
 	fi
 	if ! op=$(java -jar "$rv_cli_jar" list-versions "$rv_patches_jar" -f "$pkg_name" 2>&1 | tail -n +3 | awk '{$1=$1}1'); then
 		epr "list-versions: '$op'"
