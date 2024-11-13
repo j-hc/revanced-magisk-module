@@ -135,8 +135,8 @@ install() {
 	done
 	settings put global verifier_verify_adb_installs "$VERIF_ADB"
 }
-if [ $INS = true ]; then
-	if ! install; then abort; fi
+if [ $INS = true ] && ! install; then abort; fi
+if [ $INS = true ] || [ -z "$(ls -A1 "$BASEPATHLIB")" ]; then
 	ui_print "* Extracting native libs"
 	BASEPATHLIB=${BASEPATH}/lib/${ARCH}
 	if [ ! -d "$BASEPATHLIB" ]; then mkdir -p "$BASEPATHLIB"; else rm -f "$BASEPATHLIB"/* >/dev/null 2>&1 || :; fi
