@@ -24,27 +24,30 @@ arch = "both"
 [Twitter]
 enabled = true
 build-mode = "apk"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/x-corp/twitter"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
 
 [Twitch]
 enabled = true
 build-mode = "apk"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/tv.twitch.android.app"
 
 [TikTok]
 enabled = true
 build-mode = "apk"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
-included-patches = "'SIM spoof'"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
 included-patches = "'SIM spoof'"
 
 [Reddit]
 enabled = true
 build-mode = "apk"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
 
 [Spotify]
 enabled = true
 build-mode = "apk"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/spotify-ltd"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
