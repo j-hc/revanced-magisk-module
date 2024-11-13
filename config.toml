@@ -44,10 +44,10 @@ included-patches = "'SIM spoof'"
 enabled = true
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
 
 [Spotify]
 enabled = true
 build-mode = "apk"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/spotify-ltd"
-uptodown-dlurl = "https://spotify.en.uptodown.com/android"
+# uptodown-dlurl = "https://spotify.en.uptodown.com/android"
