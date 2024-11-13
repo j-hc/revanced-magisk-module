@@ -16,14 +16,13 @@ There exists an example below with all defaults shown and all the keys explicitl
 parallel-jobs = 1 # amount of cores to use for parallel patching, if not set nproc is used
 compression-level = 9 # module zip compression level
 remove-rv-integrations-checks = true # remove checks from the revanced integrations
+
 patches-source = "revanced/revanced-patches" # where to fetch patches bundle from. default: "revanced/revanced-patches"
-integrations-source = "revanced/revanced-integrations" # where to fetch integrations from. default: "revanced/revanced-integrations"
 cli-source = "j-hc/revanced-cli" # where to fetch cli from. default: "j-hc/revanced-cli"
 # options like cli-source can also set per app
 rv-brand = "ReVanced Extended" # rebrand from 'ReVanced' to something different. default: "ReVanced"
 
 patches-version = "v2.160.0" # 'latest', 'dev', or a version number. default: "latest"
-# integrations-version and cli-version can be also configured
 
 [Some-App]
 app-name = "SomeApp" # if set, release name becomes SomeApp instead of Some-App. default is same as table name, which is 'Some-App' here.
