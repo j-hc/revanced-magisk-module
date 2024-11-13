@@ -49,5 +49,4 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit"
 [Spotify]
 enabled = true
 build-mode = "apk"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/spotify-ltd"
-# uptodown-dlurl = "https://spotify.en.uptodown.com/android"
+uptodown-dlurl = "https://spotify.en.uptodown.com/android"
