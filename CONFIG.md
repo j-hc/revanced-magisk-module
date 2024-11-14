@@ -27,6 +27,7 @@ patches-version = "v2.160.0" # 'latest', 'dev', or a version number. default: "l
 [Some-App]
 app-name = "SomeApp" # if set, release name becomes SomeApp instead of Some-App. default is same as table name, which is 'Some-App' here.
 enabled = true # whether to build the app. default: true
+patcher-args = "-Okey=value" # optional args to be passed to cli. can be used to set patch options
 version = "auto" # 'auto', 'latest', 'beta' or a version number (e.g. '17.40.41'). default: auto
 # 'auto' option gets the latest possible version supported by all the included patches
 # 'latest' gets the latest stable without checking patches support. 'beta' gets the latest beta/alpha
