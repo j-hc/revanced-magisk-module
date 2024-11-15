@@ -1,5 +1,9 @@
 name: CI
 on:
+  workflow_run:
+    workflows: ["Sync"]  # This is the name of your sync.yml workflow
+    types:
+      - completed
   workflow_dispatch:
   schedule:
     - cron: "0 16 * * *"

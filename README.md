@@ -48,3 +48,15 @@ $ git clone https://github.com/j-hc/revanced-magisk-module
 $ cd revanced-magisk-module
 $ ./build.sh
 ```
+## Resources
+### [RvX](https://github.com/inotia00/revanced-patches)
+https://github.com/inotia00/revanced-patches
+
+### [ReX](https://github.com/YT-Advanced/revanced-patches)
+https://github.com/YT-Advanced/revanced-patches
+
+### [MicroG](https://github.com/WSTxda/MicroG-RE)
+> https://github.com/WSTxda/MicroG-RE/releases
+
+https://github.com/ReVanced/GmsCore/releases
+

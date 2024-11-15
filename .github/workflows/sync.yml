@@ -1,0 +1,43 @@
+name: Sync
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    permissions: write-all
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git for sync
+        run: |
+          git config user.email "omix.ok@gmail.com"
+          git config user.name "Omi"
+
+      - name: Add upstream remote and fetch
+        run: |
+          if ! git remote | grep -q "fork"; then
+            git remote add fork https://github.com/j-hc/revanced-magisk-module
+          fi
+          git fetch fork
+
+      - name: Sync with upstream
+        run: |
+          git checkout -B update-from-fork || git checkout update-from-fork
+          git merge fork/main --allow-unrelated-histories -X theirs --no-commit
+          git restore --source=HEAD -- config.toml CONFIG.md README.md .github/workflows/ci.yml
+          git commit -a -m "sync: upstream" || echo "No changes to commit"
+
+      - name: Merge to main and push
+        run: |
+          git checkout main
+          git merge update-from-fork --no-ff
+          git push origin main
+
+      - name: Verify and finalize
+        run: |
+          git pull origin main
