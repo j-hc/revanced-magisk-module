@@ -10,19 +10,19 @@ if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 OS=$(uname -o)
 
-toml_prep() { __TOML__=$(tr -d '\t\r' <<<"$1" | tr "'" '"' | grep -o '^[^#]*' | grep -v '^$' | sed -r 's/(\".*\")|\s*/\1/g; 1i []'); }
-toml_get_table_names() {
-	local tn
-	tn=$(grep -x '\[.*\]' <<<"$__TOML__" | tr -d '[]') || return 1
-	if [ "$(sort <<<"$tn" | uniq -u | wc -l)" != "$(wc -l <<<"$tn")" ]; then
-		abort "ERROR: Duplicate tables in TOML"
-	fi
-	echo "$tn"
-}
-toml_get_table() { sed -n "/\[${1}]/,/^\[.*]$/p" <<<"$__TOML__" | sed '${/^\[/d;}'; }
+toml_prep() { __TOML__=$($TOML get "$1" .); }
+toml_get_table_names() { jq -r -e 'to_entries[] | select(.value | type == "object") | .key' <<<"$__TOML__"; }
+toml_get_table_main() { jq -r -e 'to_entries | map(select(.value | type != "object")) | from_entries' <<<"$__TOML__"; }
+toml_get_table() { jq -r -e ".\"${1}\"" <<<"$__TOML__"; }
 toml_get() {
-	local table=$1 key=$2 val
-	val=$(grep -m 1 "^${key}=" <<<"$table") && sed -e "s/^\"//; s/\"$//" <<<"${val#*=}"
+	local op
+	op=$(jq -r ".\"${2}\" | values" <<<"$1")
+	if [ "$op" ]; then
+		op="${op#"${op%%[![:space:]]*}"}"
+		op="${op%"${op##*[![:space:]]}"}"
+		op=${op//"'"/'"'}
+		echo "$op"
+	else return 1; fi
 }
 
 pr() { echo -e "\033[0;32m[+] ${1}\033[0m"; }
@@ -117,8 +117,10 @@ get_prebuilts() {
 		if [ "$(uname -m)" = aarch64 ]; then arch=arm64; else arch=arm; fi
 		HTMLQ="${BIN_DIR}/htmlq/htmlq-${arch}"
 		AAPT2="${BIN_DIR}/aapt2/aapt2-${arch}"
+		TOML="${BIN_DIR}/toml/toml-${arch}"
 	else
 		HTMLQ="${BIN_DIR}/htmlq/htmlq-x86_64"
+		TOML="${BIN_DIR}/toml/toml-x86_64"
 	fi
 	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/x86 ${MODULE_TEMPLATE_DIR}/bin/x64
 	gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
@@ -404,7 +406,6 @@ get_archive_pkg_name() { echo "$__ARCHIVE_PKG_NAME__"; }
 
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3 rv_cli_jar=$4 rv_patches_jar=$5
-	# TODO: --options
 	local cmd="java -jar $rv_cli_jar patch $stock_input --purge -o $patched_apk -p $rv_patches_jar --keystore=ks.keystore \
 --keystore-entry-password=123456789 --keystore-password=123456789 --signer=jhc --keystore-entry-alias=jhc $patcher_args"
 	if [ "$OS" = Android ]; then cmd+=" --custom-aapt2-binary=${AAPT2}"; fi

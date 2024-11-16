@@ -13,7 +13,7 @@ There exists an example below with all defaults shown and all the keys explicitl
 **All keys are optional** (except download urls) and are assigned to their default values if not set explicitly.  
 
 ```toml
-parallel-jobs = 1 # amount of cores to use for parallel patching, if not set nproc is used
+parallel-jobs = 1 # amount of cores to use for parallel patching, if not set $(nproc) is used
 compression-level = 9 # module zip compression level
 remove-rv-integrations-checks = true # remove checks from the revanced integrations
 
@@ -23,18 +23,29 @@ cli-source = "j-hc/revanced-cli" # where to fetch cli from. default: "j-hc/revan
 rv-brand = "ReVanced Extended" # rebrand from 'ReVanced' to something different. default: "ReVanced"
 
 patches-version = "v2.160.0" # 'latest', 'dev', or a version number. default: "latest"
+cli-version = "v5.0.0" # 'latest', 'dev', or a version number. default: "latest"
 
 [Some-App]
 app-name = "SomeApp" # if set, release name becomes SomeApp instead of Some-App. default is same as table name, which is 'Some-App' here.
 enabled = true # whether to build the app. default: true
-patcher-args = "-Okey=value" # optional args to be passed to cli. can be used to set patch options
+
+# optional args to be passed to cli. can be used to set patch options
+# multiline strings in the config is supported
+patcher-args = """\
+  -OdarkThemeBackgroundColor=#FF0F0F0F \
+  -Oanother-option=value \
+  """
 version = "auto" # 'auto', 'latest', 'beta' or a version number (e.g. '17.40.41'). default: auto
 # 'auto' option gets the latest possible version supported by all the included patches
 # 'latest' gets the latest stable without checking patches support. 'beta' gets the latest beta/alpha
 include-stock = true # includes stock apk in the module. default: true
 build-mode = "apk" # 'both', 'apk' or 'module'. default: apk
-excluded-patches = "'Some Patch' 'Some Other Patch'" # whitespace seperated list of patches to exclude. default: "" (empty)
-included-patches = "'Patch something'" # whitespace seperated list of patches to include, all default patches are included by default. default: "" (empty)
+# whitespace seperated list of patches to exclude. default: ""
+excluded-patches = """\
+  'Some Patch' \
+  'Some Other Patch' \
+  """
+included-patches = "'Some Patch'" # whitespace seperated list of patches to include, all default patches are included by default. default: ""
 exclusive-patches = false # exclude all patches by default. default: false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
