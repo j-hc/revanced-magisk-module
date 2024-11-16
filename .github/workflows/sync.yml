@@ -29,7 +29,7 @@ jobs:
         run: |
           git checkout -B update-from-fork || git checkout update-from-fork
           git merge fork/main --allow-unrelated-histories -X theirs --no-commit
-          git restore --source=HEAD -- config.toml CONFIG.md README.md .github/workflows/ci.yml
+          git restore --source=HEAD -- config.toml README.md .github/workflows/ci.yml
           git commit -a -m "sync: upstream" || echo "No changes to commit"
 
       - name: Merge to main and push
