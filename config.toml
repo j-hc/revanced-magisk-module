@@ -12,26 +12,30 @@ rv-brand = "Revanced"
 version = "auto"
 arch = "arm64-v8a"
 build-mode = "apk"
-patcher-args = "'-OAppIcon=icons' '-OAppName=YoMaruExT'" # optional args to be passed to cli. can be used to set patch options
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 excluded-patches = ""
 included-patches = ""
+patcher-args = """\
+  -OAppIcon=icons \
+  -OAppName=YoMaruExT \
+   """
 
 
-# │ Revanced Extenends here │       RVX
-[RvX] #
-app-name = "Yomaru"
-rv-brand = "Ext-rvx"
-patches-source = "inotia00/revanced-patches"
-integrations-source = "inotia00/revanced-integrations"
-cli-source = "inotia00/revanced-cli"
-build-mode = "apk"                                                # apk = "apk" or magisk zip = "module"
-arch = "arm64-v8a"
-version = "auto"
-apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
-uptodown-dlurl = "https://youtube.en.uptodown.com/android"
-included-patches = "'Custom header for YouTube' 'Hide Shorts dimming'"
-excluded-patches = "'Custom branding icon for YouTube'"
-patcher-args = "'-OAppIcon=icons' '-OAppName=YoMaruExT'" # optional args to be passed to cli. can be used to set patch options
+# # │ Revanced Extenends here │       RVX
+# [RvX] #
+# app-name = "Yomaru"
+# rv-brand = "Ext-rvx"
+# patches-source = "inotia00/revanced-patches"
+# cli-source = "inotia00/revanced-cli"
+# integrations-source = "inotia00/revanced-integrations"
+# build-mode = "apk"                                                # apk = "apk" or magisk zip = "module"
+# arch = "arm64-v8a"
+# version = "auto"
+# apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
+# uptodown-dlurl = "https://youtube.en.uptodown.com/android"
+# # included-patches = "'Custom header for YouTube' 'Hide Shorts dimming'"
+# # excluded-patches = "'Custom branding icon for YouTube'"
+# excluded-patches = ""
+# included-patches = ""
 
