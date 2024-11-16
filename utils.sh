@@ -10,7 +10,7 @@ if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 OS=$(uname -o)
 
-toml_prep() { __TOML__=$($TOML get "$1" .); }
+toml_prep() { __TOML__=$($TOML --output json --file "$1" .); }
 toml_get_table_names() { jq -r -e 'to_entries[] | select(.value | type == "object") | .key' <<<"$__TOML__"; }
 toml_get_table_main() { jq -r -e 'to_entries | map(select(.value | type != "object")) | from_entries' <<<"$__TOML__"; }
 toml_get_table() { jq -r -e ".\"${1}\"" <<<"$__TOML__"; }
@@ -117,10 +117,10 @@ get_prebuilts() {
 		if [ "$(uname -m)" = aarch64 ]; then arch=arm64; else arch=arm; fi
 		HTMLQ="${BIN_DIR}/htmlq/htmlq-${arch}"
 		AAPT2="${BIN_DIR}/aapt2/aapt2-${arch}"
-		TOML="${BIN_DIR}/toml/toml-${arch}"
+		TOML="${BIN_DIR}/toml/tq-${arch}"
 	else
 		HTMLQ="${BIN_DIR}/htmlq/htmlq-x86_64"
-		TOML="${BIN_DIR}/toml/toml-x86_64"
+		TOML="${BIN_DIR}/toml/tq-x86_64"
 	fi
 	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/x86 ${MODULE_TEMPLATE_DIR}/bin/x64
 	gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
