@@ -10,7 +10,14 @@ if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 OS=$(uname -o)
 
-toml_prep() { __TOML__=$($TOML --output json --file "$1" .); }
+toml_prep() {
+	if [ ! -f "$1" ]; then return 1; fi
+	if [ "${1##*.}" == toml ]; then
+		__TOML__=$($TOML --output json --file "$1" .)
+	elif [ "${1##*.}" == json ]; then
+		__TOML__=$(cat "$1")
+	else abort "config extension not supported"; fi
+}
 toml_get_table_names() { jq -r -e 'to_entries[] | select(.value | type == "object") | .key' <<<"$__TOML__"; }
 toml_get_table_main() { jq -r -e 'to_entries | map(select(.value | type != "object")) | from_entries' <<<"$__TOML__"; }
 toml_get_table() { jq -r -e ".\"${1}\"" <<<"$__TOML__"; }
@@ -110,7 +117,7 @@ get_rv_prebuilts() {
 	echo
 }
 
-get_prebuilts() {
+set_prebuilts() {
 	APKSIGNER="${BIN_DIR}/apksigner.jar"
 	if [ "$OS" = Android ]; then
 		local arch
@@ -122,21 +129,13 @@ get_prebuilts() {
 		HTMLQ="${BIN_DIR}/htmlq/htmlq-x86_64"
 		TOML="${BIN_DIR}/toml/tq-x86_64"
 	fi
-	mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/x86 ${MODULE_TEMPLATE_DIR}/bin/x64
-	gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
-	gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-armeabi-v7a"
-	gh_dl "${MODULE_TEMPLATE_DIR}/bin/x86/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-x86"
-	gh_dl "${MODULE_TEMPLATE_DIR}/bin/x64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-x86_64"
 }
 
 config_update() {
 	if [ ! -f build.md ]; then abort "build.md not available"; fi
 	declare -A sources
 	: >"$TEMP_DIR"/skipped
-	local conf=""
-	# shellcheck disable=SC2154
-	conf+=$(sed '1d' <<<"$main_config_t")
-	conf+=$'\n'
+	local upped=()
 	local prcfg=false
 	for table_name in $(toml_get_table_names); do
 		if [ -z "$table_name" ]; then continue; fi
@@ -146,10 +145,7 @@ config_update() {
 		PATCHES_SRC=$(toml_get "$t" patches-source) || PATCHES_SRC=$DEF_PATCHES_SRC
 		PATCHES_VER=$(toml_get "$t" patches-version) || PATCHES_VER=$DEF_PATCHES_VER
 		if [[ -v sources["$PATCHES_SRC/$PATCHES_VER"] ]]; then
-			if [ "${sources["$PATCHES_SRC/$PATCHES_VER"]}" = 1 ]; then
-				conf+="$t"
-				conf+=$'\n'
-			fi
+			if [ "${sources["$PATCHES_SRC/$PATCHES_VER"]}" = 1 ]; then upped+=("$table_name"); fi
 		else
 			sources["$PATCHES_SRC/$PATCHES_VER"]=0
 			local rv_rel="https://api.github.com/repos/${PATCHES_SRC}/releases"
@@ -167,15 +163,21 @@ config_update() {
 				if ! OP=$(grep "^Patches: ${PATCHES_SRC%%/*}/" build.md | grep "$last_patches"); then
 					sources["$PATCHES_SRC/$PATCHES_VER"]=1
 					prcfg=true
-					conf+="$t"
-					conf+=$'\n'
+					upped+=("$table_name")
 				else
 					echo "$OP" >>"$TEMP_DIR"/skipped
 				fi
 			fi
 		fi
 	done
-	if [ "$prcfg" = true ]; then echo "$conf"; fi
+	if [ "$prcfg" = true ]; then
+		local query=""
+		for table in "${upped[@]}"; do
+			if [ -n "$query" ]; then query+=" or "; fi
+			query+=".key == \"$table\""
+		done
+		jq "to_entries | map(select(${query} or (.value | type != \"object\"))) | from_entries" <<<"$__TOML__"
+	fi
 }
 
 _req() {
