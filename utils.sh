@@ -360,32 +360,36 @@ get_uptodown_resp() {
 }
 get_uptodown_vers() { $HTMLQ --text ".version" <<<"$__UPTODOWN_RESP__"; }
 dl_uptodown() {
-	local uptodown_dlurl=$1 version=$2 output=$3 arch=$4 _dpi=$5 is_latest=$6
-	local url
-	if [ "$is_latest" = false ]; then
-		url=$(grep -F "${version}</span>" -B 2 <<<"$__UPTODOWN_RESP__" | head -1 | sed -n 's;.*data-url=".*download\/\(.*\)".*;\1;p') || return 1
-		url="/$url"
-	else url=""; fi
+	local uptodown_dlurl=$1 version=$2 output=$3 arch=$4 _dpi=$5
+	if [ "$arch" = "arm-v7a" ]; then arch="armeabi-v7a"; fi
+	local op resp data_code
+	data_code=$($HTMLQ "#detail-app-name" --attribute data-code <<<"$__UPTODOWN_RESP__")
+	local versionURL=""
+	for i in {1..5}; do
+		resp=$(req "${uptodown_dlurl}/apps/${data_code}/versions/${i}" -)
+		if ! op=$(jq -e -r ".data | map(select(.version == \"${version}\" and .kindFile == \"apk\")) | .[0]" <<<"$resp"); then
+			continue
+		fi
+		if versionURL=$(jq -e -r '.versionURL' <<<"$op"); then break; else return 1; fi
+	done
+	if [ -z "$versionURL" ]; then return 1; fi
+	resp=$(req "$versionURL" -) || return 1
 	if [ "$arch" != all ]; then
-		local app_code data_version files node_arch content resp
-		if [ "$is_latest" = false ]; then
-			resp=$(req "${1}/download${url}" -)
-		else resp="$__UPTODOWN_RESP_PKG__"; fi
-		app_code=$($HTMLQ "#detail-app-name" --attribute code <<<"$resp")
-		data_version=$($HTMLQ "button.button:nth-child(2)" --attribute data-version <<<"$resp")
-		files=$(req "${uptodown_dlurl%/*}/app/${app_code}/version/${data_version}/files" - | jq -r .content)
-		for ((n = 1; n < 40; n++)); do
+		local data_version files node_arch data_file_id
+		data_version=$($HTMLQ '.button.variants' --attribute data-version <<<"$resp") || return 1
+		files=$(req "${uptodown_dlurl%/*}/app/${data_code}/version/${data_version}/files" - | jq -e -r .content) || return 1
+		for ((n = 1; n < 12; n += 2)); do
 			node_arch=$($HTMLQ ".content > p:nth-child($n)" --text <<<"$files" | xargs) || return 1
 			if [ -z "$node_arch" ]; then return 1; fi
 			if [ "$node_arch" != "$arch" ]; then continue; fi
-			content=$($HTMLQ "div.variant:nth-child($((n + 1)))" <<<"$files")
-			url=$(sed -n "s;.*'.*android\/post-download\/\(.*\)'.*;\1;p" <<<"$content" | head -1)
-			url="/$url"
+			data_file_id=$($HTMLQ "div.variant:nth-child($((n + 1))) > .v-report" --attribute data-file-id <<<"$files") || return 1
+			resp=$(req "${uptodown_dlurl}/download/${data_file_id}" -)
 			break
 		done
 	fi
-	url="https://dw.uptodown.com/dwn/$(req "${uptodown_dlurl}/post-download${url}" - | sed -n 's;.*class="post-download" data-url="\(.*\)".*;\1;p')" || return 1
-	req "$url" "$output"
+	local data_url
+	data_url=$($HTMLQ "#detail-download-button" --attribute data-url <<<"$resp") || return 1
+	req "https://dw.uptodown.com/dwn/${data_url}" "$output"
 }
 get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)" <<<"$__UPTODOWN_RESP_PKG__"; }
 
