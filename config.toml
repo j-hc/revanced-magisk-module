@@ -62,7 +62,7 @@ dpi = "120-640dpi"
 
 [TikTok]
 enabled = true
-# archive-dlurl = "https://d.apkpure.net/b/APK/com.zhiliaoapp.musically?version=latest"
+# archive-dlurl = "https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok-including-musical-ly"
 included-patches = "'SIM spoof'"
 
 [Messenger]
