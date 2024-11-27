@@ -61,8 +61,8 @@ dpi = "120-640dpi"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
 
 [TikTok]
-enabled = false
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
+enabled = true
+# archive-dlurl = "https://d.apkpure.net/b/APK/com.zhiliaoapp.musically?version=latest"
 included-patches = "'SIM spoof'"
 
 [Messenger]
