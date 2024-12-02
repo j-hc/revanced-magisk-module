@@ -6,7 +6,7 @@ parallel-jobs = 1
 
 # you can use rvmm-config-gen to generate a config
 
-[Google Photos]
+[GooglePhotos]
 build-mode = "both"
 excluded-patches = ""
 included-patches = ""
