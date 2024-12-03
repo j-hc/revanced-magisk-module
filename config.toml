@@ -6,6 +6,14 @@ parallel-jobs = 1
 
 # you can use rvmm-config-gen to generate a config
 
+[GooglePhotos]
+build-mode = "both"
+excluded-patches = ""
+included-patches = ""
+version = "auto"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
+uptodown-dlurl = "https://google-photos.en.uptodown.com/android"
+
 [YouTube]
 build-mode = "both"
 excluded-patches = ""
