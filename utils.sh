@@ -54,8 +54,10 @@ get_rv_prebuilts() {
 		local ext
 		if [ "$tag" = "CLI" ]; then
 			ext="jar"
+			local grab_cl=false
 		elif [ "$tag" = "Patches" ]; then
 			ext="rvp"
+			local grab_cl=true
 		else abort unreachable; fi
 		local dir=${src%/*}
 		dir=${TEMP_DIR}/${dir,,}-rv
@@ -86,6 +88,7 @@ get_rv_prebuilts() {
 			gh_dl "$file" "$url" >&2 || return 1
 			echo "$tag: $(cut -d/ -f1 <<<"$src")/${name}  " >>"${cl_dir}/changelog.md"
 		else
+			grab_cl=false
 			local for_err=$file
 			if [ "$ver" = "latest" ]; then
 				file=$(grep -v '/[^/]*dev[^/]*$' <<<"$file" | head -1)
@@ -96,7 +99,7 @@ get_rv_prebuilts() {
 			tag_name=v${tag_name%.*}
 		fi
 		if [ "$tag" = "Patches" ]; then
-			if [ ! -f "$file" ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi
+			if [ $grab_cl = true ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi
 			if [ "$REMOVE_RV_INTEGRATIONS_CHECKS" = true ]; then
 				if ! (
 					mkdir -p "${file}-zip" || return 1
