@@ -14,4 +14,4 @@ Patches: ReVanced/patches-5.4.0.rvp
 [Changelog](https://github.com/ReVanced/revanced-patches/releases/tag/v5.4.0)  
 
 Skipped:  
-Patches: inotia00/patches-5.0.3.rvp    
+Patches: inotia00/patches-5.0.2.rvp    
