@@ -26,7 +26,7 @@ until
 do sleep 1; done
 if [ ! -f ~/.rvmm_"$(date '+%Y%m')" ]; then
 	pr "Setting up environment..."
-	yes "" | pkg update -y && pkg install -y openssl git curl jq openjdk-17 zip
+	yes "" | pkg update -y && pkg install -y git curl jq openjdk-17 zip
 	: >~/.rvmm_"$(date '+%Y%m')"
 fi
 mkdir -p /sdcard/Download/revanced-magisk-module/
