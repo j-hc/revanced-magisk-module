@@ -114,7 +114,7 @@ jobs:
         run: |
           cd build || { echo "build folder not found"; exit 1; }
 
-          TG_CHAT="@rvc_magisk"
+          TG_CHAT="@aaxyat_revanced"
           NL=$'\n'
           APKS=""
           MODULES=""
