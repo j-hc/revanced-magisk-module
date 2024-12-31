@@ -592,10 +592,12 @@ build_rv() {
 		local upj="${table,,}-update.json"
 
 		module_config "$base_template" "$pkg_name" "$version" "$arch"
+
+		local rv_patches_ver="${rv_patches_jar##*-}"
 		module_prop \
 			"${args[module_prop_name]}" \
 			"${app_name} ${args[rv_brand]}" \
-			"$version" \
+			"${version} (patches: ${rv_patches_ver%%.rvp})" \
 			"${app_name} ${args[rv_brand]} Magisk module" \
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY-}/update/${upj}" \
 			"$base_template"
@@ -628,7 +630,7 @@ MODULE_ARCH=$ma" >"$1/config"
 module_prop() {
 	echo "id=${1}
 name=${2}
-version=v${3} (${NEXT_VER_CODE})
+version=v${3}
 versionCode=${NEXT_VER_CODE}
 author=j-hc
 description=${4}" >"${6}/module.prop"
