@@ -1,83 +1,124 @@
-enable-magisk-update = true # set this to false if you do not want to receive updates for the module in magisk app
+enable-magisk-update = true
 parallel-jobs = 1
+compression-level = 9
+remove-rv-integrations-checks = true
 
-# add 'enabled = false' for not patching a specific app or remove it from the config
-# see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
+patches-source = "revanced/revanced-patches"
+cli-source = "j-hc/revanced-cli"
+rv-brand = "by h1toru"
 
-# you can use rvmm-config-gen to generate a config
+# ----- app config -----
 
-[YouTube]
+[YouTube-Premium]
+enabled = true
+app-name = "YouTube Premium"
 build-mode = "both"
-excluded-patches = ""
-included-patches = ""
 version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
-uptodown-dlurl = "https://youtube.en.uptodown.com/android"
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
-
-[Music]
-build-mode = "both"
 arch = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
-uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 
-[GooglePhotos]
-build-mode = "both"
-arch = "both"
-version = "auto"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
-uptodown-dlurl = "https://google-photos.en.uptodown.com/android"
+riplib = true
+module-prop-name = "h1toru-rvm-yt"
 
-# dont build on gh actions (https://github.com/j-hc/revanced-magisk-module/issues/554)
-[Music-Extended]
-enabled = false
-app-name = "Music"
 patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
-rv-brand = "ReVanced Extended"
-build-mode = "both"
-arch = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+# rv-brand = "Extended"
+
+patcher-args = """\
+  -e 'Change version code' \
+  -e 'Custom branding name for YouTube' -OappName='YouTube Premium' \
+  -d 'Custom branding icon for YouTube' \
+  -e 'GmsCore support' -OpackageNameYouTube='h1toru.rvm.yt' \
+  -e 'Settings for YouTube' -OsettingsLabel='Extended' \
+  -e 'Return YouTube Username' \
+  -d 'Enable gradient loading screen' \
+  -d 'Alternative thumbnails' \
+  -d 'Enable debug logging' \
+  """
+
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
+#uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 
 [YouTube-Extended]
-enabled = false
-app-name = "YouTube"
+enabled = true
+app-name = "YouTube Extended"
+build-mode = "both"
+version = "auto"
+arch = "both"
+
+riplib = true
+module-prop-name = "h1toru-rvm-yt-ex"
+
 patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
-rv-brand = "ReVanced Extended"
-build-mode = "both"
+# rv-brand = "Extended"
+
+patcher-args = """\
+  -e 'Change version code' \
+  -e 'Custom branding name for YouTube' -OappName='YouTube Extended' \
+  -e 'Custom branding icon for YouTube' -OappIcon='mmt' \
+  -e 'GmsCore support' -OpackageNameYouTube='h1toru.rvm.yt.ex' \
+  -e 'Settings for YouTube' -OsettingsLabel='Extended' \
+  -e 'Return YouTube Username' \
+  -d 'Enable gradient loading screen' \
+  -d 'Alternative thumbnails' \
+  -d 'Enable debug logging' \
+  """
+
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+#uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 
-[Twitch]
-enabled = false
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
-uptodown-dlurl = "https://twitch.en.uptodown.com/android"
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/tv.twitch.android.app"
+[YTMusic-Premium]
+enabled = true
+app-name = "YTMusic Premium"
+build-mode = "both"
+version = "auto"
+arch = "both"
 
-[Twitter]
-enabled = false
-apkmirror-dlurl = "https://www.apkmirror.com/apk/x-corp/twitter"
-build-mode = "apk"
-dpi = "120-640dpi"
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
+riplib = true
+module-prop-name = "h1toru-rvm-ytm"
 
-[TikTok]
-enabled = false
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
-included-patches = "'SIM spoof'"
+patches-source = "inotia00/revanced-patches"
+cli-source = "inotia00/revanced-cli"
+# rv-brand = "Extended"
 
-[Messenger]
-enabled = false
-apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
-arch = "arm64-v8a"
+patcher-args = """\
+  -e 'Change version code' \
+  -e 'Custom branding name for YouTube Music' -OappNameLauncher='YouTube Music Premium' -OappNameNotification='YouTube Music Premium' \
+  -d 'Custom branding icon for YouTube Music' \
+  -e 'GmsCore support' -OpackageNameYouTubeMusic='h1toru.rvm.ytm' \
+  -e 'Settings for YouTube Music' -OsettingsLabel='Extended' \
+  -e 'Disable music video in album' \
+  -e 'Return YouTube Username' \
+  -d 'Enable debug logging' \
+  """
 
-[Spotify]
-enabled = false
-uptodown-dlurl = "https://spotify.en.uptodown.com/android"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
+#uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
 
-[IconPackStudio]
-enabled = false
-apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"
+[YTMusic-Extended]
+enabled = true
+app-name = "YTMusic Extended"
+build-mode = "both"
+version = "auto"
+arch = "both"
+
+riplib = true
+module-prop-name = "h1toru-rvm-ytm-ex"
+
+patches-source = "inotia00/revanced-patches"
+cli-source = "inotia00/revanced-cli"
+# rv-brand = "Extended"
+
+patcher-args = """\
+  -e 'Change version code' \
+  -e 'Custom branding name for YouTube Music' -OappNameLauncher='YouTube Music Extended' -OappNameNotification='YouTube Music Extended' \
+  -e 'Custom branding icon for YouTube Music' -OappIcon='mmt' \
+  -e 'GmsCore support' -OpackageNameYouTubeMusic='h1toru.rvm.ytm.ex' \
+  -e 'Settings for YouTube Music' -OsettingsLabel='Extended' \
+  -e 'Disable music video in album' \
+  -e 'Return YouTube Username' \
+  -d 'Enable debug logging' \
+  """
+
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
+#uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
