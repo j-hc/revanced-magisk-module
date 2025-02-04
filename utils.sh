@@ -187,7 +187,10 @@ _req() {
 	local ip="$1" op="$2"
 	shift 2
 	if [ "$op" = - ]; then
-		curl -L -c "$TEMP_DIR/cookie.txt" -b "$TEMP_DIR/cookie.txt" --connect-timeout 5 --retry 0 --fail -s -S "$@" "$ip"
+		if ! curl -L -c "$TEMP_DIR/cookie.txt" -b "$TEMP_DIR/cookie.txt" --connect-timeout 5 --retry 0 --fail -s -S "$@" "$ip"; then
+			epr "Request failed: $ip"
+			return 1
+		fi
 	else
 		if [ -f "$op" ]; then return; fi
 		local dlp
@@ -196,7 +199,10 @@ _req() {
 			while [ -f "$dlp" ]; do sleep 1; done
 			return
 		fi
-		curl -L -c "$TEMP_DIR/cookie.txt" -b "$TEMP_DIR/cookie.txt" --connect-timeout 5 --retry 0 --fail -s -S "$@" "$ip" -o "$dlp" || return 1
+		if ! curl -L -c "$TEMP_DIR/cookie.txt" -b "$TEMP_DIR/cookie.txt" --connect-timeout 5 --retry 0 --fail -s -S "$@" "$ip" -o "$dlp"; then
+			epr "Request failed: $ip"
+			return 1
+		fi
 		mv -f "$dlp" "$op"
 	fi
 }
@@ -261,17 +267,18 @@ isoneof() {
 merge_splits() {
 	local bundle=$1 output=$2
 	pr "Merging splits"
-	gh_dl "$TEMP_DIR/apkeditor.jar" "https://github.com/REAndroid/APKEditor/releases/download/V1.3.9/APKEditor-1.3.9.jar" >/dev/null || return 1
+	gh_dl "$TEMP_DIR/apkeditor.jar" "https://github.com/REAndroid/APKEditor/releases/download/V1.4.2/APKEditor-1.4.2.jar" >/dev/null || return 1
 	if ! OP=$(java -jar "$TEMP_DIR/apkeditor.jar" merge -i "${bundle}" -o "${bundle}.mzip" -clean-meta -f 2>&1); then
-		epr "$OP"
+		epr "Apkeditor ERROR: $OP"
 		return 1
 	fi
 	# this is required because of apksig
 	mkdir "${bundle}-zip"
 	unzip -qo "${bundle}.mzip" -d "${bundle}-zip"
-	pushd "${bundle}-zip" || abort
-	zip -0rq "${CWD}/${bundle}.zip" .
-	popd || abort
+	(
+		cd "${bundle}-zip" || abort
+		zip -0rq "${CWD}/${bundle}.zip" .
+	)
 	# if building module, sign the merged apk properly
 	if isoneof "module" "${build_mode_arr[@]}"; then
 		patch_apk "${bundle}.zip" "${output}" "--exclusive" "${args[cli]}" "${args[ptjar]}"
@@ -310,8 +317,10 @@ dl_apkmirror() {
 		is_bundle=true
 	else
 		if [ "$arch" = "arm-v7a" ]; then arch="armeabi-v7a"; fi
-		local resp node app_table dlurl=""
-		url="${url}/${url##*/}-${version//./-}-release/"
+		local resp node app_table uurl dlurl=""
+		uurl=$(grep -F "downloadLink" <<<"$__APKMIRROR_RESP__" | grep -F "${version//./-}-release/" |
+			sed -n 's;.*href="\(.*-release\).*;\1;p')
+		if [ -z "$uurl" ]; then url="${url}/${url##*/}-${version//./-}-release/"; else url=https://www.apkmirror.com$uurl; fi
 		resp=$(req "$url" -) || return 1
 		node=$($HTMLQ "div.table-row.headerFont:nth-last-child(1)" -r "span:nth-child(n+3)" <<<"$resp")
 		if [ "$node" ]; then
@@ -328,10 +337,10 @@ dl_apkmirror() {
 	fi
 
 	if [ "$is_bundle" = true ]; then
-		req "$url" "${output}.apkm"
+		req "$url" "${output}.apkm" || return 1
 		merge_splits "${output}.apkm" "${output}"
 	else
-		req "$url" "${output}"
+		req "$url" "${output}" || return 1
 	fi
 }
 get_apkmirror_vers() {
@@ -518,8 +527,8 @@ build_rv() {
 		done
 		if [ ! -f "$stock_apk" ]; then return 0; fi
 	fi
-	if ! check_sig "$stock_apk" "$pkg_name"; then
-		abort "apk signature mismatch '$stock_apk'"
+	if ! OP=$(check_sig "$stock_apk" "$pkg_name" 2>&1) && ! grep -qFx "ERROR: Missing META-INF/MANIFEST.MF" <<<"$OP"; then
+		abort "apk signature mismatch '$stock_apk': $OP"
 	fi
 	log "${table}: ${version}"
 

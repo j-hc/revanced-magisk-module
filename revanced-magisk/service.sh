@@ -2,6 +2,7 @@
 MODDIR=${0%/*}
 RVPATH=/data/adb/rvhc/${MODDIR##*/}.apk
 . "$MODDIR/config"
+. "$MODDIR/common.sh"
 
 err() {
 	[ ! -f "$MODDIR/err" ] && cp "$MODDIR/module.prop" "$MODDIR/err"
@@ -11,7 +12,7 @@ err() {
 until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 1; done
 until [ -d "/sdcard/Android" ]; do sleep 1; done
 while
-	BASEPATH=$(pm path "$PKG_NAME" 2>&1 </dev/null)
+	BASEPATH=$(pmex path "$PKG_NAME")
 	SVCL=$?
 	[ $SVCL = 20 ]
 do sleep 2; done
@@ -24,7 +25,7 @@ run() {
 	sleep 4
 
 	BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
-	if [ ! -d "$BASEPATH/lib" ]; then # TODO: is this ok? idk
+	if [ ! -d "$BASEPATH/lib" ]; then
 		ls -Zla "$BASEPATH" >"$MODDIR/log.txt"
 		ls -Zla "$BASEPATH/lib" >>"$MODDIR/log.txt"
 	else rm "$MODDIR/log.txt" >/dev/null 2>&1; fi
@@ -33,15 +34,15 @@ run() {
 		err "version mismatch (installed:${VERSION}, module:$PKG_VER)"
 		return
 	fi
-	grep "$PKG_NAME" /proc/mounts | while read -r line; do
+	mm grep "$PKG_NAME" /proc/mounts | while read -r line; do
 		mp=${line#* } mp=${mp%% *}
-		umount -l "${mp%%\\*}"
+		mm umount -l "${mp%%\\*}"
 	done
 	if ! chcon u:object_r:apk_data_file:s0 "$RVPATH"; then
 		err "apk not found"
 		return
 	fi
-	mount -o bind "$RVPATH" "$BASEPATH/base.apk"
+	mm mount -o bind "$RVPATH" "$BASEPATH/base.apk"
 	am force-stop "$PKG_NAME"
 	[ -f "$MODDIR/err" ] && mv -f "$MODDIR/err" "$MODDIR/module.prop"
 }
