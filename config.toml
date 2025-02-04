@@ -14,7 +14,7 @@ enabled = true
 app-name = "YouTube Premium"
 build-mode = "both"
 version = "auto"
-arch = "all"
+arch = "both"
 
 riplib = true
 module-prop-name = "h1toru-rvm-yt"
@@ -43,7 +43,7 @@ enabled = true
 app-name = "YouTube Extended"
 build-mode = "both"
 version = "auto"
-arch = "all"
+arch = "both"
 
 riplib = true
 module-prop-name = "h1toru-rvm-yt-ex"
