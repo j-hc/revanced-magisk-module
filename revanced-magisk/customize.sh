@@ -20,8 +20,13 @@ RVPATH=/data/adb/rvhc/${MODPATH##*/}.apk
 
 set_perm_recursive "$MODPATH/bin" 0 0 0755 0777
 
-mm grep -F "$PKG_NAME" /proc/mounts | while read -r line; do
+mz grep -F "$PKG_NAME" /proc/mounts | while read -r line; do
 	ui_print "* Un-mount"
+	mp=${line#* } mp=${mp%% *}
+	mz umount -l "${mp%%\\*}"
+done
+mm grep -F "$PKG_NAME" /proc/mounts | while read -r line; do
+	ui_print "* Un-mount global"
 	mp=${line#* } mp=${mp%% *}
 	mm umount -l "${mp%%\\*}"
 done
@@ -96,7 +101,7 @@ install() {
 				if [ "$IS_SYS" = true ]; then
 					mkdir -p /data/adb/rvhc/empty /data/adb/post-fs-data.d
 					SCNM="/data/adb/post-fs-data.d/$PKG_NAME-uninstall.sh"
-					echo "mount -o bind /data/adb/rvhc/empty $BASEPATH" >"$SCNM"
+					echo "mount /data/adb/rvhc/empty $BASEPATH" >"$SCNM"
 					chmod +x "$SCNM"
 					ui_print "* Created the uninstall script."
 					ui_print ""
@@ -138,20 +143,23 @@ if [ $INS = true ] || [ -z "$(ls -A1 "$BASEPATHLIB")" ]; then
 fi
 
 ui_print "* Setting Permissions"
-set_perm "$MODPATH/base.apk" 1000 1000 644 u:object_r:apk_data_file:s0
+mkdir -p "/data/adb/rvhc"
+mv -f "$MODPATH/base.apk" "$RVPATH"
+set_perm "$RVPATH" 1000 1000 644 u:object_r:apk_data_file:s0
+
+ui_print "* Optimizing $PKG_NAME"
+mm nohup sh -c "
+mount $RVPATH $BASEPATH/base.apk
+cmd package compile --reset $PKG_NAME
+umount -l $BASEPATH/base.apk
+" >/dev/null 2>&1 &
 
 ui_print "* Mounting $PKG_NAME"
-mkdir -p "/data/adb/rvhc"
-RVPATH=/data/adb/rvhc/${MODPATH##*/}.apk
-mv -f "$MODPATH/base.apk" "$RVPATH"
-
-if ! op=$(mm mount -o bind "$RVPATH" "$BASEPATH/base.apk" 2>&1); then
+if ! op=$(mz mount "$RVPATH" "$BASEPATH/base.apk" 2>&1); then
 	ui_print "ERROR: Mount failed!"
 	ui_print "$op"
 fi
 am force-stop "$PKG_NAME"
-ui_print "* Optimizing $PKG_NAME"
-nohup cmd package compile --reset "$PKG_NAME" >/dev/null 2>&1 &
 
 ui_print "* Cleanup"
 rm -rf "${MODPATH:?}/bin" "$MODPATH/$PKG_NAME.apk"
