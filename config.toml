@@ -7,22 +7,47 @@ patches-source = "revanced/revanced-patches"
 cli-source = "j-hc/revanced-cli"
 rv-brand = "by h1toru"
 
-# ----- app config -----
+#===== app config =====#
 
 [YouTube-Premium]
 enabled = true
 app-name = "YouTube Premium"
-build-mode = "both"
+# rv-brand = "Extended"
+build-mode = "apk"
 version = "auto"
 arch = "both"
-
 riplib = true
 module-prop-name = "h1toru-rvm-yt"
 
 patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
-# rv-brand = "Extended"
+patcher-args = """\
+  -e 'Change version code' \
+  -e 'Custom branding name for YouTube' -OappName='YouTube Premium' \
+  -d 'Custom branding icon for YouTube' \
+  -e 'GmsCore support' -OpackageNameYouTube='h1toru.rvm.yt' \
+  -e 'Settings for YouTube' -OsettingsLabel='Extended' \
+  -e 'Return YouTube Username' \
+  -d 'Enable gradient loading screen' \
+  -d 'Alternative thumbnails' \
+  -d 'Enable debug logging' \
+  """
 
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
+#uptodown-dlurl = "https://youtube.en.uptodown.com/android"
+
+[YouTube-Premium-Module]
+enabled = true
+app-name = "YouTube Premium"
+# rv-brand = "Extended"
+build-mode = "module"
+version = "auto"
+arch = "all"
+riplib = true
+module-prop-name = "h1toru-rvm-yt"
+
+patches-source = "inotia00/revanced-patches"
+cli-source = "inotia00/revanced-cli"
 patcher-args = """\
   -e 'Change version code' \
   -e 'Custom branding name for YouTube' -OappName='YouTube Premium' \
@@ -41,17 +66,42 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 [YouTube-Extended]
 enabled = true
 app-name = "YouTube Extended"
-build-mode = "both"
+# rv-brand = "Extended"
+build-mode = "apk"
 version = "auto"
 arch = "both"
-
 riplib = true
 module-prop-name = "h1toru-rvm-yt-ex"
 
 patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
-# rv-brand = "Extended"
+patcher-args = """\
+  -e 'Change version code' \
+  -e 'Custom branding name for YouTube' -OappName='YouTube Extended' \
+  -e 'Custom branding icon for YouTube' -OappIcon='mmt' \
+  -e 'GmsCore support' -OpackageNameYouTube='h1toru.rvm.yt.ex' \
+  -e 'Settings for YouTube' -OsettingsLabel='Extended' \
+  -e 'Return YouTube Username' \
+  -d 'Enable gradient loading screen' \
+  -d 'Alternative thumbnails' \
+  -d 'Enable debug logging' \
+  """
 
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
+#uptodown-dlurl = "https://youtube.en.uptodown.com/android"
+
+[YouTube-Extended-Module]
+enabled = true
+app-name = "YouTube Extended"
+# rv-brand = "Extended"
+build-mode = "both"
+version = "auto"
+arch = "all"
+riplib = true
+module-prop-name = "h1toru-rvm-yt-ex"
+
+patches-source = "inotia00/revanced-patches"
+cli-source = "inotia00/revanced-cli"
 patcher-args = """\
   -e 'Change version code' \
   -e 'Custom branding name for YouTube' -OappName='YouTube Extended' \
@@ -70,17 +120,15 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 [YTMusic-Premium]
 enabled = true
 app-name = "YTMusic Premium"
+# rv-brand = "Extended"
 build-mode = "both"
 version = "auto"
 arch = "both"
-
 riplib = true
 module-prop-name = "h1toru-rvm-ytm"
 
 patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
-# rv-brand = "Extended"
-
 patcher-args = """\
   -e 'Change version code' \
   -e 'Custom branding name for YouTube Music' -OappNameLauncher='YouTube Music Premium' -OappNameNotification='YouTube Music Premium' \
@@ -98,17 +146,15 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
 [YTMusic-Extended]
 enabled = true
 app-name = "YTMusic Extended"
+# rv-brand = "Extended"
 build-mode = "both"
 version = "auto"
 arch = "both"
-
 riplib = true
 module-prop-name = "h1toru-rvm-ytm-ex"
 
 patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
-# rv-brand = "Extended"
-
 patcher-args = """\
   -e 'Change version code' \
   -e 'Custom branding name for YouTube Music' -OappNameLauncher='YouTube Music Extended' -OappNameNotification='YouTube Music Extended' \
