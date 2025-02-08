@@ -13,7 +13,8 @@ version = "auto"
 arch = "arm64-v8a"
 
 [Tiktok]
-uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
+# uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
 version = "auto"
 
 [Twitter]
