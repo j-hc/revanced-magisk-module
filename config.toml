@@ -71,7 +71,7 @@ build-mode = "apk"
 version = "auto"
 arch = "both"
 riplib = true
-module-prop-name = "h1toru-rvm-yt-ex"
+module-prop-name = "h1toru-rvm-yt"
 
 patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
@@ -98,7 +98,7 @@ build-mode = "both"
 version = "auto"
 arch = "all"
 riplib = true
-module-prop-name = "h1toru-rvm-yt-ex"
+module-prop-name = "h1toru-rvm-yt"
 
 patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
@@ -151,7 +151,7 @@ build-mode = "both"
 version = "auto"
 arch = "both"
 riplib = true
-module-prop-name = "h1toru-rvm-ytm-ex"
+module-prop-name = "h1toru-rvm-ytm"
 
 patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
