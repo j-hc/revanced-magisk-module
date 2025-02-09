@@ -14,7 +14,7 @@ arch = "arm64-v8a"
 
 [Tiktok]
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
-# uptodown-dlurl = "https://tiktok.en.uptodown.com/android"
+excluded-patches = "'SIM spoof'"
 version = "auto"
 
 [Twitter]
