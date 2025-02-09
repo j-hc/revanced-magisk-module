@@ -15,6 +15,7 @@ arch = "arm64-v8a"
 [Tiktok]
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
 excluded-patches = "'SIM spoof'"
+patches-version = "5.7.2"
 version = "auto"
 
 [Twitter]
