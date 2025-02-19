@@ -131,7 +131,7 @@ patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
 patcher-args = """\
   -e 'Change version code' \
-  -e 'Custom branding name for YouTube Music' -OappNameLauncher='YouTube Music Premium' -OappNameNotification='YTMusic Premium' \
+  -e 'Custom branding name for YouTube Music' -OappNameLauncher='YTMusic Premium' -OappNameNotification='YTMusic Premium' \
   -d 'Custom branding icon for YouTube Music' \
   -e 'GmsCore support' -OpackageNameYouTubeMusic='h1toru.rvm.ytm' \
   -e 'Settings for YouTube Music' -OrvxSettingsLabel='Extended' \
@@ -157,7 +157,7 @@ patches-source = "inotia00/revanced-patches"
 cli-source = "inotia00/revanced-cli"
 patcher-args = """\
   -e 'Change version code' \
-  -e 'Custom branding name for YouTube Music' -OappNameLauncher='YouTube Music Extended' -OappNameNotification='YTMusic Extended' \
+  -e 'Custom branding name for YouTube Music' -OappNameLauncher='YTMusic Extended' -OappNameNotification='YTMusic Extended' \
   -e 'Custom branding icon for YouTube Music' -OappIcon='mmt' \
   -e 'GmsCore support' -OpackageNameYouTubeMusic='h1toru.rvm.ytm.ex' \
   -e 'Settings for YouTube Music' -OrvxSettingsLabel='Extended' \
