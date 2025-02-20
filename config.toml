@@ -15,7 +15,6 @@ arch = "arm64-v8a"
 [Tiktok]
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
 excluded-patches = "'SIM spoof'"
-patches-version = "5.7.2"
 patches-version = "v5.13.0-dev.5"
 version = "auto"
 
@@ -28,4 +27,3 @@ version = "auto"
 [Reddit]
 apkmirror-dlurl = "https://apkmirror.com/apk/redditinc/reddit/"
 version = "auto"
-
