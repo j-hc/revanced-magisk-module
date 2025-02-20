@@ -1,5 +1,5 @@
 enable-magisk-update = false # set this to false if you do not want to receive updates for the module in magisk app
-patches-version = "5.13.0-dev.5"
+# patches-version = "5.13.0-dev.5"
 
 [YouTube]
 included-patches = "'Custom branding'"
@@ -16,6 +16,7 @@ arch = "arm64-v8a"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
 excluded-patches = "'SIM spoof'"
 patches-version = "5.7.2"
+patches-version = "v5.13.0-dev.5"
 version = "auto"
 
 [Twitter]
