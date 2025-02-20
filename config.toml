@@ -1,5 +1,5 @@
 enable-magisk-update = false # set this to false if you do not want to receive updates for the module in magisk app
-parallel-jobs = 1
+patches-version = "v5.13.0-dev.5"
 
 [YouTube]
 included-patches = "'Custom branding'"
