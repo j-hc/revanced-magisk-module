@@ -84,21 +84,24 @@ install() {
 		abort "ERROR: Stock $PKG_NAME apk was not found"
 	fi
 	ui_print "* Updating $PKG_NAME to $PKG_VER"
-	VERIF_ADB=$(settings get global verifier_verify_adb_installs)
+	install_err=""
+	VERIF1=$(settings get global verifier_verify_adb_installs)
+	VERIF2=$(settings get global package_verifier_enable)
 	settings put global verifier_verify_adb_installs 0
+	settings put global package_verifier_enable 0
 	SZ=$(stat -c "%s" "$MODPATH/$PKG_NAME.apk")
 	for IT in 1 2; do
 		if ! SES=$(pmex install-create --user 0 -i com.android.vending -r -d -S "$SZ"); then
 			ui_print "ERROR: install-create failed"
-			settings put global verifier_verify_adb_installs "$VERIF_ADB"
-			abort "$SES"
+			install_err="$SES"
+			break
 		fi
 		SES=${SES#*[} SES=${SES%]*}
 		set_perm "$MODPATH/$PKG_NAME.apk" 1000 1000 644 u:object_r:apk_data_file:s0
 		if ! op=$(pmex install-write -S "$SZ" "$SES" "$PKG_NAME.apk" "$MODPATH/$PKG_NAME.apk"); then
 			ui_print "ERROR: install-write failed"
-			settings put global verifier_verify_adb_installs "$VERIF_ADB"
-			abort "$op"
+			install_err="$op"
+			break
 		fi
 		if ! op=$(pmex install-commit "$SES"); then
 			if echo "$op" | grep -q INSTALL_FAILED_VERSION_DOWNGRADE; then
@@ -111,29 +114,35 @@ install() {
 					ui_print "* Created the uninstall script."
 					ui_print ""
 					ui_print "* Reboot and reflash the module!"
-					abort
+					install_err=" "
+					break
 				else
 					ui_print "* Uninstalling..."
 					if ! op=$(pmex uninstall -k --user 0 "$PKG_NAME"); then
 						ui_print "$op"
-						if [ $IT = 2 ]; then abort "ERROR: pm uninstall failed."; fi
+						if [ $IT = 2 ]; then
+							install_err="ERROR: pm uninstall failed."
+							break
+						fi
 					fi
 					continue
 				fi
 			fi
 			ui_print "ERROR: install-commit failed"
-			settings put global verifier_verify_adb_installs "$VERIF_ADB"
-			abort "$op"
+			install_err="$op"
+			break
 		fi
 		if BASEPATH=$(pmex path "$PKG_NAME"); then
 			BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 		else
-			settings put global verifier_verify_adb_installs "$VERIF_ADB"
-			abort "ERROR: install $PKG_NAME manually and reflash the module"
+			install_err="ERROR: install $PKG_NAME manually and reflash the module"
+			break
 		fi
 		break
 	done
-	settings put global verifier_verify_adb_installs "$VERIF_ADB"
+	settings put global verifier_verify_adb_installs "$VERIF1"
+	settings put global package_verifier_enable "$VERIF2"
+	if [ "$install_err" ]; then abort "$install_err"; fi
 }
 if [ $INS = true ] && ! install; then abort; fi
 BASEPATHLIB=${BASEPATH}/lib/${ARCH}
