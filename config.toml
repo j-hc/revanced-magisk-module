@@ -29,6 +29,9 @@ version = "auto"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
 uptodown-dlurl = "https://google-photos.en.uptodown.com/android"
 
+[Spotify]
+uptodown-dlurl = "https://spotify.en.uptodown.com/android"
+
 # dont build on gh actions (https://github.com/j-hc/revanced-magisk-module/issues/554)
 [Music-Extended]
 enabled = false
@@ -73,10 +76,6 @@ included-patches = "'SIM spoof'"
 enabled = false
 apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
 arch = "arm64-v8a"
-
-[Spotify]
-enabled = false
-uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 
 [IconPackStudio]
 enabled = false
