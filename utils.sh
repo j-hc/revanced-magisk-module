@@ -122,16 +122,12 @@ get_rv_prebuilts() {
 
 set_prebuilts() {
 	APKSIGNER="${BIN_DIR}/apksigner.jar"
-	if [ "$OS" = Android ]; then
-		local arch
-		if [ "$(uname -m)" = aarch64 ]; then arch=arm64; else arch=arm; fi
-		HTMLQ="${BIN_DIR}/htmlq/htmlq-${arch}"
-		AAPT2="${BIN_DIR}/aapt2/aapt2-${arch}"
-		TOML="${BIN_DIR}/toml/tq-${arch}"
-	else
-		HTMLQ="${BIN_DIR}/htmlq/htmlq-x86_64"
-		TOML="${BIN_DIR}/toml/tq-x86_64"
-	fi
+	local arch
+	arch=$(uname -m)
+	if [ "$arch" = aarch64 ]; then arch=arm64; elif [ "${arch:0:5}" = "armv7" ]; then arch=arm; fi
+	HTMLQ="${BIN_DIR}/htmlq/htmlq-${arch}"
+	AAPT2="${BIN_DIR}/aapt2/aapt2-${arch}"
+	TOML="${BIN_DIR}/toml/tq-${arch}"
 }
 
 config_update() {
