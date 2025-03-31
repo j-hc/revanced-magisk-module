@@ -373,11 +373,13 @@ dl_uptodown() {
 	local op resp data_code
 	data_code=$($HTMLQ "#detail-app-name" --attribute data-code <<<"$__UPTODOWN_RESP__")
 	local versionURL=""
+	local might_be_bundle=false
 	for i in {1..5}; do
 		resp=$(req "${uptodown_dlurl}/apps/${data_code}/versions/${i}" -)
-		if ! op=$(jq -e -r ".data | map(select(.version == \"${version}\" and .kindFile == \"apk\")) | .[0]" <<<"$resp"); then
+		if ! op=$(jq -e -r ".data | map(select(.version == \"${version}\")) | .[0]" <<<"$resp"); then
 			continue
 		fi
+		if [ $(jq -e -r ".kindFile" <<<"$op") = "xapk" ]; then might_be_bundle=true; fi
 		if versionURL=$(jq -e -r '.versionURL' <<<"$op"); then break; else return 1; fi
 	done
 	if [ -z "$versionURL" ]; then return 1; fi
@@ -397,7 +399,17 @@ dl_uptodown() {
 	fi
 	local data_url
 	data_url=$($HTMLQ "#detail-download-button" --attribute data-url <<<"$resp") || return 1
-	req "https://dw.uptodown.com/dwn/${data_url}" "$output"
+
+	if [ $might_be_bundle = true ]; then
+		req "https://dw.uptodown.com/dwn/${data_url}" "$output.apkm" || return 1
+		if grep -qF "AndroidManifest.xml" <<<$(unzip -l "$output.apkm"); then
+			mv -f "${output}.apkm" "${output}"
+		else
+			merge_splits "${output}.apkm" "${output}"
+		fi
+	else
+		req "https://dw.uptodown.com/dwn/${data_url}" "$output"
+	fi
 }
 get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)" <<<"$__UPTODOWN_RESP_PKG__"; }
 
