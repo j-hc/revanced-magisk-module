@@ -1,6 +1,6 @@
 {
-  "version": "v20.07.39 (patches: 5.18.0)",
-  "versionCode": 20220996,
-  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20220996/youtube-revanced-magisk-v20.07.39-all.zip",
+  "version": "v20.07.39 (patches: 5.19.0)",
+  "versionCode": 20220997,
+  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20220997/youtube-revanced-magisk-v20.07.39-all.zip",
   "changelog": "https://raw.githubusercontent.com/j-hc/revanced-magisk-module/update/build.md"
 }
