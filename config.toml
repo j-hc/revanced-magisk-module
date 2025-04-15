@@ -10,7 +10,10 @@ apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
 [Music]
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube-music/"
 version = "auto"
-arch = "arm64-v8a"
+
+[Spotify]
+uptodown-dlurl = "https://spotify.en.uptodown.com/android"
+version = "9.0.36.683"
 
 # [Tiktok]
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
@@ -22,8 +25,14 @@ arch = "arm64-v8a"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/x-corp/twitter"
 apkmirror-dpi = "120-640dpi"
 build-mode = "apk"
-version = "auto"
 
 [Reddit]
 apkmirror-dlurl = "https://apkmirror.com/apk/redditinc/reddit/"
 version = "auto"
+# dpi = "120-640dpi"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
+
+[TikTok]
+enabled = false
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
+included-patches = "'SIM spoof'"
