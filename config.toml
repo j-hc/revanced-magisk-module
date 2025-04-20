@@ -26,6 +26,7 @@ version = "9.0.36.683"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/x-corp/twitter"
 apkmirror-dpi = "120-640dpi"
 build-mode = "apk"
+version = "auto"
 
 [Reddit]
 apkmirror-dlurl = "https://apkmirror.com/apk/redditinc/reddit/"
