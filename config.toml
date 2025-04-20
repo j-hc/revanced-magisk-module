@@ -10,6 +10,7 @@ apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
 [Music]
 apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube-music/"
 version = "auto"
+arch = "arm64-v8a"
 
 [Spotify]
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
