@@ -26,9 +26,9 @@ run() {
 
 	BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 	if [ ! -d "$BASEPATH/lib" ]; then
-		ls -Zla "$BASEPATH" >"$MODDIR/log.txt"
-		ls -Zla "$BASEPATH/lib" >>"$MODDIR/log.txt"
-	else rm "$MODDIR/log.txt" >/dev/null 2>&1; fi
+		err "mount failed (ROM issue)"
+		return
+	fi
 	VERSION=$(dumpsys package "$PKG_NAME" | grep -m1 versionName) VERSION="${VERSION#*=}"
 	if [ "$VERSION" != "$PKG_VER" ] && [ "$VERSION" ]; then
 		err "version mismatch (installed:${VERSION}, module:$PKG_VER)"
