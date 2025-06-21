@@ -212,6 +212,101 @@ gh_dl() {
 }
 
 log() { echo -e "$1  " >>"build.md"; }
+
+generate_download_table() {
+	if [ ! -f "${TEMP_DIR}/build_files.txt" ]; then
+		return
+	fi
+	
+	# Initialize table
+	log "## 📦 Downloads\n"
+	log "| App | Version | APK (Non-Root) | Magisk Module (Root) |"
+	log "|-----|---------|----------------|---------------------|"
+	
+	local base_url=""
+	if [ -n "${GITHUB_REPOSITORY-}" ] && [ -n "${NEXT_VER_CODE-}" ]; then
+		base_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${NEXT_VER_CODE}"
+	fi
+	
+	# Create a temporary file to store processed data
+	local temp_table="${TEMP_DIR}/table_data.txt"
+	: > "$temp_table"
+	
+	# Process each build file
+	while IFS='|' read -r table version app_name rv_brand build_type arch filename; do
+		# Create app key for grouping
+		local app_key="${app_name} ${rv_brand}"
+		
+		# Build download link
+		local link_text
+		local download_url="${base_url}/${filename}"
+		
+		if [ "$build_type" = "apk" ]; then
+			if [ "$arch" = "all" ]; then
+				link_text="📱 APK"
+			else
+				link_text="📱 APK (${arch})"
+			fi
+		else
+			if [ "$arch" = "all" ]; then
+				link_text="📦 Module"
+			else
+				link_text="📦 Module (${arch})"
+			fi
+		fi
+		
+		local download_link="[${link_text}](${download_url})"
+		echo "${app_key}|${version}|${build_type}|${download_link}" >> "$temp_table"
+	done < <(sort "${TEMP_DIR}/build_files.txt")
+	
+	# Group by app and version
+	local current_app=""
+	local current_version=""
+	local apk_links=""
+	local module_links=""
+	
+	while IFS='|' read -r app_key version build_type download_link; do
+		if [ "$app_key" != "$current_app" ] || [ "$version" != "$current_version" ]; then
+			# Output previous row if we have one
+			if [ -n "$current_app" ]; then
+				local apk_cell="${apk_links:-"-"}"
+				local module_cell="${module_links:-"-"}"
+				log "| **${current_app}** | \`${current_version}\` | ${apk_cell} | ${module_cell} |"
+			fi
+			
+			# Reset for new app/version
+			current_app="$app_key"
+			current_version="$version"
+			apk_links=""
+			module_links=""
+		fi
+		
+		# Add to appropriate cell
+		if [ "$build_type" = "apk" ]; then
+			if [ -n "$apk_links" ]; then
+				apk_links="${apk_links}<br/>${download_link}"
+			else
+				apk_links="$download_link"
+			fi
+		else
+			if [ -n "$module_links" ]; then
+				module_links="${module_links}<br/>${download_link}"
+			else
+				module_links="$download_link"
+			fi
+		fi
+	done < "$temp_table"
+	
+	# Output final row
+	if [ -n "$current_app" ]; then
+		local apk_cell="${apk_links:-"-"}"
+		local module_cell="${module_links:-"-"}"
+		log "| **${current_app}** | \`${current_version}\` | ${apk_cell} | ${module_cell} |"
+	fi
+	
+	log ""
+	rm -f "$temp_table"
+}
 get_highest_ver() {
 	local vers m
 	vers=$(tee)
@@ -539,7 +634,7 @@ build_rv() {
 	if ! OP=$(check_sig "$stock_apk" "$pkg_name" 2>&1) && ! grep -qFx "ERROR: Missing META-INF/MANIFEST.MF" <<<"$OP"; then
 		abort "apk signature mismatch '$stock_apk': $OP"
 	fi
-	log "${table}: ${version}"
+	# Individual app logging removed - will be replaced by table generation
 
 	local microg_patch
 	microg_patch=$(grep "^Name: " <<<"$list_patches" | grep -i "gmscore\|microg" || :) microg_patch=${microg_patch#*: }
@@ -589,6 +684,8 @@ build_rv() {
 			local apk_output="${BUILD_DIR}/${app_name_l}-${rv_brand_f}-v${version_f}-${arch_f}.apk"
 			mv -f "$patched_apk" "$apk_output"
 			pr "Built ${table} (non-root): '${apk_output}'"
+			# Store APK build info
+			echo "${table}|${version}|${app_name}|${args[rv_brand]}|apk|${arch}|$(basename "$apk_output")" >> "${TEMP_DIR}/build_files.txt"
 			continue
 		fi
 		local base_template
@@ -615,6 +712,8 @@ build_rv() {
 		zip -"$COMPRESSION_LEVEL" -FSqr "${CWD}/${BUILD_DIR}/${module_output}" .
 		popd >/dev/null || :
 		pr "Built ${table} (root): '${BUILD_DIR}/${module_output}'"
+		# Store Module build info
+		echo "${table}|${version}|${app_name}|${args[rv_brand]}|module|${arch}|${module_output}" >> "${TEMP_DIR}/build_files.txt"
 	done
 }
 

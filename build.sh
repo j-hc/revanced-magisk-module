@@ -40,6 +40,8 @@ if [ "${2-}" = "--config-update" ]; then
 fi
 
 : >build.md
+# Initialize build files tracking
+: >"${TEMP_DIR}/build_files.txt"
 ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || ENABLE_MAGISK_UPDATE=true
 if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY-}" ]; then
 	pr "You are building locally. Magisk updates will not be enabled."
@@ -165,9 +167,15 @@ wait
 rm -rf temp/tmp.*
 if [ -z "$(ls -A1 "${BUILD_DIR}")" ]; then abort "All builds failed."; fi
 
+# Generate download table
+generate_download_table
+
+log "\n## Notes"
 log "\nInstall [MicroG](https://github.com/ReVanced/GmsCore/releases) to be able to use non-root YouTube or YouTube-Music."
 log "Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to block Play Store from updating YouTube and YouTube-Music."
 log "\n[Main Repo](https://github.com/avisek/revanced-apps)\n"
+
+log "## Changelog"
 log "$(cat "$TEMP_DIR"/*-rv/changelog.md)"
 
 SKIPPED=$(cat "$TEMP_DIR"/skipped 2>/dev/null || :)
