@@ -219,9 +219,9 @@ generate_download_table() {
 	fi
 	
 	# Initialize table
-	log "## 📦 Downloads\n"
-	log "| App | Version | APK (Non-Root) | Magisk Module (Root) |"
-	log "|-----|---------|----------------|---------------------|"
+	log "## Downloads\n"
+	log "| App | APK (Non-Root) | Magisk Module (Root) |"
+	log "|-----|----------------|----------------------|"
 	
 	local base_url=""
 	if [ -n "${GITHUB_REPOSITORY-}" ] && [ -n "${NEXT_VER_CODE-}" ]; then
@@ -243,15 +243,15 @@ generate_download_table() {
 		
 		if [ "$build_type" = "apk" ]; then
 			if [ "$arch" = "all" ]; then
-				link_text="📱 APK"
+				link_text="APK"
 			else
-				link_text="📱 APK (${arch})"
+				link_text="APK (${arch})"
 			fi
 		else
 			if [ "$arch" = "all" ]; then
-				link_text="📦 Module"
+				link_text="Module"
 			else
-				link_text="📦 Module (${arch})"
+				link_text="Module (${arch})"
 			fi
 		fi
 		
@@ -271,7 +271,8 @@ generate_download_table() {
 			if [ -n "$current_app" ]; then
 				local apk_cell="${apk_links:-"-"}"
 				local module_cell="${module_links:-"-"}"
-				log "| **${current_app}** | \`${current_version}\` | ${apk_cell} | ${module_cell} |"
+				local app_cell="**${current_app}**<br/><sup>${current_version}</sup>"
+				log "| ${app_cell} | ${apk_cell} | ${module_cell} |"
 			fi
 			
 			# Reset for new app/version
@@ -301,7 +302,8 @@ generate_download_table() {
 	if [ -n "$current_app" ]; then
 		local apk_cell="${apk_links:-"-"}"
 		local module_cell="${module_links:-"-"}"
-		log "| **${current_app}** | \`${current_version}\` | ${apk_cell} | ${module_cell} |"
+		local app_cell="**${current_app}**<br/><sup>${current_version}</sup>"
+		log "| ${app_cell} | ${apk_cell} | ${module_cell} |"
 	fi
 	
 	log ""
