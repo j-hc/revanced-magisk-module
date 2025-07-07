@@ -15,13 +15,13 @@ The latest ReVanced apps, available for both root and non-root users.
 
 ## Features
 
-- **Always up-to-date** - Automatically updated with the latest patch versions
+- **Always up-to-date** - Automatically updated with latest patch versions
 - **Optimized size** - APKs have unnecessary libraries removed to reduce file size
 - **Fully automated** - Every binary and APK is compiled without human intervention
 - **Zero bloat** - No rebranding or additional modifications beyond ReVanced patches
 - **Open source** - Complete transparency in the build process
 
-### Magisk/KernelSU Module Benefits
+### Magisk/KernelSU Module Features
 
 - **Enhanced performance** - Recompiles invalidated odex files for YouTube and YouTube Music
 - **Seamless updates** - Receive updates directly through the Magisk app
@@ -31,8 +31,8 @@ The latest ReVanced apps, available for both root and non-root users.
 
 ## Important Notes
 
-- **Prevent auto-updates**: Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to prevent the Play Store from auto-updating YouTube and YouTube Music
-- **Non-root requirement**: Non-root versions of YouTube and YouTube Music require [MicroG](https://github.com/ReVanced/GmsCore/releases) to function properly
+- **Non-root users** - Install [MicroG](https://github.com/ReVanced/GmsCore/releases) to use non-root versions of YouTube, YouTube Music, and Google Photos
+- **Root users** - Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to block Play Store from auto-updating YouTube, YouTube Music, and Google Photos
 
 ## Credits
 

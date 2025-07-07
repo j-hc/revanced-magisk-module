@@ -306,9 +306,9 @@ generate_download_table() {
 		log "| ${app_cell} | ${apk_cell} | ${module_cell} |"
 	fi
 	
-	log ""
 	rm -f "$temp_table"
 }
+
 get_highest_ver() {
 	local vers m
 	vers=$(tee)
