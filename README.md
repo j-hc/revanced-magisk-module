@@ -1,17 +1,30 @@
+<div align="center">
+
+<br/>
+
+<a href="https://github.com/avisek/revanced-apps">
+  <img alt="ReVanced Logo" src="https://upload.wikimedia.org/wikipedia/commons/4/40/Revanced-logo-round.svg" width="160" />
+</a>
+
 # ReVanced Apps
+
+**🚀 The latest ReVanced apps, available for both root and non-root users**
 
 [![CI](https://github.com/avisek/revanced-apps/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/avisek/revanced-apps/actions/workflows/ci.yml)
 
-The latest ReVanced apps, available for both root and non-root users.
+[![Download Latest Release](https://img.shields.io/badge/📥%C2%A0%C2%A0Download%20Latest%20Release-blue?style=for-the-badge&labelColor=blue)](https://github.com/avisek/revanced-apps/releases)
 
-📥&nbsp; **[Download the latest release](https://github.com/avisek/revanced-apps/releases)**
+<br/>
+<br/>
+
+</div>
 
 ## 📱 Available Apps
 
-- **<img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_(2017).svg" width="19" height="19" align="absmiddle"/> YouTube** - ReVanced Extended
-- **<img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/Youtube_Music_icon.svg" width="19" height="19" align="absmiddle"/> YouTube Music** - ReVanced Extended
-- **<img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Photos_icon_(2020).svg" width="19" height="19" align="absmiddle"/> Google Photos** - Unlimited Storage
-- **<img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" width="19" height="19" align="absmiddle"/> Spotify** - Premium Unlocked
+- **<a href="https://github.com/avisek/revanced-apps/releases"><img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_(2017).svg" width="19" height="19" align="absmiddle"/></a> YouTube** - ReVanced Extended
+- **<a href="https://github.com/avisek/revanced-apps/releases"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/Youtube_Music_icon.svg" width="19" height="19" align="absmiddle"/></a> YouTube Music** - ReVanced Extended
+- **<a href="https://github.com/avisek/revanced-apps/releases"><img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Photos_icon_(2020).svg" width="19" height="19" align="absmiddle"/></a> Google Photos** - Unlimited Storage
+- **<a href="https://github.com/avisek/revanced-apps/releases"><img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" width="19" height="19" align="absmiddle"/></a> Spotify** - Premium Unlocked
 
 ## ✨ Features
 
