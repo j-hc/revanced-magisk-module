@@ -65,8 +65,11 @@ get_rv_prebuilts() {
 
 		local rv_rel="https://api.github.com/repos/${src}/releases" name_ver
 		if [ "$ver" = "dev" ]; then
-			name_ver="*-dev*"
-		elif [ "$ver" = "latest" ]; then
+			local resp
+			resp=$(gh_req "$rv_rel" -) || return 1
+			ver=$(jq -e -r '.[] | .tag_name' <<<"$resp" | get_highest_ver) || return 1;
+		fi
+		if [ "$ver" = "latest" ]; then
 			rv_rel+="/latest"
 			name_ver="*"
 		else
@@ -79,7 +82,6 @@ get_rv_prebuilts() {
 		if [ -z "$file" ]; then
 			local resp asset name
 			resp=$(gh_req "$rv_rel" -) || return 1
-			if [ "$ver" = "dev" ]; then resp=$(jq -r '.[0]' <<<"$resp"); fi
 			tag_name=$(jq -r '.tag_name' <<<"$resp")
 			asset=$(jq -e -r ".assets[] | select(.name | endswith(\"$ext\"))" <<<"$resp") || return 1
 			url=$(jq -r .url <<<"$asset")
@@ -220,6 +222,7 @@ get_highest_ver() {
 }
 semver_validate() {
 	local a="${1%-*}"
+	local a="${a#v}"
 	local ac="${a//[.0-9]/}"
 	[ ${#ac} = 0 ]
 }
