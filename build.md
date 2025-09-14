@@ -1,7 +1,7 @@
 GooglePhotos (arm64-v8a): 7.45.0.804174563  
 GooglePhotos (arm-v7a): 7.45.0.804174563  
-Music (arm64-v8a): 8.25.54  
-Music (arm-v7a): 8.25.54  
+Music (arm64-v8a): 7.29.52  
+Music (arm-v7a): 7.29.52  
 YouTube: 20.13.41  
 
 Install [Microg](https://github.com/ReVanced/GmsCore/releases) for non-root YouTube and YT Music APKs  
