@@ -391,9 +391,9 @@ dl_uptodown() {
 		if versionURL=$(jq -e -r '.versionURL' <<<"$op"); then break; else return 1; fi
 	done
 	if [ -z "$versionURL" ]; then return 1; fi
-	resp=$(req "$versionURL" -) || return 1
  	versionURL=$(jq -e -r '.url + "/" + .extraURL + "/" + (.versionID | tostring)' <<<"$versionURL")
-
+	resp=$(req "$versionURL" -) || return 1
+ 	
 	local data_version files node_arch data_file_id
 	data_version=$($HTMLQ '.button.variants' --attribute data-version <<<"$resp") || return 1
 	if [ "$data_version" ]; then
