@@ -172,13 +172,35 @@ am force-stop "$PKG_NAME"
 ui_print "* Optimizing $PKG_NAME"
 nohup cmd package compile --reset "$PKG_NAME" >/dev/null 2>&1 &
 
-ui_print "* Cleanup"
-rm -rf "${MODPATH:?}/bin" "$MODPATH/$PKG_NAME.apk"
-
-if [ "$KSU" ] && [ -d "/data/adb/modules/zygisk-assistant" ]; then
-	ui_print "* If you are using zygisk-assistant, you need to"
-	ui_print "  give root permissions to $PKG_NAME"
+if [ "$KSU" ]; then
+	UID=$(dumpsys package "$PKG_NAME" | grep -m1 uid)
+	UID=${UID#*=} UID=${UID%% *}
+	if [ -z "$UID" ]; then
+		UID=$(dumpsys package "$PKG_NAME" | grep -m1 userId)
+		UID=${UID#*=} UID=${UID%% *}
+	fi
+	if [ "$UID" ]; then
+		OP=$("${MODPATH:?}/bin/$ARCH/ksu_profile" "$UID" 2>&1)
+		R=$?
+		if [ $R = 0 ]; then
+			ui_print ""
+			ui_print "* You are using KernelSU."
+			ui_print "  In order for the module to work, you"
+			ui_print "  may need to untick 'Unmount modules'"
+			ui_print "  in KernelSU app for $PKG_NAME"
+			ui_print "  Do not ignore this message and proceed "
+			ui_print "  to create an issue on the GitHub page!"
+			ui_print ""
+		elif [ $R = 1 ]; then
+			:
+		else ui_print "ERROR ksu_profile: $OP"; fi
+	else
+		ui_print "no UID"
+		echo >&2 "$(dumpsys package "$PKG_NAME")"
+	fi
 fi
+
+rm -rf "${MODPATH:?}/bin" "$MODPATH/$PKG_NAME.apk"
 
 ui_print "* Done"
 ui_print "  by j-hc (github.com/j-hc)"
