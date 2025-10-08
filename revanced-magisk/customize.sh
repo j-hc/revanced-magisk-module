@@ -104,11 +104,17 @@ install() {
 			break
 		fi
 		if ! op=$(pmex install-commit "$SES"); then
-			if echo "$op" | grep -q INSTALL_FAILED_VERSION_DOWNGRADE; then
-				ui_print "* Handling INSTALL_FAILED_VERSION_DOWNGRADE.."
+			if echo "$op" | grep -q -e INSTALL_FAILED_VERSION_DOWNGRADE -e INSTALL_FAILED_UPDATE_INCOMPATIBLE; then
+				ui_print "* Handling install error"
 				if [ "$IS_SYS" = true ]; then
-					mkdir -p /data/adb/rvhc/empty /data/adb/post-fs-data.d
 					SCNM="/data/adb/post-fs-data.d/$PKG_NAME-uninstall.sh"
+					if [ -f "$SCNM" ]; then
+						ui_print "* Remove the old module. Reboot and reflash!"
+						ui_print ""
+						install_err=" "
+						break
+					fi
+					mkdir -p /data/adb/rvhc/empty /data/adb/post-fs-data.d
 					echo "mount -o bind /data/adb/rvhc/empty $BASEPATH" >"$SCNM"
 					chmod +x "$SCNM"
 					ui_print "* Created the uninstall script."
@@ -188,7 +194,7 @@ if [ "$KSU" ]; then
 			ui_print "  In order for the module to work, you"
 			ui_print "  may need to untick 'Unmount modules'"
 			ui_print "  in KernelSU app for $PKG_NAME"
-			ui_print "  Do not ignore this message and proceed "
+			ui_print "  Do not ignore this message and proceed"
 			ui_print "  to create an issue on the GitHub page!"
 			ui_print ""
 		elif [ $R = 1 ]; then
