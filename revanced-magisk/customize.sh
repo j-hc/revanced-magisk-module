@@ -89,21 +89,9 @@ install() {
 	VERIF2=$(settings get global package_verifier_enable)
 	settings put global verifier_verify_adb_installs 0
 	settings put global package_verifier_enable 0
-	SZ=$(stat -c "%s" "$MODPATH/$PKG_NAME.apk")
 	for IT in 1 2; do
-		if ! SES=$(pmex install-create --user 0 -i com.android.vending -r -d -S "$SZ"); then
-			ui_print "ERROR: install-create failed"
-			install_err="$SES"
-			break
-		fi
-		SES=${SES#*[} SES=${SES%]*}
 		set_perm "$MODPATH/$PKG_NAME.apk" 1000 1000 644 u:object_r:apk_data_file:s0
-		if ! op=$(pmex install-write -S "$SZ" "$SES" "$PKG_NAME.apk" "$MODPATH/$PKG_NAME.apk"); then
-			ui_print "ERROR: install-write failed"
-			install_err="$op"
-			break
-		fi
-		if ! op=$(pmex install-commit "$SES"); then
+		if ! op=$(pmex install --user 0 -i com.android.vending -r -d "$MODPATH/$PKG_NAME.apk"); then
 			if echo "$op" | grep -q -e INSTALL_FAILED_VERSION_DOWNGRADE -e INSTALL_FAILED_UPDATE_INCOMPATIBLE; then
 				ui_print "* Handling install error"
 				if [ "$IS_SYS" = true ]; then
@@ -134,7 +122,7 @@ install() {
 					continue
 				fi
 			fi
-			ui_print "ERROR: install-commit failed"
+			ui_print "ERROR: install failed"
 			install_err="$op"
 			break
 		fi
@@ -179,19 +167,20 @@ ui_print "* Optimizing $PKG_NAME"
 nohup cmd package compile --reset "$PKG_NAME" >/dev/null 2>&1 &
 
 if [ "$KSU" ]; then
-	UID=$(dumpsys package "$PKG_NAME" | grep -m1 uid)
+	DSYS=$(dumpsys package "$PKG_NAME")
+	UID=$(echo "$DSYS" | grep -m1 uid)
 	UID=${UID#*=} UID=${UID%% *}
 	if [ -z "$UID" ]; then
-		UID=$(dumpsys package "$PKG_NAME" | grep -m1 userId)
+		UID=$(echo "$DSYS" | grep -m1 userId)
 		UID=${UID#*=} UID=${UID%% *}
 	fi
 	if [ "$UID" ]; then
-		if ! OP=$("${MODPATH:?}/bin/$ARCH/ksu_profile" "$UID" 2>&1); then
+		if ! OP=$("${MODPATH:?}/bin/$ARCH/ksu_profile" "$UID" "$PKG_NAME" 2>&1); then
 			ui_print "ERROR ksu_profile: $OP"
 		fi
 	else
 		ui_print "no UID"
-		dumpsys package "$PKG_NAME" >&2
+		echo "$DSYS" >&2
 	fi
 fi
 
