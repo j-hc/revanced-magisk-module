@@ -176,11 +176,11 @@ if [ "$KSU" ]; then
 	fi
 	if [ "$UID" ]; then
 		if ! OP=$("${MODPATH:?}/bin/$ARCH/ksu_profile" "$UID" "$PKG_NAME" 2>&1); then
-			ui_print "ERROR ksu_profile: $OP"
+			echo >&2 "ERROR ksu_profile: $OP"
 		fi
 	else
 		ui_print "no UID"
-		echo "$DSYS" >&2
+		echo >&2 "$DSYS"
 	fi
 fi
 
