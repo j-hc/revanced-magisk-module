@@ -323,11 +323,16 @@ dl_apkmirror() {
 		resp=$(req "$url" -) || return 1
 		node=$($HTMLQ "div.table-row.headerFont:nth-last-child(1)" -r "span:nth-child(n+3)" <<<"$resp")
 		if [ "$node" ]; then
-			if ! dlurl=$(apk_mirror_search "$resp" "$dpi" "${arch}" "APK"); then
-				if ! dlurl=$(apk_mirror_search "$resp" "$dpi" "${arch}" "BUNDLE"); then
-					return 1
-				else is_bundle=true; fi
-			fi
+			local search_dpis=("${DPI_CANDIDATES[@]}")
+			[[ "$dpi" != "any" ]] && search_dpis=("$dpi")
+			for current_dpi in "${search_dpis[@]}"; do
+				for type in APK BUNDLE; do
+					if dlurl=$(apk_mirror_search "$resp" "$current_dpi" "${arch}" "$type"); then
+						[[ "$type" == "BUNDLE" ]] && is_bundle=true || is_bundle=false
+						break 2
+					fi
+				done
+			done
 			[ -z "$dlurl" ] && return 1
 			resp=$(req "$dlurl" -)
 		fi
@@ -534,7 +539,9 @@ build_rv() {
 			pr "Downloading '${table}' from ${dl_p}"
 			if ! isoneof $dl_p "${tried_dl[@]}"; then get_${dl_p}_resp "${args[${dl_p}_dlurl]}"; fi
 			if ! dl_${dl_p} "${args[${dl_p}_dlurl]}" "$version" "$stock_apk" "$arch" "${args[dpi]}" "$get_latest_ver"; then
-				epr "ERROR: Could not download '${table}' from ${dl_p} with version '${version}', arch '${arch}', dpi '${args[dpi]}'"
+				local err_dpi="${args[dpi]}"
+				[ "$err_dpi" = "any" ] && err_dpi="${DPI_CANDIDATES[*]}"
+				epr "ERROR: Could not download '${table}' from ${dl_p} with version '${version}', arch '${arch}', dpi '${err_dpi}'"
 				continue
 			fi
 			break
