@@ -173,23 +173,6 @@ am force-stop "$PKG_NAME"
 ui_print "* Optimizing $PKG_NAME"
 nohup cmd package compile --reset "$PKG_NAME" >/dev/null 2>&1 &
 
-if [ "$KSU" ]; then
-	UID=$(dumpsys package "$PKG_NAME" | grep -m1 uid)
-	UID=${UID#*=} UID=${UID%% *}
-	if [ -z "$UID" ]; then
-		UID=$(dumpsys package "$PKG_NAME" | grep -m1 userId)
-		UID=${UID#*=} UID=${UID%% *}
-	fi
-	if [ "$UID" ]; then
-		if ! OP=$("${MODPATH:?}/bin/$ARCH/ksu_profile" "$UID" "$PKG_NAME" 2>&1); then
-			ui_print "ERROR ksu_profile: $OP"
-		fi
-	else
-		ui_print "no UID"
-		dumpsys package "$PKG_NAME" >&2
-	fi
-fi
-
 rm -rf "${MODPATH:?}/bin" "$MODPATH/$PKG_NAME.apk"
 
 ui_print "* Done"
