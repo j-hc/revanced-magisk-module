@@ -39,17 +39,7 @@ pmex() {
 
 if ! pmex path "$PKG_NAME" >&2; then
 	if pmex install-existing "$PKG_NAME" >&2; then
-		BASEPATH=$(pmex path "$PKG_NAME") || abort "ERROR: pm path failed $BASEPATH"
-		echo >&2 "'$BASEPATH'"
-		BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
-		if [ "${BASEPATH:1:4}" = data ]; then
-			if pmex uninstall -k --user 0 "$PKG_NAME" >&2; then
-				rm -rf "$BASEPATH" 2>&1
-				ui_print "* Cleared existing $PKG_NAME package"
-				ui_print "* Reboot and reflash"
-				abort
-			else abort "ERROR: pm uninstall failed"; fi
-		else ui_print "* Installed stock $PKG_NAME package"; fi
+		pmex uninstall-system-updates "$PKG_NAME"
 	fi
 fi
 
@@ -104,8 +94,13 @@ install() {
 			break
 		fi
 		if ! op=$(pmex install-commit "$SES"); then
+			echo >&2 "$op"
 			if echo "$op" | grep -q -e INSTALL_FAILED_VERSION_DOWNGRADE -e INSTALL_FAILED_UPDATE_INCOMPATIBLE; then
 				ui_print "* Handling install error"
+				pmex uninstall-system-updates "$PKG_NAME"
+				BASEPATH=$(pmex path "$PKG_NAME") || abort
+				BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
+				if [ "${BASEPATH:1:4}" != data ]; then IS_SYS=true; fi
 				if [ "$IS_SYS" = true ]; then
 					SCNM="/data/adb/post-fs-data.d/$PKG_NAME-uninstall.sh"
 					if [ -f "$SCNM" ]; then
