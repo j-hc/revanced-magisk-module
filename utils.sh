@@ -22,12 +22,15 @@ toml_get_table_names() { jq -r -e 'to_entries[] | select(.value | type == "objec
 toml_get_table_main() { jq -r -e 'to_entries | map(select(.value | type != "object")) | from_entries' <<<"$__TOML__"; }
 toml_get_table() { jq -r -e ".\"${1}\"" <<<"$__TOML__"; }
 toml_get() {
-	local op
+	local op quote_placeholder=$'\001'
 	op=$(jq -r ".\"${2}\" | values" <<<"$1")
 	if [ "$op" ]; then
 		op="${op#"${op%%[![:space:]]*}"}"
 		op="${op%"${op##*[![:space:]]}"}"
+		op=${op//\\\'/$quote_placeholder}
+		op=${op//"''"/$quote_placeholder}
 		op=${op//"'"/'"'}
+		op=${op//$quote_placeholder/$'\''}
 		echo "$op"
 	else return 1; fi
 }

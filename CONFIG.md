@@ -7,6 +7,9 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app"
 # or uptodown-dlurl = "https://app.en.uptodown.com/android"
 ```
 
+> [!WARNING]
+> When a patch name itself contains a single quote, double it inside the string (e.g. 'Hide ''Get Music Premium''').
+
 ## More about other options:
 
 There exists an example below with all defaults shown and all the keys explicitly set.  
