@@ -365,6 +365,14 @@ get_apkmirror_resp() {
 }
 
 # -------------------- uptodown --------------------
+get_variants() {
+    local h=$(echo "$1" | tr -d '\n')
+    paste -d '|' \
+        <(echo "$h" | grep -o 'variants\.svg">\s*[^<]*' | sed 's/.*svg">\s*//') \
+        <(echo "$h" | grep -o 'title="[x]*apk"'         | cut -d'"' -f2) \
+        <(echo "$h" | grep -o 'class="v-screen">[^<]*'  | sed 's/.*>//') \
+        <(echo "$h" | grep -o 'data-file-id="[0-9]*"'   | cut -d'"' -f2)
+}
 get_uptodown_resp() {
 	__UPTODOWN_RESP__=$(req "${1}/versions" -)
 	__UPTODOWN_RESP_PKG__=$(req "${1}/download" -)
@@ -375,14 +383,14 @@ dl_uptodown() {
 	local apparch
 	if [ "$arch" = "arm-v7a" ]; then arch="armeabi-v7a"; fi
 	if [ "$arch" = all ]; then
-		apparch=('arm64-v8a, armeabi-v7a, x86, x86_64' 'arm64-v8a, armeabi-v7a')
-	else apparch=("$arch" 'arm64-v8a, armeabi-v7a, x86, x86_64' 'arm64-v8a, armeabi-v7a'); fi
+		apparch=('arm64-v8a, armeabi-v7a, x86_64' 'arm64-v8a, armeabi-v7a, x86, x86_64' 'arm64-v8a, armeabi-v7a')
+	else apparch=("$arch" 'arm64-v8a, armeabi-v7a, x86_64' 'arm64-v8a, armeabi-v7a, x86, x86_64' 'arm64-v8a, armeabi-v7a'); fi
 
 	local op resp data_code
 	data_code=$($HTMLQ "#detail-app-name" --attribute data-code <<<"$__UPTODOWN_RESP__")
 	local versionURL=""
 	local is_bundle=false
-	for i in {1..5}; do
+	for i in {1..20}; do
 		resp=$(req "${uptodown_dlurl}/apps/${data_code}/versions/${i}" -)
 		if ! op=$(jq -e -r ".data | map(select(.version == \"${version}\")) | .[0]" <<<"$resp"); then
 			continue
@@ -394,18 +402,18 @@ dl_uptodown() {
 	versionURL=$(jq -e -r '.url + "/" + .extraURL + "/" + (.versionID | tostring)' <<<"$versionURL")
 	resp=$(req "$versionURL" -) || return 1
 
-	local data_version files node_arch data_file_id
+	local data_version files
 	data_version=$($HTMLQ '.button.variants' --attribute data-version <<<"$resp") || return 1
 	if [ "$data_version" ]; then
 		files=$(req "${uptodown_dlurl%/*}/app/${data_code}/version/${data_version}/files" - | jq -e -r .content) || return 1
-		for ((n = 1; n < 12; n += 2)); do
-			node_arch=$($HTMLQ ".content > p:nth-child($n)" --text <<<"$files" | xargs) || return 1
-			if [ -z "$node_arch" ]; then return 1; fi
-			if ! isoneof "$node_arch" "${apparch[@]}"; then continue; fi
-			data_file_id=$($HTMLQ "div.variant:nth-child($((n + 1))) > .v-report" --attribute data-file-id <<<"$files") || return 1
-			resp=$(req "${uptodown_dlurl}/download/${data_file_id}-x" -)
+		while IFS='|' read -r architecture file_type dpi file_id; do
+			if [ -z "$architecture" ]; then return 1; fi
+			if ! isoneof "$architecture" "${apparch[@]}"; then continue; fi
+			# FIXME Verify DPI for each file if desired
+			[[ "$file_type" == "xapk" ]] && is_bundle=true || is_bundle=false
+			resp=$(req "${uptodown_dlurl}/download/${file_id}-x" -)
 			break
-		done
+		done < <(get_variants "$files")
 	fi
 	local data_url
 	data_url=$($HTMLQ "#detail-download-button" --attribute data-url <<<"$resp") || return 1
