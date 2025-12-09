@@ -47,3 +47,13 @@ run() {
 }
 
 run
+
+if [ "$KSU" = true ] && /data/adb/ksud kernel 2>&1 | grep -q "umount" >/dev/null 2>&1; then
+	echo "allow zygote adb_data_file dir search" > /dev/revanced_rule
+	/data/adb/ksud sepolicy apply /dev/revanced_rule
+	rm /dev/revanced_rule
+
+	APK_PATH=$(pm path "$PKG_NAME")
+	/data/adb/ksud kernel umount add "$APK_PATH" -f 2 > /dev/null
+	/data/adb/ksud kernel notify-module-mounted > /dev/null
+fi
