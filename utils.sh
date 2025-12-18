@@ -326,7 +326,7 @@ dl_apkmirror() {
 		resp=$(req "$url" -) || return 1
 		node=$($HTMLQ "div.table-row.headerFont:nth-last-child(1)" -r "span:nth-child(n+3)" <<<"$resp")
 		if [ "$node" ]; then
-			for current_dpi in "${dpi[@]}"; do
+			for current_dpi in $dpi; do
 				for type in APK BUNDLE; do
 					if dlurl=$(apk_mirror_search "$resp" "$current_dpi" "${arch}" "$type"); then
 						[[ "$type" == "BUNDLE" ]] && is_bundle=true || is_bundle=false
@@ -539,8 +539,8 @@ build_rv() {
 			if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
 			pr "Downloading '${table}' from ${dl_p}"
 			if ! isoneof $dl_p "${tried_dl[@]}"; then get_${dl_p}_resp "${args[${dl_p}_dlurl]}"; fi
-			if ! dl_${dl_p} "${args[${dl_p}_dlurl]}" "$version" "$stock_apk" "$arch" "$DPI_CANDIDATES" "$get_latest_ver"; then
-				epr "ERROR: Could not download '${table}' from ${dl_p} with version '${version}', arch '${arch}', dpi '${DPI_CANDIDATES[*]}'"
+			if ! dl_${dl_p} "${args[${dl_p}_dlurl]}" "$version" "$stock_apk" "$arch" "${args[dpi]}" "$get_latest_ver"; then
+				epr "ERROR: Could not download '${table}' from ${dl_p} with version '${version}', arch '${arch}', dpi '${args[dpi]}'"
 				continue
 			fi
 			break
