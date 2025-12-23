@@ -389,14 +389,23 @@ get_apkmirror_vers() {
 }
 get_apkmirror_pkg_name() { sed -n 's;.*id=\(.*\)" class="accent_color.*;\1;p' <<<"$__APKMIRROR_RESP__"; }
 get_apkmirror_resp() {
-	__APKMIRROR_RESP__=$(req "${1}" -) || return 1
+	if ! __APKMIRROR_RESP__=$(req "${1}" - 2>/dev/null); then
+		epr "APKMirror request failed for ${1} (possible rate limiting/403)"
+		return 1
+	fi
 	__APKMIRROR_CAT__="${1##*/}"
 }
 
 # -------------------- uptodown --------------------
 get_uptodown_resp() {
-	__UPTODOWN_RESP__=$(req "${1}/versions" -) || return 1
-	__UPTODOWN_RESP_PKG__=$(req "${1}/download" -) || return 1
+	if ! __UPTODOWN_RESP__=$(req "${1}/versions" - 2>/dev/null); then
+		epr "Uptodown request failed for ${1}"
+		return 1
+	fi
+	if ! __UPTODOWN_RESP_PKG__=$(req "${1}/download" - 2>/dev/null); then
+		epr "Uptodown download page request failed for ${1}"
+		return 1
+	fi
 }
 get_uptodown_vers() { $HTMLQ --text ".version" <<<"$__UPTODOWN_RESP__"; }
 dl_uptodown() {
@@ -459,13 +468,19 @@ get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)"
 dl_archive() {
 	local url=$1 version=$2 output=$3 arch=$4
 	local path version=${version// /}
-	path=$(grep "${version_f#v}-${arch// /}" <<<"$__ARCHIVE_RESP__") || return 1
+	if ! path=$(grep "${version_f#v}-${arch// /}" <<<"$__ARCHIVE_RESP__"); then
+		epr "Version ${version} with arch ${arch} not found in archive"
+		return 1
+	fi
 	req "${url}/${path}" "$output"
 }
 get_archive_resp() {
 	local r
-	r=$(req "$1" -)
-	if [ -z "$r" ]; then return 1; else __ARCHIVE_RESP__=$(sed -n 's;^<a href="\(.*\)"[^"]*;\1;p' <<<"$r"); fi
+	if ! r=$(req "$1" - 2>/dev/null) || [ -z "$r" ]; then
+		epr "Archive request failed for ${1}"
+		return 1
+	fi
+	__ARCHIVE_RESP__=$(sed -n 's;^<a href="\(.*\)"[^"]*;\1;p' <<<"$r")
 	__ARCHIVE_PKG_NAME__=$(awk -F/ '{print $NF}' <<<"$1")
 }
 get_archive_vers() { sed 's/^[^-]*-//;s/-\(all\|arm64-v8a\|arm-v7a\)\.apk//g' <<<"$__ARCHIVE_RESP__"; }
@@ -495,6 +510,8 @@ check_sig() {
 }
 
 build_rv() {
+	(
+	set +e  # Disable exit on error inside build_rv to handle failures gracefully
 	eval "declare -A args=${1#*=}"
 	local version="" pkg_name=""
 	local mode_arg=${args[build_mode]} version_mode=${args[version]}
@@ -534,7 +551,8 @@ build_rv() {
 	if [ "$version_mode" = auto ]; then
 		if ! version=$(get_patch_last_supported_ver "$list_patches" "$pkg_name" \
 			"${args[included_patches]}" "${args[excluded_patches]}" "${args[exclusive_patches]}"); then
-			exit 1
+			epr "ERROR: Failed to get patch version for ${table}. Skipping..."
+			return 0
 		elif [ -z "$version" ]; then get_latest_ver=true; fi
 	elif isoneof "$version_mode" latest beta; then
 		get_latest_ver=true
@@ -671,6 +689,8 @@ build_rv() {
 		popd >/dev/null || :
 		pr "Built ${table} (root): '${BUILD_DIR}/${module_output}'"
 	done
+	) || epr "Build process for an app exited with error, continuing with next app..."
+	return 0  # Always return success to continue with other builds
 }
 
 list_args() { tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/\([^"]\)"\([^"]\)/\1'\''\2/g' | grep -v '^$' || :; }
