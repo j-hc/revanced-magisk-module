@@ -170,8 +170,8 @@ config_update() {
 			else
 				last_patches=$(gh_req "$rv_rel/tags/${ver}" -)
 			fi
-			if ! last_patches=$(jq -e -r '.assets[] | select(.name | endswith("$PATCH_EXT")) | .name' <<<"$last_patches"); then
-				abort oops
+			if ! last_patches=$(jq -e -r --arg ext "$PATCH_EXT" '.assets[] | select(.name | endswith($ext)) | .name' <<<"$last_patches"); then
+				abort "oops"
 			fi
 			if [ "$last_patches" ]; then
 				if ! OP=$(grep "^Patches: ${PATCHES_SRC%%/*}/" build.md | grep "$last_patches"); then
