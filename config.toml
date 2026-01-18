@@ -8,7 +8,6 @@ parallel-jobs = 1
 
 [YouTube-Extended-anddea]
 enabled = true
-app-name = "YouTube"
 patches-source = "anddea/revanced-patches"
 cli-source = "j-hc/revanced-cli"
 rv-brand = "ReVanced Extended"
@@ -21,7 +20,6 @@ arch = "all"
 
 [YouTube-Music-Extended-anddea]
 enabled = true
-app-name = "YT-Music"
 patches-source = "anddea/revanced-patches"
 cli-source = "j-hc/revanced-cli"
 rv-brand = "ReVanced Extended"
@@ -34,7 +32,6 @@ arch = "all"
 
 [YouTube-Morphe]
 enabled = true
-app-name = "YouTube"
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "j-hc/revanced-cli"
 rv-brand = "ReVanced Extended"
@@ -47,7 +44,6 @@ arch = "all"
 
 [YouTube-Music-Morphe]
 enabled = true
-app-name = "YT-Music"
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "j-hc/revanced-cli"
 rv-brand = "ReVanced Extended"
