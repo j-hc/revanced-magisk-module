@@ -12,7 +12,7 @@
 
 ### Builder's features
 * Builds Magisk modules with RVX patches for YouTube and YouTube-Music
-* Uses the latest patches from [inotia00](https://github.com/inotia00/revanced-patches) and [mininxd](https://github.com/mininxd/revanced-patches)
+* Uses the latest patches from [anddea](https://github.com/anddea/revanced-patches)
 * Modules are built without human intervention
 
 
@@ -25,6 +25,4 @@
 
 [The ReVanced team](https://github.com/revanced)
 
-[inotia00](https://github.com/inotia00) for their [revanced-extended patches](https://github.com/inotia00/revanced-patches)
-
-[mininxd](https://github.com/mininxd) for his [revanced-extended patches](https://github.com/mininxd/revanced-patches)
+[anddea](https://github.com/anddea) for their [revanced-extended patches](https://github.com/anddea/revanced-patches)
