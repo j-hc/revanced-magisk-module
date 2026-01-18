@@ -12,7 +12,7 @@
 
 ### Builder's features
 * Builds Magisk modules with RVX patches for YouTube and YouTube-Music
-* Uses the latest patches from [anddea](https://github.com/anddea/revanced-patches)
+* Uses the latest patches from [anddea's RVX](https://github.com/anddea/revanced-patches)
 * Modules are built without human intervention
 
 
