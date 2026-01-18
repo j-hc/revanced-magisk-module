@@ -33,7 +33,7 @@ arch = "all"
 [YouTube-Morphe]
 enabled = true
 patches-source = "MorpheApp/morphe-patches"
-cli-source = "j-hc/revanced-cli"
+cli-source = "MorpheApp/morphe-cli"
 rv-brand = "ReVanced Extended"
 build-mode = "module"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
@@ -45,7 +45,7 @@ arch = "all"
 [YouTube-Music-Morphe]
 enabled = true
 patches-source = "MorpheApp/morphe-patches"
-cli-source = "j-hc/revanced-cli"
+cli-source = "MorpheApp/morphe-cli"
 rv-brand = "ReVanced Extended"
 build-mode = "module"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
