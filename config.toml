@@ -31,10 +31,10 @@ arch = "all"
 
 
 [YouTube-Morphe]
-enabled = true
+enabled = false
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
-rv-brand = "ReVanced Extended"
+rv-brand = "Morphe"
 build-mode = "module"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
@@ -43,10 +43,10 @@ arch = "all"
 
 
 [YouTube-Music-Morphe]
-enabled = true
+enabled = false
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
-rv-brand = "ReVanced Extended"
+rv-brand = "Morphe"
 build-mode = "module"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
