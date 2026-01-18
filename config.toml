@@ -30,3 +30,29 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 module-prop-name = "ytm-rvx-anddea"
 arch = "all"
+
+
+[YouTube-Morphe]
+enabled = true
+app-name = "YouTube"
+patches-source = "MorpheApp/morphe-patches"
+cli-source = "j-hc/revanced-cli"
+rv-brand = "ReVanced Extended"
+build-mode = "module"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
+uptodown-dlurl = "https://youtube.en.uptodown.com/android"
+module-prop-name = "yt-morphe"
+arch = "all"
+
+
+[YouTube-Music-Morphe]
+enabled = true
+app-name = "YT-Music"
+patches-source = "MorpheApp/morphe-patches"
+cli-source = "j-hc/revanced-cli"
+rv-brand = "ReVanced Extended"
+build-mode = "module"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
+uptodown-dlurl = "https://youtube.en.uptodown.com/android"
+module-prop-name = "ytm-morphe"
+arch = "all"
