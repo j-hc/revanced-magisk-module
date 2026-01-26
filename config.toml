@@ -52,3 +52,11 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 module-prop-name = "ytm-morphe"
 arch = "all"
+
+[YouTube-Morphe]
+app-name = "YouTube"
+apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
+patches-source = "MorpheApp/morphe-patches"
+cli-source = "MorpheApp/morphe-cli"
+build-mode = "both"
+rv-brand = "Morphe"
