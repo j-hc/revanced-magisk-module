@@ -30,7 +30,7 @@ module-prop-name = "ytm-rvx-anddea"
 arch = "all"
 
 
-[YouTube-Morphe]
+[YouTube-Morephe]
 enabled = false
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
