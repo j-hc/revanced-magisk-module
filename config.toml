@@ -30,8 +30,8 @@ module-prop-name = "ytm-rvx-anddea"
 arch = "all"
 
 
-[YouTube-Morephe]
-enabled = false
+[YouTube-Morphe]
+enabled = true
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Morphe"
@@ -43,7 +43,7 @@ arch = "all"
 
 
 [YouTube-Music-Morphe]
-enabled = false
+enabled = true
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Morphe"
@@ -52,11 +52,3 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 module-prop-name = "ytm-morphe"
 arch = "all"
-
-[YouTube-Morphe]
-app-name = "YouTube"
-apkmirror-dlurl = "https://apkmirror.com/apk/google-inc/youtube/"
-patches-source = "MorpheApp/morphe-patches"
-cli-source = "MorpheApp/morphe-cli"
-build-mode = "both"
-rv-brand = "Morphe"
