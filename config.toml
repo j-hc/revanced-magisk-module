@@ -27,7 +27,7 @@ build-mode = "module"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 app-name = "YT-Music RVX anddea"
 module-prop-name = "ytm-rvx-anddea"
-arch = "all"
+arch = "both"
 
 
 [YouTube-Morphe]
@@ -51,7 +51,7 @@ build-mode = "module"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
 app-name = "YT-Music Morphe"
 module-prop-name = "ytm-morphe"
-arch = "all"
+arch = "both"
 
 
 [Reddit-Morphe]
