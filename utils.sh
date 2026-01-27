@@ -640,9 +640,9 @@ build_rv() {
 		local patches_ver="${patches_jar##*-}"
 		module_prop \
 			"${args[module_prop_name]}" \
-			"${app_name} ${args[rv_brand]}" \
+			"${app_name}" \
 			"${version} (patches ${patches_ver%%.$PATCH_EXT})" \
-			"${app_name} ${args[rv_brand]} Magisk module" \
+			"${app_name} module" \
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY-}/update/${upj}" \
 			"$base_template"
 
