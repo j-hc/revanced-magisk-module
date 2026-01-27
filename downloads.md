@@ -1,0 +1,1 @@
+[![Total Downloads](https://img.shields.io/github/downloads/Susheate/rvx-morphe-module-builder/total?label=Downloads&style=for-the-badge)](https://github.com/Susheate/revanced-extended-magisk/releases)
