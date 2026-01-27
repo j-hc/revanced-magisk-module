@@ -6,9 +6,9 @@
 
 ### Modules features
 * Keep mounts across reboots
-* Receive updates from the Magisk app
+* Receive updates from your root manager app
 * Should not trigger root detections
-* Support both Magisk and KernelSU
+* Support Apatch, Magisk and KernelSU
 
 ### Builder's features
 * Builds Magisk modules with RVX patches for YouTube and YouTube-Music
