@@ -56,7 +56,7 @@ arch = "both"
 
 [Reddit-Morphe]
 enabled = true
-patches-source = "wchill/patcheddit"
+patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Morphe"
 build-mode = "module"
