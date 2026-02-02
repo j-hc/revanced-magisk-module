@@ -54,7 +54,7 @@ module-prop-name = "ytm-morphe"
 arch = "both"
 
 
-[Reddit-Morphe]
+[Reddit]
 enabled = true
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
