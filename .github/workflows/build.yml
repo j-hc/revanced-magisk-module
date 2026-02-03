@@ -8,6 +8,12 @@ on:
         default: true
 
   workflow_dispatch:
+    inputs:
+      patches_source:
+        description: "Enter patches source or owner names separated by spaces. Leave empty to build all"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   run:
@@ -26,10 +32,10 @@ jobs:
           submodules: true
 
       - name: Update config
-        if: ${{ inputs.from_ci }}
+        if: ${{ inputs.from_ci || inputs.patches_source != '' }}
         run: |
-          if git checkout origin/update build.md; then
-            UPDATE_CFG=$(./build.sh config.toml --config-update)
+          if git show origin/update:build.md > build.md; then
+            UPDATE_CFG=$(./build.sh config.toml --config-update "${{ inputs.patches_source }}")
             if [ "$UPDATE_CFG" ]; then
               echo "$UPDATE_CFG" > config.json
             fi
@@ -66,7 +72,7 @@ jobs:
           body: ${{ steps.get_output.outputs.BUILD_LOG }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./build/*
-          release_name: ReVanced
+          release_name: Release No.${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           file_glob: true
           overwrite: true

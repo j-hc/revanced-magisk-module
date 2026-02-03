@@ -150,11 +150,24 @@ set_prebuilts() {
 }
 
 config_update() {
+	local filter="${1-}"
 	if [ ! -f build.md ]; then abort "build.md not available"; fi
 	declare -A sources
 	: >"$TEMP_DIR"/skipped
 	local upped=()
 	local prcfg=false
+	
+	matches_filter() {
+		local src="$1" filter="$2"
+		[ -z "$filter" ] && return 0
+		local src_owner="${src%%/*}"
+		for f in $filter; do
+			local f_owner="${f%%/*}"
+			[[ "${src_owner,,}" == "${f_owner,,}" ]] && return 0
+		done
+		return 1
+	}
+	
 	for table_name in $(toml_get_table_names); do
 		if [ -z "$table_name" ]; then continue; fi
 		t=$(toml_get_table "$table_name")
@@ -162,10 +175,27 @@ config_update() {
 		if [ "$enabled" = false ]; then continue; fi
 		PATCHES_SRC=$(toml_get "$t" patches-source) || PATCHES_SRC=$DEF_PATCHES_SRC
 		PATCHES_VER=$(toml_get "$t" patches-version) || PATCHES_VER=$DEF_PATCHES_VER
+		
+		if [ -n "$filter" ] && ! matches_filter "$PATCHES_SRC" "$filter"; then
+			# Not matched → add old patches to skipped
+			patches_owner="${PATCHES_SRC%%/*}"
+			old_patches=$(grep -i "^Patches: ${patches_owner}/" build.md | head -1 || :)
+			if [ -n "$old_patches" ] && ! grep -qF "$old_patches" "$TEMP_DIR"/skipped 2>/dev/null; then
+				echo "$old_patches" >>"$TEMP_DIR"/skipped
+			fi
+			continue
+		fi
+		
 		if [[ -v sources["$PATCHES_SRC/$PATCHES_VER"] ]]; then
 			if [ "${sources["$PATCHES_SRC/$PATCHES_VER"]}" = 1 ]; then upped+=("$table_name"); fi
 		else
 			sources["$PATCHES_SRC/$PATCHES_VER"]=0
+			
+			if [ -n "$filter" ]; then
+				sources["$PATCHES_SRC/$PATCHES_VER"]=1
+				prcfg=true
+				upped+=("$table_name")
+			else
 			local rv_rel="https://api.github.com/repos/${PATCHES_SRC}/releases"
 			if [ "$PATCHES_VER" = "dev" ]; then
 				last_patches=$(gh_req "$rv_rel" - | jq -e -r '.[0]')
@@ -185,6 +215,7 @@ config_update() {
 				else
 					echo "$OP" >>"$TEMP_DIR"/skipped
 				fi
+			fi
 			fi
 		fi
 	done

@@ -36,8 +36,11 @@ DEF_DPI_LIST=$(toml_get "$main_config_t" dpi) || DEF_DPI_LIST="nodpi anydpi"
 mkdir -p "$TEMP_DIR" "$BUILD_DIR"
 
 if [ "${2-}" = "--config-update" ]; then
-	config_update
+	config_update "${3-}"
 	exit 0
+elif [ -n "${2-}" ]; then
+	config_update "${2}" > config.json
+	exec ./build.sh config.json
 fi
 
 : >build.md
@@ -79,7 +82,7 @@ for table_name in $(toml_get_table_names); do
 	cli_ver=$(toml_get "$t" cli-version) || cli_ver=$DEF_CLI_VER
 
 	if ! PREBUILTS="$(get_prebuilts "$cli_src" "$cli_ver" "$patches_src" "$patches_ver")"; then
-		abort "could not download rv prebuilts"
+		abort "Could not download prebuilts for '$table_name'"
 	fi
 	read -r cli_jar patches_jar <<<"$PREBUILTS"
 	app_args[cli]=$cli_jar
