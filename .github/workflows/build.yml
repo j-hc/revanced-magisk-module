@@ -9,8 +9,16 @@ on:
 
   workflow_dispatch:
     inputs:
-      patches_source:
-        description: "Enter patches source or owner names separated by spaces. Leave empty to build all"
+      filter_type:
+        description: "Select filter type"
+        required: true
+        type: choice
+        options:
+          - patches
+          - app
+        default: "patches"
+      filter_value:
+        description: "Enter patches owner or app names separated by spaces. Leave empty to build all"
         required: false
         type: string
         default: ""
@@ -32,10 +40,10 @@ jobs:
           submodules: true
 
       - name: Update config
-        if: ${{ inputs.from_ci || inputs.patches_source != '' }}
+        if: ${{ inputs.from_ci || inputs.filter_value != '' }}
         run: |
           if git show origin/update:build.md > build.md; then
-            UPDATE_CFG=$(./build.sh config.toml --config-update "${{ inputs.patches_source }}")
+            UPDATE_CFG=$(./build.sh config.toml --config-update "${{ inputs.filter_type }}" "${{ inputs.filter_value }}")
             if [ "$UPDATE_CFG" ]; then
               echo "$UPDATE_CFG" > config.json
             fi

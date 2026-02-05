@@ -36,10 +36,10 @@ DEF_DPI_LIST=$(toml_get "$main_config_t" dpi) || DEF_DPI_LIST="nodpi anydpi"
 mkdir -p "$TEMP_DIR" "$BUILD_DIR"
 
 if [ "${2-}" = "--config-update" ]; then
-	config_update "${3-}"
+	config_update "${3-patches}" "${4-}"
 	exit 0
 elif [ -n "${2-}" ]; then
-	config_update "${2}" > config.json
+	config_update "${2-patches}" "${3-}" > config.json
 	exec ./build.sh config.json
 fi
 
@@ -174,7 +174,8 @@ log "Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach root R
 log "\n[revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)\n"
 log "$(cat "$TEMP_DIR"/*/changelog.md)"
 
-SKIPPED=$(cat "$TEMP_DIR"/skipped 2>/dev/null || :)
+CHANGELOGS=$(cat "$TEMP_DIR"/*/changelog.md 2>/dev/null || :)
+SKIPPED=$(grep -vFf <(echo "$CHANGELOGS") "$TEMP_DIR"/skipped 2>/dev/null || :)
 if [ -n "$SKIPPED" ]; then
 	log "\nSkipped:"
 	log "$SKIPPED"

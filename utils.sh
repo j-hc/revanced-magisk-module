@@ -150,7 +150,8 @@ set_prebuilts() {
 }
 
 config_update() {
-	local filter="${1-}"
+	local filter_type="${1-patches}"
+	local filter_value="${2-}"
 	if [ ! -f build.md ]; then abort "build.md not available"; fi
 	declare -A sources
 	: >"$TEMP_DIR"/skipped
@@ -158,12 +159,11 @@ config_update() {
 	local prcfg=false
 	
 	matches_filter() {
-		local src="$1" filter="$2"
+		local value="$1" filter="$2"
 		[ -z "$filter" ] && return 0
-		local src_owner="${src%%/*}"
+		local value_lower="${value,,}"
 		for f in $filter; do
-			local f_owner="${f%%/*}"
-			[[ "${src_owner,,}" == "${f_owner,,}" ]] && return 0
+			[[ "$value_lower" == "${f,,}" ]] && return 0
 		done
 		return 1
 	}
@@ -176,22 +176,31 @@ config_update() {
 		PATCHES_SRC=$(toml_get "$t" patches-source) || PATCHES_SRC=$DEF_PATCHES_SRC
 		PATCHES_VER=$(toml_get "$t" patches-version) || PATCHES_VER=$DEF_PATCHES_VER
 		
-		if [ -n "$filter" ] && ! matches_filter "$PATCHES_SRC" "$filter"; then
-			# Not matched → add old patches to skipped
-			patches_owner="${PATCHES_SRC%%/*}"
-			old_patches=$(grep -i "^Patches: ${patches_owner}/" build.md | head -1 || :)
+		# Check filters - skip and add to skipped if not matched
+		local matched=true
+		local patches_owner="${PATCHES_SRC%%/*}"
+		if [ -n "$filter_value" ]; then
+			if [ "$filter_type" = "app" ]; then
+				matches_filter "$table_name" "$filter_value" || matched=false
+			else
+				matches_filter "$patches_owner" "$filter_value" || matched=false
+			fi
+		fi
+		if [ "$matched" = false ]; then
+			local old_patches=$(grep -i "^Patches: ${patches_owner}/" build.md | head -1 || :)
 			if [ -n "$old_patches" ] && ! grep -qF "$old_patches" "$TEMP_DIR"/skipped 2>/dev/null; then
 				echo "$old_patches" >>"$TEMP_DIR"/skipped
 			fi
 			continue
 		fi
 		
+		# Check if this patches source has been processed
 		if [[ -v sources["$PATCHES_SRC/$PATCHES_VER"] ]]; then
 			if [ "${sources["$PATCHES_SRC/$PATCHES_VER"]}" = 1 ]; then upped+=("$table_name"); fi
 		else
 			sources["$PATCHES_SRC/$PATCHES_VER"]=0
 			
-			if [ -n "$filter" ]; then
+			if [ -n "$filter_value" ]; then
 				sources["$PATCHES_SRC/$PATCHES_VER"]=1
 				prcfg=true
 				upped+=("$table_name")
