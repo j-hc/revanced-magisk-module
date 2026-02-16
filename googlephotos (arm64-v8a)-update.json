@@ -1,6 +1,6 @@
 {
-  "version": "v7.59.0.856624550 (patches 5.48.0.rvp)",
-  "versionCode": 20221036,
-  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20221036/googlephotos-revanced-magisk-v7.59.0.856624550-arm64-v8a.zip",
+  "version": "v7.63.0.869312946 (patches 5.50.2.rvp)",
+  "versionCode": 20221037,
+  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20221037/googlephotos-revanced-magisk-v7.63.0.869312946-arm64-v8a.zip",
   "changelog": "https://raw.githubusercontent.com/j-hc/revanced-magisk-module/update/build.md"
 }
