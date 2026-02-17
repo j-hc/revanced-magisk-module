@@ -308,23 +308,32 @@ merge_splits() {
 }
 
 # -------------------- apkmirror --------------------
-apk_mirror_search() {
+apkmirror_search() {
 	local resp="$1" dpi="$2" arch="$3" apk_bundle="$4"
-	local apparch dlurl node app_table
+	local apparch dlurl="" node app_table emptyCheck
 	if [ "$arch" = all ]; then
 		apparch=(universal noarch 'arm64-v8a + armeabi-v7a')
 	else apparch=("$arch" universal noarch 'arm64-v8a + armeabi-v7a'); fi
 	for ((n = 1; n < 40; n++)); do
 		node=$($HTMLQ "div.table-row.headerFont:nth-last-child($n)" -r "span:nth-child(n+3)" <<<"$resp")
 		if [ -z "$node" ]; then break; fi
-		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
-		if [ "$(sed -n 3p <<<"$app_table")" = "$apk_bundle" ] && [ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] &&
-			isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; then
+		emptyCheck=$($HTMLQ -t -w "div.table-cell:nth-child(1) > a:nth-child(1)" <<<"$node" | xargs)
+		if [ "$emptyCheck" ]; then
 			dlurl=$($HTMLQ --base https://www.apkmirror.com --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
+		else break; fi
+		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
+		if [ "$(sed -n 3p <<<"$app_table")" = "$apk_bundle" ] &&
+			[ "$(sed -n 6p <<<"$app_table")" = "$dpi" ] &&
+			isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; then
 			echo "$dlurl"
 			return 0
 		fi
 	done
+	if [ "$n" -eq 2 ] && [ "$dlurl" ]; then
+		# only one apk exists, return it
+		echo "$dlurl"
+		return 0
+	fi
 	return 1
 }
 dl_apkmirror() {
@@ -342,7 +351,7 @@ dl_apkmirror() {
 		if [ "$node" ]; then
 			for current_dpi in $dpi; do
 				for type in APK BUNDLE; do
-					if dlurl=$(apk_mirror_search "$resp" "$current_dpi" "${arch}" "$type"); then
+					if dlurl=$(apkmirror_search "$resp" "$current_dpi" "${arch}" "$type"); then
 						[[ "$type" == "BUNDLE" ]] && is_bundle=true || is_bundle=false
 						break 2
 					fi
