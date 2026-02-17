@@ -5,7 +5,6 @@ CWD=$(pwd)
 TEMP_DIR="temp"
 BIN_DIR="bin"
 BUILD_DIR="build"
-PATCH_EXT=""
 
 if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
@@ -67,7 +66,6 @@ get_prebuilts() {
 			ext="jar"
 			local grab_cl=false
 		elif [ "$tag" = "Patches" ]; then
-			ext=$PATCH_EXT
 			local grab_cl=true
 		else abort unreachable; fi
 
@@ -95,8 +93,10 @@ get_prebuilts() {
 			local resp asset name
 			resp=$(gh_req "$rv_rel" -) || return 1
 			tag_name=$(jq -r '.tag_name' <<<"$resp")
-			matches=$(jq -e ".assets | map(select(.name | endswith(\"$ext\")))" <<<"$resp")
-			if [ "$(jq 'length' <<<"$matches")" -ne 1 ]; then
+			matches=$(jq -e '.assets | map(select(.name | endswith("asc") | not))' <<<"$resp")
+			if [ "$(jq 'length' <<<"$matches")" -eq 0 ]; then
+				abort "No asset was found"
+			elif [ "$(jq 'length' <<<"$matches")" -ne 1 ]; then
 				wpr "More than 1 asset was found for this cli release. Falling back to the first one found..."
 			fi
 			asset=$(jq -r ".[0]" <<<"$matches")
@@ -117,13 +117,9 @@ get_prebuilts() {
 			tag_name=v${tag_name%.*}
 		fi
 
-		if [ "$tag" = "CLI" ]; then
-			PATCH_EXT=$(java -jar "$file" -h | grep -oP -m1 '\w+(?= files)' | tr '[:upper:]' '[:lower:]')
-			if [ -z "$PATCH_EXT" ]; then abort "Unable to detect patch extension from CLI help output."; fi
-		elif [ "$tag" = "Patches" ]; then
+		if [ "$tag" = "Patches" ]; then
 			if [ $grab_cl = true ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi
 			if [ "$REMOVE_RV_INTEGRATIONS_CHECKS" = true ]; then
-				# inner extension (rvp->rve, mpp->mpe)
 				local extensions_ext
 				extensions_ext=$(unzip -l "${file}" "extensions/shared*" | grep -o "shared.*") extensions_ext="${extensions_ext#*.}"
 				if ! (
@@ -165,7 +161,7 @@ config_update() {
 		if [ -z "$table_name" ]; then continue; fi
 		t=$(toml_get_table "$table_name")
 		enabled=$(toml_get "$t" enabled) || enabled=true
-		if [ "$enabled" = false ]; then continue; fi
+		if [ "$enabled" = "false" ]; then continue; fi
 		PATCHES_SRC=$(toml_get "$t" patches-source) || PATCHES_SRC=$DEF_PATCHES_SRC
 		PATCHES_VER=$(toml_get "$t" patches-version) || PATCHES_VER=$DEF_PATCHES_VER
 		if [[ -v sources["$PATCHES_SRC/$PATCHES_VER"] ]]; then
@@ -180,7 +176,7 @@ config_update() {
 			else
 				last_patches=$(gh_req "$rv_rel/tags/${ver}" -)
 			fi
-			if ! last_patches=$(jq -e -r ".assets[] | select(.name | endswith(\"$PATCH_EXT\")) | .name" <<<"$last_patches"); then
+			if ! last_patches=$(jq -e -r '.assets[] | select(.name | endswith("asc") | not) | .name' <<<"$last_patches"); then
 				abort oops
 			fi
 			if [ "$last_patches" ]; then
@@ -650,7 +646,7 @@ build_rv() {
 		module_prop \
 			"${args[module_prop_name]}" \
 			"${app_name} ${args[rv_brand]}" \
-			"${version} (patches ${patches_ver%%.$PATCH_EXT})" \
+			"${version} (patches ${patches_ver})" \
 			"${app_name} ${args[rv_brand]} Magisk module" \
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY-}/update/${upj}" \
 			"$base_template"

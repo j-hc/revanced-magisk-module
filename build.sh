@@ -43,7 +43,7 @@ fi
 : >build.md
 ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || ENABLE_MAGISK_UPDATE=true
 if [ "$ENABLE_MAGISK_UPDATE" = true ] && [ -z "${GITHUB_REPOSITORY-}" ]; then
-	pr "You are building locally. Magisk updates will not be enabled."
+	pr "You are building locally. Module updates will not be enabled."
 	ENABLE_MAGISK_UPDATE=false
 fi
 if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compression-level must be within 0-9"; fi
