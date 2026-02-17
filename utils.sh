@@ -60,10 +60,8 @@ get_prebuilts() {
 	for src_ver in "$cli_src CLI $cli_ver cli" "$patches_src Patches $patches_ver patches"; do
 		set -- $src_ver
 		local src=$1 tag=$2 ver=${3-} fprefix=$4
-		local ext
 
 		if [ "$tag" = "CLI" ]; then
-			ext="jar"
 			local grab_cl=false
 		elif [ "$tag" = "Patches" ]; then
 			local grab_cl=true
@@ -88,7 +86,7 @@ get_prebuilts() {
 		fi
 
 		local url file tag_name name
-		file=$(find "$dir" -name "*${fprefix}-${name_ver#v}.${ext}" -type f 2>/dev/null)
+		file=$(find "$dir" -name "*${fprefix}-${name_ver#v}.*" -type f 2>/dev/null)
 		if [ -z "$file" ]; then
 			local resp asset name
 			resp=$(gh_req "$rv_rel" -) || return 1
