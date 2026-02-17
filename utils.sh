@@ -41,6 +41,10 @@ epr() {
 	echo >&2 -e "\033[0;31m[-] ${1}\033[0m"
 	if [ "${GITHUB_REPOSITORY-}" ]; then echo >&2 -e "::error::utils.sh [-] ${1}\n"; fi
 }
+wpr() {
+	echo >&2 -e "\033[0;33m[!] ${1}\033[0m"
+	if [ "${GITHUB_REPOSITORY-}" ]; then echo >&2 -e "::warning::utils.sh [!] ${1}\n"; fi
+}
 abort() {
 	epr "ABORT: ${1-}"
 	exit 1
@@ -92,7 +96,7 @@ get_prebuilts() {
 			tag_name=$(jq -r '.tag_name' <<<"$resp")
 			matches=$(jq -e ".assets | map(select(.name | endswith(\"$ext\")))" <<<"$resp")
 			if [ "$(jq 'length' <<<"$matches")" -ne 1 ]; then
-				pr "More than 1 asset was found for this cli release. Falling back to the first one found..."
+				wpr "More than 1 asset was found for this cli release. Falling back to the first one found..."
 			fi
 			asset=$(jq -r ".[0]" <<<"$matches")
 			url=$(jq -r .url <<<"$asset")
