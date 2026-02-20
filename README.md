@@ -10,10 +10,10 @@ Use [**zygisk-detach**](https://github.com/j-hc/zygisk-detach) to detach YouTube
 
 <details><summary><big>Features</big></summary>
 <ul>
- <li>Support all present and future ReVanced and <a href="https://github.com/inotia00/revanced-patches">ReVanced Extended</a> apps</li>
+ <li> Supports all present and future ReVanced apps (including projects implementing the same API)</li>
  <li> Can build Magisk modules and non-root APKs</li>
  <li> Updated daily with the latest versions of apps and patches</li>
- <li> Optimize APKs and modules for size</li>
+ <li> Optimizes APKs and modules for size</li>
  <li> Modules</li>
     <ul>
      <li> recompile invalidated odex for faster usage</li>
@@ -23,7 +23,6 @@ Use [**zygisk-detach**](https://github.com/j-hc/zygisk-detach) to detach YouTube
      <li> support Magisk and KernelSU</li>
     </ul>
 </ul>
-Note that the <a href="../../actions/workflows/ci.yml">CI workflow</a> is scheduled to build the modules and APKs everyday using GitHub Actions if there is a change in ReVanced patches. You may want to disable it.
 </details>
 
 ## To include/exclude patches or patch other apps
@@ -49,9 +48,9 @@ You can consider using [rvmm-zygisk-mount](https://github.com/j-hc/rvmm-zygisk-m
 bash <(curl -sSf https://raw.githubusercontent.com/j-hc/revanced-magisk-module/main/build-termux.sh)
 ```
 
-### On Desktop
+### On Linux
 ```console
-$ git clone https://github.com/j-hc/revanced-magisk-module
+$ git clone https://github.com/j-hc/revanced-magisk-module --depth 1
 $ cd revanced-magisk-module
 $ ./build.sh
 ```

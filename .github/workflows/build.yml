@@ -86,8 +86,8 @@ jobs:
           }
 
           cd build || { echo "build folder not found"; exit 1; }
-          for OUTPUT in *magisk*.zip; do
-            [ "$OUTPUT" = "*magisk*.zip" ] && continue
+          for OUTPUT in *module*.zip; do
+            [ "$OUTPUT" = "*module*.zip" ] && continue
             ZIP_S=$(unzip -p "$OUTPUT" module.prop)
             if ! UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson); then continue; fi
             UPDATE_JSON="${UPDATE_JSON##*/}"
