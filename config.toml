@@ -1,91 +1,94 @@
-enable-module-update = true # set this to false if you do not want to receive updates for the module
+# ============================================================
+# Global Settings
+# ============================================================
+
+# enable-magisk-update = true  # Set to false to disable module updates in Magisk app
 parallel-jobs = 1
 
-# add 'enabled = false' for not patching a specific app or remove it from the config
-# see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
+# Add 'enabled = false' to skip patching a specific app, or remove the section entirely.
+# See https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for details.
+# You can use rvmm-config-gen to generate a config.
 
-# you can use rvmm-config-gen to generate a config
+# ============================================================
+# Google Apps
+# ============================================================
+
+[Google-Photos]
+arch              = "arm64-v8a"
+uptodown-dlurl    = "https://google-photos.en.uptodown.com/android"
+apkmirror-dlurl   = "https://www.apkmirror.com/apk/google-inc/photos/"
+archive-dlurl     = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.photos"
 
 [YouTube]
-build-mode = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
-uptodown-dlurl = "https://youtube.en.uptodown.com/android"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+patches-source    = "MorpheApp/morphe-patches"
+cli-source        = "MorpheApp/morphe-cli"
+uptodown-dlurl    = "https://youtube.en.uptodown.com/android"
+apkmirror-dlurl   = "https://apkmirror.com/apk/google-inc/youtube/"
+archive-dlurl   = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+excluded-patches  = """\
+  'Theme' \
+  'Custom branding' \
+  """
 
-[YouTube-Morphe]
-app-name = "YouTube"
-patches-source = "MorpheApp/morphe-patches"
-cli-source = "MorpheApp/morphe-cli"
-rv-brand = "Morphe"
-build-mode = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
-uptodown-dlurl = "https://youtube.en.uptodown.com/android"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+[YouTube-Music]
+patches-source    = "MorpheApp/morphe-patches"
+cli-source        = "MorpheApp/morphe-cli"
+arch              = "arm64-v8a"
+apkmirror-dlurl   = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
+uptodown-dlurl  = "https://youtube-music.en.uptodown.com/android"
+archive-dlurl   = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+excluded-patches  = """\
+  'Theme' \
+  'Custom branding' \
+  """
 
-[Music]
-build-mode = "both"
-arch = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
-uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+# ============================================================
+# Reddit Apps
+# ============================================================
 
-[Music-Morphe]
-app-name = "Music"
-patches-source = "MorpheApp/morphe-patches"
-cli-source = "MorpheApp/morphe-cli"
-rv-brand = "Morphe"
-build-mode = "both"
-arch = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
-uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+[Boost]
+uptodown-dlurl    = "https://boost-for-reddit.en.uptodown.com/android"
+apkmirror-dlurl   = "https://www.apkmirror.com/apk/ruben-mayayo/boost-for-reddit/"
+archive-dlurl     = "https://archive.org/download/tpRaa/com.rubenmayayo.reddit"
+included-patches  = "'Spoof client'"
+patcher-args      = """\
+  -Oclient-id=fyANDeFodM3bIfthz8z0yQ \
+  """
 
-[Reddit-Morphe]
-app-name = "Reddit"
-rv-brand = "Morphe"
-patches-source = "MorpheApp/morphe-patches"
-cli-source = "MorpheApp/morphe-cli"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
-uptodown-dlurl = "https://reddit-official-app.en.uptodown.com/android"
-dpi = "120-640dpi"
+[Reddit]
+patches-source    = "MorpheApp/morphe-patches"
+cli-source        = "MorpheApp/morphe-cli"
+uptodown-dlurl    = "https://reddit-official-app.en.uptodown.com/android"
+apkmirror-dlurl   = "https://apkmirror.com/apk/redditinc/reddit/"
+archive-dlurl   = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
 
-[GooglePhotos]
-enabled = false
-build-mode = "both"
-arch = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
-uptodown-dlurl = "https://google-photos.en.uptodown.com/android"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.photos"
+# ============================================================
+# Music & Media
+# ============================================================
 
 [Spotify]
-enabled = false
-uptodown-dlurl = "https://spotify.en.uptodown.com/android"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.spotify.music"
+uptodown-dlurl    = "https://spotify.en.uptodown.com/android"
+archive-dlurl     = "https://archive.org/download/jhc-apks/apks/com.spotify.music"
 
-[Twitch]
-enabled = false
-apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
-uptodown-dlurl = "https://twitch.en.uptodown.com/android"
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/tv.twitch.android.app"
+[Instagram]
+arch              = "arm64-v8a"
+uptodown-dlurl    = "https://instagram.en.uptodown.com/android"
+apkmirror-dlurl   = "https://apkmirror.com/apk/instagram/instagram-instagram/"
+# archive-dlurl   = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
 
-[Twitter]
-enabled = false
-apkmirror-dlurl = "https://www.apkmirror.com/apk/x-corp/twitter"
-build-mode = "apk"
-dpi = "120-640dpi"
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
+[Strava]
+arch              = "arm64-v8a"
+uptodown-dlurl    = "https://strava.en.uptodown.com/android"
+apkmirror-dlurl   = "https://www.apkmirror.com/apk/strava-inc/strava-run-bike/"
 
-[TikTok]
-enabled = false
-# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.zhiliaoapp.musically"
-included-patches = "'SIM spoof'"
+# ============================================================
+# Disabled / Unused Apps
+# ============================================================
 
-[Messenger]
-enabled = false
-apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-2/messenger/"
-arch = "arm64-v8a"
-
-[IconPackStudio]
-enabled = false
-apkmirror-dlurl = "https://www.apkmirror.com/apk/smart-launcher-team/icon-pack-studio/"
+# [X]
+# patches-source       = "crimera/piko"
+# integrations-source  = "crimera/revanced-integrations"
+# uptodown-dlurl       = "https://twitter.en.uptodown.com/android"
+# apkmirror-dlurl      = "https://www.apkmirror.com/apk/x-corp/twitter"
+# archive-dlurl        = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
+# version              = "10.49.0-release.0"
