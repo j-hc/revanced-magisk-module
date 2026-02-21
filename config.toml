@@ -1,85 +1,8 @@
-# ============================================================
-# Global Settings
-# ============================================================
 
-# enable-magisk-update = true  # Set to false to disable module updates in Magisk app
-parallel-jobs = 1
 
-# Add 'enabled = false' to skip patching a specific app, or remove the section entirely.
-# See https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for details.
-# You can use rvmm-config-gen to generate a config.
-
-# ============================================================
-# Google Apps
-# ============================================================
-
-[Google-Photos]
-arch              = "arm64-v8a"
-uptodown-dlurl    = "https://google-photos.en.uptodown.com/android"
-apkmirror-dlurl   = "https://www.apkmirror.com/apk/google-inc/photos/"
-archive-dlurl     = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.photos"
-
-[YouTube]
-patches-source    = "MorpheApp/morphe-patches"
-cli-source        = "MorpheApp/morphe-cli"
-uptodown-dlurl    = "https://youtube.en.uptodown.com/android"
-apkmirror-dlurl   = "https://apkmirror.com/apk/google-inc/youtube/"
-archive-dlurl   = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
-excluded-patches  = """\
-  'Theme' \
-  'Custom branding' \
-  """
-
-[YouTube-Music]
-patches-source    = "MorpheApp/morphe-patches"
-cli-source        = "MorpheApp/morphe-cli"
-arch              = "arm64-v8a"
-apkmirror-dlurl   = "https://www.apkmirror.com/apk/google-inc/youtube-music/"
-uptodown-dlurl  = "https://youtube-music.en.uptodown.com/android"
-archive-dlurl   = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
-excluded-patches  = """\
-  'Theme' \
-  'Custom branding' \
-  """
-
-# ============================================================
-# Reddit Apps
-# ============================================================
-
-[Boost]
-uptodown-dlurl    = "https://boost-for-reddit.en.uptodown.com/android"
-apkmirror-dlurl   = "https://www.apkmirror.com/apk/ruben-mayayo/boost-for-reddit/"
-archive-dlurl     = "https://archive.org/download/tpRaa/com.rubenmayayo.reddit"
-included-patches  = "'Spoof client'"
-patcher-args      = """\
-  -Oclient-id=fyANDeFodM3bIfthz8z0yQ \
-  """
-
-[Reddit]
-patches-source    = "MorpheApp/morphe-patches"
-cli-source        = "MorpheApp/morphe-cli"
-uptodown-dlurl    = "https://reddit-official-app.en.uptodown.com/android"
-apkmirror-dlurl   = "https://apkmirror.com/apk/redditinc/reddit/"
-archive-dlurl   = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
-
-# ============================================================
-# Music & Media
-# ============================================================
-
-[Spotify]
-uptodown-dlurl    = "https://spotify.en.uptodown.com/android"
-archive-dlurl     = "https://archive.org/download/jhc-apks/apks/com.spotify.music"
-
-[Instagram]
-arch              = "arm64-v8a"
-uptodown-dlurl    = "https://instagram.en.uptodown.com/android"
-apkmirror-dlurl   = "https://apkmirror.com/apk/instagram/instagram-instagram/"
-# archive-dlurl   = "https://archive.org/download/jhc-apks/apks/com.instagram.android"
-
-[Strava]
-arch              = "arm64-v8a"
-uptodown-dlurl    = "https://strava.en.uptodown.com/android"
-apkmirror-dlurl   = "https://www.apkmirror.com/apk/strava-inc/strava-run-bike/"
+[MacroFactor]
+patches-source    = "lennyRBLX/apk-patches"
+uptodown-dlurl    = "https://macrofactor-diet-sidekick-and-macro-tracker.en.uptodown.com"
 
 # ============================================================
 # Disabled / Unused Apps
