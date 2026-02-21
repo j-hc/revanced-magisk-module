@@ -1,6 +1,7 @@
 
 
 [MacroFactor]
+arch              = "arm64-v8a"
 patches-source    = "lennyRBLX/apk-patches"
 uptodown-dlurl    = "https://macrofactor-diet-sidekick-and-macro-tracker.en.uptodown.com"
 
