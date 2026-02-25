@@ -1,0 +1,15 @@
+# ============================================================
+# Global Settings
+# ============================================================
+
+# enable-magisk-update = true  # Set to false to disable module updates in Magisk app
+parallel-jobs = 1
+
+# Add 'enabled = false' to skip patching a specific app, or remove the section entirely.
+# See https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for details.
+# You can use rvmm-config-gen to generate a config.
+
+[Strava]
+arch              = "arm64-v8a"
+uptodown-dlurl    = "https://strava.en.uptodown.com/android"
+apkmirror-dlurl   = "https://www.apkmirror.com/apk/strava-inc/strava-run-bike"
