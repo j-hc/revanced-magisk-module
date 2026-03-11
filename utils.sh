@@ -92,8 +92,12 @@ get_prebuilts() {
 			resp=$(gh_req "$rv_rel" -) || return 1
 			tag_name=$(jq -r '.tag_name' <<<"$resp")
 			matches=$(jq -e '.assets | map(select(.name | endswith("asc") | not))' <<<"$resp")
+			if [ "$(jq 'length' <<<"$matches")" -gt 1 ]; then
+				matches=$(jq -e -r 'map(select(.name | contains("-dev") | not))' <<<"$matches")
+			fi
 			if [ "$(jq 'length' <<<"$matches")" -eq 0 ]; then
-				abort "No asset was found"
+				epr "No asset was found"
+				return 1
 			elif [ "$(jq 'length' <<<"$matches")" -ne 1 ]; then
 				wpr "More than 1 asset was found for this cli release. Falling back to the first one found..."
 			fi
