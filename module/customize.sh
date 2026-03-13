@@ -94,13 +94,14 @@ install() {
 			break
 		fi
 		if ! op=$(pmex install-commit "$SES"); then
-			echo >&2 "$op"
+			ui_print "$op"
 			if echo "$op" | grep -q -e INSTALL_FAILED_VERSION_DOWNGRADE -e INSTALL_FAILED_UPDATE_INCOMPATIBLE; then
 				ui_print "* Handling install error"
 				pmex uninstall-system-updates "$PKG_NAME"
-				BASEPATH=$(pmex path "$PKG_NAME") || abort
-				BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
-				if [ "${BASEPATH:1:4}" != data ]; then IS_SYS=true; fi
+				if BASEPATH=$(pmex path "$PKG_NAME"); then
+					BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
+					if [ "${BASEPATH:1:4}" != data ]; then IS_SYS=true; fi
+				fi
 				if [ "$IS_SYS" = true ]; then
 					SCNM="/data/adb/post-fs-data.d/$PKG_NAME-uninstall.sh"
 					if [ -f "$SCNM" ]; then
@@ -136,14 +137,17 @@ install() {
 		if BASEPATH=$(pmex path "$PKG_NAME"); then
 			BASEPATH=${BASEPATH##*:} BASEPATH=${BASEPATH%/*}
 		else
-			install_err="ERROR: install $PKG_NAME manually and reflash the module"
+			install_err=" "
 			break
 		fi
 		break
 	done
 	settings put global verifier_verify_adb_installs "$VERIF1"
 	settings put global package_verifier_enable "$VERIF2"
-	if [ "$install_err" ]; then abort "$install_err"; fi
+	if [ "$install_err" ]; then
+		ui_print "$install_err"
+		abort "ERROR: disable the module, reboot, install $PKG_NAME manually and reflash again"
+	fi
 }
 if [ $INS = true ] && ! install; then abort; fi
 BASEPATHLIB=${BASEPATH}/lib/${ARCH}
