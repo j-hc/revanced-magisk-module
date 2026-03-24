@@ -50,7 +50,7 @@ abort() {
 	rm -rf ./${TEMP_DIR}/*tmp.* ./${TEMP_DIR}/*/*tmp.* ./${TEMP_DIR}/*-temporary-files
 	kill -n 9 0
 }
-java() { env -i java "$@"; }
+java() { env -i java --enable-native-access=ALL-UNNAMED "$@"; }
 
 get_prebuilts() {
 	local cli_src=$1 cli_ver=$2 patches_src=$3 patches_ver=$4
@@ -313,15 +313,18 @@ merge_splits() {
 	local bundle=$1 output=$2
 	pr "Merging splits"
 	gh_dl "$TEMP_DIR/apkeditor.jar" "https://github.com/REAndroid/APKEditor/releases/download/V1.4.7/APKEditor-1.4.7.jar" >/dev/null || return 1
-	if ! OP=$(java -jar "$TEMP_DIR/apkeditor.jar" merge -i "${bundle}" -o "${bundle}.mzip" -clean-meta -f 2>&1); then
-		epr "Apkeditor ERROR: $OP"
+	if ! OP=$(java -jar "$TEMP_DIR/apkeditor.jar" merge -i "$bundle" -o "${output}-unsigned" -clean-meta -f 2>&1); then
+		epr "APKEditor error: $OP"
 		return 1
 	fi
-	# sign the merged apk properly
-	patch_apk "${bundle}.mzip" "${output}" "--exclusive" "${args[cli]}" "${args[ptjar]}"
-	local ret=$?
-	rm -f "${bundle}.mzip"
-	return $ret
+	# sign the merged stock apk
+	if ! OP=$(java -jar "$APKSIGNER" sign --ks ks-p12.keystore --ks-pass pass:123456789 --key-pass pass:123456789 --ks-key-alias jhc \
+		--out "${output}" "${output}-unsigned"); then
+		epr "apksigner error: $OP"
+		return 1
+	fi
+	rm "${output}.idsig" "${output}-unsigned" 2>/dev/null || :
+	return 0
 }
 
 # -------------------- apkmirror --------------------
@@ -520,7 +523,7 @@ check_sig() {
 	local file=$1 pkg_name=$2
 	local sig
 	if grep -q "$pkg_name" sig.txt; then
-		sig=$(java -jar --enable-native-access=ALL-UNNAMED "$APKSIGNER" verify --print-certs "$file" | grep ^Signer | grep SHA-256 | tail -1 | awk '{print $NF}')
+		sig=$(java -jar "$APKSIGNER" verify --print-certs "$file" | grep ^Signer | grep SHA-256 | tail -1 | awk '{print $NF}')
 		echo "$pkg_name signature: ${sig}"
 		grep -qFx "$sig $pkg_name" sig.txt
 	fi
