@@ -59,19 +59,21 @@ jobs:
           cat build.md >> "$GITHUB_OUTPUT"
           echo "${DELIM}" >> "$GITHUB_OUTPUT"
           cp -f build.md build.tmp
+      
+      - name: Upload release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+          BODY: ${{ steps.get_output.outputs.BUILD_LOG }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "Release" --notes "$BODY"
+            gh release upload "$TAG" ./build/* --clobber
+          else
+            gh release create "$TAG" ./build/* --title "Release" --notes "$BODY"
+          fi
 
-      - name: Upload modules to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          body: ${{ steps.get_output.outputs.BUILD_LOG }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./build/*
-          release_name: ReVanced
-          tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
-          file_glob: true
-          overwrite: true
-
-      - name: Update changelog and update json
+      - name: Update modules changelog and update json
         id: update_config
         run: |
           git checkout -f update || git switch --discard-changes --orphan update
@@ -100,12 +102,19 @@ jobs:
 
           find . -name "*-update.json" | grep . || : >dummy-update.json
 
-      - uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          branch: update
-          skip_checkout: true
-          file_pattern: build.md *-update.json
-          commit_message: Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+      - name: Commit module json changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+          git add build.md *-update.json
+      
+          if ! git diff --cached --quiet; then
+            git commit -m "Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}"
+            git push origin HEAD:update
+          else
+            echo "no changes!"
+          fi
 
       - name: Report to Telegram
         env:
