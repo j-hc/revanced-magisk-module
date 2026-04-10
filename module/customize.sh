@@ -106,7 +106,7 @@ install() {
 			ui_print "$op"
 			if echo "$op" | grep -q -e INSTALL_FAILED_VERSION_DOWNGRADE -e INSTALL_FAILED_UPDATE_INCOMPATIBLE; then
 				ui_print "* Uninstalling..."
-				if ! op=$(pmex uninstall -k --user 0 "$PKG_NAME"); then
+				if ! op=$(pmex uninstall --user 0 "$PKG_NAME"); then
 					ui_print "$op"
 					if [ $IT = 2 ]; then
 						install_err="ERROR: pm uninstall failed."
