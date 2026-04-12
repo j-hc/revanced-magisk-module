@@ -339,7 +339,7 @@ apkmirror_search() {
 
 	local appdpi=("nodpi" "anydpi")
 	if [ "$dpi" ]; then
-		appdpi+=("$dpi")
+		appdpi+=($dpi)
 	fi
 
 	for ((n = 1; n < 40; n++)); do
