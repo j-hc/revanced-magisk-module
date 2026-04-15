@@ -82,7 +82,6 @@ install() {
 	if [ ! -f "$MODPATH/$PKG_NAME.apk" ]; then
 		abort "ERROR: Stock $PKG_NAME apk was not found"
 	fi
-	ui_print "* Updating $PKG_NAME to $PKG_VER"
 	install_err=""
 	VERIF1=$(settings get global verifier_verify_adb_installs)
 	VERIF2=$(settings get global package_verifier_enable)
@@ -90,6 +89,7 @@ install() {
 	settings put global package_verifier_enable 0
 	SZ=$(stat -c "%s" "$MODPATH/$PKG_NAME.apk")
 	for IT in 1 2; do
+		ui_print "* Updating $PKG_NAME to $PKG_VER"
 		if ! SES=$(pmex install-create --user 0 -i com.android.vending -r -S "$SZ"); then
 			ui_print "ERROR: install-create failed"
 			install_err="$SES"
@@ -106,7 +106,7 @@ install() {
 			ui_print "$op"
 			if echo "$op" | grep -q -e INSTALL_FAILED_VERSION_DOWNGRADE -e INSTALL_FAILED_UPDATE_INCOMPATIBLE; then
 				ui_print "* Uninstalling..."
-				if ! op=$(pmex uninstall --user 0 "$PKG_NAME"); then
+				if ! op=$(pmex uninstall "$PKG_NAME"); then
 					ui_print "$op"
 					if [ $IT = 2 ]; then
 						install_err="ERROR: pm uninstall failed."
