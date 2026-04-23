@@ -371,7 +371,7 @@ dl_apkmirror() {
 		merge_splits "${output}.apkm" "${output}"
 		return 0
 	fi
-	
+
 	if [ "$arch" = "arm-v7a" ]; then arch="armeabi-v7a"; fi
 	local resp node app_table apkmname dlurl=""
 	apkmname=$($HTMLQ "h1.marginZero" --text <<<"$__APKMIRROR_RESP__")
@@ -648,18 +648,23 @@ build_rv() {
 		fi
 	fi
 
-	local sig_check_apk
+	local sig_op
 	if [ -f "${stock_apk}.apkm" ]; then
-		unzip -j "${stock_apk}.apkm" "base.apk" -d "${stock_apk}.base" >/dev/null
-		sig_check_apk="${stock_apk}.base/base.apk"
+		rm -rf "${stock_apk}-zip" || :
+		unzip -j "${stock_apk}.apkm" -d "${stock_apk}-zip" >/dev/null
+		for a in "${stock_apk}"-zip/*.apk; do
+			if ! sig_op=$(check_sig "$a" "$pkg_name" 2>&1); then
+				epr "Not building $table, apk signature mismatch '$a': $sig_op"
+				return 0
+			fi
+		done
+		rm -rf "${stock_apk}-zip" || :
 	else
-		sig_check_apk="${stock_apk}"
+		if ! sig_op=$(check_sig "$stock_apk" "$pkg_name" 2>&1); then
+			epr "Not building $table, apk signature mismatch '$stock_apk': $sig_op"
+			return 0
+		fi
 	fi
-	if ! sig_op=$(check_sig "$sig_check_apk" "$pkg_name" 2>&1); then
-		epr "Not building $table, apk signature mismatch '$stock_apk': $sig_op"
-		return 0
-	fi
-	rm -rf "${stock_apk}.base" || :
 	log "${table}: ${version}"
 
 	local microg_patch
