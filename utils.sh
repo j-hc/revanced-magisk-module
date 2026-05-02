@@ -281,14 +281,28 @@ get_patch_last_supported_ver() {
 }
 
 patches_list_versions() {
-	local cli_jar=$1 patches_jar=$2 pkg_name=$3 op
-	if ! op=$(java -jar "$cli_jar" list-versions -p "$patches_jar" -f "$pkg_name" -b 2>&1); then
-		if ! op=$(java -jar "$cli_jar" list-versions "$patches_jar" -f "$pkg_name" 2>&1); then
-			epr "Could not list versions $cli_jar: '$op'"
-			return 1
-		fi
+	local cli_jar=$1 patches_jar=$2 pkg_name=$3 op cmd
+	local cmd_base="java -jar '$cli_jar' list-versions"
+
+	# TODO: remove this later
+	local cli_name
+	cli_name=$(basename "$cli_jar")
+	if [ "${cli_name::8}" = revanced ]; then cmd_base+=" -b"; fi
+
+	cmd="${cmd_base} --patches='$patches_jar' -f '$pkg_name'"
+	if op=$(eval "$cmd" 2>&1); then
+		echo "$op"
+		return
 	fi
-	echo "$op"
+
+	cmd="${cmd_base} '$patches_jar' -f '$pkg_name'"
+	if op=$(eval "$cmd" 2>&1); then
+		echo "$op"
+		return
+	fi
+
+	epr "Could not list versions $cli_jar: '$op'"
+	return 1
 }
 patches_list() {
 	local cli_jar=$1 patches_jar=$2 pkg_name=$3 op
