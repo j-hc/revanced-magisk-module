@@ -37,8 +37,10 @@ pmex() {
 	return $RET
 }
 
-if pmex path "$PKG_NAME" >&2; then
-	pmex uninstall-system-updates "$PKG_NAME" >/dev/null 2>&1
+if OP=$(dumpsys package "$PKG_NAME") && [ "$OP" ]; then
+	if echo "$OP" | grep -m1 pkgFlags | grep -Fq UPDATED_SYSTEM_APP; then
+		pmex uninstall-system-updates "$PKG_NAME" >/dev/null 2>&1
+	fi
 else
 	if pmex install-existing "$PKG_NAME" >/dev/null 2>&1; then
 		pmex uninstall-system-updates "$PKG_NAME" >/dev/null 2>&1
@@ -160,7 +162,7 @@ fi
 am force-stop "$PKG_NAME"
 ui_print "* Optimizing $PKG_NAME"
 
-cmd package compile -m speed-profile -f "$PKG_NAME"
+cmd package compile -m speed-profile -f "$PKG_NAME" >/dev/null 2>&1
 # nohup cmd package compile -m speed-profile -f "$PKG_NAME" >/dev/null 2>&1
 
 if [ "$KSU" ]; then
@@ -175,7 +177,7 @@ if [ "$KSU" ]; then
 			ui_print "  $OP"
 			ui_print "* Because you are using a fork of KernelSU, "
 			ui_print "  you need to go to your root manager app and"
-			ui_print "  disable 'Unmount modules' option for $PKG_NAME"
+			ui_print "  disable 'Unmount modules' for $PKG_NAME"
 		fi
 	else
 		ui_print "ERROR: UID could not be found for $PKG_NAME"
