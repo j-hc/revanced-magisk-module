@@ -166,10 +166,10 @@ cmd package compile -m speed-profile -f "$PKG_NAME" >/dev/null 2>&1
 # nohup cmd package compile -m speed-profile -f "$PKG_NAME" >/dev/null 2>&1
 
 if [ "$KSU" ]; then
-	UID=$(dumpsys package "$PKG_NAME" 2>&1 | grep -m1 uid)
+	UID=$(dumpsys package "$PKG_NAME" 2>&1 | grep -m1 uid=)
 	UID=${UID#*=} UID=${UID%% *}
 	if [ -z "$UID" ]; then
-		UID=$(dumpsys package "$PKG_NAME" 2>&1 | grep -m1 userId)
+		UID=$(dumpsys package "$PKG_NAME" 2>&1 | grep -m1 userId=)
 		UID=${UID#*=} UID=${UID%% *}
 	fi
 	if [ "$UID" ]; then
@@ -181,7 +181,6 @@ if [ "$KSU" ]; then
 		fi
 	else
 		ui_print "ERROR: UID could not be found for $PKG_NAME"
-		dumpsys package "$PKG_NAME" >&2
 	fi
 fi
 
