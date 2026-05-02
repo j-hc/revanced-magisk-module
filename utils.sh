@@ -360,12 +360,11 @@ apkmirror_search() {
 		node=$($HTMLQ "div.table-row.headerFont:nth-last-child($n)" -r "span:nth-child(n+3)" <<<"$resp")
 		if [ -z "$node" ]; then break; fi
 		emptyCheck=$($HTMLQ -t -w "div.table-cell:nth-child(1) > a:nth-child(1)" <<<"$node" | xargs)
-		if [ "$emptyCheck" ]; then
-			dlurl=$($HTMLQ --base https://www.apkmirror.com --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
-		else break; fi
+		if [ -z "$emptyCheck" ]; then break; fi
 		app_table=$($HTMLQ --text --ignore-whitespace <<<"$node")
-		if [ "$(sed -n 3p <<<"$app_table")" = "$apk_bundle" ] &&
-			isoneof "$(sed -n 6p <<<"$app_table")" "${appdpi[@]}" &&
+		if [ "$(sed -n 3p <<<"$app_table")" != "$apk_bundle" ]; then continue; fi
+		dlurl=$($HTMLQ --base https://www.apkmirror.com --attribute href "div:nth-child(1) > a:nth-child(1)" <<<"$node")
+		if isoneof "$(sed -n 6p <<<"$app_table")" "${appdpi[@]}" &&
 			isoneof "$(sed -n 4p <<<"$app_table")" "${apparch[@]}"; then
 			echo "$dlurl"
 			return 0
