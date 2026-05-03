@@ -91,7 +91,7 @@ install() {
 	settings put global verifier_verify_adb_installs 0
 	settings put global package_verifier_enable 0
 
-	SZ=$(stat -c "%s" "$MODPATH/stock/base.apk" | awk '{sum += $0} END {print sum}')
+	SZ=$(stat -c "%s" "$MODPATH"/stock/*.apk | awk '{sum += $0} END {print sum}')
 	for IT in 1 2; do
 		ui_print "* Updating $PKG_NAME to $PKG_VER"
 		if ! SES=$(pmex install-create --user 0 -i com.android.vending -r -S "$SZ"); then
