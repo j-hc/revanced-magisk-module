@@ -47,8 +47,10 @@ wpr() {
 }
 abort() {
 	epr "ABORT: ${1-}"
-	rm -rf ./${TEMP_DIR}/*tmp.* ./${TEMP_DIR}/*/*tmp.* ./${TEMP_DIR}/*-temporary-files
-	kill -n 9 0
+	rm -rf ./${TEMP_DIR}/*tmp.* ./${TEMP_DIR}/*/*tmp.* ./${TEMP_DIR}/*-temporary-files ./*-temporary-files
+	trap - SIGTERM SIGINT EXIT
+	kill -- -$$ 2>/dev/null
+	exit 1
 }
 java() { env -i java --enable-native-access=ALL-UNNAMED "$@"; }
 
