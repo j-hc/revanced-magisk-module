@@ -1,6 +1,6 @@
 {
-  "version": "v8.47.56 (patches 1.25.0.mpp)",
-  "versionCode": 20221053,
-  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20221053/music-morphe-module-v8.47.56-arm64-v8a.zip",
+  "version": "v8.47.56 (patches 1.26.0.mpp)",
+  "versionCode": 20221055,
+  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20221055/music-morphe-module-v8.47.56-arm64-v8a.zip",
   "changelog": "https://raw.githubusercontent.com/j-hc/revanced-magisk-module/update/build.md"
 }
