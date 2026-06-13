@@ -1,6 +1,6 @@
 {
   "version": "v11.81.0-release.0 (patches 3.4.0.mpp)",
-  "versionCode": 20221058,
-  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20221058/twitter-piko-module-v11.81.0-release.0-all.zip",
+  "versionCode": 20221061,
+  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20221061/twitter-piko-module-v11.81.0-release.0-all.zip",
   "changelog": "https://raw.githubusercontent.com/j-hc/revanced-magisk-module/update/build.md"
 }
