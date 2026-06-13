@@ -1,5 +1,5 @@
-Music-Morphe (arm64-v8a): 8.47.56  
-Music-Morphe (arm-v7a): 8.47.56  
+Music-Morphe (arm64-v8a): 8.51.51  
+Music-Morphe (arm-v7a): 8.51.51  
 Reddit-Morphe: 2026.14.0  
 YouTube-Morphe: 20.51.39  
 
@@ -8,9 +8,9 @@ Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach YouTube and
 
 [revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)
   
-CLI: MorpheApp/morphe-cli-1.9.0-all.jar  
-Patches: MorpheApp/patches-1.30.0.mpp  
-[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v1.30.0)  
+CLI: MorpheApp/morphe-cli-1.9.1-all.jar  
+Patches: MorpheApp/patches-1.31.0.mpp  
+[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v1.31.0)  
 
 Skipped:  
-Patches: crimera/patches-3.4.0.mpp      
+Patches: crimera/patches-3.4.0.mpp        
