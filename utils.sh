@@ -49,7 +49,7 @@ abort() {
 	epr "ABORT: ${1-}"
 	rm -rf ./${TEMP_DIR}/*tmp.* ./${TEMP_DIR}/*/*tmp.* ./${TEMP_DIR}/*-temporary-files ./*-temporary-files
 	trap - SIGTERM SIGINT EXIT
-	kill -- -$$ 2>/dev/null
+	kill -9 -- -$$ 2>/dev/null
 	exit 1
 }
 java() { env -i java --enable-native-access=ALL-UNNAMED "$@"; }
@@ -746,6 +746,8 @@ build_rv() {
 		if [ "$build_mode" = apk ]; then
 			if [ "${NORB:-}" != true ] || { [ ! -f "$patched_apk" ] && [ ! -f "$apk_output" ]; }; then
 				mv -f "$patched_apk" "$apk_output"
+			else
+				cp -f "$patched_apk" "$apk_output"
 			fi
 			pr "Built ${table} (non-root): '${apk_output}'"
 			continue
