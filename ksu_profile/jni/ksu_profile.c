@@ -36,6 +36,7 @@ struct root_profile {
 
     char selinux_domain[KSU_SELINUX_DOMAIN];
     int32_t namespaces;
+    uint64_t flags;
 };
 
 struct non_root_profile {
