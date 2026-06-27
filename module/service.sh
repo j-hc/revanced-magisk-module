@@ -7,10 +7,10 @@ err() {
 	sed -i "s/^des.*/description=⚠️ Needs reflash: '${1}'/g" "$MODDIR/module.prop"
 }
 
-until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 1; done
-until [ -d "/sdcard/Android" ]; do sleep 1; done
-
 run() {
+	until [ "$(getprop sys.boot_completed)" = 1 ]; do sleep 1; done
+	until [ -d "/sdcard/Android" ]; do sleep 1; done
+
 	while
 		BASEPATH=$(get_basepath)
 		SVCL=$?
@@ -26,4 +26,6 @@ run() {
 	mount_rv "$BASEPATH"
 }
 
-run
+if [ ! -f "$MODDIR/disabled_by_webui" ]; then
+	run
+fi
