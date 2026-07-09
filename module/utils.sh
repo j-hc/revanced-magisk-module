@@ -3,6 +3,12 @@
 RVPATH=/data/adb/rvhc/${MODDIR##*/}.apk
 . "$MODDIR/config"
 
+desc_err() {
+	[ ! -f "$MODDIR/err" ] && cp "$MODDIR/module.prop" "$MODDIR/err"
+	sed -i "s/^des.*/description=⚠️ Needs reflash: '${1}'/g" "$MODDIR/module.prop"
+}
+
+
 pmex() {
 	OP=$(pm "$@" 2>&1 </dev/null)
 	RET=$?
@@ -38,17 +44,17 @@ get_mounts() {
 
 mount_rv() {
 	if [ ! -d "${1}/lib" ]; then
-		err "mount failed. Dont report this, consider using rvmm-zygisk-mount"
+		desc_err "mount failed. Dont report this, consider using rvmm-zygisk-mount"
 		return 1
 	fi
 	VERSION=$(get_app_version)
 	if [ "$VERSION" != "$PKG_VER" ] && [ "$VERSION" ]; then
-		err "version mismatch (installed:${VERSION}, module:$PKG_VER)"
+		desc_err "version mismatch (installed:${VERSION}, module:$PKG_VER)"
 		return 1
 	fi
 	umount_all
 	if ! chcon u:object_r:apk_data_file:s0 "$RVPATH"; then
-		err "apk not found"
+		desc_err "apk not found"
 		return 1
 	fi
 	mount -o bind "$RVPATH" "${1}/base.apk"
