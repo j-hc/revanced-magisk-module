@@ -45,9 +45,14 @@ wpr() {
 	echo >&2 -e "\033[0;33m[!] ${1}\033[0m"
 	if [ "${GITHUB_REPOSITORY-}" ]; then echo >&2 -e "::warning::utils.sh [!] ${1}\n"; fi
 }
+
+_clean_tmp() {
+	rm -rf ./${TEMP_DIR}/*tmp.* ./${TEMP_DIR}/*tmp_* ./${TEMP_DIR}/*/*tmp.* ./${TEMP_DIR}/*-temporary-files ./*-temporary-files
+}
+
 abort() {
 	epr "ABORT: ${1-}"
-	rm -rf ./${TEMP_DIR}/*tmp.* ./${TEMP_DIR}/*/*tmp.* ./${TEMP_DIR}/*-temporary-files ./*-temporary-files
+	_clean_tmp
 	trap - SIGTERM SIGINT EXIT
 	kill -9 -- -$$ 2>/dev/null
 	exit 1
@@ -349,7 +354,7 @@ apkmirror_search() {
 	local dlurl="" node app_table emptyCheck
 
 	local apparch=('universal' 'noarch' 'arm64-v8a + armeabi-v7a')
-	if [ "$arch" != all ]; then
+	if [ "$arch" != "all" ]; then
 		apparch+=("$arch")
 	fi
 
@@ -504,7 +509,7 @@ get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)"
 # -------------------- archive --------------------
 dl_archive() {
 	local url=$1 version=$2 output=$3 arch=$4
-	local path output_m version=${version// /}
+	local path version=${version// /}
 
 	if [ -f "${output}.apkm" ]; then
 		merge_splits "${output}.apkm" "$output"
@@ -513,13 +518,10 @@ dl_archive() {
 
 	path=$(grep -m1 "${version_f#v}-${arch// /}" <<<"$__ARCHIVE_RESP__") || return 1
 	if [ "${path##*.}" = "apkm" ]; then
-		output_m="${output}.apkm"
+		req "${url}/${path}" "${output}.apkm" || return 1
+		merge_splits "${output}.apkm" "$output"
 	else
-		output_m=$output
-	fi
-	req "${url}/${path}" "$output_m" || return 1
-	if [ "${path##*.}" = "apkm" ]; then
-		merge_splits "$output_m" "$output"
+		req "${url}/${path}" "${output}" || return 1
 	fi
 }
 get_archive_resp() {
@@ -534,7 +536,16 @@ get_archive_pkg_name() { echo "$__ARCHIVE_PKG_NAME__"; }
 # -------------------- direct --------------------
 dl_direct() {
 	local url=$1 version=${2// /-} output=$3 arch=$4 _dpi=$5
-	req "$url" "${output}" || return 1
+	if ! grep -q "${version_f#v}-${arch// /}" <<<"$url"; then
+		epr "Given direct-dlurl for $output is not compatible. Set proper 'arch' and 'version' options."
+		return 1
+	fi
+	if [ "${url##*.}" = "apkm" ]; then
+		req "$url" "${output}.apkm" || return 1
+		merge_splits "${output}.apkm" "$output"
+	else
+		req "$url" "${output}" || return 1
+	fi
 }
 get_direct_vers() { cut -d- -f2 <<<"$__DIRECT_APKNAME__"; }
 get_direct_pkg_name() { cut -d- -f1 <<<"$__DIRECT_APKNAME__"; }
