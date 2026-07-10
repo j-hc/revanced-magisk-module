@@ -96,9 +96,13 @@ install() {
 
 		if ! op=$(pmex install-commit "$SES"); then
 			ui_print "$op"
-			if echo "$op" | grep -q -e INSTALL_FAILED_VERSION_DOWNGRADE -e INSTALL_FAILED_UPDATE_INCOMPATIBLE; then
+			if echo "$op" | grep -q -e INSTALL_FAILED_VERSION_DOWNGRADE -e INSTALL_FAILED_UPDATE_INCOMPATIBLE -e INSTALL_FAILED_DUPLICATE; then
 				ui_print "* Uninstalling..."
-				if ! op=$(pmex uninstall "$PKG_NAME"); then
+				ex_unins_arg=""
+				if echo "$op" | grep -q INSTALL_FAILED_DUPLICATE; then
+					ex_unins_arg="-k"
+				fi
+				if ! op=$(pmex uninstall --user 0 $ex_unins_arg "$PKG_NAME"); then
 					ui_print "$op"
 					if [ $IT = 2 ]; then
 						install_err="ERROR: pm uninstall failed."
@@ -165,8 +169,7 @@ if [ "$KSU" ]; then
 	if [ "$UID" ]; then
 		if ! OP=$("${MODPATH:?}/bin/$ARCH/ksu_profile" "$UID" "$PKG_NAME" 2>&1); then
 			ui_print "  $OP"
-			ui_print "* Because you are using a fork of KernelSU, "
-			ui_print "  you need to go to your root manager app and"
+			ui_print "  In your root manager app,"
 			ui_print "  disable 'Unmount modules' for $PKG_NAME"
 		fi
 	else

@@ -8,7 +8,6 @@ desc_err() {
 	sed -i "s/^des.*/description=⚠️ Needs reflash: '${1}'/g" "$MODDIR/module.prop"
 }
 
-
 pmex() {
 	OP=$(pm "$@" 2>&1 </dev/null)
 	RET=$?
