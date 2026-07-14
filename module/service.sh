@@ -13,7 +13,7 @@ run() {
 	do sleep 2; done
 
 	if [ $SVCL != 0 ]; then
-		desc_err "app not installed"
+		ch_desc_err "App not installed"
 		return
 	fi
 	sleep 4
@@ -21,6 +21,6 @@ run() {
 	mount_rv "$BASEPATH"
 }
 
-if [ ! -f "$MODDIR/disabled_by_webui" ]; then
+if [ ! -f "$MODDIR/disabled_by_action" ]; then
 	run
 fi
