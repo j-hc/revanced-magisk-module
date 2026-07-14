@@ -8,13 +8,12 @@ if [ -z "$(get_mounts)" ]; then
 	rm -f "$DFILE"
 	if mount_nosleep; then
 		echo "* Enabled successfully"
+		cp -f "$MODDIR/module.prop.orig" "$MODDIR/module.prop"
 	else
 		echo "* Failed"
 	fi
 	echo ""
 	get_mounts
-
-	cp -f "$MODDIR/module.prop.orig" "$MODDIR/module.prop"
 else
 	touch "$DFILE"
 	umount_all
