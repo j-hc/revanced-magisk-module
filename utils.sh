@@ -66,15 +66,9 @@ get_prebuilts() {
 	cl_dir=${TEMP_DIR}/${cl_dir,,}-rv
 	[ -d "$cl_dir" ] || mkdir "$cl_dir"
 
-	for src_ver in "$cli_src CLI $cli_ver cli" "$patches_src Patches $patches_ver patches"; do
+	for src_ver in "Patches $patches_src $patches_ver" "CLI $cli_src $cli_ver"; do
 		set -- $src_ver
-		local src=$1 tag=$2 ver=${3-} fprefix=$4
-
-		if [ "$tag" = "CLI" ]; then
-			local grab_cl=false
-		elif [ "$tag" = "Patches" ]; then
-			local grab_cl=true
-		else abort unreachable; fi
+		local tag=$1 src=$2 ver=${3-}
 
 		local dir=${src%/*}
 		dir=${TEMP_DIR}/${dir,,}-rv
@@ -94,8 +88,16 @@ get_prebuilts() {
 			name_ver="$ver"
 		fi
 
-		local url file tag_name matches
-		file=$(find "$dir" -name "*${fprefix}-${name_ver#v}.*" -type f 2>/dev/null)
+		local file
+		if [ "$tag" = "CLI" ]; then
+			file=$(find "$dir" -maxdepth 1 -name "*cli-${name_ver#v}*.jar" -o -name "*desktop-${name_ver#v}*.jar" -type f 2>/dev/null)
+			local grab_cl=false
+		elif [ "$tag" = "Patches" ]; then
+			file=$(find "$dir" -maxdepth 1 -name "*patches-${name_ver#v}.*" -type f 2>/dev/null)
+			local grab_cl=false
+		else abort unreachable; fi
+
+		local url tag_name matches
 		if [ "$ver" = "latest" ]; then
 			file=$(grep -v '/[^/]*dev[^/]*$' <<<"$file" | head -1)
 		else

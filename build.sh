@@ -81,7 +81,7 @@ for table_name in $(toml_get_table_names); do
 		epr "Could not get prebuilts"
 		continue
 	fi
-	read -r cli_jar patches_jar <<<"$PREBUILTS"
+	read -r patches_jar cli_jar <<<"$PREBUILTS"
 	app_args[cli]=$cli_jar
 	app_args[ptjar]=$patches_jar
 	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]=$DEF_RV_BRAND
