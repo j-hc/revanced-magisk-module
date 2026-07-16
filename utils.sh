@@ -94,7 +94,7 @@ get_prebuilts() {
 			local grab_cl=false
 		elif [ "$tag" = "Patches" ]; then
 			file=$(find "$dir" -maxdepth 1 -name "*patches-${name_ver#v}.*" -type f 2>/dev/null)
-			local grab_cl=false
+			local grab_cl=true
 		else abort unreachable; fi
 
 		local url tag_name matches
