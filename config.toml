@@ -43,7 +43,7 @@ archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.a
 [Reddit-Morphe]
 app-name = "Reddit"
 rv-brand = "Morphe"
-build-mode = "both"
+build-mode = "apk"
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
