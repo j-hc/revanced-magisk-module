@@ -1,6 +1,5 @@
 #!/system/bin/sh
-MODDIR=$MODPATH
-. "$MODPATH/utils.sh"
+MODDIR="$MODPATH" . "$MODPATH/utils.sh"
 
 ui_print ""
 if [ -n "$MODULE_ARCH" ] && [ "$MODULE_ARCH" != "$ARCH" ]; then
@@ -97,10 +96,12 @@ install() {
 		if ! op=$(pmex install-commit "$SES"); then
 			ui_print "$op"
 			if echo "$op" | grep -q -e INSTALL_FAILED_VERSION_DOWNGRADE -e INSTALL_FAILED_UPDATE_INCOMPATIBLE -e INSTALL_FAILED_DUPLICATE; then
-				ui_print "* Uninstalling..."
 				ex_unins_arg=""
 				if echo "$op" | grep -q INSTALL_FAILED_DUPLICATE; then
+					ui_print "* Uninstalling without data loss..."
 					ex_unins_arg="-k"
+				else
+					ui_print "* Uninstalling..."
 				fi
 				if ! op=$(pmex uninstall --user 0 $ex_unins_arg "$PKG_NAME"); then
 					ui_print "$op"
@@ -180,6 +181,6 @@ fi
 rm -rf "${MODPATH:?}/bin" "$MODPATH/stock/"
 cp -f "$MODPATH/module.prop" "$MODPATH/module.prop.orig"
 
-ui_print "* Done"
+ui_print "* Done. No need to reboot."
 ui_print "  by j-hc (github.com/j-hc)"
 ui_print " "
