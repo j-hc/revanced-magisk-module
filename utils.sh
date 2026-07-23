@@ -57,7 +57,13 @@ abort() {
 	kill -9 -- -$$ 2>/dev/null
 	exit 1
 }
-java() { env -i java --enable-native-access=ALL-UNNAMED "$@"; }
+java() {
+	if [ "${JAVA_HOME_21_X64-}" ]; then
+		env -i JAVA_HOME="$JAVA_HOME_21_X64" "$JAVA_HOME_21_X64"/bin/java --enable-native-access=ALL-UNNAMED "$@"
+	else
+		env -i java --enable-native-access=ALL-UNNAMED "$@"
+	fi
+}
 
 get_prebuilts() {
 	local cli_src=$1 cli_ver=$2 patches_src=$3 patches_ver=$4
