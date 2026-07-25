@@ -291,7 +291,11 @@ get_patch_last_supported_ver() {
 	if [ "$op" = "Any" ]; then return; fi
 	pcount=$(head -1 <<<"$op") pcount=${pcount#*(} pcount=${pcount% *}
 	if [ -z "$pcount" ]; then
-		abort "No patches found for '$pkg_name' in patches '$patches_jar'"
+		if grep -Fq "$pkg_name" <<<"$list_patches"; then
+			return
+		else
+			abort "No patches found for '$pkg_name' in patches '$patches_jar'"
+		fi
 	fi
 	grep -F "($pcount patch" <<<"$op" | sed 's/ (.* patch.*//' | get_highest_ver || return 1
 }
