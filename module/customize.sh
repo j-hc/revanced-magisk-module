@@ -1,4 +1,5 @@
 #!/system/bin/sh
+export MODULE_HOT_INSTALL_REQUEST="true"
 MODDIR="$MODPATH" . "$MODPATH/utils.sh"
 
 ui_print ""
