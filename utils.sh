@@ -267,7 +267,8 @@ semver_validate() {
 	[ ${#ac} = 0 ]
 }
 get_patch_last_supported_ver() {
-	local list_patches=$1 pkg_name=$2 inc_sel=$3 _exc_sel=$4 _exclusive=$5 # TODO: resolve using all of these
+	local list_patches=$1 pkg_name=$2 inc_sel=$3 is_experimental=$4
+	# _exc_sel=$4 _exclusive=$5
 	local op
 	if [ "$inc_sel" ]; then
 		if ! op=$(awk '{$1=$1}1' <<<"$list_patches"); then
@@ -286,7 +287,7 @@ get_patch_last_supported_ver() {
 			return
 		fi
 	fi
-	op=$(patches_list_versions "$cli_jar" "$patches_jar" "$pkg_name") || return 1
+	op=$(patches_list_versions "$cli_jar" "$patches_jar" "$pkg_name" "$is_experimental") || return 1
 	op=$(sed -n '/Most common compatible versions:/,$p' <<<"$op" | sed '1d' | awk '{$1=$1}1')
 	if [ "$op" = "Any" ]; then return; fi
 	pcount=$(head -1 <<<"$op") pcount=${pcount#*(} pcount=${pcount% *}
@@ -301,15 +302,19 @@ get_patch_last_supported_ver() {
 }
 
 patches_list_versions() {
-	local cli_jar=$1 patches_jar=$2 pkg_name=$3 op cmd
+	local cli_jar=$1 patches_jar=$2 pkg_name=$3 is_experimental=$4
 	local cmd_base="java -jar '$cli_jar' list-versions"
 
 	# TODO: remove this later
 	local cli_name
 	cli_name=$(basename "$cli_jar")
-	if [ "${cli_name::8}" = revanced ]; then cmd_base+=" -b"; fi
+	if [ "${cli_name::8}" = "revanced" ]; then
+		cmd_base+=" -b"
+	elif [ "$is_experimental" = "true" ]; then
+		cmd_base+=" -x"
+	fi
 
-	cmd="${cmd_base} --patches='$patches_jar' -f '$pkg_name'"
+	local cmd="${cmd_base} --patches='$patches_jar' -f '$pkg_name'"
 	if op=$(eval "$cmd" 2>&1); then
 		echo "$op"
 		return
@@ -325,9 +330,12 @@ patches_list_versions() {
 	return 1
 }
 patches_list() {
-	local cli_jar=$1 patches_jar=$2 pkg_name=$3 op
+	local cli_jar=$1 patches_jar=$2 pkg_name=$3 is_experimental=$4
+	local op
 	if ! op=$(java -jar "$cli_jar" list-patches -p "$patches_jar" --filter-package-name "$pkg_name" --versions --packages -b 2>&1); then
-		if ! op=$(java -jar "$cli_jar" list-patches --patches "$patches_jar" -f "$pkg_name" --with-versions --with-packages 2>&1); then
+		local cmd="java -jar '$cli_jar' list-patches --patches '$patches_jar' -f '$pkg_name' --with-versions --with-packages"
+		if [ "$is_experimental" = "true" ]; then cmd+=" -x"; fi
+		if ! op=$(eval "$cmd" 2>&1); then
 			epr "Could not get patches list ($pkg_name) $cli_jar: '$op'"
 			return 1
 		fi
@@ -438,17 +446,14 @@ get_apkmirror_vers() {
 	local vers apkm_resp
 	apkm_resp=$(req "https://www.apkmirror.com/uploads/?appcategory=${__APKMIRROR_CAT__}" -)
 	vers=$(sed -n 's;.*Version:</span><span class="infoSlide-value">\(.*\) </span>.*;\1;p' <<<"$apkm_resp" | awk '{$1=$1}1')
-	if [ "$__AAV__" = false ]; then
-		local IFS=$'\n'
-		vers=$(grep -iv "\(beta\|alpha\)" <<<"$vers")
-		local v r_vers=()
-		for v in $vers; do
-			grep -iq "${v} \(beta\|alpha\)" <<<"$apkm_resp" || r_vers+=("$v")
-		done
-		echo "${r_vers[*]}"
-	else
-		echo "$vers"
-	fi
+
+	vers=$(grep -iv "\(beta\|alpha\)" <<<"$vers")
+	local v r_vers=()
+	local IFS=$'\n'
+	for v in $vers; do
+		grep -iq "${v} \(beta\|alpha\)" <<<"$apkm_resp" || r_vers+=("$v")
+	done
+	echo "${r_vers[*]}"
 }
 get_apkmirror_pkg_name() { sed -n 's;.*id=\(.*\)" class="accent_color.*;\1;p' <<<"$__APKMIRROR_RESP__"; }
 get_apkmirror_resp() {
@@ -636,23 +641,24 @@ build_rv() {
 	fi
 	pr "Package name of '${table}' is '$pkg_name'"
 	local list_patches
-	list_patches=$(patches_list "$cli_jar" "$patches_jar" "$pkg_name") || return 1
+
+	local is_experimental="false"
+	if [ "$version_mode" = "experimental" ]; then is_experimental="true"; fi
+	list_patches=$(patches_list "$cli_jar" "$patches_jar" "$pkg_name" "$is_experimental") || return 1
 	local get_latest_ver=false
-	if [ "$version_mode" = auto ]; then
-		if ! version=$(get_patch_last_supported_ver "$list_patches" "$pkg_name" \
-			"${args[included_patches]}" "${args[excluded_patches]}" "${args[exclusive_patches]}"); then
+	if isoneof "$version_mode" "auto" "experimental"; then
+		if ! version=$(get_patch_last_supported_ver "$list_patches" "$pkg_name" "${args[included_patches]}" "$is_experimental"); then
 			epr "get_patch_last_supported_ver failed '$list_patches'"
 			return
-		elif [ -z "$version" ]; then get_latest_ver=true; fi
-	elif isoneof "$version_mode" latest beta; then
-		get_latest_ver=true
+		elif [ -z "$version" ]; then get_latest_ver="true"; fi
+	elif [ "$version_mode" = "latest" ]; then
+		get_latest_ver="true"
 		p_patcher_args+=("-f")
 	else
 		version=$version_mode
 		p_patcher_args+=("-f")
 	fi
-	if [ $get_latest_ver = true ]; then
-		if [ "$version_mode" = beta ]; then __AAV__="true"; else __AAV__="false"; fi
+	if [ $get_latest_ver = "true" ]; then
 		pkgvers=$(get_"${dl_from}"_vers)
 		version=$(get_highest_ver <<<"$pkgvers") || version=$(head -1 <<<"$pkgvers")
 	fi
