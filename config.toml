@@ -41,9 +41,18 @@ dpi = "120-640dpi"
 [GooglePhotos]
 build-mode = "both"
 patches-source = "RookieEnough/De-Vanced"
+rv-brand = "DeVanced"
 cli-source = "MorpheApp/morphe-cli"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.photos"
+
+[Twitter]
+patches-source = "crimera/piko-newx"
+cli-source = "MorpheApp/morphe-cli"
+rv-brand = "Piko"
+archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
+version = "12.22.0-prod.01"
+included-patches = "'NewX: Restore Twitter branding'"
 
 [Music]
 enabled = false
@@ -59,17 +68,6 @@ build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
-
-[Twitter]
-enabled = false
-patches-source = "crimera/piko"
-cli-source = "MorpheApp/morphe-cli"
-rv-brand = "Piko"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/x-corp/twitter/"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
-build-mode = "module"
-version = "11.81.0-release.0"
-include-stock = "split"
 
 [Twitch]
 enabled = false
