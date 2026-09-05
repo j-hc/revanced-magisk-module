@@ -97,10 +97,8 @@ get_prebuilts() {
 		local file
 		if [ "$tag" = "CLI" ]; then
 			file=$(find "$dir" -maxdepth 1 -name "*cli-${name_ver#v}*.jar" -o -name "*desktop-${name_ver#v}*.jar" -type f 2>/dev/null)
-			local grab_cl=false
 		elif [ "$tag" = "Patches" ]; then
 			file=$(find "$dir" -maxdepth 1 -name "*patches-${name_ver#v}.*" -type f 2>/dev/null)
-			local grab_cl=true
 		else abort unreachable; fi
 
 		local url tag_name matches
@@ -130,18 +128,24 @@ get_prebuilts() {
 			asset=$(jq -r ".[0]" <<<"$matches")
 			url=$(jq -r .url <<<"$asset")
 			name=$(jq -r .name <<<"$asset")
+
+			if [[ ! "$name" =~ [0-9] ]]; then
+				local name_only="${name%.*}"
+				local name_ext="${name##*.}"
+				name="${name_only}-${tag_name#v}.${name_ext}"
+			fi
+
 			file="${dir}/${name}"
 			gh_dl "$file" "$url" >&2 || return 1
-			echo "$tag: $(cut -d/ -f1 <<<"$src")/${name}  " >>"${cl_dir}/changelog.md"
 		else
-			grab_cl=false
 			name=$(basename "$file")
-			tag_name=$(cut -d'-' -f3- <<<"$name")
+			tag_name=$(cut -d'-' -f2- <<<"$name")
 			tag_name=v${tag_name%.*}
 		fi
+		echo "$tag: ${src}/${name}  " >>"${cl_dir}/changelog.md"
 
 		if [ "$tag" = "Patches" ]; then
-			if [ "$grab_cl" = true ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi
+			echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"
 			if [ "$REMOVE_RV_INTEGRATIONS_CHECKS" = true ]; then
 				local extensions_ext
 				extensions_ext=$(unzip -l "${file}" "extensions/shared.*" | grep -o "shared\..*") extensions_ext="${extensions_ext#*.}"
@@ -154,7 +158,7 @@ get_prebuilts() {
 					cd "${file}-zip" || abort
 					zip -0rq "${CWD}/${file}" . || return 1
 				) >&2; then
-					echo >&2 "Patching revanced-integrations failed"
+					echo >&2 "Patching integrations checks failed"
 				fi
 				rm -r "${file}-zip" || :
 			fi
@@ -199,11 +203,18 @@ config_update() {
 			else
 				last_patches=$(gh_req "$rv_rel/tags/${PATCHES_VER}" -) || continue
 			fi
+			tag_name=$(jq -e -r '.tag_name' <<<"$last_patches") || abort "config_update error: No tag name"
 			if ! last_patches=$(jq -e -r '.assets[] | select(.name | (endswith("asc") or endswith("json")) | not) | .name' <<<"$last_patches"); then
 				abort "config_update error: '$last_patches'"
 			fi
 			if [ "$last_patches" ]; then
-				if ! OP=$(grep "^Patches: ${PATCHES_SRC%%/*}/" build.md | grep -m1 "$last_patches"); then
+				if [[ ! "$last_patches" =~ [0-9] ]]; then
+					local name_only="${last_patches%.*}"
+					local name_ext="${last_patches##*.}"
+					last_patches="${name_only}-${tag_name#v}.${name_ext}"
+				fi
+
+				if ! OP=$(grep -m1 "^Patches: ${PATCHES_SRC}/${last_patches}" build.md); then
 					sources["$PATCHES_SRC/$PATCHES_VER"]=1
 					prcfg=true
 					upped+=("$table_name")
