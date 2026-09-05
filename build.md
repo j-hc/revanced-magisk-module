@@ -11,5 +11,5 @@ Patches: crimera/patches.mpp
 CLI: MorpheApp/morphe-desktop-1.15.0-all.jar    
 
 Skipped:  
-Patches: RookieEnough/patches-1.3.1.mpp  
-Patches: MorpheApp/patches-1.41.0.mpp    
+Patches: RookieEnough/De-Vanced/patches-1.3.1.mpp  
+Patches: MorpheApp/morphe-patches/patches-1.41.0.mpp    
