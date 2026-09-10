@@ -54,7 +54,10 @@ excluded-patches = """\
 included-patches = "'Some Patch'"                          # whitespace seperated list of non-default patches to include. default: ""
 include-stock = "merged"                                   # 'merged', 'split' or 'disable'. default: merged
 exclusive-patches = false                                  # exclude all patches by default. default: false
-enable-update-checks = true                                # enables in-app update check for `apk` build-mode. default: false
+
+# enables in-app update check for `apk` build-mode. default: false
+# as of now, works only for yt, yt music, twitter and gphotos
+enable-update-checks = true
 
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app"
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
