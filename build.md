@@ -12,4 +12,4 @@ CLI: MorpheApp/morphe-cli/morphe-desktop-1.15.1-all.jar
 
 Skipped:  
 Patches: MorpheApp/morphe-patches/patches-1.42.0.mpp    
-Patches: RookieEnough/De-Vanced/patches-1.3.4.mpp  
+Patches: RookieEnough/De-Vanced/patches-1.3.3.mpp  
