@@ -22,11 +22,7 @@ set_perm_recursive "$MODPATH/bin" 0 0 0755 0777
 
 umount_all
 
-if OP=$(dumpsys package "$PKG_NAME") && [ "$OP" ]; then
-	if echo "$OP" | grep -m1 pkgFlags | grep -Fq UPDATED_SYSTEM_APP; then
-		pmex uninstall-system-updates "$PKG_NAME" >/dev/null 2>&1
-	fi
-else
+if ! OP=$(dumpsys package "$PKG_NAME") || [ -z "$OP" ]; then
 	if pmex install-existing "$PKG_NAME" >/dev/null 2>&1; then
 		pmex uninstall-system-updates "$PKG_NAME" >/dev/null 2>&1
 	fi

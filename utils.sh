@@ -738,6 +738,12 @@ build_rv() {
 	fi
 	log "${table}: ${version}"
 
+	local branding_patch
+	branding_patch=$(grep "^Name: " <<<"$list_patches" | grep -i "custom branding" || :) branding_patch=${branding_patch#*: }
+	if [[ ${p_patcher_args[*]} =~ $branding_patch ]]; then
+		branding_patch=""
+	fi
+
 	local microg_patch
 	microg_patch=$(grep "^Name: " <<<"$list_patches" | grep -i "gmscore\|microg" || :) microg_patch=${microg_patch#*: }
 	if [ -n "$microg_patch" ] && [[ ${p_patcher_args[*]} =~ $microg_patch ]]; then
@@ -757,12 +763,20 @@ build_rv() {
 		else
 			patched_apk="${TEMP_DIR}/${app_name_l}-${rv_brand_f}-${version_f}-${arch_f}.apk"
 		fi
-		if [ -n "$microg_patch" ]; then
-			if [ "$build_mode" = "apk" ]; then
+
+		if [ "$build_mode" = "apk" ]; then
+			if [ -n "$microg_patch" ]; then
 				patcher_args+=("-e \"${microg_patch}\"")
-			elif [ "$build_mode" = "module" ]; then
+			fi
+		elif [ "$build_mode" = "module" ]; then
+			if [ -n "$microg_patch" ]; then
 				patcher_args+=("-d \"${microg_patch}\"")
 			fi
+			if [ -n "$branding_patch" ]; then
+				patcher_args+=("-d \"${branding_patch}\"")
+			fi
+		else
+			abort unreachable
 		fi
 
 		if [ "${args[enable_update_checks]}" = "true" ] && [ "$build_mode" = "apk" ]; then
