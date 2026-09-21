@@ -4,7 +4,6 @@ Adding another revanced app is as easy as this:
 ```toml
 [Some-App]
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app"
-# or uptodown-dlurl = "https://app.en.uptodown.com/android"
 ```
 
 > [!WARNING]
@@ -60,7 +59,6 @@ exclusive-patches = false                                  # exclude all patches
 enable-update-checks = true
 
 apkmirror-dlurl = "https://www.apkmirror.com/apk/inc/app"
-uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 # direct download url. the url must have point to an apk file with name format shown in this example
 direct-dlurl = "https://website/com.google.android.youtube-20.40.45-all.apk"
 
