@@ -737,6 +737,7 @@ build_rv() {
 		fi
 	fi
 	log "${table}: ${version}"
+	if [ "${args[patcher_args]}" ]; then p_patcher_args+=("${args[patcher_args]}"); fi
 
 	local branding_patch
 	branding_patch=$(grep "^Name: " <<<"$list_patches" | grep -i "custom branding" || :) branding_patch=${branding_patch#*: }
@@ -754,7 +755,6 @@ build_rv() {
 	local patcher_args patched_apk build_mode
 	local rv_brand_f=${args[rv_brand],,}
 	rv_brand_f=${rv_brand_f// /-}
-	if [ "${args[patcher_args]}" ]; then p_patcher_args+=("${args[patcher_args]}"); fi
 	for build_mode in "${build_mode_arr[@]}"; do
 		patcher_args=("${p_patcher_args[@]}")
 		pr "Building '${table}' in '$build_mode' mode"
