@@ -1,6 +1,6 @@
 {
-  "version": "v21.13.164 (patches 1.43.0.mpp)",
-  "versionCode": 20221091,
-  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20221091/youtube-morphe-module-v21.13.164-all.zip",
+  "version": "v21.16.256 (patches 1.44.0.mpp)",
+  "versionCode": 20221095,
+  "zipUrl": "https://github.com/j-hc/revanced-magisk-module/releases/download/20221095/youtube-morphe-module-v21.16.256-all.zip",
   "changelog": "https://raw.githubusercontent.com/j-hc/revanced-magisk-module/update/build.md"
 }
