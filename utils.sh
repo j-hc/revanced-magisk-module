@@ -792,6 +792,12 @@ build_rv() {
 
 					local v
 					v=$(git tag --sort=committerdate | tail -1) || :
+					if [[ $v =~ ^[0-9]+$ ]]; then
+						v=$((v + 1))
+					else
+						epr "'$v' is not a proper version tag"
+						v=""
+					fi
 					if [ -n "$v" ]; then patcher_args+=("-e 'Current Build Tag' -OcurrentTag='\"$v\"'"); fi
 				else
 					wpr "enable-update-checks is only implemented for j-hc/revanced-magisk-module"
