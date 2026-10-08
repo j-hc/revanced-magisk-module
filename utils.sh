@@ -778,30 +778,23 @@ build_rv() {
 			abort unreachable
 		fi
 
-		if [ "${args[enable_update_checks]}" = "true" ] && [ "$build_mode" = "apk" ]; then
-			if [ -n "${GITHUB_REPOSITORY-}" ]; then
-				if [ "${GITHUB_REPOSITORY}" = "j-hc/revanced-magisk-module" ]; then
-					local p="$TEMP_DIR/jhc-update-check.mpp"
-					if [ ! -f $p ]; then
-						local resp dlurl
-						resp=$(gh_req "https://api.github.com/repos/j-hc/morphe-jhc-update-check-patch/releases/latest" -) || return 1
-						dlurl=$(jq -e -r '.assets[0] | .browser_download_url' <<<"$resp") || return 1
-						gh_dl $p "$dlurl" >/dev/null || return 1
-					fi
-					patcher_args+=("-p '$p'")
+		if [ "${args[enable_update_checks]}" = "true" ] && [ "$build_mode" = "apk" ] && [ -n "${GITHUB_REPOSITORY-}" ]; then
+			local p="$TEMP_DIR/jhc-update-check.mpp"
+			if [ ! -f $p ]; then
+				local resp dlurl
+				resp=$(gh_req "https://api.github.com/repos/j-hc/morphe-jhc-update-check-patch/releases/latest" -) || return 1
+				dlurl=$(jq -e -r '.assets[0] | .browser_download_url' <<<"$resp") || return 1
+				gh_dl $p "$dlurl" >/dev/null || return 1
+			fi
+			patcher_args+=("-p '$p'")
 
-					local v
-					v=$(git tag --sort=committerdate | tail -1) || :
-					if [[ $v =~ ^[0-9]+$ ]]; then
-						v=$((v + 1))
-					else
-						epr "'$v' is not a proper version tag"
-						v=""
-					fi
-					if [ -n "$v" ]; then patcher_args+=("-e 'Current Build Tag' -OcurrentTag='\"$v\"'"); fi
-				else
-					wpr "enable-update-checks is only implemented for j-hc/revanced-magisk-module"
-				fi
+			local v
+			v=$(git tag --sort=committerdate | tail -1) || :
+			if [[ $v =~ ^[0-9]+$ ]]; then
+				v=$((v + 1))
+				patcher_args+=("-e 'j-hc Update Check Res' -OcurrentTag='\"$v\"' -OupdateRepo='\"${GITHUB_REPOSITORY}\"'")
+			else
+				epr "'$v' is not a proper version tag"
 			fi
 		fi
 
