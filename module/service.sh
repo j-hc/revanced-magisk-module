@@ -22,6 +22,8 @@ run() {
 	mount_rv "$BASEPATH"
 }
 
-if [ ! -f "$MODDIR/disabled_by_action" ]; then
+if [ -d "/data/adb/modules/rvmm-zygisk-mount/" ] && [ ! -f "/data/adb/modules/rvmm-zygisk-mount/disable" ]; then
+	ch_desc "⚠️ Mounting is being handled by rvmm-zygisk-mount"
+elif [ ! -f "$MODDIR/disabled_by_action" ]; then
 	run
 fi
