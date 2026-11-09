@@ -14,7 +14,7 @@ run() {
 	do sleep 2; done
 
 	if [ $SVCL != 0 ]; then
-		ch_desc_err "App not installed: '$BASEPATH'"
+		ch_desc_err "App not installed: '$BASEPATH'. If this was unexpected, consider using rvmm-zygisk-mount."
 		return
 	fi
 	sleep 4
