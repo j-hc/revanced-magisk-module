@@ -7,7 +7,8 @@ BIN_DIR="bin"
 BUILD_DIR="build"
 DL_SRCS=("direct" "archive" "apkmirror")
 
-if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
+if [ "${GH_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GH_TOKEN}"; else GH_HEADER=; fi
+if [ "${GH_REPO-}" ]; then GITHUB_REPOSITORY="${GH_REPO}"; fi
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
 OS=$(uname -o)
 
@@ -778,7 +779,8 @@ build_rv() {
 			abort unreachable
 		fi
 
-		if [ "${args[enable_update_checks]}" = "true" ] && [ "$build_mode" = "apk" ] && [ -n "${GITHUB_REPOSITORY-}" ]; then
+		if [ "${args[enable_update_checks]}" = "true" ] && [ "$build_mode" = "apk" ] &&
+			[ -n "${GITHUB_REPOSITORY-}" ] && [ -n "${NEXT_VER_CODE-}" ]; then
 			local p="$TEMP_DIR/jhc-update-check.mpp"
 			if [ ! -f $p ]; then
 				local resp dlurl
@@ -787,16 +789,8 @@ build_rv() {
 				gh_dl $p "$dlurl" >/dev/null || return 1
 			fi
 			patcher_args+=("-p '$p'")
-
-			local v
-			v=$(git tag --sort=committerdate | tail -1) || :
-			if [[ $v =~ ^[0-9]+$ ]]; then
-				v=$((v + 1))
-				patcher_args+=("-e 'j-hc Update Check'")
-				patcher_args+=("-e 'j-hc Update Check Res' -OcurrentTag='\"$v\"' -OupdateRepo='\"${GITHUB_REPOSITORY}\"'")
-			else
-				epr "'$v' is not a proper version tag"
-			fi
+			patcher_args+=("-e 'j-hc Update Check'")
+			patcher_args+=("-e 'j-hc Update Check Res' -OcurrentTag='\"${NEXT_VER_CODE}\"' -OupdateRepo='\"${GITHUB_REPOSITORY}\"'")
 		fi
 
 		if grep -Fq -- '--striplibs' <<<"$(java 2>&1 -jar "$cli_jar" patch)"; then

@@ -25,32 +25,47 @@ jobs:
           fetch-depth: 0
           submodules: true
 
-      - name: Update config
-        if: ${{ inputs.from_ci }}
+      - name: Check alternative repo env
+        env:
+          GH_TOKEN_ALT: ${{ secrets.GH_TOKEN_ALT }}
+          REPO_ALT: ${{ vars.REPO_ALT }}
         run: |
-          if git checkout origin/update build.md; then
-            UPDATE_CFG=$(./build.sh config.toml --config-update)
-            if [ "$UPDATE_CFG" ]; then
-              echo "'$UPDATE_CFG'"
-              echo "$UPDATE_CFG" > config.json
-            fi
+          if [[ -n "$GH_TOKEN_ALT" && -n "$REPO_ALT" ]]; then
+            echo "Release repository: $REPO_ALT"
+          elif [[ -z "$GH_TOKEN_ALT" && -z "$REPO_ALT" ]]; then
+            :
+          else
+            echo "::error::GH_TOKEN_ALT and REPO_ALT must either both be configured or both be absent."
+            exit 1
           fi
 
       - name: Get next version code
         id: next_ver_code
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN_ALT || secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ vars.REPO_ALT || github.repository }}
         run: |
           TAG=$(gh release list -L 1 | awk -F '\t' '{print $3}')
           if [ -z "$TAG" ]; then TAG=0; fi
           echo "NEXT_VER_CODE=$((TAG + 1))" >> $GITHUB_OUTPUT
 
       - name: Build modules/APKs
-        run: if [ -f "config.json" ]; then ./build.sh config.json; else ./build.sh config.toml; fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: $GITHUB_REPOSITORY
+          GH_TOKEN: ${{ secrets.GH_TOKEN_ALT || secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ vars.REPO_ALT || github.repository }}
           NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+        run: |
+          CFG=config.toml
+          if git checkout origin/update build.md; then
+            echo "Updating config"
+            UPDATE_CFG=$(./build.sh config.toml --config-update)
+            if [ "$UPDATE_CFG" ]; then
+              echo "'$UPDATE_CFG'"
+              echo "$UPDATE_CFG" > config.json
+              CFG=config.json
+            fi
+          fi
+          ./build.sh "$CFG"
 
       - name: Get output
         id: get_output
@@ -60,10 +75,11 @@ jobs:
           cat build.md >> "$GITHUB_OUTPUT"
           echo "${DELIM}" >> "$GITHUB_OUTPUT"
           cp -f build.md build.tmp
-      
+
       - name: Upload release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN_ALT || secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ vars.REPO_ALT || github.repository }}
           TAG: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           BODY: ${{ steps.get_output.outputs.BUILD_LOG }}
         run: |
@@ -108,9 +124,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      
+
           git add build.md *-update.json
-      
+
           if ! git diff --cached --quiet; then
             git commit -m "Bump version ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}"
             git push origin HEAD:update
